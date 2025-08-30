@@ -1,0 +1,31 @@
+@use './colors' as colors;
+
+.my-text-color-white {
+  color: colors.$white-color !important;
+
+  &>* {
+    color: colors.$white-color !important;
+  }
+}
+
+.my-fw-bold {
+  font-weight: bold !important;
+
+  &>* {
+    font-weight: bold !important;
+  }
+}
+
+.my-text-align-center {
+  text-align: center !important;
+}
+
+@for $i from 1 through 5 {
+  .my-text-truncate-#{$i} {
+    display: -webkit-box;
+    -webkit-line-clamp: #{$i};
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

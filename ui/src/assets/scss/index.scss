@@ -1,0 +1,31 @@
+@use '@/assets/scss/_utils.scss';
+@use '@/assets/scss/_background.scss';
+@use '@/assets/scss/_text.scss';
+@use '@/assets/scss/_border.scss';
+@use './colors' as colors;
+@import url(./_fonts.scss);
+
+*,
+*::before,
+*::after {
+  font-family: OpenSansRegular;
+  box-sizing: border-box;
+  margin: 0;
+  font-weight: normal;
+}
+
+.my-flex-direction-column {
+  flex-direction: column !important;
+}
+
+.my-justify-content-space-between {
+  justify-content: space-between !important;
+}
+
+.my-justify-content-center {
+  justify-content: center !important;
+}
+
+.my-margin-auto {
+  margin: auto !important;
+}

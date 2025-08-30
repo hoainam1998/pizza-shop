@@ -1,0 +1,7 @@
+@use './colors' as colors;
+
+:export {
+  primaryColor: colors.$primary-color;
+  whiteColor: colors.$white-color;
+  menuItemActiveColor: colors.$menu-item-active-color;
+}

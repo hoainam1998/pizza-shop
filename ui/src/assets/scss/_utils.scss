@@ -1,0 +1,117 @@
+@use 'sass:map';
+$space-name: (
+  'p': 'padding',
+  'm': 'margin',
+);
+$direction-name: (
+  'l': 'left',
+  'r': 'right',
+  't': 'top',
+  'b': 'bottom',
+  'x': 'horizontal',
+  'y': 'vertical',
+);
+$display-name: 'flex', 'inline', 'block', 'inline-block', 'none';
+$size-name: (
+  'w': 'width',
+  'h': 'height'
+);
+
+@mixin space($property, $direction, $i) {
+  $propertyName: map.get($space-name, $property);
+  $directionName: map.get($direction-name, $direction);
+
+  @if $directionName =='horizontal' {
+    .my-#{$property}#{$direction}-#{$i} {
+      #{$propertyName}-left: #{$i}px !important;
+      #{$propertyName}-right: #{$i}px !important;
+    }
+  }
+
+  @else if $directionName =='vertical' {
+    .my-#{$property}#{$direction}-#{$i} {
+      #{$propertyName}-top: #{$i}px !important;
+      #{$propertyName}-bottom: #{$i}px !important;
+    }
+  }
+
+  @else {
+    .my-#{$property}#{$direction}-#{$i} {
+      #{$propertyName}-#{$directionName}: #{$i}px !important;
+    }
+  }
+}
+
+@mixin sizing($shortName, $propertyName, $value, $unit: '%') {
+  @if $unit =='%' {
+    .my-#{$shortName}-#{$value} {
+      #{$propertyName}: #{$value}+#{$unit} !important;
+    }
+  }
+
+  @else {
+    .my-#{$shortName}-#{$value}#{$unit} {
+      #{$propertyName}: #{$value}+#{$unit} !important;
+    }
+  }
+}
+
+@mixin display($value) {
+  .my-display-#{$value} {
+    display: #{$value} !important;
+  }
+}
+
+@each $name, $_ in $space-name {
+  @each $key, $_ in $direction-name {
+    @for $i from 1 through 100 {
+      @include space($name, $key, $i);
+    }
+  }
+}
+
+@each $name in $display-name {
+  @include display($name);
+}
+
+@for $i from 9 through 40 {
+  .my-fs-#{$i} {
+    font-size: #{$i}px;
+  }
+}
+
+@for $i from 1 through 50 {
+  .my-flex-gap-#{$i} {
+    gap: #{$i}px !important;
+  }
+
+  .my-flex-basic-#{$i} {
+    flex-basis: #{$i}+'%' !important;
+  }
+}
+
+@each $key, $value in $size-name {
+  @for $i from 1 through 100 {
+    @include sizing($key, $value, $i);
+  }
+
+  @for $i from 20 through 500 {
+    @include sizing($key, $value, $i, 'px')
+  }
+}
+
+@for $i from 1 through 9 {
+  .my-transition-duration-#{$i} {
+    transition-duration: #{'0.'+#{$i}s
+  }
+
+  !important;
+}
+
+.my-opacity-#{$i} {
+  opacity: #{'0.'+#{$i}
+}
+
+!important;
+}
+}

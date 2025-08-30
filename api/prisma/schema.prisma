@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Status {
+  IN_STOCK
+  EXPIRED
+  LESS
+}
+
+model category {
+  category_id String    @id @db.VarChar(20)
+  avatar      String    @db.Text
+  name        String    @db.VarChar(200)
+  product     product[]
+}
+
+model product {
+  product_id         String               @id @db.VarChar(20)
+  name               String               @db.VarChar(200)
+  avatar             String               @db.Text
+  count              Int
+  price              Int
+  status             Status               @default(IN_STOCK)
+  expired_time       String               @db.VarChar(20)
+  category_id        String               @db.VarChar(20)
+  category           category             @relation(fields: [category_id], references: category_id, onDelete: NoAction, onUpdate: NoAction, map: "FK_CATEGORY")
+  product_ingredient product_ingredient[]
+  bill_detail        bill_detail[]
+
+  @@index([product_id, name], map: "FK_CATEGORY")
+}
+
+model ingredient {
+  ingredient_id      String               @id @db.VarChar(20)
+  name               String               @db.VarChar(100)
+  avatar             String               @db.Text
+  unit               String               @db.VarChar(10)
+  count              Int
+  price              Int
+  expired_time       String               @db.VarChar(20)
+  status             Status               @default(IN_STOCK)
+  product_ingredient product_ingredient[]
+
+  @@index([ingredient_id, name])
+}
+
+model product_ingredient {
+  product_id    String     @db.VarChar(20)
+  ingredient_id String     @db.VarChar(20)
+  unit          String     @db.VarChar(10)
+  count         Int
+  ingredient    ingredient @relation(fields: [ingredient_id], references: ingredient_id, onDelete: NoAction, onUpdate: NoAction, map: "FK_INGREDIENT")
+  product       product    @relation(fields: [product_id], references: product_id, onDelete: NoAction, onUpdate: NoAction, map: "FK_PRODUCT_INGREDIENT")
+
+  @@id([product_id, ingredient_id])
+  @@index([product_id], map: "FK_PRODUCT_INGREDIENT")
+}
+
+model user {
+  user_id    String @id @db.VarChar(20)
+  first_name String @db.VarChar(200)
+  last_name  String @db.VarChar(20)
+  avatar     String @db.Text
+  account    String @db.VarChar(100)
+  password   String @db.VarChar(10)
+  sex        Int    @default(0) @db.UnsignedTinyInt
+  power      Int    @default(0) @db.UnsignedTinyInt
+  phone      String @db.VarChar(11)
+  email      String @db.VarChar(100)
+  bill       bill[]
+
+  @@index([user_id, last_name, email])
+}
+
+model bill {
+  bill_id        String        @id @db.VarChar(20)
+  user_id        String        @db.VarChar(20)
+  complete_total Int
+  created_at     String        @db.VarChar(20)
+  user           user          @relation(fields: [user_id], references: user_id, onDelete: NoAction, onUpdate: NoAction, map: "FK_BILL_USER")
+  bill_detail    bill_detail[]
+}
+
+model bill_detail {
+  bill_id    String  @db.VarChar(20)
+  product_id String  @db.VarChar(20)
+  count      Int
+  total      Int
+  bill       bill    @relation(fields: [bill_id], references: bill_id, onDelete: NoAction, onUpdate: NoAction, map: "FK_BILL")
+  product    product @relation(fields: [product_id], references: product_id, onDelete: NoAction, onUpdate: NoAction, map: "FK_PRODUCT_BILL")
+
+  @@id([bill_id, product_id])
+  @@index([bill_id], map: "FK_BILL")
+}
