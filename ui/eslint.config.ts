@@ -39,6 +39,7 @@ export default defineConfigWithVueTs(
       'valid-typeof': 'error',
       quotes: ['error', 'single'],
       '@typescript-eslint/explicit-member-accessibility': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
       'vue/multi-word-component-names': 'off',
     },
   },
