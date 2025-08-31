@@ -1,5 +1,4 @@
 /* eslint-disable no-var */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 declare module '*.vue' {
   import { DefineComponent } from 'vue';
@@ -11,3 +10,4 @@ declare namespace globalThis {
   var isAdmin: boolean;
 }
 declare module '*.module.scss';
+declare module '@/assets/*';

@@ -6,33 +6,34 @@
     my-border-radius-6
     my-transition-duration-4
     my-w-250px my-h-250px
-    my-border-color-hover-00a8ff" v-model:file-list="file" :show-file-list="false" :http-request="uploadRequest"
-    :on-change="onChange" :name="name">
-    <img v-if="imageUrl" :src="imageUrl" class="my-w-100 my-h-100" />
-    <div v-else class="avatar-uploader-icon
-      my-bg-no-repeat
-      my-bg-position-center
-      my-bg-size-cover
-      my-opacity-5
-      my-w-100
-      my-h-100
-      my-fs-28">
-    </div>
-    <el-input v-model="file" type="hidden" />
+    my-border-color-hover-00a8ff"
+      ref="uploadBox"
+      v-model:file-list="file"
+      :drag="true"
+      :show-file-list="false"
+      :http-request="uploadRequest"
+      :on-change="onChange"
+      :name="name"
+      :auto-upload="true"
+      accept="image/*">
+      <img :src="imageUrl" class="my-w-100 my-h-100" />
+      <el-input v-model="file" type="hidden" />
   </el-upload>
 </template>
 
 <script lang="ts" setup>
-import { ref, defineProps } from 'vue';
+import { ref, defineProps, nextTick, useTemplateRef, defineExpose } from 'vue';
 import type { UploadFile, UploadRequestOptions } from 'element-plus';
+import defaultImageUploadPlaceholder from '@/assets/images/picture.png';
 
 type UploadBoxPropsType = {
   name: string;
 };
 
+const uploadBox = useTemplateRef('uploadBox');
 const { name } = defineProps<UploadBoxPropsType>();
-const file = defineModel('file');
-const imageUrl = ref('');
+const file = defineModel<UploadFile[]>('file');
+const imageUrl = ref(defaultImageUploadPlaceholder);
 
 const uploadRequest = (request: UploadRequestOptions): void => {
   imageUrl.value = URL.createObjectURL(request.file);
@@ -40,8 +41,22 @@ const uploadRequest = (request: UploadRequestOptions): void => {
 
 const onChange = (uploadFile: UploadFile): void => {
   file.value = [uploadFile];
+  const fileInput: HTMLInputElement | null = document.querySelector(`input[name="${name}"]`);
+  if (fileInput) {
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(uploadFile.raw as File);
+    nextTick(() => fileInput.files = dataTransfer.files);
+  }
 };
 
+const reset = (): void => {
+  uploadBox.value.clearFiles();
+  imageUrl.value = defaultImageUploadPlaceholder;
+};
+
+defineExpose({
+  reset,
+});
 </script>
 
 <style lang="scss">
@@ -50,8 +65,10 @@ const onChange = (uploadFile: UploadFile): void => {
     width: 100%;
     height: 100%;
 
-    &>.avatar-uploader-icon {
-      background-image: url('../assets/images/picture.png');
+    .el-upload-dragger {
+      border: none;
+      background-color: transparent;
+      padding: 7px;
     }
   }
 }
