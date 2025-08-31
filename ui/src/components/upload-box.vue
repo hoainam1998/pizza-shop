@@ -7,15 +7,15 @@
     my-transition-duration-4
     my-w-250px my-h-250px
     my-border-color-hover-00a8ff"
-      ref="uploadBox"
-      v-model:file-list="file"
-      :drag="true"
-      :show-file-list="false"
-      :http-request="uploadRequest"
-      :on-change="onChange"
-      :name="name"
-      :auto-upload="true"
-      accept="image/*">
+    ref="uploadBox"
+    v-model:file-list="file"
+    :drag="true"
+    :show-file-list="false"
+    :http-request="uploadRequest"
+    :on-change="onChange"
+    :name="name"
+    :auto-upload="true"
+    accept="image/*">
       <img :src="imageUrl" class="my-w-100 my-h-100" />
       <el-input v-model="file" type="hidden" />
   </el-upload>

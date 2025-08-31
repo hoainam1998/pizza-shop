@@ -80,7 +80,6 @@ const pageSizeChange = (): void => {
 };
 
 const pageNumberChange = (pageNumber: number): void => {
-  console.log('page number change');
   emit('pagination', pageSize.value, pageNumber);
 };
 
