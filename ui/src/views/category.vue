@@ -13,18 +13,18 @@
       <template #name="props">
         {{ props.row.name }}
       </template>
-      <template #operation>
+      <template #operation="props">
         <div class="my-text-align-center">
-          <el-button size="small" class="my-fw-bold" type="success">
+          <el-button size="small" class="my-fw-bold" type="success" @click="getCategoryDetail(props.row.categoryId)">
             Update
           </el-button>
-          <el-button size="small" class="my-fw-bold" type="danger">
+          <el-button size="small" class="my-fw-bold" type="danger" @click="deleteCategory(props.row.categoryId)">
             Delete
           </el-button>
         </div>
       </template>
     </Table>
-    <el-form ref="categoryFormRef" id="categoryForm" :model="ruleForm" :rules="categoryFormRules" label-width="auto"
+    <el-form ref="categoryFormRef" :id="FORM_ID" :model="ruleForm" :rules="categoryFormRules" label-width="auto"
       label-position="left" class="my-mt-10 my-flex-basic-40">
       <el-form-item label="Category name" prop="name">
         <el-input v-model="ruleForm.name" name="name" />
@@ -34,7 +34,7 @@
       </el-form-item>
       <div class="my-display-flex my-justify-content-center">
         <el-button class="my-fw-bold" type="primary" @click="submitForm">
-          Create
+          {{ isUpdate ? 'Update' : 'Create' }}
         </el-button>
       </div>
     </el-form>
@@ -42,22 +42,23 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, onBeforeMount, useTemplateRef } from 'vue';
-import type { FormInstance, FormRules, UploadFile } from 'element-plus';
+import { reactive, ref, onBeforeMount, useTemplateRef, computed } from 'vue';
+import type { FormInstance, FormRules, UploadRawFile } from 'element-plus';
 import { type AxiosResponse, type AxiosError, HttpStatusCode } from 'axios';
 import UploadBox from '@/components/upload-box.vue';
 import Table from '@/components/table.vue';
 import { CategoryService } from '@/services';
-import { showErrorNotification, showSuccessNotification } from '@/utils';
+import { showErrorNotification, showSuccessNotification, convertBase64ToSingleFile } from '@/utils';
 import constants from '@/constants';
 import type{ MessageResponse } from '@/interfaces';
 
 const PAGE_SIZE = constants.PAGINATION.PAGE_SIZE;
 const PAGE_NUMBER = constants.PAGINATION.PAGE_NUMBER;
+const FORM_ID = 'categoryForm';
 
 type CategoryForm = {
   name: string;
-  avatar: UploadFile[];
+  avatar: (UploadRawFile | File)[];
 };
 
 const uploadImage = useTemplateRef('uploadImage');
@@ -94,6 +95,8 @@ const fields = [
 
 const data = ref([]);
 const total = ref(0);
+const categoryId = ref('');
+const isUpdate = computed(() => !!categoryId.value);
 
 const fetchCategories = (pageSize: number, pageNumber: number): void => {
   CategoryService.post('pagination', {
@@ -130,19 +133,53 @@ const submitForm = async (): Promise<void> => {
   if (categoryFormRef.value) {
     await categoryFormRef.value.validate((valid) => {
       if (valid) {
-        const form = new FormData(document.forms.namedItem('categoryForm')!);
-        CategoryService.post('create', form)
+        const form = new FormData(document.forms.namedItem(FORM_ID)!);
+        const title = isUpdate.value ? 'Update category!' : 'Create category!';
+        let mutationCategoryPromise;
+
+        if (isUpdate.value) {
+          form.append('categoryId', categoryId.value);
+          mutationCategoryPromise = CategoryService.put('update', form);
+        } else {
+          mutationCategoryPromise = CategoryService.post('create', form);
+        }
+
+        mutationCategoryPromise
           .then((response) => {
-            showSuccessNotification('Create category!', response.data.message);
+            showSuccessNotification(title, response.data.message);
             categoryTableRef.value!.refresh();
           })
           .catch((error: AxiosError<MessageResponse>) => {
-            showErrorNotification('Create category!', error.response!.data.message);
+            showErrorNotification(title, error.response!.data.message);
           })
           .finally(resetForm);
       }
     });
   }
+};
+
+const getCategoryDetail = (id: string): void => {
+  CategoryService.post('detail', {
+    categoryId: id,
+    query: {
+      name: true,
+      avatar: true,
+    },
+  }).then(async (response: AxiosResponse) => {
+    ruleForm.name = response.data.name;
+    const file = await convertBase64ToSingleFile(response.data.avatar, response.data.name);
+    ruleForm.avatar = [file as File];
+    categoryId.value = id;
+  });
+};
+
+const deleteCategory = (id: string): void => {
+  CategoryService.delete(`delete/${id}`).then((response: AxiosResponse) => {
+    showSuccessNotification('Delete category!', response.data.message);
+    categoryTableRef.value!.refresh();
+  }).catch((error: AxiosError<MessageResponse>) => {
+    showErrorNotification('Delete category!', error.response!.data.message);
+  });
 };
 
 onBeforeMount(() => fetchCategories(PAGE_SIZE, PAGE_NUMBER));

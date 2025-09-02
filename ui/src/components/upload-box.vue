@@ -22,8 +22,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, defineProps, nextTick, useTemplateRef, defineExpose } from 'vue';
-import type { UploadFile, UploadRequestOptions } from 'element-plus';
+import { ref, defineProps, nextTick, useTemplateRef, defineExpose, watch } from 'vue';
+import type { UploadFile, UploadRawFile, UploadRequestOptions } from 'element-plus';
 import defaultImageUploadPlaceholder from '@/assets/images/picture.png';
 
 type UploadBoxPropsType = {
@@ -32,19 +32,30 @@ type UploadBoxPropsType = {
 
 const uploadBox = useTemplateRef('uploadBox');
 const { name } = defineProps<UploadBoxPropsType>();
-const file = defineModel<UploadFile[]>('file');
+const file = defineModel<(File | UploadRawFile)[]>('file');
 const imageUrl = ref(defaultImageUploadPlaceholder);
+
+watch(file, (newFile) => {
+  if (newFile && newFile.length) {
+    const fileUpload = newFile[0] as File;
+    imageUrl.value = URL.createObjectURL(fileUpload);
+    assignInputFile(fileUpload);
+  }
+});
 
 const uploadRequest = (request: UploadRequestOptions): void => {
   imageUrl.value = URL.createObjectURL(request.file);
 };
 
 const onChange = (uploadFile: UploadFile): void => {
-  file.value = [uploadFile];
+  nextTick(() => file.value = [uploadFile.raw!]);
+};
+
+const assignInputFile = (file: File): void => {
   const fileInput: HTMLInputElement | null = document.querySelector(`input[name="${name}"]`);
   if (fileInput) {
     const dataTransfer = new DataTransfer();
-    dataTransfer.items.add(uploadFile.raw as File);
+    dataTransfer.items.add(file as File);
     nextTick(() => fileInput.files = dataTransfer.files);
   }
 };
