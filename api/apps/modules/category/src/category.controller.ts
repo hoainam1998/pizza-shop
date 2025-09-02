@@ -3,15 +3,16 @@ import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { Prisma } from 'generated/prisma';
 import { CategoryService } from './category.service';
 import { category } from 'generated/prisma';
-import type { CategoryBody } from '@share/interfaces';
+import type { CategoryBody, CategoryPaginationResponse } from '@share/interfaces';
 import { checkArrayHaveValues } from '@share/utils';
 import {
   createCategoryPattern,
   paginationCategoryPattern,
   updateCategoryPattern,
   deleteCategoryPattern,
+  getCategoryPattern,
 } from '@share/pattern';
-import { SelectCategory } from '@share/validators/category.dto';
+import { CategoryDto, GetCategory, PaginationCategory } from '@share/validators/category.dto';
 import { PRISMA_ERROR_CODE } from '@share/enums';
 import messages from '@share/messages';
 
@@ -27,7 +28,7 @@ export class CategoryController {
   }
 
   @MessagePattern(paginationCategoryPattern)
-  pagination(@Payload() select: SelectCategory) {
+  pagination(@Payload() select: PaginationCategory): Promise<CategoryPaginationResponse> {
     return this.categoryService
       .pagination(select)
       .catch((error: Error) => {
@@ -44,15 +45,27 @@ export class CategoryController {
           );
         }
         return {
-          list,
-          total,
-        };
+          list: list as CategoryBody[],
+          total: total as number,
+        } satisfies CategoryPaginationResponse;
       });
   }
 
   @MessagePattern(updateCategoryPattern)
   updateCategory(@Payload() data: CategoryBody): Promise<category> {
     return this.categoryService.update(data).catch((error: Error) => {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === PRISMA_ERROR_CODE.NOT_FOUND) {
+          throw new RpcException(new NotFoundException(messages.CATEGORY.NOT_FOUND));
+        }
+      }
+      throw new RpcException(error.message);
+    });
+  }
+
+  @MessagePattern(getCategoryPattern)
+  getCategory(@Payload() category: GetCategory): Promise<Omit<CategoryDto, 'categoryId'>> {
+    return this.categoryService.getDetail(category).catch((error: Error) => {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === PRISMA_ERROR_CODE.NOT_FOUND) {
           throw new RpcException(new NotFoundException(messages.CATEGORY.NOT_FOUND));

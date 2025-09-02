@@ -1,5 +1,5 @@
 import { CategoryBody, CategoryPaginationResponse } from '@share/interfaces';
-import { IsNumber, IsPositive, IsArray, ArrayNotEmpty, ValidateNested } from 'class-validator';
+import { IsNumber, IsPositive, IsArray, IsString, ArrayNotEmpty, ValidateNested } from 'class-validator';
 import { Exclude, Expose, Type } from 'class-transformer';
 
 export class CategoryPaginationSerializer {
@@ -12,8 +12,8 @@ export class CategoryPaginationSerializer {
   @IsPositive()
   total: number;
 
-  constructor(o: CategoryPaginationResponse) {
-    Object.assign(this, o);
+  constructor(target: CategoryPaginationResponse) {
+    Object.assign(this, target);
   }
 }
 
@@ -42,4 +42,16 @@ export class CategoryPaginationFormatter {
   list: CategoryFormatter[];
 
   total: number;
+}
+
+export class CategoryDetailSerializer {
+  @IsString()
+  name: string;
+
+  @IsString()
+  avatar: string;
+
+  constructor(target: CategoryDetailSerializer) {
+    Object.assign(this, target);
+  }
 }

@@ -9,8 +9,9 @@ import {
   paginationCategoryPattern,
   updateCategoryPattern,
   deleteCategoryPattern,
+  getCategoryPattern,
 } from '@share/pattern';
-import { SelectCategory } from '@share/validators/category.dto';
+import { CategoryDto, GetCategory, PaginationCategory } from '@share/validators/category.dto';
 
 @Injectable()
 export default class CategoryService {
@@ -20,7 +21,11 @@ export default class CategoryService {
     return this.category.send<category>(createCategoryPattern, category);
   }
 
-  pagination(select: SelectCategory): Observable<CategoryPaginationResponse> {
+  getCategory(category: GetCategory): Observable<Omit<CategoryDto, 'categoryId'>> {
+    return this.category.send<Omit<CategoryDto, 'categoryId'>>(getCategoryPattern, category);
+  }
+
+  pagination(select: PaginationCategory): Observable<CategoryPaginationResponse> {
     return this.category.send<CategoryPaginationResponse>(paginationCategoryPattern, select);
   }
 

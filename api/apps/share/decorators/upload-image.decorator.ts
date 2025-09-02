@@ -7,7 +7,7 @@ export default function UploadImage(
 ): ParameterDecorator {
   return UploadedFile(
     new ParseFilePipe({
-      validators: [new FileTypeValidator({ fileType: /image\/(jpeg|png)/ })],
+      validators: [new FileTypeValidator({ fileType: /image\/(jpeg|jpg|png)/ })],
       exceptionFactory: (error) => {
         if (error === 'File is required') {
           throw new BadRequestException({ message: `${fieldName} is missing!` });

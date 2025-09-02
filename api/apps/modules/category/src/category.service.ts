@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { PRISMA_CLIENT } from '@share/di-token';
 import { category, PrismaClient } from 'generated/prisma';
 import { CategoryBody, CategoryPaginationPrismaResponse } from '@share/interfaces';
-import { SelectCategory } from '@share/validators/category.dto';
+import { PaginationCategory, GetCategory, CategoryDto } from '@share/validators/category.dto';
 
 @Injectable()
 export class CategoryService {
@@ -17,7 +17,16 @@ export class CategoryService {
     });
   }
 
-  pagination(select: SelectCategory): Promise<CategoryPaginationPrismaResponse> {
+  getDetail(category: GetCategory): Promise<Omit<CategoryDto, 'categoryId'>> {
+    return this.prismaClient.category.findFirstOrThrow({
+      where: {
+        category_id: category.categoryId,
+      },
+      select: category.query,
+    });
+  }
+
+  pagination(select: PaginationCategory): Promise<CategoryPaginationPrismaResponse> {
     const skip = (select.pageNumber - 1) * select.pageSize;
     return this.prismaClient.$transaction([
       this.prismaClient.category.findMany({
@@ -54,23 +63,24 @@ export class CategoryService {
   }
 
   delete(categoryId: string): Promise<category> {
-    return this.prismaClient.category
-      .update({
-        where: {
-          category_id: categoryId,
-        },
-        data: {
-          product: {
-            deleteMany: {},
-          },
-        },
-      })
-      .then(() => {
-        return this.prismaClient.category.delete({
+    return this.prismaClient
+      .$transaction([
+        this.prismaClient.category.update({
           where: {
             category_id: categoryId,
           },
-        });
-      });
+          data: {
+            product: {
+              deleteMany: {},
+            },
+          },
+        }),
+        this.prismaClient.category.delete({
+          where: {
+            category_id: categoryId,
+          },
+        }),
+      ])
+      .then((result) => result[1]);
   }
 }

@@ -1,14 +1,14 @@
 import { HttpStatus } from '@nestjs/common';
-import { CategoryFormatter } from './serializer/category';
 
 export type CategoryBody = {
   category_id?: string;
   name: string;
   avatar: string;
+  disabled?: boolean;
 };
 
 export type CategoryPaginationResponse = {
-  list: CategoryFormatter[];
+  list: CategoryBody[];
   total: number;
 };
 
@@ -20,4 +20,8 @@ export type MicroservicesErrorResponse = {
   status: HttpStatus;
   response?: any;
   message?: string;
+};
+
+export type MessageResponse = {
+  message: string;
 };
