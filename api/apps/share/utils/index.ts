@@ -1,4 +1,4 @@
-import { EventPatternType } from '../interfaces';
+import { EventPatternType, MessageResponse } from '../interfaces';
 
 /**
  * Create microservice event.
@@ -16,7 +16,7 @@ const createMicroserviceEvent = (pattern: string): EventPatternType => ({ cmd: p
  * @returns {{
  * message: string}} - The message object.
  */
-const createMessage = (message: string) => ({ message });
+const createMessage = (message: string): MessageResponse => ({ message });
 
 /**
  * Convert file to base64 image file string.

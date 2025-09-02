@@ -20,9 +20,13 @@ import { MessageSerializer } from '@share/serializer/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageTransformPipe } from '@share/pipes';
 import { UploadImage } from '@share/decorators';
-import { CreateCategoryDto, SelectCategory } from '@share/validators/category.dto';
+import { CategoryDto, CreateCategoryDto, GetCategory, PaginationCategory } from '@share/validators/category.dto';
 import { FindOneParam } from '@share/validators/common.dto';
-import { CategoryPaginationSerializer, CategoryPaginationFormatter } from '@share/serializer/category';
+import {
+  CategoryPaginationSerializer,
+  CategoryPaginationFormatter,
+  CategoryDetailSerializer,
+} from '@share/serializer/category';
 import { CategoryBody, CategoryPaginationResponse, MicroservicesErrorResponse } from '@share/interfaces';
 import messages from '@share/messages';
 import { createMessage } from '@share/utils';
@@ -43,19 +47,19 @@ export default class CategoryController {
     return this.categoryService.createCategory(categoryInsert).pipe(
       map(() => MessageSerializer.create(messages.CATEGORY.ADD_CATEGORY_SUCCESS)),
       catchError((error: Error) => {
-        throw new BadRequestException({ message: error.message });
+        throw new BadRequestException(createMessage(error.message));
       }),
     );
   }
 
   @Post('pagination')
   @HttpCode(HttpStatus.OK)
-  pagination(@Body() select: SelectCategory): Observable<Promise<CategoryPaginationResponse>> {
+  pagination(@Body() select: PaginationCategory): Observable<Promise<CategoryPaginationFormatter>> {
     return this.categoryService.pagination(select).pipe(
       map((response: CategoryPaginationResponse) => {
         return validate(new CategoryPaginationSerializer(response)).then((result) => {
           if (!result) {
-            throw new BadRequestException({ message: messages.COMMON.OUTPUT_VALIDATE });
+            throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
           }
           return plainToInstance(CategoryPaginationFormatter, response);
         });
@@ -64,7 +68,28 @@ export default class CategoryController {
         if (error.status === HttpStatus.NOT_FOUND) {
           throw new NotFoundException(error.response);
         }
-        throw new BadRequestException({ message: error.message });
+        throw new BadRequestException(createMessage(error.message!));
+      }),
+    );
+  }
+
+  @Post('detail')
+  @HttpCode(HttpStatus.OK)
+  getCategory(@Body() category: GetCategory): Observable<Promise<Omit<CategoryDto, 'categoryId'>>> {
+    return this.categoryService.getCategory(category).pipe(
+      map((response: Omit<CategoryDto, 'categoryId'>) => {
+        return validate(new CategoryDetailSerializer(response)).then((result) => {
+          if (!result) {
+            throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
+          }
+          return response;
+        });
+      }),
+      catchError((error: MicroservicesErrorResponse) => {
+        if (error.status === HttpStatus.NOT_FOUND) {
+          throw new NotFoundException(error.response);
+        }
+        throw new BadRequestException(createMessage(error.message!));
       }),
     );
   }
