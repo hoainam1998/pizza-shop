@@ -8,6 +8,7 @@ const adminRoutes: RouterOptions['routes'] = [
     path: paths.BASE,
     name: 'home',
     component: Home,
+    redirect: 'category',
     children: [
       {
         path: paths.CATEGORY,

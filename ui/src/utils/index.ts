@@ -1,49 +1,22 @@
-import { ElNotification, type NotificationParams } from 'element-plus';
+import { showErrorNotification, showSuccessNotification } from './show-notification';
 
 /**
-* Show notification.
-*
-* @param {NotificationParams} options - The notification options.
-*/
-const showNotification = (params: NotificationParams): void => {
-  ElNotification(params);
-};
-
-/**
-* Show success notification.
-*
-* @param {string} title - The title.
-* @param {string} message - The message.
-* @param {object} options - The another options.
-*/
-const showSuccessNotification = (title: string, message: string, options?: any): void => {
-  showNotification({
-    title,
-    type: 'success',
-    message,
-    position: 'bottom-right',
-    ...options,
-  });
-};
-
-/**
-* Show error notification.
-*
-* @param {string} title - The title.
-* @param {string} message - The message.
-* @param {object} options - The another options.
-*/
-const showErrorNotification = (title: string, message: string, options?: any): void => {
-  showNotification({
-    title,
-    type: 'error',
-    message,
-    position: 'bottom-right',
-    ...options,
-  });
+ * Return promise of file from base64 string.
+ *
+ * @param {string} imageBase64String - base64 string present image.
+ * @param {string} name - file name.
+ * @returns {Promise<File>} - promise file.
+ */
+const convertBase64ToSingleFile = (imageBase64String: string, name: string): Promise<File> => {
+  return fetch(imageBase64String)
+    .then((res) => res.blob())
+    .then((blob) => {
+      return new File([blob], name, { type: blob.type });
+    });
 };
 
 export {
   showSuccessNotification,
   showErrorNotification,
+  convertBase64ToSingleFile,
 };
