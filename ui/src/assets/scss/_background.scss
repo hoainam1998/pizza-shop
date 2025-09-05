@@ -1,21 +1,25 @@
 @use './colors' as colors;
 
-.my-bg-no-repeat {
+.ps-bg-no-repeat {
   background-repeat: no-repeat !important;
 }
 
-.my-bg-position-center {
+.ps-bg-position-center {
   background-position: center !important;
 }
 
-.my-bg-size-cover {
+.ps-bg-size-cover {
   background-size: cover !important;
 }
 
-.my-bg-f39c12 {
+.ps-bg-f39c12 {
   background-color: colors.$primary-color !important;
 }
 
-.my-bg-2ecc71 {
+.ps-bg-2ecc71 {
   background-color: colors.$green-color !important;
+}
+
+.ps-bg-white {
+  background-color: colors.$white-color !important;
 }

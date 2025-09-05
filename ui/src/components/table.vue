@@ -1,7 +1,7 @@
 <template>
-  <div class="my-w-100">
+  <div class="table ps-w-100">
     <el-table :data="data" :border="true" :empty-text="emptyText" :preserve-expanded-content="true"
-      class="my-w-100 my-mt-10" header-cell-class-name="my-bg-2ecc71" header-row-class-name="my-text-color-white">
+      class="ps-w-100 ps-mt-10" header-cell-class-name="ps-bg-2ecc71" header-row-class-name="ps-text-color-white">
       <el-table-column type="expand" v-if="!!slots.expand">
         <template #default="props">
           <slot name="expand" v-bind="props"></slot>
@@ -19,8 +19,8 @@
         </template>
       </el-table-column>
     </el-table>
-    <div class="my-display-flex my-justify-content-space-between my-mt-7">
-      <el-select v-model="pageSize" class="my-w-100px" @change="pageSizeChange">
+    <div class="ps-display-flex ps-justify-content-space-between ps-mt-7">
+      <el-select v-model="pageSize" class="ps-w-100px" @change="pageSizeChange">
         <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
       <el-pagination

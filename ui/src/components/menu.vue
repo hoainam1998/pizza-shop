@@ -1,6 +1,6 @@
 <template>
-  <div class="menu-wrapper my-display-flex my-flex-direction-column my-justify-content-space-between my-bg-f39c12">
-    <div class="my-mt-10 my-text-align-center">
+  <div class="menu-wrapper ps-display-flex ps-flex-direction-column ps-justify-content-space-between ps-bg-f39c12">
+    <div class="ps-mt-10 ps-text-align-center">
       <RouterLink :to="paths.BASE">
         <img src="@/assets/images/logo.png" height="40" width="40" />
       </RouterLink>
@@ -25,15 +25,15 @@
       </el-menu>
     </div>
     <div>
-      <el-image style="width: 70px; height: 70px" :src="url" fit="cover" class="my-display-block my-margin-auto" />
-      <h5 class="my-mt-5 my-text-color-white my-text-align-center my-text-truncate-1 my-px-7">
+      <el-image style="width: 70px; height: 70px" :src="url" fit="cover" class="ps-display-block ps-margin-auto" />
+      <h5 class="ps-mt-5 ps-text-color-white ps-text-align-center ps-text-truncate-1 ps-px-7">
         Lorem ipsum dolor sit amet consectetur adipiscing elit. Dolor sit amet consectetur
         adipiscing elit quisque faucibus.
       </h5>
-      <hr class="my-mt-7" />
-      <div class="my-py-7 my-text-align-center">
-        <el-button size="small" type="primary" class="my-fw-bold">Personal</el-button>
-        <el-button size="small" type="danger" class="my-fw-bold">Logout</el-button>
+      <hr class="ps-mt-7" />
+      <div class="ps-py-7 ps-text-align-center">
+        <el-button size="small" type="primary" class="ps-fw-bold">Personal</el-button>
+        <el-button size="small" type="danger" class="ps-fw-bold">Logout</el-button>
       </div>
     </div>
   </div>

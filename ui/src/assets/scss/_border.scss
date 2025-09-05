@@ -2,27 +2,27 @@
 $border-style: 'dashed', 'solid';
 
 @for $i from 1 through 5 {
-  .my-border-width-#{$i} {
+  .ps-border-width-#{$i} {
     border-width: #{$i}px !important;
   }
 }
 
 @for $i from 3 through 10 {
-  .my-border-radius-#{$i} {
+  .ps-border-radius-#{$i} {
     border-radius: #{$i}px !important;
   }
 }
 
-.my-border-color-gray {
+.ps-border-color-gray {
   border-color: colors.$gray-color !important;
 }
 
-.my-border-color-hover-00a8ff:hover {
+.ps-border-color-hover-00a8ff:hover {
   border-color: colors.$menu-item-active-color !important;
 }
 
 @each $value in $border-style {
-  .my-border-style-#{$value} {
+  .ps-border-style-#{$value} {
     border-style: #{$value} !important;
   }
 }

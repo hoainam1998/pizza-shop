@@ -1,6 +1,6 @@
 @use './colors' as colors;
 
-.my-text-color-white {
+.ps-text-color-white {
   color: colors.$white-color !important;
 
   &>* {
@@ -8,7 +8,7 @@
   }
 }
 
-.my-fw-bold {
+.ps-fw-bold {
   font-weight: bold !important;
 
   &>* {
@@ -16,16 +16,20 @@
   }
 }
 
-.my-text-align-center {
+.ps-text-align-center {
   text-align: center !important;
 }
 
 @for $i from 1 through 5 {
-  .my-text-truncate-#{$i} {
+  .ps-text-truncate-#{$i} {
     display: -webkit-box;
     -webkit-line-clamp: #{$i};
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
   }
+}
+
+.ps-text-transform-capitalize {
+  text-transform: capitalize !important;
 }

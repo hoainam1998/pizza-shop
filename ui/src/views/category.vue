@@ -1,5 +1,5 @@
 <template>
-  <main class="my-display-flex my-flex-gap-10 my-px-7">
+  <main class="category ps-display-flex ps-flex-gap-10 ps-px-7">
     <Table
       ref="categoryTable"
       :fields="fields"
@@ -14,26 +14,26 @@
         {{ props.row.name }}
       </template>
       <template #operation="props">
-        <div class="my-text-align-center">
-          <el-button size="small" class="my-fw-bold" type="success" @click="getCategoryDetail(props.row.categoryId)">
+        <div class="ps-text-align-center">
+          <el-button size="small" class="ps-fw-bold" type="success" @click="getCategoryDetail(props.row.categoryId)">
             Update
           </el-button>
-          <el-button size="small" class="my-fw-bold" type="danger" @click="deleteCategory(props.row.categoryId)">
+          <el-button size="small" class="ps-fw-bold" type="danger" @click="deleteCategory(props.row.categoryId)">
             Delete
           </el-button>
         </div>
       </template>
     </Table>
     <el-form ref="categoryFormRef" :id="FORM_ID" :model="ruleForm" :rules="categoryFormRules" label-width="auto"
-      label-position="left" class="my-mt-10 my-flex-basic-40">
+      label-position="left" class="ps-mt-10 ps-flex-basic-40">
       <el-form-item label="Category name" prop="name">
         <el-input v-model="ruleForm.name" name="name" />
       </el-form-item>
       <el-form-item label="Avatar" prop="avatar">
         <UploadBox ref="uploadImage" name="avatar" v-model:file="ruleForm.avatar" />
       </el-form-item>
-      <div class="my-display-flex my-justify-content-center">
-        <el-button class="my-fw-bold" type="primary" @click="submitForm">
+      <div class="ps-display-flex ps-justify-content-center">
+        <el-button class="ps-fw-bold" type="primary" @click="submitForm">
           {{ isUpdate ? 'Update' : 'Create' }}
         </el-button>
       </div>
@@ -114,7 +114,7 @@ const fetchCategories = (pageSize: number, pageNumber: number): void => {
       data.value = [];
       total.value = 0;
     } else {
-      showErrorNotification('Fetch category!', error.response!.data.message);
+      showErrorNotification('Fetch category!', error.response?.data.message);
     }
   });
 };

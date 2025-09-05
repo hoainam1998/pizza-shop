@@ -2,6 +2,7 @@
 @use '@/assets/scss/_background.scss';
 @use '@/assets/scss/_text.scss';
 @use '@/assets/scss/_border.scss';
+@use '@/assets/scss/_flex.scss';
 @use './colors' as colors;
 @import url(./_fonts.scss);
 
@@ -14,18 +15,6 @@
   font-weight: normal;
 }
 
-.my-flex-direction-column {
-  flex-direction: column !important;
-}
-
-.my-justify-content-space-between {
-  justify-content: space-between !important;
-}
-
-.my-justify-content-center {
-  justify-content: center !important;
-}
-
-.my-margin-auto {
+.ps-margin-auto {
   margin: auto !important;
 }

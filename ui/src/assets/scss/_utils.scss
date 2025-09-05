@@ -22,42 +22,52 @@ $size-name: (
   $directionName: map.get($direction-name, $direction);
 
   @if $directionName =='horizontal' {
-    .my-#{$property}#{$direction}-#{$i} {
+    .ps-#{$property}#{$direction}-#{$i} {
       #{$propertyName}-left: #{$i}px !important;
       #{$propertyName}-right: #{$i}px !important;
     }
   }
 
   @else if $directionName =='vertical' {
-    .my-#{$property}#{$direction}-#{$i} {
+    .ps-#{$property}#{$direction}-#{$i} {
       #{$propertyName}-top: #{$i}px !important;
       #{$propertyName}-bottom: #{$i}px !important;
     }
   }
 
   @else {
-    .my-#{$property}#{$direction}-#{$i} {
+    .ps-#{$property}#{$direction}-#{$i} {
       #{$propertyName}-#{$directionName}: #{$i}px !important;
     }
   }
 }
 
 @mixin sizing($shortName, $propertyName, $value, $unit: '%') {
-  @if $unit =='%' {
-    .my-#{$shortName}-#{$value} {
+  @if $unit == '%' {
+    .ps-#{$shortName}-#{$value} {
       #{$propertyName}: #{$value}+#{$unit} !important;
+      max-#{$propertyName}: #{$value}+#{$unit} !important;
+    }
+
+    .ps-min-#{$shortName}-#{$value} {
+      min-#{$propertyName}: #{$value}+#{$unit} !important;
     }
   }
 
   @else {
-    .my-#{$shortName}-#{$value}#{$unit} {
+    .ps-#{$shortName}-#{$value}#{$unit} {
       #{$propertyName}: #{$value}+#{$unit} !important;
+      max-#{$propertyName}: #{$value}+#{$unit} !important;
+    }
+
+    .ps-min-#{$shortName}-#{$value}#{$unit} {
+      min-#{$propertyName}: #{$value}+#{$unit} !important;
     }
   }
 }
 
 @mixin display($value) {
-  .my-display-#{$value} {
+  .ps-display-#{$value} {
     display: #{$value} !important;
   }
 }
@@ -75,17 +85,17 @@ $size-name: (
 }
 
 @for $i from 9 through 40 {
-  .my-fs-#{$i} {
+  .ps-fs-#{$i} {
     font-size: #{$i}px;
   }
 }
 
 @for $i from 1 through 50 {
-  .my-flex-gap-#{$i} {
+  .ps-flex-gap-#{$i} {
     gap: #{$i}px !important;
   }
 
-  .my-flex-basic-#{$i} {
+  .ps-flex-basic-#{$i} {
     flex-basis: #{$i}+'%' !important;
   }
 }
@@ -93,6 +103,12 @@ $size-name: (
 @each $key, $value in $size-name {
   @for $i from 1 through 100 {
     @include sizing($key, $value, $i);
+    @if $value == 'height' {
+      @include sizing($key, $value, $i, 'vh');
+    }
+    @else if $value == 'width' {
+      @include sizing($key, $value, $i, 'vw');
+    }
   }
 
   @for $i from 20 through 500 {
@@ -101,17 +117,12 @@ $size-name: (
 }
 
 @for $i from 1 through 9 {
-  .my-transition-duration-#{$i} {
-    transition-duration: #{'0.'+#{$i}s
+  .ps-transition-duration-#{$i} {
+    transition-duration: #{'0.'+#{$i}s} !important;
   }
 
-  !important;
-}
+  .ps-opacity-#{$i} {
+    opacity: #{'0.'+#{$i}} !important;
 
-.my-opacity-#{$i} {
-  opacity: #{'0.'+#{$i}
-}
-
-!important;
-}
+  }
 }
