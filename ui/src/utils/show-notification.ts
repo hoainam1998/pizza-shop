@@ -6,7 +6,9 @@ import { ElNotification, type NotificationParams } from 'element-plus';
 * @param {NotificationParams} options - The notification options.
 */
 const showNotification = (params: NotificationParams): void => {
-  ElNotification(params);
+  if (params.message && params.title) {
+    ElNotification(params);
+  }
 };
 
 /**
@@ -16,7 +18,7 @@ const showNotification = (params: NotificationParams): void => {
 * @param {string} message - The message.
 * @param {object} options - The another options.
 */
-const showSuccessNotification = (title: string, message: string, options?: any): void => {
+const showSuccessNotification = (title: string, message?: string, options?: any): void => {
   showNotification({
     title,
     type: 'success',
@@ -33,7 +35,7 @@ const showSuccessNotification = (title: string, message: string, options?: any):
 * @param {string} message - The message.
 * @param {object} options - The another options.
 */
-const showErrorNotification = (title: string, message: string, options?: any): void => {
+const showErrorNotification = (title: string, message?: string, options?: any): void => {
   showNotification({
     title,
     type: 'error',

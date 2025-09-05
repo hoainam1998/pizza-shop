@@ -1,8 +1,8 @@
 <template>
-  <el-breadcrumb :separator-icon="separatorIcon" class="breadcrumb my-py-5 my-px-5 my-bg-f39c12">
+  <el-breadcrumb :separator-icon="separatorIcon" class="breadcrumb ps-py-5 ps-px-5 ps-bg-f39c12">
     <el-breadcrumb-item
       v-for="(match, index) in matched"
-      :class="{ 'my-text-color-white my-fw-bold': index === matched.length - 1 }"
+      :class="{ 'ps-text-color-white ps-fw-bold': index === matched.length - 1 }"
       :key="index"
       :to="{ path: match.path }"
     >

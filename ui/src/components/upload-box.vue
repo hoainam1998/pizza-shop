@@ -1,12 +1,12 @@
 <template>
-  <el-upload class="avatar-uploader
-    my-border-width-1
-    my-border-style-dashed
-    my-border-color-gray
-    my-border-radius-6
-    my-transition-duration-4
-    my-w-250px my-h-250px
-    my-border-color-hover-00a8ff"
+  <el-upload class="upload-box
+    ps-border-width-1
+    ps-border-style-dashed
+    ps-border-color-gray
+    ps-border-radius-6
+    ps-transition-duration-4
+    ps-w-250px ps-h-250px
+    ps-border-color-hover-00a8ff"
     ref="uploadBox"
     v-model:file-list="file"
     :drag="true"
@@ -16,7 +16,7 @@
     :name="name"
     :auto-upload="true"
     accept="image/*">
-      <img :src="imageUrl" class="my-w-100 my-h-100" />
+      <img :src="imageUrl" class="ps-w-100 ps-h-100" />
       <el-input v-model="file" type="hidden" />
   </el-upload>
 </template>
@@ -71,7 +71,7 @@ defineExpose({
 </script>
 
 <style lang="scss">
-.avatar-uploader {
+.upload-box {
   .el-upload {
     width: 100%;
     height: 100%;

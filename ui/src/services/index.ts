@@ -21,6 +21,16 @@ class Services {
   }
 
   /**
+   * Axios get method.
+   *
+   * @param {string} subUrl - The sub url.
+   * @returns {Promise<AxiosResponse>} - The promise response.
+   */
+  get(subUrl: string): Promise<AxiosResponse> {
+    return api.get(`${this._baseUrl}/${subUrl}`);
+  }
+
+  /**
    * Axios post method.
    *
    * @param {string} subUrl - The sub url.
@@ -54,3 +64,4 @@ class Services {
 }
 
 export const CategoryService = new Services('/category');
+export const UserService = new Services('/user');
