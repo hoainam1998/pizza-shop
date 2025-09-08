@@ -3,6 +3,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import UserController from './user.controller';
 import UserService from './user.service';
 import { USER_SERVICE } from 'apps/share/di-token';
+import ShareModule from '@share/module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { USER_SERVICE } from 'apps/share/di-token';
         },
       },
     ]),
+    ShareModule,
   ],
   controllers: [UserController],
   providers: [UserService],

@@ -8,3 +8,10 @@ export const databaseConfig = registerAs('database', () => ({
 export const portConfig = registerAs('ports', () => ({
   API_PORT: process.env.API_PORT,
 }));
+
+export const emailConfig = registerAs('mail', () => ({
+  SMPT_HOST: process.env.SMPT_HOST,
+  SMPT_PORT: process.env.SMPT_PORT,
+  SMPT_MAIL: process.env.SMPT_MAIL,
+  SMPT_APP_PASS: process.env.SMPT_APP_PASS,
+}));

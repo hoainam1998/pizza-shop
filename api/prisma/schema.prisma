@@ -40,7 +40,7 @@ model product {
   product_ingredient product_ingredient[]
   bill_detail        bill_detail[]
 
-  @@index([product_id, name], map: "FK_CATEGORY")
+  @@index([product_id, name], map: "IDX_PRODUCT_ID_NAME")
 }
 
 model ingredient {
@@ -70,17 +70,17 @@ model product_ingredient {
 }
 
 model user {
-  user_id    String @id @db.VarChar(20)
-  first_name String @db.VarChar(200)
-  last_name  String @db.VarChar(20)
-  avatar     String @db.Text
-  account    String @db.VarChar(100)
-  password   String @db.VarChar(10)
-  sex        Int    @default(0) @db.UnsignedTinyInt
-  power      Int    @default(0) @db.UnsignedTinyInt
-  phone      String @db.VarChar(11)
-  email      String @db.VarChar(100)
-  bill       bill[]
+  user_id              String  @id @db.VarChar(20)
+  first_name           String  @db.VarChar(200)
+  last_name            String  @db.VarChar(20)
+  avatar               String? @db.Text
+  password             String  @db.VarChar(10)
+  sex                  Int     @default(0) @db.UnsignedTinyInt
+  power                Int     @default(0) @db.UnsignedTinyInt
+  phone                String  @db.VarChar(11)
+  email                String  @db.VarChar(100)
+  reset_password_token String? @db.Text
+  bill                 bill[]
 
   @@index([user_id, last_name, email])
 }

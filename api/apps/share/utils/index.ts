@@ -1,4 +1,10 @@
 import { EventPatternType, MessageResponse } from '../interfaces';
+import {
+  passwordHashing,
+  autoGeneratePassword,
+  signingAdminResetPasswordToken,
+  getAdminResetPasswordLink,
+} from './auth';
 
 /**
  * Create microservice event.
@@ -14,9 +20,10 @@ const createMicroserviceEvent = (pattern: string): EventPatternType => ({ cmd: p
  *
  * @param {string} message - The message.
  * @returns {{
- * message: string}} - The message object.
+ * message: string
+ * errorCode: string}} - The message object.
  */
-const createMessage = (message: string): MessageResponse => ({ message });
+const createMessage = (message: string, errorCode?: string): MessageResponse => ({ message, errorCode });
 
 /**
  * Convert file to base64 image file string.
@@ -35,4 +42,13 @@ const convertFileToBase64 = (file: Express.Multer.File): string =>
  */
 const checkArrayHaveValues = (array: any[]) => Array.isArray(array) && array.length > 0;
 
-export { createMicroserviceEvent, createMessage, convertFileToBase64, checkArrayHaveValues };
+export {
+  createMicroserviceEvent,
+  createMessage,
+  convertFileToBase64,
+  checkArrayHaveValues,
+  passwordHashing,
+  autoGeneratePassword,
+  signingAdminResetPasswordToken,
+  getAdminResetPasswordLink,
+};

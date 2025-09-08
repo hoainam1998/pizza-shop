@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { databaseConfig, portConfig } from './config';
+import { databaseConfig, portConfig, emailConfig } from './config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      load: [databaseConfig, portConfig],
+      load: [databaseConfig, portConfig, emailConfig],
       isGlobal: true,
     }),
   ],
