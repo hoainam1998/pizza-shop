@@ -1,0 +1,17 @@
+import 'express-session';
+
+declare module 'express-session' {
+  export interface SessionData {
+    user?: {
+      canSignup: boolean;
+    };
+  }
+}
+
+declare global {
+  export namespace Express {
+    export interface Request {
+      session: import('express-session').Session & Partial<import('express-session').SessionData>;
+    }
+  }
+}

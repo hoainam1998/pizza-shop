@@ -14,7 +14,7 @@ import {
 } from '@share/pattern';
 import { CategoryDto, GetCategory, PaginationCategory } from '@share/validators/category.dto';
 import { PRISMA_ERROR_CODE } from '@share/enums';
-import messages from '@share/messages';
+import messages from '@share/constants/messages';
 
 @Controller()
 export class CategoryController {

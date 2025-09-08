@@ -1,13 +1,27 @@
-import { Controller } from '@nestjs/common';
+import { BadRequestException, Controller } from '@nestjs/common';
+import { Prisma, type user } from 'generated/prisma';
+import { MessagePattern, RpcException } from '@nestjs/microservices';
 import { UsersService } from './users.service';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { canSignupPattern, signupPattern } from '@share/pattern';
+import { type SignupUserPayload } from '@share/interfaces';
+import { createMessage } from '@share/utils';
 
 @Controller('user')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly userService: UsersService) {}
 
-  @MessagePattern({ cmd: 'hello' })
-  getHello(@Payload() data: string): any {
-    return this.usersService.getHello(data);
+  @MessagePattern(canSignupPattern)
+  canSignup(): Promise<number> {
+    return this.userService.canSignup();
+  }
+
+  @MessagePattern(signupPattern)
+  signup(signupUser: SignupUserPayload): Promise<user> {
+    return this.userService.signup(signupUser.user, signupUser.canSignup).catch((error) => {
+      if (error instanceof Prisma.PrismaClientValidationError) {
+        throw new RpcException(new BadRequestException(createMessage(error.message)));
+      }
+      throw new RpcException(error);
+    });
   }
 }

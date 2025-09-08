@@ -2,7 +2,7 @@ import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from
 import { createMessage } from '@share/utils';
 import { Response } from 'express';
 import { MessageResponse } from '@share/interfaces';
-import messages from '@share/messages';
+import messages from '@share/constants/messages';
 
 @Catch(HttpException)
 export default class PrismaDisconnectExceptionFilter implements ExceptionFilter {
@@ -12,8 +12,10 @@ export default class PrismaDisconnectExceptionFilter implements ExceptionFilter 
     const status = exception.getStatus();
     const exceptionResponse: MessageResponse = exception.getResponse() as MessageResponse;
 
-    if (exceptionResponse.message.includes("Can't reach database server ")) {
-      return response.status(HttpStatus.BAD_REQUEST).json(createMessage(messages.COMMON.DATABASE_DISCONNECT));
+    if (exceptionResponse.message) {
+      if (exceptionResponse.message.includes("Can't reach database server ")) {
+        return response.status(HttpStatus.BAD_REQUEST).json(createMessage(messages.COMMON.DATABASE_DISCONNECT));
+      }
     }
 
     response.status(status).json(exceptionResponse);

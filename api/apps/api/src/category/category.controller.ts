@@ -28,7 +28,7 @@ import {
   CategoryDetailSerializer,
 } from '@share/serializer/category';
 import { CategoryBody, CategoryPaginationResponse, MicroservicesErrorResponse } from '@share/interfaces';
-import messages from '@share/messages';
+import messages from '@share/constants/messages';
 import { createMessage } from '@share/utils';
 
 @UseInterceptors(ClassSerializerInterceptor)

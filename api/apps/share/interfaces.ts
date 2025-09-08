@@ -1,4 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
+import { user } from 'generated/prisma';
 
 export type CategoryBody = {
   category_id?: string;
@@ -24,4 +25,14 @@ export type MicroservicesErrorResponse = {
 
 export type MessageResponse = {
   message: string;
+  errorCode?: string;
+};
+
+export type SignupUserPayload = {
+  user: user;
+  canSignup: boolean;
+};
+
+export type UserCreated = user & {
+  plain_password: string;
 };

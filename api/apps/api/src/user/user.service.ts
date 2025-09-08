@@ -1,14 +1,19 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
-import { USER_SERVICE } from 'apps/share/di-token';
-import { createMicroserviceEvent } from 'apps/share/utils';
+import { user } from 'generated/prisma';
+import { USER_SERVICE } from '@share/di-token';
+import { canSignupPattern, signupPattern } from '@share/pattern';
 
 @Injectable()
 export default class UserService {
   constructor(@Inject(USER_SERVICE) private user: ClientProxy) {}
 
-  getHello(): Observable<string> {
-    return this.user.send<string>(createMicroserviceEvent('hello'), 'nam');
+  canSignup(): Observable<number> {
+    return this.user.send<number>(canSignupPattern, {});
+  }
+
+  signup(user: user, canSignup: boolean): Observable<user> {
+    return this.user.send<user>(signupPattern, Object.assign({ user }, { canSignup }));
   }
 }
