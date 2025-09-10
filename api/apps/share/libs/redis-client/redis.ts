@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common';
-import { createClient } from 'redis';
+import { createClient, RedisClientType } from 'redis';
 import Event from './events/event';
 const logger = new Logger('Redis Client!');
 
@@ -9,7 +9,7 @@ const logger = new Logger('Redis Client!');
  */
 class RedisClient {
   static instance: RedisClient;
-  redisClient;
+  redisClient: RedisClientType;
 
   /**
    * Create instance.
@@ -28,7 +28,7 @@ class RedisClient {
   /**
    * Redis connect.
    */
-  connect() {
+  connect(): void {
     this.redisClient
       .connect()
       .then(() => logger.log('Connect was success!'))
@@ -39,7 +39,7 @@ class RedisClient {
    * Redis publish.
    * @param {Event} - The event object.
    */
-  publish(event: Event) {
+  publish(event: Event): void {
     this.redisClient
       .publish(event.eventName, event.plainToObject)
       .catch((error) => Logger.log('Redis Pub', error.message));
@@ -50,7 +50,7 @@ class RedisClient {
    * @param {string} - The event name.
    * @param {function} - The subscribe callback.
    */
-  async subscribe(eventName: string, fn: any) {
+  async subscribe(eventName: string, fn: any): Promise<void> {
     const subscriber = this.redisClient.duplicate();
     await subscriber.connect();
     subscriber.subscribe(eventName, fn).catch((error) => Logger.log('Redis Sub', error.message));
@@ -59,7 +59,7 @@ class RedisClient {
   /**
    * Redis client object.
    */
-  get Client(): any {
+  get Client(): RedisClientType {
     return this.redisClient;
   }
 

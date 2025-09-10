@@ -10,3 +10,6 @@ export const getCategoryPattern = createMicroserviceEvent('get');
 // user
 export const canSignupPattern = createMicroserviceEvent('can_signup');
 export const signupPattern = createMicroserviceEvent('signup');
+
+// ingredient
+export const createIngredientPattern = createMicroserviceEvent('create_ingredient');

@@ -21,11 +21,14 @@
     "noImplicitAny": true,
     "strictBindCallApply": true,
     "noFallthroughCasesInSwitch": true,
-    "typeRoots": ["./node_modules/@types", "types.d.ts"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "types.d.ts"
+    ],
     "paths": {
       "@share/*": [
         "apps/share/*"
       ]
-    },
+    }
   }
 }

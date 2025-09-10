@@ -7,6 +7,9 @@ export const databaseConfig = registerAs('database', () => ({
 
 export const portConfig = registerAs('ports', () => ({
   API_PORT: process.env.API_PORT,
+  USER_MICROSERVICE_TCP_PORT: process.env.USER_MICROSERVICE_TCP_PORT,
+  CATEGORY_MICROSERVICE_TCP_PORT: process.env.CATEGORY_MICROSERVICE_TCP_PORT,
+  INGREDIENT_MICROSERVICE_TCP_PORT: process.env.INGREDIENT_MICROSERVICE_TCP_PORT,
 }));
 
 export const emailConfig = registerAs('mail', () => ({

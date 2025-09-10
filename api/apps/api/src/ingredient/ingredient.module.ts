@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
+import IngredientService from './ingredient.service';
+import IngredientController from './ingredient.controller';
 import { ClientProvider, ClientsModule, Transport } from '@nestjs/microservices';
-import UserController from './user.controller';
-import UserService from './user.service';
-import { USER_SERVICE } from 'apps/share/di-token';
-import ShareModule from '@share/module';
+import { INGREDIENT_SERVICE } from '@share/di-token';
 import { ConfigService } from '@nestjs/config';
+import ShareModule from '@share/module';
 
 @Module({
   imports: [
@@ -14,17 +14,17 @@ import { ConfigService } from '@nestjs/config';
           return {
             transport: Transport.TCP,
             options: {
-              port: parseInt(configService.get<string>('ports.USER_MICROSERVICE_TCP_PORT')!),
+              port: parseInt(configService.get<string>('ports.INGREDIENT_MICROSERVICE_TCP_PORT')!),
             },
           };
         },
         inject: [ConfigService],
-        name: USER_SERVICE,
+        name: INGREDIENT_SERVICE,
       },
     ]),
     ShareModule,
   ],
-  controllers: [UserController],
-  providers: [UserService],
+  providers: [IngredientService],
+  controllers: [IngredientController],
 })
-export default class UserModule {}
+export default class IngredientModule {}

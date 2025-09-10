@@ -1,4 +1,4 @@
-import 'express-session';
+import expressSession from 'express-session';
 
 declare module 'express-session' {
   export interface SessionData {
@@ -11,7 +11,7 @@ declare module 'express-session' {
 declare global {
   export namespace Express {
     export interface Request {
-      session: import('express-session').Session & Partial<import('express-session').SessionData>;
+      session: expressSession.Session & Partial<expressSession.SessionData>;
     }
   }
 }

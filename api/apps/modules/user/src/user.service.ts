@@ -4,7 +4,7 @@ import { PRISMA_CLIENT } from '@share/di-token';
 import constants from '@share/constants';
 
 @Injectable()
-export class UsersService {
+export default class UsersService {
   constructor(@Inject(PRISMA_CLIENT) private readonly prismaClient: PrismaClient) {}
 
   canSignup(): Promise<number> {

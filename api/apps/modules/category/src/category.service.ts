@@ -2,10 +2,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import { PRISMA_CLIENT } from '@share/di-token';
 import { category, PrismaClient } from 'generated/prisma';
 import { CategoryBody, CategoryPaginationPrismaResponse } from '@share/interfaces';
-import { PaginationCategory, GetCategory, CategoryDto } from '@share/validators/category.dto';
+import { PaginationCategory, GetCategory, CategoryDto } from '@share/dto/validators/category.dto';
 
 @Injectable()
-export class CategoryService {
+export default class CategoryService {
   constructor(@Inject(PRISMA_CLIENT) private readonly prismaClient: PrismaClient) {}
 
   create(categoryBody: CategoryBody): Promise<category> {

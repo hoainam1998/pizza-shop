@@ -1,3 +1,8 @@
+type RedisDataJson = {
+  senderId: string;
+  payload: any;
+};
+
 /**
  * Redis event pub/sub
  * @class
@@ -59,7 +64,7 @@ class Event {
    * payload: object
    * }} The plain message object.
    */
-  static fromJson(json: string) {
+  static fromJson(json: string): RedisDataJson {
     const messageObject = JSON.parse(json);
     const payload = JSON.parse(messageObject.payload as string);
     return {

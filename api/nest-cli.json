@@ -28,13 +28,22 @@
         "tsConfigPath": "apps/modules/category/tsconfig.app.json"
       }
     },
-    "users": {
+    "ingredient": {
       "type": "application",
-      "root": "apps/modules/users",
+      "root": "apps/modules/ingredient",
       "entryFile": "main",
-      "sourceRoot": "apps/modules/users/src",
+      "sourceRoot": "apps/modules/ingredient/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/modules/users/tsconfig.app.json"
+        "tsConfigPath": "apps/modules/ingredient/tsconfig.app.json"
+      }
+    },
+    "user": {
+      "type": "application",
+      "root": "apps/modules/user",
+      "entryFile": "main",
+      "sourceRoot": "apps/modules/user/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/modules/user/tsconfig.app.json"
       }
     }
   }

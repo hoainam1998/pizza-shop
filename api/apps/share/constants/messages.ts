@@ -17,4 +17,8 @@ export default Object.freeze({
     EMAIL_REGIS_ALREADY_EXIST: 'Your email was already regis!',
     CAN_NOT_SIGNUP: 'Already has a super admin. You can not signup!',
   },
+  INGREDIENT: {
+    CREATE_INGREDIENT_SUCCESS: 'Create ingredient was success!',
+    NAME_ALREADY_EXIST: 'Ingredient name has been exist!',
+  },
 });

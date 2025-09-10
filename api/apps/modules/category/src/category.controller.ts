@@ -1,7 +1,7 @@
 import { Controller, NotFoundException } from '@nestjs/common';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { Prisma } from 'generated/prisma';
-import { CategoryService } from './category.service';
+import CategoryService from './category.service';
 import { category } from 'generated/prisma';
 import type { CategoryBody, CategoryPaginationResponse } from '@share/interfaces';
 import { checkArrayHaveValues } from '@share/utils';
@@ -12,12 +12,12 @@ import {
   deleteCategoryPattern,
   getCategoryPattern,
 } from '@share/pattern';
-import { CategoryDto, GetCategory, PaginationCategory } from '@share/validators/category.dto';
+import { CategoryDto, GetCategory, PaginationCategory } from '@share/dto/validators/category.dto';
 import { PRISMA_ERROR_CODE } from '@share/enums';
 import messages from '@share/constants/messages';
 
 @Controller()
-export class CategoryController {
+export default class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @MessagePattern(createCategoryPattern)
