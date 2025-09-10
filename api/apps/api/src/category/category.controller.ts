@@ -16,17 +16,17 @@ import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import { catchError, map, Observable } from 'rxjs';
 import CategoryService from './category.service';
-import { MessageSerializer } from '@share/serializer/common';
+import { MessageSerializer } from '@share/dto/serializer/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageTransformPipe } from '@share/pipes';
 import { UploadImage } from '@share/decorators';
-import { CategoryDto, CreateCategoryDto, GetCategory, PaginationCategory } from '@share/validators/category.dto';
-import { FindOneParam } from '@share/validators/common.dto';
+import { CategoryDto, CreateCategoryDto, GetCategory, PaginationCategory } from '@share/dto/validators/category.dto';
+import { FindOneParam } from '@share/dto/validators/common.dto';
 import {
   CategoryPaginationSerializer,
   CategoryPaginationFormatter,
   CategoryDetailSerializer,
-} from '@share/serializer/category';
+} from '@share/dto/serializer/category';
 import { CategoryBody, CategoryPaginationResponse, MicroservicesErrorResponse } from '@share/interfaces';
 import messages from '@share/constants/messages';
 import { createMessage } from '@share/utils';
@@ -112,7 +112,7 @@ export default class CategoryController {
 
   @Delete('delete/:id')
   @HttpCode(HttpStatus.OK)
-  delete(@Param() param: FindOneParam) {
+  delete(@Param() param: FindOneParam): Observable<MessageSerializer> {
     return this.categoryService.deleteCategory(param.id).pipe(
       map(() => MessageSerializer.create(messages.CATEGORY.DELETE_CATEGORY_SUCCESS)),
       catchError((error: Error) => {

@@ -20,6 +20,12 @@ enum Status {
   LESS
 }
 
+enum Unit {
+  KG
+  GRAM
+  CAN
+}
+
 model category {
   category_id String    @id @db.VarChar(20)
   avatar      String    @db.Text
@@ -47,7 +53,7 @@ model ingredient {
   ingredient_id      String               @id @db.VarChar(20)
   name               String               @db.VarChar(100)
   avatar             String               @db.Text
-  unit               String               @db.VarChar(10)
+  unit               Unit
   count              Int
   price              Int
   expired_time       String               @db.VarChar(20)
@@ -60,7 +66,7 @@ model ingredient {
 model product_ingredient {
   product_id    String     @db.VarChar(20)
   ingredient_id String     @db.VarChar(20)
-  unit          String     @db.VarChar(10)
+  unit          Unit
   count         Int
   ingredient    ingredient @relation(fields: [ingredient_id], references: ingredient_id, onDelete: NoAction, onUpdate: NoAction, map: "FK_INGREDIENT")
   product       product    @relation(fields: [product_id], references: product_id, onDelete: NoAction, onUpdate: NoAction, map: "FK_PRODUCT_INGREDIENT")

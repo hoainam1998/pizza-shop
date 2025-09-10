@@ -11,7 +11,7 @@ import {
   deleteCategoryPattern,
   getCategoryPattern,
 } from '@share/pattern';
-import { CategoryDto, GetCategory, PaginationCategory } from '@share/validators/category.dto';
+import { CategoryDto, GetCategory, PaginationCategory } from '@share/dto/validators/category.dto';
 
 @Injectable()
 export default class CategoryService {

@@ -1,20 +1,26 @@
 import { Module } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ClientProvider, ClientsModule, Transport } from '@nestjs/microservices';
 import multer from 'multer';
 import CategoryController from './category.controller';
 import CategoryService from './category.service';
 import { CATEGORY_SERVICE } from 'apps/share/di-token';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    ClientsModule.register([
+    ClientsModule.registerAsync([
       {
-        name: CATEGORY_SERVICE,
-        transport: Transport.TCP,
-        options: {
-          port: parseInt(process.env.CATEGORY_MICROSERVICE_TCP_PORT!),
+        useFactory: (configService: ConfigService): ClientProvider => {
+          return {
+            transport: Transport.TCP,
+            options: {
+              port: parseInt(configService.get<string>('ports.CATEGORY_MICROSERVICE_TCP_PORT')!),
+            },
+          };
         },
+        inject: [ConfigService],
+        name: CATEGORY_SERVICE,
       },
     ]),
     MulterModule.register({

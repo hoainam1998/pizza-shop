@@ -15,15 +15,15 @@ import {
 import { catchError, map, Observable } from 'rxjs';
 import { validate } from 'class-validator';
 import UserService from './user.service';
-import { CanSignupSerializer } from '@share/serializer/user';
-import { SignupDTO } from '@share/validators/user.dto';
+import { CanSignupSerializer } from '@share/dto/serializer/user';
+import { SignupDTO } from '@share/dto/validators/user.dto';
 import { createMessage, getAdminResetPasswordLink } from '@share/utils';
 import messages from '@share/constants/messages';
 import { instanceToPlain } from 'class-transformer';
 import { user } from 'generated/prisma';
 import SendEmailService from '@share/libs/mailer/mailer.service';
 import { MicroservicesErrorResponse, type UserCreated } from '@share/interfaces';
-import { MessageSerializer } from '@share/serializer/common';
+import { MessageSerializer } from '@share/dto/serializer/common';
 import ErrorCode from '@share/error-code';
 
 @Controller('user')
