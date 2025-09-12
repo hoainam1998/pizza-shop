@@ -13,11 +13,13 @@ import {
 import { catchError, map, Observable } from 'rxjs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { instanceToPlain } from 'class-transformer';
+import { validate } from 'class-validator';
 import { ingredient } from 'generated/prisma';
 import IngredientService from './ingredient.service';
 import { UploadImage } from '@share/decorators';
 import { ImageTransformPipe } from '@share/pipes';
-import { IngredientCreate } from '@share/dto/validators/ingredient.dto';
+import { IngredientCreate, ComputeProductPrice } from '@share/dto/validators/ingredient.dto';
+import { PriceProduct } from '@share/dto/serializer/ingredient';
 import { MessageSerializer } from '@share/dto/serializer/common';
 import messages from '@share/constants/messages';
 import { createMessage } from '@share/utils';
@@ -48,5 +50,24 @@ export default class IngredientController {
           throw new BadRequestException(createMessage(error.message!));
         }),
       );
+  }
+
+  @Post('compute-product-price')
+  @HttpCode(HttpStatus.OK)
+  computeProductPrice(@Body() productIngredient: ComputeProductPrice) {
+    return this.ingredientService.computeProductPrice(productIngredient).pipe(
+      map((result) => {
+        const productPrice = new PriceProduct(result);
+        return validate(productPrice).then((resultValidate) => {
+          if (resultValidate) {
+            return productPrice.Price;
+          }
+          throw new BadRequestException(createMessage(messages.PRODUCT.PRICE_INVALID));
+        });
+      }),
+      catchError((error: MicroservicesErrorResponse) => {
+        throw new BadRequestException(createMessage(error.message!));
+      }),
+    );
   }
 }
