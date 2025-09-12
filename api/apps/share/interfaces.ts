@@ -36,3 +36,9 @@ export type SignupUserPayload = {
 export type UserCreated = user & {
   plain_password: string;
 };
+
+export type ProductIngredient = {
+  id: string;
+  amount: number;
+  unit: string;
+};

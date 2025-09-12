@@ -21,4 +21,7 @@ export default Object.freeze({
     CREATE_INGREDIENT_SUCCESS: 'Create ingredient was success!',
     NAME_ALREADY_EXIST: 'Ingredient name has been exist!',
   },
+  PRODUCT: {
+    PRICE_INVALID: 'Product price is invalid!',
+  },
 });
