@@ -1,17 +1,11 @@
-import { computed } from 'vue';
-import { useStore } from '@/store';
-import { HIDE_LOADING, SHOW_LOADING } from '@/store/modules/loading/actions';
+import { reactive } from 'vue';
 
-export default () => {
-  const store = useStore();
-
-  return {
-    state: {
-      loading: computed(() => store.state.loading.loading),
-    },
-    action: {
-      showLoading: () => store.dispatch(`loading/${SHOW_LOADING}`),
-      hideLoading: () => store.dispatch(`loading/${HIDE_LOADING}`),
-    },
-  };
-};
+export default reactive({
+  loading: false,
+  showLoading() {
+    this.loading = true;
+  },
+  hideLoading() {
+    this.loading = false;
+  }
+});

@@ -13,3 +13,15 @@
 .ps-align-items-center {
   align-items: center !important;
 }
+
+@for $gap from 1 through 10 {
+  .ps-flex-gap-#{$gap} {
+    gap: #{$gap}px !important
+  }
+}
+
+@for $grow from 0 through 10 {
+  .ps-flex-grow-#{$grow} {
+    flex-grow: #{$grow} !important;
+  }
+}

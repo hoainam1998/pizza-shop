@@ -1,15 +1,14 @@
 import axios, { AxiosError, HttpStatusCode } from 'axios';
-import store from './store';
 import router from './router';
 import paths from './router/paths';
-import { SHOW_LOADING, HIDE_LOADING } from './store/modules/loading/actions';
 import { showErrorNotification } from './utils';
+import loadingStore from './composables/store/loading';
 
 /**
  * Force logout.
  */
 const forceLogout = (): void => {
-  router.push(paths.LOGIN);
+  router.push(`${paths.LOGIN}`);
 };
 
 /**
@@ -45,7 +44,7 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   function (config) {
-    store.dispatch(`loading/${SHOW_LOADING}`);
+    loadingStore.showLoading();
     return config;
   },
   function (error) {
@@ -55,12 +54,12 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   function (response) {
-    store.dispatch(`loading/${HIDE_LOADING}`);
+    loadingStore.hideLoading();
     return response;
   },
   function (error) {
     handleRequestError(error);
-    store.dispatch(`loading/${HIDE_LOADING}`);
+    loadingStore.hideLoading();
     return Promise.reject(error);
   },
 );

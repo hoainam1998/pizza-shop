@@ -9,7 +9,7 @@ import Breadcrumb from '@/components/breadcrumb.vue';
     <Menu />
     <div class="ps-w-100">
       <Breadcrumb />
-      <RouterView />
+      <router-view />
     </div>
   </div>
 </template>

@@ -8,6 +8,15 @@
   }
 }
 
+// #606266
+.ps-text-color-606266 {
+  color: colors.$label-color !important;
+
+  &>* {
+    color: colors.$label-color !important;
+  }
+}
+
 .ps-fw-bold {
   font-weight: bold !important;
 
@@ -18,6 +27,10 @@
 
 .ps-text-align-center {
   text-align: center !important;
+}
+
+.ps-text-align-end {
+  text-align: end !important;
 }
 
 @for $i from 1 through 5 {
