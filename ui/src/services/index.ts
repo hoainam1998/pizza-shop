@@ -1,4 +1,4 @@
-import type { AxiosResponse } from 'axios';
+import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import api from '@/axios';
 
 type RequestBody = {
@@ -24,10 +24,11 @@ class Services {
    * Axios get method.
    *
    * @param {string} subUrl - The sub url.
+   * @param {AxiosRequestConfig} - The axios config.
    * @returns {Promise<AxiosResponse>} - The promise response.
    */
-  get(subUrl: string): Promise<AxiosResponse> {
-    return api.get(`${this._baseUrl}/${subUrl}`);
+  get(subUrl: string, config?: AxiosRequestConfig): Promise<AxiosResponse> {
+    return api.get(`${this._baseUrl}/${subUrl}`, config);
   }
 
   /**
@@ -35,10 +36,11 @@ class Services {
    *
    * @param {string} subUrl - The sub url.
    * @param {RequestBody} body - The request body.
+   * @param {AxiosRequestConfig} - The axios config.
    * @returns {Promise<AxiosResponse>} - The promise response.
    */
-  post(subUrl: string, body: RequestBody): Promise<AxiosResponse> {
-    return api.post(`${this._baseUrl}/${subUrl}`, body);
+  post(subUrl: string, body: RequestBody, config?: AxiosRequestConfig): Promise<AxiosResponse> {
+    return api.post(`${this._baseUrl}/${subUrl}`, body, config);
   }
 
   /**
@@ -46,22 +48,26 @@ class Services {
    *
    * @param {string} subUrl - The sub url.
    * @param {RequestBody} body - The request body.
+   * @param {AxiosRequestConfig} - The axios config.
    * @returns {Promise<AxiosResponse>} - The promise response.
    */
-  put(subUrl: string, body: RequestBody): Promise<AxiosResponse> {
-    return api.put(`${this._baseUrl}/${subUrl}`, body);
+  put(subUrl: string, body: RequestBody, config?: AxiosRequestConfig): Promise<AxiosResponse> {
+    return api.put(`${this._baseUrl}/${subUrl}`, body, config);
   }
 
   /**
    * Axios delete method.
    *
    * @param {string} subUrl - The sub url.
+   * @param {AxiosRequestConfig} - The axios config.
    * @returns {Promise<AxiosResponse>} - The promise response.
    */
-  delete(subUrl: string): Promise<AxiosResponse> {
-    return api.delete(`${this._baseUrl}/${subUrl}`);
+  delete(subUrl: string, config?: AxiosRequestConfig): Promise<AxiosResponse> {
+    return api.delete(`${this._baseUrl}/${subUrl}`, config);
   }
 }
 
 export const CategoryService = new Services('/category');
 export const UserService = new Services('/user');
+export const IngredientService = new Services('/ingredient');
+export const UnitService = new Services('/unit');

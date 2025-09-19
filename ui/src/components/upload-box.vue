@@ -32,12 +32,12 @@ type UploadBoxPropsType = {
 
 const uploadBox = useTemplateRef('uploadBox');
 const { name } = defineProps<UploadBoxPropsType>();
-const file = defineModel<(File | UploadRawFile)[]>('file');
+const file = defineModel<(File | UploadRawFile | UploadFile)[]>('file');
 const imageUrl = ref(defaultImageUploadPlaceholder);
 
 watch(file, (newFile) => {
   if (newFile && newFile.length) {
-    const fileUpload = newFile[0] as File;
+    const fileUpload: File = ((newFile[0] as UploadFile).raw  || newFile[0]) as File;
     imageUrl.value = URL.createObjectURL(fileUpload);
     assignInputFile(fileUpload);
   }

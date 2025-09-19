@@ -50,7 +50,7 @@ import Table from '@/components/table.vue';
 import { CategoryService } from '@/services';
 import { showErrorNotification, showSuccessNotification, convertBase64ToSingleFile } from '@/utils';
 import constants from '@/constants';
-import type{ MessageResponse } from '@/interfaces';
+import type { MessageResponse } from '@/interfaces';
 
 const PAGE_SIZE = constants.PAGINATION.PAGE_SIZE;
 const PAGE_NUMBER = constants.PAGINATION.PAGE_NUMBER;
@@ -184,4 +184,3 @@ const deleteCategory = (id: string): void => {
 
 onBeforeMount(() => fetchCategories(PAGE_SIZE, PAGE_NUMBER));
 </script>
-<style lang="scss"></style>

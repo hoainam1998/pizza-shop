@@ -5,6 +5,6 @@ import Spinner from './components/spinner.vue';
 
 <template>
   <Spinner>
-    <RouterView />
+    <router-view />
   </Spinner>
 </template>

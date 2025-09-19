@@ -74,7 +74,7 @@ $size-name: (
 
 @each $name, $_ in $space-name {
   @each $key, $_ in $direction-name {
-    @for $i from 1 through 100 {
+    @for $i from 0 through 100 {
       @include space($name, $key, $i);
     }
   }
