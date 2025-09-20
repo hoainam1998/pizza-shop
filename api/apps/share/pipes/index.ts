@@ -1,2 +1,4 @@
 import ImageTransformPipe from './image-transform.pipe';
-export { ImageTransformPipe };
+import MatcherPipe from './matcher.pipe';
+
+export { ImageTransformPipe, MatcherPipe };

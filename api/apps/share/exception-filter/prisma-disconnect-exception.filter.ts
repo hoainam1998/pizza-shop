@@ -1,7 +1,7 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { createMessage } from '@share/utils';
 import { Response } from 'express';
-import { MessageResponse } from '@share/interfaces';
+import { MessageResponseType } from '@share/interfaces';
 import messages from '@share/constants/messages';
 
 @Catch(HttpException)
@@ -9,8 +9,8 @@ export default class PrismaDisconnectExceptionFilter implements ExceptionFilter 
   catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const status = exception.getStatus();
-    const exceptionResponse: MessageResponse = exception.getResponse() as MessageResponse;
+    const next = ctx.getNext();
+    const exceptionResponse: MessageResponseType = exception.getResponse() as MessageResponseType;
 
     if (exceptionResponse.message) {
       if (exceptionResponse.message.includes("Can't reach database server ")) {
@@ -18,6 +18,6 @@ export default class PrismaDisconnectExceptionFilter implements ExceptionFilter 
       }
     }
 
-    response.status(status).json(exceptionResponse);
+    return next();
   }
 }

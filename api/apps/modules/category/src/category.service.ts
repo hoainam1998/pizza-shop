@@ -2,11 +2,26 @@ import { Inject, Injectable } from '@nestjs/common';
 import { PRISMA_CLIENT } from '@share/di-token';
 import { category, PrismaClient } from 'generated/prisma';
 import { CategoryBody, CategoryPaginationPrismaResponse } from '@share/interfaces';
-import { PaginationCategory, GetCategory, CategoryDto } from '@share/dto/validators/category.dto';
+import { PaginationCategory, GetCategory, CategoryDto, CategorySelect } from '@share/dto/validators/category.dto';
+import CategoryCachingService from '@share/libs/caching/category/category.service';
+
+const selectCategory = (select: CategorySelect, categories: category[]): Partial<category>[] => {
+  return categories.map((category) =>
+    Object.entries(select).reduce<Partial<category>>((obj, [key, value]: [keyof category, any]) => {
+      if (value) {
+        obj[key] = category[key];
+      }
+      return obj;
+    }, {}),
+  );
+};
 
 @Injectable()
 export default class CategoryService {
-  constructor(@Inject(PRISMA_CLIENT) private readonly prismaClient: PrismaClient) {}
+  constructor(
+    @Inject(PRISMA_CLIENT) private readonly prismaClient: PrismaClient,
+    private readonly categoryCachingService: CategoryCachingService,
+  ) {}
 
   create(categoryBody: CategoryBody): Promise<category> {
     return this.prismaClient.category.create({
@@ -24,6 +39,18 @@ export default class CategoryService {
       },
       select: category.query,
     });
+  }
+
+  async getAllCategories(select: CategorySelect): Promise<Partial<category>[]> {
+    let categories: category[] = [];
+    const alreadyExist = await this.categoryCachingService.checkExist();
+    if (alreadyExist) {
+      categories = await this.categoryCachingService.getAllCategories();
+    } else {
+      categories = await this.prismaClient.category.findMany();
+      await this.categoryCachingService.storeAllCategories(categories);
+    }
+    return selectCategory(select, categories);
   }
 
   pagination(select: PaginationCategory): Promise<CategoryPaginationPrismaResponse> {

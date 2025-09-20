@@ -9,17 +9,18 @@ import {
   BadRequestException,
   HttpCode,
   HttpStatus,
+  NotFoundException,
 } from '@nestjs/common';
 import { catchError, map, Observable } from 'rxjs';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { instanceToPlain } from 'class-transformer';
+import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { ingredient } from 'generated/prisma';
 import IngredientService from './ingredient.service';
 import { UploadImage } from '@share/decorators';
 import { ImageTransformPipe } from '@share/pipes';
-import { IngredientCreate, ComputeProductPrice } from '@share/dto/validators/ingredient.dto';
-import { PriceProduct } from '@share/dto/serializer/ingredient';
+import { IngredientCreate, ComputeProductPrice, IngredientSelect } from '@share/dto/validators/ingredient.dto';
+import { PriceProduct, IngredientList, Ingredient } from '@share/dto/serializer/ingredient';
 import { MessageSerializer } from '@share/dto/serializer/common';
 import messages from '@share/constants/messages';
 import { createMessage } from '@share/utils';
@@ -54,12 +55,12 @@ export default class IngredientController {
 
   @Post('compute-product-price')
   @HttpCode(HttpStatus.OK)
-  computeProductPrice(@Body() productIngredient: ComputeProductPrice) {
+  computeProductPrice(@Body() productIngredient: ComputeProductPrice): Observable<Promise<number>> {
     return this.ingredientService.computeProductPrice(productIngredient).pipe(
       map((result) => {
         const productPrice = new PriceProduct(result);
-        return validate(productPrice).then((resultValidate) => {
-          if (resultValidate) {
+        return validate(productPrice).then((errors) => {
+          if (!errors.length) {
             return productPrice.Price;
           }
           throw new BadRequestException(createMessage(messages.PRODUCT.PRICE_INVALID));
@@ -69,5 +70,40 @@ export default class IngredientController {
         throw new BadRequestException(createMessage(error.message!));
       }),
     );
+  }
+
+  @Post('all')
+  @HttpCode(HttpStatus.OK)
+  getAll(@Body() select: IngredientSelect): Observable<Promise<any>> {
+    const selectObject = { ...select };
+    if (select.units) {
+      Object.assign(selectObject, { unit: true });
+    }
+
+    return this.ingredientService
+      .getAll(plainToInstance(IngredientSelect, selectObject, { excludePrefixes: ['units'] }))
+      .pipe(
+        map(async (ingredients) => {
+          const ingredientList = new IngredientList(ingredients);
+          return validate(ingredientList).then((errors) => {
+            if (!errors.length) {
+              const options = select.units ? { groups: ['units'] } : { groups: [] };
+              if (select.unit) {
+                Object.assign(options, { groups: [...options.groups, 'unit'] });
+              }
+              return instanceToPlain(plainToInstance(Ingredient, ingredientList.List, { groups: ['unit'] }), options);
+            } else {
+              throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
+            }
+          });
+        }),
+        catchError((error: MicroservicesErrorResponse) => {
+          if (error.status === HttpStatus.NOT_FOUND) {
+            throw new NotFoundException(error.response);
+          } else {
+            throw new BadRequestException(createMessage(error.message!));
+          }
+        }),
+      );
   }
 }

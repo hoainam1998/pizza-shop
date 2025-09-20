@@ -22,7 +22,7 @@ import messages from '@share/constants/messages';
 import { instanceToPlain } from 'class-transformer';
 import { user } from 'generated/prisma';
 import SendEmailService from '@share/libs/mailer/mailer.service';
-import { MicroservicesErrorResponse, type UserCreated } from '@share/interfaces';
+import { MicroservicesErrorResponse, type UserCreatedType } from '@share/interfaces';
 import { MessageSerializer } from '@share/dto/serializer/common';
 import ErrorCode from '@share/error-code';
 
@@ -61,7 +61,7 @@ export default class UserController {
       throw new UnauthorizedException(createMessage(messages.USER.CAN_NOT_SIGNUP, ErrorCode.CAN_NOT_SIGNUP));
     }
     return this.userService.signup(instanceToPlain(user) as user, true).pipe(
-      map((user: UserCreated) => {
+      map((user: UserCreatedType) => {
         const link = getAdminResetPasswordLink(user.reset_password_token!);
         return this.sendEmailService
           .sendPassword(user.email, link, user.plain_password)

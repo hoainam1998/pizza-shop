@@ -1,21 +1,5 @@
-import { CategoryBody, CategoryPaginationResponse } from '@share/interfaces';
-import { IsNumber, IsPositive, IsArray, IsString, ArrayNotEmpty, ValidateNested } from 'class-validator';
+import { IsNumber, IsPositive, IsArray, IsString, ArrayNotEmpty, ValidateNested, IsOptional } from 'class-validator';
 import { Exclude, Expose, Type } from 'class-transformer';
-
-export class CategoryPaginationSerializer {
-  @IsArray()
-  @ArrayNotEmpty()
-  @ValidateNested({ each: true })
-  list: Required<CategoryBody>[];
-
-  @IsNumber()
-  @IsPositive()
-  total: number;
-
-  constructor(target: CategoryPaginationResponse) {
-    Object.assign(this, target);
-  }
-}
 
 export class CategoryFormatter {
   @Exclude({ toPlainOnly: true })
@@ -38,13 +22,27 @@ export class CategoryFormatter {
 }
 
 export class CategoryPaginationFormatter {
+  @IsArray()
+  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
   @Type(() => CategoryFormatter)
   list: CategoryFormatter[];
 
+  @IsNumber()
+  @IsPositive()
   total: number;
+
+  constructor(target: CategoryPaginationFormatter) {
+    Object.assign(this, target);
+  }
 }
 
 export class CategoryDetailSerializer {
+  @Exclude({ toPlainOnly: true })
+  @IsOptional()
+  @IsString()
+  category_id: string;
+
   @IsString()
   name: string;
 
@@ -53,5 +51,23 @@ export class CategoryDetailSerializer {
 
   constructor(target: CategoryDetailSerializer) {
     Object.assign(this, target);
+  }
+
+  @Expose({ toPlainOnly: true })
+  get categoryId() {
+    return this.category_id;
+  }
+}
+
+export class Categories {
+  @IsArray()
+  _list: CategoryDetailSerializer[];
+
+  constructor(list: Omit<CategoryDetailSerializer, 'categoryId'>[]) {
+    Object.assign(this, { _list: list });
+  }
+
+  get List() {
+    return this._list;
   }
 }

@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ingredient, PrismaClient, Unit } from 'generated/prisma';
 import { PRISMA_CLIENT, REDIS_CLIENT } from '@share/di-token';
 import RedisClient from '@share/libs/redis-client/redis';
-import { type ProductIngredient } from '@share/interfaces';
+import { type ProductIngredientType, type IngredientSelectType } from '@share/interfaces';
 
 @Injectable()
 export default class IngredientService {
@@ -17,7 +17,10 @@ export default class IngredientService {
     });
   }
 
-  async computeProductIngredients(temporaryProductId: string, productIngredients: ProductIngredient[]) {
+  async computeProductIngredients(
+    temporaryProductId: string,
+    productIngredients: ProductIngredientType[],
+  ): Promise<number> {
     const ingredientIds: string[] = productIngredients.map((ingredientItem) => ingredientItem.id);
     let missingIngredients: string[] = ingredientIds;
     let ingredientsFormRedis: (string | null)[] = await this.redisClient.Client.hmGet(
@@ -86,5 +89,14 @@ export default class IngredientService {
           return price;
         }, 0);
       });
+  }
+
+  getAll(select: IngredientSelectType): Promise<ingredient[]> {
+    return this.prismaClient.ingredient.findMany({
+      select: {
+        ingredient_id: true,
+        ...select,
+      },
+    });
   }
 }
