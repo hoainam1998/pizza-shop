@@ -50,7 +50,7 @@ import Table from '@/components/table.vue';
 import { CategoryService } from '@/services';
 import { showErrorNotification, showSuccessNotification, convertBase64ToSingleFile } from '@/utils';
 import constants from '@/constants';
-import type { MessageResponse } from '@/interfaces';
+import type { MessageResponseType } from '@/interfaces';
 
 const PAGE_SIZE = constants.PAGINATION.PAGE_SIZE;
 const PAGE_NUMBER = constants.PAGINATION.PAGE_NUMBER;
@@ -109,7 +109,7 @@ const fetchCategories = (pageSize: number, pageNumber: number): void => {
   }).then((response: AxiosResponse) => {
     data.value = response.data.list;
     total.value = response.data.total;
-  }).catch((error: AxiosError<MessageResponse>) => {
+  }).catch((error: AxiosError<MessageResponseType>) => {
     if (error.status === HttpStatusCode.NotFound) {
       data.value = [];
       total.value = 0;
@@ -149,7 +149,7 @@ const submitForm = async (): Promise<void> => {
             showSuccessNotification(title, response.data.message);
             categoryTableRef.value!.refresh();
           })
-          .catch((error: AxiosError<MessageResponse>) => {
+          .catch((error: AxiosError<MessageResponseType>) => {
             showErrorNotification(title, error.response!.data.message);
           })
           .finally(resetForm);
@@ -177,7 +177,7 @@ const deleteCategory = (id: string): void => {
   CategoryService.delete(`delete/${id}`).then((response: AxiosResponse) => {
     showSuccessNotification('Delete category!', response.data.message);
     categoryTableRef.value!.refresh();
-  }).catch((error: AxiosError<MessageResponse>) => {
+  }).catch((error: AxiosError<MessageResponseType>) => {
     showErrorNotification('Delete category!', error.response!.data.message);
   });
 };

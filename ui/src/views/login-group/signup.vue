@@ -64,7 +64,7 @@ import paths from '@/router/paths';
 import constants from '@/constants';
 import { UserService } from '@/services';
 import { showErrorNotification, showSuccessNotification } from '@/utils';
-import type{ MessageResponse } from '@/interfaces';
+import type { MessageResponseType } from '@/interfaces';
 
 type SignupModelType = {
   firstName: string;
@@ -139,10 +139,10 @@ const onSubmit = async (): Promise<void> => {
     await signupFormRef.value.validate((valid) => {
       if (valid) {
         UserService.post('signup', signupFormModel)
-          .then((response: AxiosResponse<MessageResponse>) => {
+          .then((response: AxiosResponse<MessageResponseType>) => {
             showSuccessNotification('Signup success!', response.data.message);
-            router.push(paths.LOGIN);
-          }).catch((error: AxiosError<MessageResponse>) => {
+            router.push(`${paths.LOGIN}`);
+          }).catch((error: AxiosError<MessageResponseType>) => {
             showErrorNotification('Signup failed!', error.response!.data.message);
           }).finally(reset);
       }

@@ -14,9 +14,13 @@
 
 <script lang="ts" setup>
 import { defineModel, defineProps } from 'vue';
-
 type ExpiredDaySelectProps = {
   name: string;
+};
+
+type DatePickerShortcut = {
+  text: string;
+  value: (time: any) => Date;
 };
 
 const selectedDay = defineModel();
@@ -24,7 +28,7 @@ const { name } = defineProps<ExpiredDaySelectProps>();
 const disabledDate = (time: Date): boolean => time.getTime() < Date.now();
 const oneDay: number = 3600 * 1000 * 24;
 
-const shortcuts = [
+const shortcuts: DatePickerShortcut[] = [
   {
     text: 'Tomorrow',
     value: () => {

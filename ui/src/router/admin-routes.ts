@@ -24,12 +24,12 @@ const adminRoutes: RouterOptions['routes'] = [
     redirect: 'category',
     children: [
       {
-        path: 'category',
+        path: paths.HOME.CATEGORY,
         name: 'category',
         component: Category,
       },
       {
-        path: 'product',
+        path: paths.HOME.PRODUCT,
         name: 'product',
         component: RouterView,
         children: [

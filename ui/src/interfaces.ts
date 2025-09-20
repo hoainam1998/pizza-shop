@@ -4,11 +4,11 @@ export type TableFieldType = {
   width?: number;
 };
 
-export type MessageResponse = {
+export type MessageResponseType = {
   message: string;
 };
 
-export type Ingredient = {
+export type IngredientType = {
   ingredientId: string;
   name?: string;
   avatar?: string;
@@ -26,4 +26,4 @@ export type CategoryType = {
   categoryId: string;
   name: string;
   avatar: string;
-}
+};
