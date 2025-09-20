@@ -97,6 +97,7 @@ export default class CategoryController {
 
   @Post('detail')
   @HttpCode(HttpStatus.OK)
+  @SerializeOptions({ type: CategoryDto })
   getCategory(@Body() category: GetCategory): Observable<Promise<Omit<CategoryDto, 'categoryId'>>> {
     return this.categoryService.getCategory(category).pipe(
       map((response: CategoryDetailSerializer) => {
