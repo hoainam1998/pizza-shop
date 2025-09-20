@@ -3,15 +3,17 @@ import { ClientProxy } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 import { category } from 'generated/prisma';
 import { CATEGORY_SERVICE } from '@share/di-token';
-import { CategoryBody, CategoryPaginationResponse } from '@share/interfaces';
+import { CategoryBody } from '@share/interfaces';
 import {
   createCategoryPattern,
   paginationCategoryPattern,
   updateCategoryPattern,
   deleteCategoryPattern,
   getCategoryPattern,
+  getAllCategories,
 } from '@share/pattern';
-import { CategoryDto, GetCategory, PaginationCategory } from '@share/dto/validators/category.dto';
+import { CategoryDto, CategorySelect, GetCategory, PaginationCategory } from '@share/dto/validators/category.dto';
+import { CategoryPaginationFormatter } from '@share/dto/serializer/category';
 
 @Injectable()
 export default class CategoryService {
@@ -25,8 +27,12 @@ export default class CategoryService {
     return this.category.send<Omit<CategoryDto, 'categoryId'>>(getCategoryPattern, category);
   }
 
-  pagination(select: PaginationCategory): Observable<CategoryPaginationResponse> {
-    return this.category.send<CategoryPaginationResponse>(paginationCategoryPattern, select);
+  getAllCategories(select: CategorySelect): Observable<category[]> {
+    return this.category.send<category[]>(getAllCategories, select);
+  }
+
+  pagination(select: PaginationCategory): Observable<CategoryPaginationFormatter> {
+    return this.category.send<CategoryPaginationFormatter>(paginationCategoryPattern, select);
   }
 
   updateCategory(category: CategoryBody): Observable<category> {

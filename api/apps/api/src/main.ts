@@ -36,7 +36,7 @@ async function bootstrap() {
       },
     }),
   );
-  app.useGlobalFilters(new HttpExceptionFilter(), new PrismaDisconnectExceptionFilter());
+  app.useGlobalFilters(new PrismaDisconnectExceptionFilter(), new HttpExceptionFilter());
   app.use(session(sessionConfig(redisClient.Client)));
   await app.listen(port, () => Logger.log(`App started at ${port}`, 'App Bootstrap'));
 }

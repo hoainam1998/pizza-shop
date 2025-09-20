@@ -1,6 +1,6 @@
 import { Expose, Transform } from 'class-transformer';
-import { IsString, IsInt, IsNumberString, IsArray } from 'class-validator';
-import { type ProductIngredient } from '@share/interfaces';
+import { IsString, IsInt, IsNumberString, IsArray, IsBoolean, IsOptional } from 'class-validator';
+import { type ProductIngredientType, type IngredientSelectType } from '@share/interfaces';
 
 export class IngredientCreate {
   @IsString()
@@ -26,7 +26,7 @@ export class IngredientCreate {
   }
 }
 
-export class ProductIngredients implements ProductIngredient {
+export class ProductIngredients implements ProductIngredientType {
   @IsNumberString()
   id: string;
 
@@ -43,4 +43,38 @@ export class ComputeProductPrice {
 
   @IsArray()
   productIngredients: ProductIngredients[];
+}
+
+export class IngredientSelect implements IngredientSelectType {
+  @IsOptional()
+  @IsBoolean()
+  name: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  avatar: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  unit: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  count: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  expired_time: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  status: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  price: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  units: boolean;
 }

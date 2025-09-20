@@ -11,8 +11,9 @@ import {
   updateCategoryPattern,
   deleteCategoryPattern,
   getCategoryPattern,
+  getAllCategories,
 } from '@share/pattern';
-import { CategoryDto, GetCategory, PaginationCategory } from '@share/dto/validators/category.dto';
+import { CategoryDto, CategorySelect, GetCategory, PaginationCategory } from '@share/dto/validators/category.dto';
 import { PRISMA_ERROR_CODE } from '@share/enums';
 import messages from '@share/constants/messages';
 
@@ -27,6 +28,25 @@ export default class CategoryController {
     });
   }
 
+  @MessagePattern(getAllCategories)
+  getAllCategories(@Payload() select: CategorySelect): Promise<category[]> {
+    return this.categoryService
+      .getAllCategories(select)
+      .then((categories) => {
+        if (!checkArrayHaveValues(categories)) {
+          throw new RpcException(
+            new NotFoundException({
+              message: [],
+            }),
+          );
+        }
+        return categories;
+      })
+      .catch((error: Error) => {
+        throw new RpcException(error.message);
+      });
+  }
+
   @MessagePattern(paginationCategoryPattern)
   pagination(@Payload() select: PaginationCategory): Promise<CategoryPaginationResponse> {
     return this.categoryService
@@ -39,8 +59,10 @@ export default class CategoryController {
         if (!checkArrayHaveValues(list as CategoryBody[])) {
           throw new RpcException(
             new NotFoundException({
-              list: [],
-              total: 0,
+              message: {
+                list: [],
+                total: 0,
+              },
             }),
           );
         }

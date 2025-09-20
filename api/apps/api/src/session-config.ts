@@ -7,7 +7,7 @@ export default (redisClient: RedisClientType) =>
   ({
     store: new RedisStore({
       client: redisClient,
-      prefix: constants.REDIS_PREFIX,
+      prefix: constants.REDIS_PREFIX.SESSION_KEY,
     }),
     secret: process.env.SESSION_ID_TOKEN!,
     resave: false,

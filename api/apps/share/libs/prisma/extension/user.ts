@@ -3,13 +3,13 @@ import constants from '@share/constants';
 import messages from '@share/constants/messages';
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { createMessage, autoGeneratePassword, passwordHashing, signingAdminResetPasswordToken } from '@share/utils';
-import { type UserCreated } from '@share/interfaces';
+import { type UserCreatedType } from '@share/interfaces';
 
 type PrismaUserCreateParameter = {
   args: Omit<Prisma.userCreateArgs, 'data'> & {
     data: Omit<Prisma.userCreateArgs['data'], 'user_id'> | Prisma.userCreateArgs['data'];
   };
-  query: (args: PrismaUserCreateParameter['args']) => PrismaPromise<UserCreated>;
+  query: (args: PrismaUserCreateParameter['args']) => PrismaPromise<UserCreatedType>;
 };
 
 const USER = messages.USER;
@@ -17,7 +17,7 @@ const SEX_VALID = Object.values(constants.SEX);
 const POWER_VALID = Object.values(constants.POWER_NUMERIC);
 
 export default (prisma: PrismaClient) => ({
-  create: async ({ args, query }: PrismaUserCreateParameter): Promise<UserCreated> => {
+  create: async ({ args, query }: PrismaUserCreateParameter): Promise<UserCreatedType> => {
     const firstTimePassword = autoGeneratePassword();
     if (Object.hasOwn(args.data, 'sex')) {
       if (!SEX_VALID.includes(args.data.sex!)) {

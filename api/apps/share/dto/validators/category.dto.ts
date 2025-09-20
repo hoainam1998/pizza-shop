@@ -56,3 +56,13 @@ export class GetCategory {
   @Type(() => CategoryQuery)
   query: CategoryQuery;
 }
+
+export class CategorySelect {
+  @IsOptional()
+  @IsBoolean()
+  name: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  avatar: boolean;
+}

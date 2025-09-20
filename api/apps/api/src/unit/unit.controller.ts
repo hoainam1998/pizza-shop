@@ -1,4 +1,5 @@
-import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Query } from '@nestjs/common';
+import { MatcherPipe } from '@share/pipes';
 import { Unit } from 'generated/prisma';
 
 type UnitOptions = {
@@ -6,11 +7,18 @@ type UnitOptions = {
   value: string;
 };
 
+const generateUnitOptions = (units: string[]): UnitOptions[] => {
+  return units.map((unit) => ({ label: unit, value: unit }));
+};
+
 @Controller('unit')
 export default class UnitController {
   @Get()
   @HttpCode(HttpStatus.OK)
-  getAllUnits(): UnitOptions[] {
-    return Object.values(Unit).map((unit) => ({ label: unit, value: unit }));
+  getAllUnits(@Query('of', new MatcherPipe(['product', 'ingredient'])) of: string): UnitOptions[] {
+    if (of === 'product') {
+      return generateUnitOptions(Object.values(Unit).filter((unit) => unit !== Unit.GRAM));
+    }
+    return generateUnitOptions(Object.values(Unit));
   }
 }

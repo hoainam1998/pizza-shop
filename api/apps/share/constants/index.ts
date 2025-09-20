@@ -1,5 +1,4 @@
 export default Object.freeze({
-  REDIS_PREFIX: 'ps:',
   SEX: {
     MALE: 0,
     FEMALE: 1,
@@ -8,5 +7,9 @@ export default Object.freeze({
     SUPER_ADMIN: 0,
     ADMIN: 1,
     SALE: 2,
+  },
+  REDIS_PREFIX: {
+    SESSION_KEY: 'ps:',
+    CATEGORIES: 'categories',
   },
 });

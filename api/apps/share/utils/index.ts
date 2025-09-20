@@ -1,4 +1,4 @@
-import { EventPatternType, MessageResponse } from '../interfaces';
+import { EventPatternType, MessageResponseType } from '../interfaces';
 import {
   passwordHashing,
   autoGeneratePassword,
@@ -23,7 +23,7 @@ const createMicroserviceEvent = (pattern: string): EventPatternType => ({ cmd: p
  * message: string
  * errorCode: string}} - The message object.
  */
-const createMessage = (message: string, errorCode?: string): MessageResponse => ({ message, errorCode });
+const createMessage = (message: string, errorCode?: string): MessageResponseType => ({ message, errorCode });
 
 /**
  * Convert file to base64 image file string.

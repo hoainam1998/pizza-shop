@@ -2,9 +2,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
 import { ingredient } from 'generated/prisma';
-import { createIngredientPattern, computeProductPrice } from '@share/pattern';
+import { createIngredientPattern, computeProductPrice, getAllIngredients } from '@share/pattern';
 import { INGREDIENT_SERVICE } from '@share/di-token';
-import { ComputeProductPrice } from '@share/dto/validators/ingredient.dto';
+import { ComputeProductPrice, IngredientSelect } from '@share/dto/validators/ingredient.dto';
 
 @Injectable()
 export default class IngredientService {
@@ -16,5 +16,9 @@ export default class IngredientService {
 
   computeProductPrice(productIngredient: ComputeProductPrice): Observable<number> {
     return this.ingredient.send<number>(computeProductPrice, productIngredient);
+  }
+
+  getAll(select: IngredientSelect): Observable<ingredient[]> {
+    return this.ingredient.send<ingredient[]>(getAllIngredients, select);
   }
 }

@@ -10,26 +10,29 @@ import {
   Param,
   Post,
   Put,
+  SerializeOptions,
   UseInterceptors,
 } from '@nestjs/common';
 import { validate } from 'class-validator';
-import { plainToInstance } from 'class-transformer';
 import { catchError, map, Observable } from 'rxjs';
 import CategoryService from './category.service';
 import { MessageSerializer } from '@share/dto/serializer/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageTransformPipe } from '@share/pipes';
 import { UploadImage } from '@share/decorators';
-import { CategoryDto, CreateCategoryDto, GetCategory, PaginationCategory } from '@share/dto/validators/category.dto';
-import { FindOneParam } from '@share/dto/validators/common.dto';
 import {
-  CategoryPaginationSerializer,
-  CategoryPaginationFormatter,
-  CategoryDetailSerializer,
-} from '@share/dto/serializer/category';
-import { CategoryBody, CategoryPaginationResponse, MicroservicesErrorResponse } from '@share/interfaces';
+  CategoryDto,
+  CategorySelect,
+  CreateCategoryDto,
+  GetCategory,
+  PaginationCategory,
+} from '@share/dto/validators/category.dto';
+import { FindOneParam } from '@share/dto/validators/common.dto';
+import { CategoryPaginationFormatter, CategoryDetailSerializer, Categories } from '@share/dto/serializer/category';
+import { CategoryBody, MicroservicesErrorResponse } from '@share/interfaces';
 import messages from '@share/constants/messages';
 import { createMessage } from '@share/utils';
+import { category } from 'generated/prisma';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('category')
@@ -52,16 +55,35 @@ export default class CategoryController {
     );
   }
 
+  @Post('all')
+  @HttpCode(HttpStatus.OK)
+  @SerializeOptions({ type: CategoryDetailSerializer })
+  getAllCategories(@Body() select: CategorySelect): Observable<Promise<category[]>> {
+    return this.categoryService.getAllCategories(select).pipe(
+      map((categories) => {
+        const categoriesObj = new Categories(categories);
+        return validate(categoriesObj).then((errors) => {
+          if (!errors.length) {
+            return categoriesObj.List;
+          }
+          throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
+        });
+      }),
+    );
+  }
+
   @Post('pagination')
   @HttpCode(HttpStatus.OK)
+  @SerializeOptions({ type: CategoryPaginationFormatter })
   pagination(@Body() select: PaginationCategory): Observable<Promise<CategoryPaginationFormatter>> {
     return this.categoryService.pagination(select).pipe(
-      map((response: CategoryPaginationResponse) => {
-        return validate(new CategoryPaginationSerializer(response)).then((result) => {
-          if (!result) {
+      map((response) => {
+        const paginationResult = new CategoryPaginationFormatter(response);
+        return validate(paginationResult).then((errors) => {
+          if (!errors.length) {
             throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
           }
-          return plainToInstance(CategoryPaginationFormatter, response);
+          return paginationResult;
         });
       }),
       catchError((error: MicroservicesErrorResponse) => {
@@ -77,9 +99,9 @@ export default class CategoryController {
   @HttpCode(HttpStatus.OK)
   getCategory(@Body() category: GetCategory): Observable<Promise<Omit<CategoryDto, 'categoryId'>>> {
     return this.categoryService.getCategory(category).pipe(
-      map((response: Omit<CategoryDto, 'categoryId'>) => {
-        return validate(new CategoryDetailSerializer(response)).then((result) => {
-          if (!result) {
+      map((response: CategoryDetailSerializer) => {
+        return validate(new CategoryDetailSerializer(response)).then((error) => {
+          if (error.length) {
             throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
           }
           return response;
