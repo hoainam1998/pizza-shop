@@ -1,10 +1,23 @@
+/**
+ * Organization and validate route path.
+ * @class
+ */
 class RouterPath {
+  [x: string]: any;
   private _path: string;
   private _children?: Record<string, string>;
 
+  /**
+   *
+   * @constructor
+   * @param {string} path - The route path.
+   * @param {Record<string, string>} children - The child route path.
+   */
   constructor(path: string, children?: Record<string, string>) {
     this._path = path;
-    this._children = children;
+    if (children) {
+      this.Children = children;
+    }
   }
 
   set Path(value: string) {
@@ -31,6 +44,17 @@ class RouterPath {
 
     if (resultValidate) {
       this._children = value;
+      const childObj = Object.entries(this._children)
+        .reduce<Record<string, any>>((o, [key, value]) => {
+          o[key] = {
+            value,
+            writeable: false,
+            configurable: false,
+            enumerable: false,
+          };
+          return o;
+        }, {});
+      Object.defineProperties(this, childObj);
     } else {
       throw new Error(`[Route Path] ${invalidPaths.join(', ')} must be the children's rout path!`);
     }

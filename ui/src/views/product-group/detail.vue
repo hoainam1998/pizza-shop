@@ -3,7 +3,7 @@
     <el-form :id="FORM_ID" ref="productRef" :model="form" :rules="rules" label-position="top">
       <el-row>
         <el-col :xl="20">
-          <el-row :gutter="10" justify="space-between">
+          <el-row :gutter="15" justify="space-between">
             <el-col :xl="5">
               <el-form-item label="Name" prop="name">
                 <el-input v-model="form.name" name="name" autocomplete="off" />
@@ -12,13 +12,6 @@
             <el-col :xl="2">
               <el-form-item label="Amount" prop="count">
                 <el-input v-model="form.count" name="count" type="number" />
-              </el-form-item>
-            </el-col>
-            <el-col :xl="2">
-              <el-form-item label="Unit" prop="unit">
-                <el-select v-model="form.unit" name="unit" placeholder="Please select an unit!">
-                  <el-option v-for="(unit, index) in units" :key="index" :value="unit.value" :label="unit.label" />
-                </el-select>
               </el-form-item>
             </el-col>
             <el-col :xl="4">
@@ -32,12 +25,12 @@
                 </el-select>
               </el-form-item>
             </el-col>
-            <el-col :xl="3">
+            <el-col :xl="4">
               <el-form-item prop="expiredTime" label="Expired time">
                 <ExpiredDaySelect v-model="form.expiredTime" name="expiredTime" />
               </el-form-item>
             </el-col>
-            <el-col :xl="8">
+            <el-col :xl="9">
               <IngredientSelect v-model="form.ingredients" />
             </el-col>
           </el-row>
@@ -68,8 +61,8 @@ import type { FormInstance, FormRules, UploadRawFile } from 'element-plus';
 import UploadBox from '@/components/upload-box.vue';
 import ExpiredDaySelect from './expired-time-select.vue';
 import IngredientSelect from './ingredient-select.vue';
-import { UnitService, CategoryService } from '@/services';
-import { type CategoryType, type Ingredient, type OptionType } from '@/interfaces';
+import { CategoryService } from '@/services';
+import { type CategoryType, type IngredientType, } from '@/interfaces';
 
 const FORM_ID = 'productForm';
 
@@ -81,10 +74,9 @@ type ProductFormRule = {
   avatar: (UploadRawFile | File)[];
   price: number;
   unit: string;
-  ingredients: Ingredient[],
+  ingredients: IngredientType[],
 };
 
-const units: Ref<OptionType[]> = ref([]);
 const categories: Ref<CategoryType[]> = ref([]);
 const productRef = ref<FormInstance>();
 const rules = reactive<FormRules<ProductFormRule>>({
@@ -154,16 +146,6 @@ const onSubmit = async (): Promise<void> => {
 };
 
 onBeforeMount(() => {
-  UnitService.get('', {
-    params: {
-      of: 'product'
-    }
-  }).then((response: AxiosResponse<OptionType[]>) => {
-    units.value = response.data;
-  }).catch(() => {
-    units.value = [];
-  });
-
   CategoryService.post('all', {
     name: true,
   }).then((response: AxiosResponse) => {

@@ -37,7 +37,7 @@ import { ElFormItem, ElSelect, ElOption, ElIcon, ElInput, ElRow, ElCol } from 'e
 import { CloseBold } from '@element-plus/icons-vue';
 import { dangerColor } from '@/assets/scss/variables.module.scss';
 import { IngredientService } from '@/services';
-import { type Ingredient, type OptionType } from '@/interfaces';
+import { type IngredientType, type OptionType } from '@/interfaces';
 import type { AxiosResponse } from 'axios';
 
 type IngredientItemsProp = {
@@ -57,32 +57,24 @@ type IngredientStore = {
 };
 
 const ingredients: Ref<IngredientItemsProp[]> = ref([]);
-const ingredientSelected: Ref<Ingredient[] | undefined> = defineModel<Ingredient[] | undefined>();
+const ingredientSelected: Ref<IngredientType[] | undefined> = defineModel<IngredientType[] | undefined>();
 const ingredientIdsSelected: Ref<string[]> =
   computed(() => (ingredientSelected.value || []).map((i) => i.ingredientId));
 const temporaryProductPrice: Ref<number> = ref(0);
 const options: Ref<OptionType[]> = ref([]);
 const ingredientStore: IngredientStore = {};
+const temporaryProductId: string = Date.now().toString();
 
 watch(ingredientSelected.value!, () => {
   ingredients.value = assignIngredientItems(ingredients.value, ingredientIdsSelected.value);
-  // IngredientService.post('compute-product-price', {
-  //   temporaryProductId: Date.now().toString(),
-  //   productIngredients: [{
-  //     id: '1757410124885',
-  //     amount: 2,
-  //     unit: 'GRAM'
-  //   },
-  //   {
-  //     id: '1757582086529',
-  //     amount: 2,
-  //     unit: 'GRAM'
-  //   }]
-  // }).then((response) => {
-  //   temporaryProductPrice.value = response.data;
-  // }).catch(() => {
-  //   temporaryProductPrice.value = 0;
-  // });
+  IngredientService.post('compute-product-price', {
+    temporaryProductId,
+    productIngredients: ingredientSelected.value
+  }).then((response: AxiosResponse<number>) => {
+    temporaryProductPrice.value = response.data;
+  }).catch(() => {
+    temporaryProductPrice.value = 0;
+  });
 });
 
 const assignIngredientItems = (ingredients: (IngredientItemsProp | string)[], ingredientIdsSelected: string[])
@@ -98,8 +90,8 @@ const assignIngredientItems = (ingredients: (IngredientItemsProp | string)[], in
       value: ingredientIdsSelected[index],
       amount: ingredientSelected.value![index].amount!,
       unit: ingredientSelected.value![index].unit!,
-      units: currentIngredient.units.map((unit) => ({ label: unit, value: unit })),
-      avatar: currentIngredient.avatar,
+      units: (currentIngredient?.units || []).map((unit) => ({ label: unit, value: unit })),
+      avatar: currentIngredient?.avatar,
     };
   });
 };
@@ -121,7 +113,7 @@ const deleteIngredientItem = (index: number) => (ingredientId: string): void => 
   ingredients.value.splice(index, 1);
 };
 
-const selectedIngredient = (index: number) => (ingredient: Ingredient): void => {
+const selectedIngredient = (index: number) => (ingredient: IngredientType): void => {
   if (ingredientSelected.value![index]) {
     ingredientSelected.value![index] = ingredient;
   } else {
@@ -255,7 +247,7 @@ onBeforeMount(() => {
     avatar: true,
     unit: true,
     units: true,
-  }).then((response: AxiosResponse<Ingredient[]>) => {
+  }).then((response: AxiosResponse<IngredientType[]>) => {
     options.value = response.data.map((ingredient) => {
       Object.assign(ingredientStore, {
         [ingredient.ingredientId]: {
