@@ -77,7 +77,7 @@ export default class CategoryController {
   @SerializeOptions({ type: CategoryPaginationFormatter })
   pagination(@Body() select: PaginationCategory): Observable<Promise<CategoryPaginationFormatter>> {
     return this.categoryService.pagination(select).pipe(
-      map((response) => {
+      map((response: CategoryPaginationFormatter) => {
         const paginationResult = new CategoryPaginationFormatter(response);
         return validate(paginationResult).then((errors) => {
           if (!errors.length) {

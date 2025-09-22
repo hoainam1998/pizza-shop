@@ -21,7 +21,7 @@ export default class IngredientService {
     temporaryProductId: string,
     productIngredients: ProductIngredientType[],
   ): Promise<number> {
-    const ingredientIds: string[] = productIngredients.map((ingredientItem) => ingredientItem.id);
+    const ingredientIds: string[] = productIngredients.map((ingredientItem) => ingredientItem.ingredientId);
     let missingIngredients: string[] = ingredientIds;
     let ingredientsFormRedis: (string | null)[] = await this.redisClient.Client.hmGet(
       `ingredient_${temporaryProductId}`,
@@ -76,12 +76,12 @@ export default class IngredientService {
           });
         }
 
-        return productIngredients.reduce((price, ingredientItem, index) => {
+        return productIngredients.reduce<number>((price, ingredientItem, index) => {
           if (ingredientItem.unit === resultAfterMerged[index].unit) {
-            price += ingredientItem.amount * resultAfterMerged[index].price;
+            price += ingredientItem.amount * +resultAfterMerged[index].price;
           } else {
             if (ingredientItem.unit === Unit.GRAM && resultAfterMerged[index].unit === Unit.KG) {
-              price += (ingredientItem.amount / 1000) * resultAfterMerged[index].price;
+              price += (ingredientItem.amount / 1000) * +resultAfterMerged[index].price;
             } else {
               throw new BadRequestException(`${resultAfterMerged[index].name} have wrong unit!`);
             }

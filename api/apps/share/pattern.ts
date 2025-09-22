@@ -16,3 +16,6 @@ export const signupPattern = createMicroserviceEvent('signup');
 export const createIngredientPattern = createMicroserviceEvent('create_ingredient');
 export const computeProductPrice = createMicroserviceEvent('compute_product_price');
 export const getAllIngredients = createMicroserviceEvent('get_all_ingredients');
+
+// product
+export const createProductPattern = createMicroserviceEvent('create_product');

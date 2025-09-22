@@ -1,7 +1,9 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { createMessage } from '@share/utils';
 import { Response } from 'express';
-import { MessageResponseType } from '@share/interfaces';
+import { MessageResponseType, ValidationCustomErrorType } from '@share/interfaces';
+
+type ExceptionResponseType = MessageResponseType & ValidationCustomErrorType;
 
 @Catch(HttpException)
 export default class HttpExceptionFilter implements ExceptionFilter {
@@ -10,21 +12,25 @@ export default class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const next = ctx.getNext();
     const status = exception.getStatus();
-    const exceptionResponse: MessageResponseType = exception.getResponse() as MessageResponseType;
+    const exceptionResponse: ExceptionResponseType = exception.getResponse() as ExceptionResponseType;
 
     if (status === HttpStatus.NOT_FOUND) {
       return response.status(status).json(exceptionResponse.message);
     }
 
-    const msg: string = [exceptionResponse.message].flat().reduce((messages, message) => {
-      messages += message;
-      return messages;
-    }, '');
-
-    if (msg.length) {
-      return response.status(status).json(createMessage(msg));
+    if (Object.hasOwn(exceptionResponse, 'messages')) {
+      return response.status(status).json(exceptionResponse.messages);
     } else {
-      return next();
+      const msg: string = [exceptionResponse.message].flat().reduce((messages, message) => {
+        messages += message;
+        return messages;
+      }, '');
+
+      if (msg.trim().length) {
+        return response.status(status).json(createMessage(msg));
+      } else {
+        return next();
+      }
     }
   }
 }

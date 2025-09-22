@@ -10,6 +10,7 @@ export const portConfig = registerAs('ports', () => ({
   USER_MICROSERVICE_TCP_PORT: process.env.USER_MICROSERVICE_TCP_PORT,
   CATEGORY_MICROSERVICE_TCP_PORT: process.env.CATEGORY_MICROSERVICE_TCP_PORT,
   INGREDIENT_MICROSERVICE_TCP_PORT: process.env.INGREDIENT_MICROSERVICE_TCP_PORT,
+  PRODUCT_MICROSERVICE_TCP_PORT: process.env.PRODUCT_MICROSERVICE_TCP_PORT,
 }));
 
 export const emailConfig = registerAs('mail', () => ({

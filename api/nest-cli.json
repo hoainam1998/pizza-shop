@@ -37,6 +37,15 @@
         "tsConfigPath": "apps/modules/ingredient/tsconfig.app.json"
       }
     },
+    "product": {
+      "type": "application",
+      "root": "apps/modules/product",
+      "entryFile": "main",
+      "sourceRoot": "apps/modules/product/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/modules/product/tsconfig.app.json"
+      }
+    },
     "user": {
       "type": "application",
       "root": "apps/modules/user",

@@ -2,6 +2,8 @@ export default Object.freeze({
   COMMON: {
     OUTPUT_VALIDATE: 'Output validate error!',
     DATABASE_DISCONNECT: 'Database was disconnect. Please try again!',
+    MUTATING_DATABASE_ERROR: 'Something error when working with your database!',
+    ALREADY_EXIST: 'This record have been exist!',
   },
   CATEGORY: {
     NOT_FOUND: 'The category item requirement is not found!',
@@ -23,5 +25,6 @@ export default Object.freeze({
   },
   PRODUCT: {
     PRICE_INVALID: 'Product price is invalid!',
+    CREATE_PRODUCT_SUCCESS: 'Create product was success!',
   },
 });

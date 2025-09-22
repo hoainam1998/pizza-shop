@@ -39,6 +39,7 @@ model product {
   avatar             String               @db.Text
   count              Int
   price              Int
+  original_price     Int
   status             Status               @default(IN_STOCK)
   expired_time       String               @db.VarChar(20)
   category_id        String               @db.VarChar(20)

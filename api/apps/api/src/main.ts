@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { BadRequestException, Logger, ValidationPipe } from '@nestjs/common';
+import { ValidationError } from 'class-validator';
 import { ConfigService } from '@nestjs/config';
 import session from 'express-session';
 import AppModule from './app.module';
@@ -9,11 +10,7 @@ import corsConfig from './cors-config';
 import sessionConfig from './session-config';
 import { REDIS_CLIENT } from '@share/di-token';
 import RedisClient from '@share/libs/redis-client/redis';
-import { ValidationError } from 'class-validator';
-
-type ValidationCustomError = {
-  messages: (string | string[])[];
-};
+import { type ValidationCustomErrorType } from '@share/interfaces';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: corsConfig });
@@ -24,7 +21,7 @@ async function bootstrap() {
     new ValidationPipe({
       exceptionFactory: (exceptions: ValidationError[]) => {
         const error = exceptions.reduce(
-          (errorObject: ValidationCustomError, exception: ValidationError) => {
+          (errorObject: ValidationCustomErrorType, exception: ValidationError) => {
             errorObject.messages.push(Object.values(exception.constraints!));
             errorObject.messages = errorObject.messages.flat();
             return errorObject;

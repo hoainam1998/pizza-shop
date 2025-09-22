@@ -29,7 +29,7 @@ export default class CategoryController {
   }
 
   @MessagePattern(getAllCategories)
-  getAllCategories(@Payload() select: CategorySelect): Promise<category[]> {
+  getAllCategories(@Payload() select: CategorySelect): Promise<Partial<category>[]> {
     return this.categoryService
       .getAllCategories(select)
       .then((categories) => {

@@ -28,7 +28,7 @@ export class IngredientCreate {
 
 export class ProductIngredients implements ProductIngredientType {
   @IsNumberString()
-  id: string;
+  ingredientId: string;
 
   @IsInt()
   amount: number;

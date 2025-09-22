@@ -17,7 +17,7 @@ export default class IngredientController {
   createIngredient(ingredient: ingredient): Promise<ingredient> {
     return this.ingredientService.createIngredient(ingredient).catch((error: Error) => {
       this.logger.error('Create ingredient!', error.message);
-      throw new RpcException(error);
+      throw new RpcException(new BadRequestException(error));
     });
   }
 
@@ -31,7 +31,7 @@ export default class IngredientController {
         if (error instanceof Prisma.PrismaClientInitializationError) {
           throw new RpcException(new BadRequestException(createMessage(error.message)));
         }
-        throw new RpcException(error);
+        throw new RpcException(new BadRequestException(error));
       });
   }
 
