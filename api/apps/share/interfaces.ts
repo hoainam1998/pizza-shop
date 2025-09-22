@@ -36,7 +36,7 @@ export type UserCreatedType = user & {
 };
 
 export type ProductIngredientType = {
-  id: string;
+  ingredientId: string;
   amount: number;
   unit: string;
 };
@@ -49,4 +49,8 @@ export type IngredientSelectType = {
   expired_time: boolean;
   status: boolean;
   price: boolean;
+};
+
+export type ValidationCustomErrorType = {
+  messages: (string | string[])[];
 };

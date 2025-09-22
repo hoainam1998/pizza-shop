@@ -5,6 +5,7 @@ import UsersService from './user.service';
 import { canSignupPattern, signupPattern } from '@share/pattern';
 import { type SignupUserPayloadType } from '@share/interfaces';
 import { createMessage } from '@share/utils';
+import messages from '@share/constants/messages';
 
 @Controller('user')
 export default class UsersController {
@@ -21,11 +22,11 @@ export default class UsersController {
   @MessagePattern(signupPattern)
   signup(signupUser: SignupUserPayloadType): Promise<user> {
     return this.userService.signup(signupUser.user, signupUser.canSignup).catch((error: Error) => {
-      Logger.error('Signup', error.message);
+      this.logger.error('Signup', error.message);
       if (error instanceof Prisma.PrismaClientValidationError) {
-        throw new RpcException(new BadRequestException(createMessage(error.message)));
+        throw new RpcException(new BadRequestException(createMessage(messages.COMMON.MUTATING_DATABASE_ERROR)));
       }
-      throw new RpcException(error);
+      throw new RpcException(new BadRequestException(error));
     });
   }
 }

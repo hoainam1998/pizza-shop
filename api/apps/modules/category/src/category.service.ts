@@ -5,7 +5,14 @@ import { CategoryBody, CategoryPaginationPrismaResponse } from '@share/interface
 import { PaginationCategory, GetCategory, CategoryDto, CategorySelect } from '@share/dto/validators/category.dto';
 import CategoryCachingService from '@share/libs/caching/category/category.service';
 
+/**
+ * Select category field.
+ * @param {CategorySelect} select - The category select.
+ * @param {category[]} categories - The category list.
+ * @returns {Partial<category>[]} - A object select category field.
+ */
 const selectCategory = (select: CategorySelect, categories: category[]): Partial<category>[] => {
+  Object.assign(select, { category_id: true });
   return categories.map((category) =>
     Object.entries(select).reduce<Partial<category>>((obj, [key, value]: [keyof category, any]) => {
       if (value) {

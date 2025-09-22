@@ -74,7 +74,7 @@ export default class IngredientController {
 
   @Post('all')
   @HttpCode(HttpStatus.OK)
-  getAll(@Body() select: IngredientSelect): Observable<Promise<any>> {
+  getAll(@Body() select: IngredientSelect): Observable<Promise<Record<keyof typeof Ingredient, any>>> {
     const selectObject = { ...select };
     if (select.units) {
       Object.assign(selectObject, { unit: true });
