@@ -5,12 +5,26 @@ import { ValidationError } from 'class-validator';
 import { ConfigService } from '@nestjs/config';
 import session from 'express-session';
 import AppModule from './app.module';
-import { HttpExceptionFilter, PrismaDisconnectExceptionFilter } from '@share/exception-filter';
+import { HttpExceptionFilter } from '@share/exception-filter';
 import corsConfig from './cors-config';
 import sessionConfig from './session-config';
 import { REDIS_CLIENT } from '@share/di-token';
 import RedisClient from '@share/libs/redis-client/redis';
-import { type ValidationCustomErrorType } from '@share/interfaces';
+
+const handleValidateException = (exceptions: ValidationError[]) => {
+  return exceptions.reduce((messages: string[], exception: ValidationError) => {
+    if (exception.constraints) {
+      messages = messages.concat(Object.values(exception.constraints));
+    }
+
+    if (exception.children) {
+      const messagesChild = handleValidateException(exception.children || []);
+      messages = messages.concat(messagesChild);
+    }
+
+    return messages;
+  }, []);
+};
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: corsConfig });
@@ -20,20 +34,12 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       exceptionFactory: (exceptions: ValidationError[]) => {
-        const error = exceptions.reduce(
-          (errorObject: ValidationCustomErrorType, exception: ValidationError) => {
-            errorObject.messages.push(Object.values(exception.constraints!));
-            errorObject.messages = errorObject.messages.flat();
-            return errorObject;
-          },
-          { messages: [] },
-        );
-
-        throw new BadRequestException(error);
+        const errors = handleValidateException(exceptions);
+        throw new BadRequestException({ messages: errors });
       },
     }),
   );
-  app.useGlobalFilters(new PrismaDisconnectExceptionFilter(), new HttpExceptionFilter());
+  app.useGlobalFilters(new HttpExceptionFilter());
   app.use(session(sessionConfig(redisClient.Client)));
   await app.listen(port, () => Logger.log(`App started at ${port}`, 'App Bootstrap'));
 }

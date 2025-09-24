@@ -1,9 +1,7 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { createMessage } from '@share/utils';
 import { Response } from 'express';
-import { MessageResponseType, ValidationCustomErrorType } from '@share/interfaces';
-
-type ExceptionResponseType = MessageResponseType & ValidationCustomErrorType;
+import messages from '@share/constants/messages';
 
 @Catch(HttpException)
 export default class HttpExceptionFilter implements ExceptionFilter {
@@ -12,15 +10,20 @@ export default class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const next = ctx.getNext();
     const status = exception.getStatus();
-    const exceptionResponse: ExceptionResponseType = exception.getResponse() as ExceptionResponseType;
+    const exceptionResponse = exception.getResponse() as any;
 
     if (status === HttpStatus.NOT_FOUND) {
-      return response.status(status).json(exceptionResponse.message);
+      response.status(status).json(exceptionResponse.response);
+      return next();
     }
 
     if (Object.hasOwn(exceptionResponse, 'messages')) {
       return response.status(status).json(exceptionResponse.messages);
     } else {
+      if (exceptionResponse.message.includes("Can't reach database server")) {
+        return response.status(HttpStatus.BAD_REQUEST).json(createMessage(messages.COMMON.DATABASE_DISCONNECT));
+      }
+
       const msg: string = [exceptionResponse.message].flat().reduce((messages, message) => {
         messages += message;
         return messages;

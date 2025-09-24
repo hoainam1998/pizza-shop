@@ -4,6 +4,7 @@ import { category, PrismaClient } from 'generated/prisma';
 import { CategoryBody, CategoryPaginationPrismaResponse } from '@share/interfaces';
 import { PaginationCategory, GetCategory, CategoryDto, CategorySelect } from '@share/dto/validators/category.dto';
 import CategoryCachingService from '@share/libs/caching/category/category.service';
+import { calcSkip } from '@share/utils';
 
 /**
  * Select category field.
@@ -61,7 +62,8 @@ export default class CategoryService {
   }
 
   pagination(select: PaginationCategory): Promise<CategoryPaginationPrismaResponse> {
-    const skip = (select.pageNumber - 1) * select.pageSize;
+    const skip = calcSkip(select.pageSize, select.pageNumber);
+
     return this.prismaClient.$transaction([
       this.prismaClient.category.findMany({
         select: {

@@ -1,17 +1,23 @@
 import { HttpStatus } from '@nestjs/common';
-import { user, category } from 'generated/prisma';
+import { user, category, product } from 'generated/prisma';
 
 export type CategoryBody = Omit<category, 'category_id'> & {
   category_id?: category['category_id'];
   disabled?: boolean;
 };
 
-export type CategoryPaginationResponse = {
-  list: CategoryBody[];
+export type PaginationResponse<T> = {
+  list: T[];
   total: number;
 };
 
+export type CategoryPaginationResponse = PaginationResponse<CategoryBody>;
+
+export type ProductPaginationResponse = PaginationResponse<product>;
+
 export type CategoryPaginationPrismaResponse = (CategoryBody[] | number)[];
+
+export type ProductPaginationPrismaResponse = (product[] | number)[];
 
 export type EventPatternType = { cmd: string };
 

@@ -1,8 +1,10 @@
 import { createMicroserviceEvent } from './utils';
 
+// common
+export const paginationPattern = createMicroserviceEvent('pagination');
+
 // category
 export const createCategoryPattern = createMicroserviceEvent('create');
-export const paginationCategoryPattern = createMicroserviceEvent('pagination');
 export const updateCategoryPattern = createMicroserviceEvent('update');
 export const deleteCategoryPattern = createMicroserviceEvent('delete');
 export const getCategoryPattern = createMicroserviceEvent('detail');

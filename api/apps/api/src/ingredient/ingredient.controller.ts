@@ -99,7 +99,7 @@ export default class IngredientController {
         }),
         catchError((error: MicroservicesErrorResponse) => {
           if (error.status === HttpStatus.NOT_FOUND) {
-            throw new NotFoundException(error.response);
+            throw new NotFoundException(error);
           } else {
             throw new BadRequestException(createMessage(error.message!));
           }

@@ -42,6 +42,15 @@ const convertFileToBase64 = (file: Express.Multer.File): string =>
  */
 const checkArrayHaveValues = (array: any[]) => Array.isArray(array) && array.length > 0;
 
+/**
+ * Return a skip property.
+ *
+ * @param {number} pageSize - Page size.
+ * @param {number} pageNumber - Page number.
+ * @returns {number} - A skip property.
+ */
+const calcSkip = (pageSize: number, pageNumber: number) => (pageNumber - 1) * pageSize;
+
 export {
   createMicroserviceEvent,
   createMessage,
@@ -51,4 +60,5 @@ export {
   autoGeneratePassword,
   signingAdminResetPasswordToken,
   getAdminResetPasswordLink,
+  calcSkip,
 };

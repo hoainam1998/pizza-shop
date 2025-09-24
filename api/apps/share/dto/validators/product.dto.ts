@@ -1,7 +1,8 @@
-import { Exclude, Expose, Transform } from 'class-transformer';
-import { IsString, IsInt, IsNumberString, IsArray } from 'class-validator';
+import { Exclude, Expose, Transform, Type } from 'class-transformer';
+import { IsString, IsInt, IsNumberString, IsArray, ValidateNested, IsBoolean, IsOptional } from 'class-validator';
 import { OmitType } from '@nestjs/mapped-types';
 import { Status } from 'generated/prisma';
+import { Pagination } from './common.dto';
 
 export class ProductCreate {
   @IsString()
@@ -94,4 +95,89 @@ export class ProductCreateTransform extends OmitType(ProductCreate, [
   productId: string;
 
   status = Status.IN_STOCK;
+}
+
+export class ProductQuery {
+  product_id: boolean = true;
+
+  @IsOptional()
+  @IsBoolean()
+  name: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  avatar: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  count: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  price: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  original_price: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  status: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  expired_time: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  category: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  ingredients: boolean;
+
+  @Expose()
+  get product_ingredient() {
+    if (this.ingredients) {
+      return {
+        select: {
+          ingredient_id: true,
+          count: true,
+          unit: true,
+          ingredient: {
+            select: {
+              name: true,
+              avatar: true,
+            },
+          },
+        },
+      };
+    }
+  }
+
+  @Expose()
+  get category_id() {
+    return this.category;
+  }
+}
+
+export class ProductQueryTransform extends OmitType(ProductQuery, ['ingredients', 'category']) {
+  @Exclude()
+  ingredients: boolean;
+
+  @Exclude()
+  category: boolean;
+
+  @Expose()
+  product_id: boolean;
+}
+
+export class ProductSelect extends Pagination {
+  @ValidateNested()
+  @Type(() => ProductQuery)
+  query: ProductQuery;
+
+  @IsOptional()
+  @IsString()
+  search: string;
 }
