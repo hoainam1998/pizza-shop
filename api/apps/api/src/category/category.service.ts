@@ -6,7 +6,7 @@ import { CATEGORY_SERVICE } from '@share/di-token';
 import { CategoryBody } from '@share/interfaces';
 import {
   createCategoryPattern,
-  paginationCategoryPattern,
+  paginationPattern,
   updateCategoryPattern,
   deleteCategoryPattern,
   getCategoryPattern,
@@ -32,7 +32,7 @@ export default class CategoryService {
   }
 
   pagination(select: PaginationCategory): Observable<CategoryPaginationFormatter> {
-    return this.category.send<CategoryPaginationFormatter>(paginationCategoryPattern, select);
+    return this.category.send<CategoryPaginationFormatter>(paginationPattern, select);
   }
 
   updateCategory(category: CategoryBody): Observable<category> {

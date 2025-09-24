@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Controller, HttpStatus, Logger, NotFoundException } from '@nestjs/common';
 import { Prisma, type ingredient } from 'generated/prisma';
 import { MessagePattern, RpcException } from '@nestjs/microservices';
 import IngredientService from './ingredient.service';
@@ -37,11 +37,20 @@ export default class IngredientController {
 
   @MessagePattern(getAllIngredients)
   getAllIngredients(select: IngredientSelect): Promise<ingredient[]> {
-    return this.ingredientService.getAll(select).then((ingredients) => {
-      if (!checkArrayHaveValues(ingredients)) {
-        throw new RpcException(new NotFoundException([]));
-      }
-      return ingredients;
-    });
+    return this.ingredientService
+      .getAll(select)
+      .then((ingredients) => {
+        if (!checkArrayHaveValues(ingredients)) {
+          throw new NotFoundException([]);
+        }
+        return ingredients;
+      })
+      .catch((error) => {
+        this.logger.log('Get all ingredient', error.message);
+        if (error.status === HttpStatus.NOT_FOUND) {
+          throw new RpcException(error);
+        }
+        throw new RpcException(new BadRequestException(error));
+      });
   }
 }

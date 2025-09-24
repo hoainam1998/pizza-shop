@@ -1,4 +1,4 @@
-import { Controller, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Controller, HttpStatus, Logger, NotFoundException } from '@nestjs/common';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { Prisma } from 'generated/prisma';
 import CategoryService from './category.service';
@@ -7,7 +7,7 @@ import type { CategoryBody, CategoryPaginationResponse } from '@share/interfaces
 import { checkArrayHaveValues } from '@share/utils';
 import {
   createCategoryPattern,
-  paginationCategoryPattern,
+  paginationPattern,
   updateCategoryPattern,
   deleteCategoryPattern,
   getCategoryPattern,
@@ -19,11 +19,15 @@ import messages from '@share/constants/messages';
 
 @Controller()
 export default class CategoryController {
-  constructor(private readonly categoryService: CategoryService) {}
+  constructor(
+    private readonly categoryService: CategoryService,
+    private readonly logger: Logger,
+  ) {}
 
   @MessagePattern(createCategoryPattern)
   createCategory(@Payload() data: CategoryBody): Promise<category> {
     return this.categoryService.create(data).catch((error: Error) => {
+      this.logger.log('Create category', error.message);
       throw new RpcException(error.message);
     });
   }
@@ -34,20 +38,22 @@ export default class CategoryController {
       .getAllCategories(select)
       .then((categories) => {
         if (!checkArrayHaveValues(categories)) {
-          throw new RpcException(
-            new NotFoundException({
-              message: [],
-            }),
-          );
+          throw new NotFoundException({
+            message: [],
+          });
         }
         return categories;
       })
-      .catch((error: Error) => {
-        throw new RpcException(error.message);
+      .catch((error) => {
+        this.logger.log('Get all categories', error.message);
+        if (error.status === HttpStatus.NOT_FOUND) {
+          throw new RpcException(error);
+        }
+        throw new RpcException(new BadRequestException(error));
       });
   }
 
-  @MessagePattern(paginationCategoryPattern)
+  @MessagePattern(paginationPattern)
   pagination(@Payload() select: PaginationCategory): Promise<CategoryPaginationResponse> {
     return this.categoryService
       .pagination(select)
@@ -57,25 +63,29 @@ export default class CategoryController {
       .then((response) => {
         const [list, total] = response;
         if (!checkArrayHaveValues(list as CategoryBody[])) {
-          throw new RpcException(
-            new NotFoundException({
-              message: {
-                list: [],
-                total: 0,
-              },
-            }),
-          );
+          throw new NotFoundException({
+            list: [],
+            total: 0,
+          });
         }
         return {
           list: list as CategoryBody[],
           total: total as number,
         } satisfies CategoryPaginationResponse;
+      })
+      .catch((error) => {
+        this.logger.log('Category pagination', error.message);
+        if (error.status === HttpStatus.NOT_FOUND) {
+          throw new RpcException(error);
+        }
+        throw new RpcException(new BadRequestException(error));
       });
   }
 
   @MessagePattern(updateCategoryPattern)
   updateCategory(@Payload() data: CategoryBody): Promise<category> {
     return this.categoryService.update(data).catch((error: Error) => {
+      this.logger.log('Update category', error.message);
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === PRISMA_ERROR_CODE.NOT_FOUND) {
           throw new RpcException(new NotFoundException(messages.CATEGORY.NOT_FOUND));
@@ -88,24 +98,26 @@ export default class CategoryController {
   @MessagePattern(getCategoryPattern)
   getCategory(@Payload() category: GetCategory): Promise<Omit<CategoryDto, 'categoryId'>> {
     return this.categoryService.getDetail(category).catch((error: Error) => {
+      this.logger.log('Get category', error.message);
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === PRISMA_ERROR_CODE.NOT_FOUND) {
           throw new RpcException(new NotFoundException(messages.CATEGORY.NOT_FOUND));
         }
       }
-      throw new RpcException(error.message);
+      throw new RpcException(new BadRequestException(error));
     });
   }
 
   @MessagePattern(deleteCategoryPattern)
   deleteCategory(@Payload() categoryId: string): Promise<category> {
     return this.categoryService.delete(categoryId).catch((error: Error) => {
+      this.logger.log('Delete category', error.message);
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === PRISMA_ERROR_CODE.NOT_FOUND) {
           throw new RpcException(new NotFoundException(messages.CATEGORY.NOT_FOUND));
         }
       }
-      throw new RpcException(error.message);
+      throw new RpcException(new BadRequestException(error));
     });
   }
 }

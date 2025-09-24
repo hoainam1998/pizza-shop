@@ -1,8 +1,11 @@
-import { BadRequestException, Controller, Logger } from '@nestjs/common';
+import { BadRequestException, Controller, Logger, NotFoundException } from '@nestjs/common';
 import { MessagePattern, RpcException } from '@nestjs/microservices';
-import { createProductPattern } from '@share/pattern';
+import { createProductPattern, paginationPattern } from '@share/pattern';
 import * as prisma from 'generated/prisma';
 import ProductService from './product.service';
+import { ProductSelect } from '@share/dto/validators/product.dto';
+import { ProductPaginationResponse } from '@share/interfaces';
+import { checkArrayHaveValues } from '@share/utils';
 
 @Controller()
 export default class ProductController {
@@ -17,5 +20,31 @@ export default class ProductController {
       this.logger.log('Create product', error.message);
       throw new RpcException(new BadRequestException(error));
     });
+  }
+
+  @MessagePattern(paginationPattern)
+  pagination(select: ProductSelect): Promise<ProductPaginationResponse> {
+    return this.productService
+      .pagination(select)
+      .then((results) => {
+        const [list, total] = results;
+        if (!checkArrayHaveValues(list as prisma.product[])) {
+          throw new NotFoundException({
+            list: [],
+            total: 0,
+          });
+        }
+        return {
+          list,
+          total,
+        } as ProductPaginationResponse;
+      })
+      .catch((error: Error) => {
+        this.logger.log('Product pagination', error.message);
+        if (error instanceof NotFoundException) {
+          throw new RpcException(error);
+        }
+        throw new RpcException(new BadRequestException(error));
+      });
   }
 }

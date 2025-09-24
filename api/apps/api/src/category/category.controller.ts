@@ -88,7 +88,7 @@ export default class CategoryController {
       }),
       catchError((error: MicroservicesErrorResponse) => {
         if (error.status === HttpStatus.NOT_FOUND) {
-          throw new NotFoundException(error.response);
+          throw new NotFoundException(error);
         }
         throw new BadRequestException(createMessage(error.message!));
       }),
@@ -110,7 +110,7 @@ export default class CategoryController {
       }),
       catchError((error: MicroservicesErrorResponse) => {
         if (error.status === HttpStatus.NOT_FOUND) {
-          throw new NotFoundException(error.response);
+          throw new NotFoundException(error);
         }
         throw new BadRequestException(createMessage(error.message!));
       }),
