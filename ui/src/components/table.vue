@@ -8,13 +8,15 @@
         </template>
       </el-table-column>
       <el-table-column
-        v-for="(field, index) in fields" :key="index"
+        v-for="(field, index) in fields"
+        :key="index"
         :label="field.label"
         :prop="field.key"
-        :width="field.width">
+        :width="field.width"
+        align="center">
         <template #default="props">
           <slot :name="field.key" v-bind="props">
-            {{ props.row[field.key] }}
+            {{ props.row[field.key] !== undefined ? props.row[field.key].toString() : '' }}
           </slot>
         </template>
       </el-table-column>

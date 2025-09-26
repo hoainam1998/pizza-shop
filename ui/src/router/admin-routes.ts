@@ -5,7 +5,8 @@ import Category from '@/views/category.vue';
 import Home from '@/views/home.vue';
 import Signup from '@/views/login-group/signup.vue';
 import Login from '@/views/login-group/login.vue';
-import ProductDetail from '@/views/product-group/detail.vue';
+import ProductDetail from '@/views/product-group/detail/detail.vue';
+import ProductList from '@/views/product-group/list/list.vue';
 
 const adminRoutes: RouterOptions['routes'] = [
   {
@@ -24,20 +25,28 @@ const adminRoutes: RouterOptions['routes'] = [
     redirect: 'category',
     children: [
       {
-        path: paths.HOME.CATEGORY,
+        path: `${paths.HOME.CATEGORY}`,
         name: 'category',
         component: Category,
       },
       {
-        path: paths.HOME.PRODUCT,
+        path: `${paths.HOME.PRODUCT}`,
         name: 'product',
         component: RouterView,
         children: [
           {
             path: '',
             name: 'product_list',
+            component: ProductList,
+          },
+          {
+            path: `${paths.HOME.PRODUCT.NEW}`,
             component: ProductDetail,
           },
+          {
+            path: `${paths.ID}`,
+            component: ProductDetail,
+          }
         ],
       },
     ],

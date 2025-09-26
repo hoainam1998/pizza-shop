@@ -1,5 +1,10 @@
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import api from '@/axios';
+import { HandleNotFoundError } from '@/decorators';
+
+type ExtraConfigs = AxiosRequestConfig & {
+  allowNotFound: boolean;
+};
 
 type RequestBody = {
   [key: string]: any;
@@ -27,7 +32,8 @@ class Services {
    * @param {AxiosRequestConfig} - The axios config.
    * @returns {Promise<AxiosResponse>} - The promise response.
    */
-  get(subUrl: string, config?: AxiosRequestConfig): Promise<AxiosResponse> {
+  @HandleNotFoundError
+  get(subUrl: string, config?: ExtraConfigs): Promise<AxiosResponse> {
     return api.get(`${this._baseUrl}/${subUrl}`, config);
   }
 
@@ -39,7 +45,8 @@ class Services {
    * @param {AxiosRequestConfig} - The axios config.
    * @returns {Promise<AxiosResponse>} - The promise response.
    */
-  post(subUrl: string, body: RequestBody, config?: AxiosRequestConfig): Promise<AxiosResponse> {
+  @HandleNotFoundError
+  post(subUrl: string, body: RequestBody, config?: ExtraConfigs): Promise<AxiosResponse> {
     return api.post(`${this._baseUrl}/${subUrl}`, body, config);
   }
 
@@ -71,3 +78,4 @@ export const CategoryService = new Services('/category');
 export const UserService = new Services('/user');
 export const IngredientService = new Services('/ingredient');
 export const UnitService = new Services('/unit');
+export const ProductService = new Services('/product');
