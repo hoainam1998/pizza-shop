@@ -5,7 +5,10 @@ export default Object.freeze({
   SIGNUP: new RouterPath('/signup'),
   LOGIN: new RouterPath('/login'),
   HOME: new RouterPath('/home', {
-    PRODUCT: 'product',
-    CATEGORY: 'category',
+    PRODUCT: new RouterPath('product', {
+      NEW: new RouterPath('new'),
+    }),
+    CATEGORY: new RouterPath('category'),
   }),
+  ID: new RouterPath(':/id'),
 });

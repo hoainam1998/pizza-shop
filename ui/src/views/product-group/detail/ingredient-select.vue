@@ -57,13 +57,13 @@ type IngredientStore = {
 };
 
 const ingredients: Ref<IngredientItemsProp[]> = ref([]);
-const ingredientSelected: Ref<IngredientType[] | undefined> = defineModel<IngredientType[] | undefined>();
+const ingredientSelected: Ref<IngredientType[] | undefined> = defineModel<IngredientType[] | undefined>('ingredients');
+const temporaryProductPrice: Ref<number> = defineModel<number>('temporary-price', { required: true, default: 0 });
+const temporaryProductId: Ref<string> = defineModel<string>('temporaryProductId', { default: Date.now().toString() });
 const ingredientIdsSelected: Ref<string[]> =
   computed(() => (ingredientSelected.value || []).map((i) => i.ingredientId));
-const temporaryProductPrice: Ref<number> = ref(0);
 const options: Ref<OptionType[]> = ref([]);
 const ingredientStore: IngredientStore = {};
-const temporaryProductId: string = Date.now().toString();
 
 watch(ingredientSelected.value!, () => {
   ingredients.value = assignIngredientItems(ingredients.value, ingredientIdsSelected.value);

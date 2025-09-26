@@ -1,13 +1,23 @@
 /* eslint-disable no-var */
-/* eslint-disable @typescript-eslint/no-empty-object-type */
+
+import 'vue';
 declare module '*.vue' {
   import { DefineComponent } from 'vue';
-  const component: DefineComponent<{}, {}, any>;
+  const component: DefineComponent<object, object, any>;
   export default component;
-}
-declare namespace globalThis {
-  var isSale: boolean;
-  var isAdmin: boolean;
-}
+};
+declare module '@vue/runtime-core' {
+  interface ComponentCustomProperties {
+    $formatDateHyphen(timestamp: string | number): string;
+    $formatDateSlash(timestamp: string | number): string;
+    $formatVNDCurrency(value: string | number): string;
+  }
+};
+declare global {
+  namespace globalThis {
+    var isSale: boolean;
+    var isAdmin: boolean;
+  }
+};
 declare module '*.module.scss';
 declare module '@/assets/*';

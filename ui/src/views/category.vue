@@ -50,7 +50,7 @@ import Table from '@/components/table.vue';
 import { CategoryService } from '@/services';
 import { showErrorNotification, showSuccessNotification, convertBase64ToSingleFile } from '@/utils';
 import constants from '@/constants';
-import type { MessageResponseType } from '@/interfaces';
+import type { MessageResponseType, TableFieldType } from '@/interfaces';
 
 const PAGE_SIZE = constants.PAGINATION.PAGE_SIZE;
 const PAGE_NUMBER = constants.PAGINATION.PAGE_NUMBER;
@@ -78,7 +78,7 @@ const categoryFormRules = reactive<FormRules<CategoryForm>>({
   ]
 });
 
-const fields = [
+const fields: TableFieldType[] = [
   {
     label: 'Avatar',
     key: 'avatar',

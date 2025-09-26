@@ -16,7 +16,11 @@
             </el-col>
             <el-col :xl="4">
               <el-form-item label="Category" prop="category">
-                <el-select v-model="form.category" name="category" placeholder="Please select a category!">
+                <el-select
+                  v-model="form.category"
+                  :value-key="form.category"
+                  name="category"
+                  placeholder="Please select a category!">
                   <el-option
                     v-for="(category, index) in categories"
                     :key="index"
@@ -31,7 +35,10 @@
               </el-form-item>
             </el-col>
             <el-col :xl="9">
-              <IngredientSelect v-model="form.ingredients" />
+              <IngredientSelect
+                v-model:ingredients="form.ingredients"
+                v-model:temporary-price="form.originalPrice"
+                v-model:temporary-product-id="form.productId" />
             </el-col>
           </el-row>
         </el-col>
@@ -61,19 +68,20 @@ import type { FormInstance, FormRules, UploadRawFile } from 'element-plus';
 import UploadBox from '@/components/upload-box.vue';
 import ExpiredDaySelect from './expired-time-select.vue';
 import IngredientSelect from './ingredient-select.vue';
-import { CategoryService } from '@/services';
+import { CategoryService, ProductService } from '@/services';
 import { type CategoryType, type IngredientType, } from '@/interfaces';
 
 const FORM_ID = 'productForm';
 
 type ProductFormRule = {
+  productId: string;
   name: string;
   count: number;
   expiredTime?: number;
   category: string;
   avatar: (UploadRawFile | File)[];
   price: number;
-  unit: string;
+  originalPrice: number;
   ingredients: IngredientType[],
 };
 
@@ -113,13 +121,14 @@ const rules = reactive<FormRules<ProductFormRule>>({
 });
 
 const form = reactive<ProductFormRule>({
+  productId: Date.now().toString(),
   name: '',
   count: 0,
   expiredTime: undefined,
   category: '',
   avatar: [],
   price: 0,
-  unit: '',
+  originalPrice: 0,
   ingredients: [{
     ingredientId: '1757410124885',
     amount: 2,
@@ -136,10 +145,20 @@ const onSubmit = async (): Promise<void> => {
   if (productRef.value) {
     await productRef.value.validate((valid) => {
       if (valid) {
-        const form = new FormData(document.forms.namedItem(FORM_ID)!);
-        for (const value of form.keys()) {
-          // TODO
+        const formData = new FormData();
+        const formEntries = Object.entries(form) as [string, any];
+        for (const [key, value] of formEntries) {
+          if (!/(ingredients|avatar)/.test(key)) {
+            formData.append(key, value);
+          } else if (key === 'avatar') {
+            formData.append(key, (value as Array<File>)[0]);
+          } else {
+            form.ingredients.forEach((ingredient) => {
+              formData.append(key, JSON.stringify(ingredient));
+            });
+          }
         }
+        ProductService.post('create', formData);
       }
     });
   }
@@ -148,6 +167,7 @@ const onSubmit = async (): Promise<void> => {
 onBeforeMount(() => {
   CategoryService.post('all', {
     name: true,
+    categoryId: true,
   }).then((response: AxiosResponse) => {
     categories.value = response.data;
   }).catch(() => {

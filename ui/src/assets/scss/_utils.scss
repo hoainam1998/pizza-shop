@@ -21,14 +21,14 @@ $size-name: (
   $propertyName: map.get($space-name, $property);
   $directionName: map.get($direction-name, $direction);
 
-  @if $directionName =='horizontal' {
+  @if $directionName == 'horizontal' {
     .ps-#{$property}#{$direction}-#{$i} {
       #{$propertyName}-left: #{$i}px !important;
       #{$propertyName}-right: #{$i}px !important;
     }
   }
 
-  @else if $directionName =='vertical' {
+  @else if $directionName == 'vertical' {
     .ps-#{$property}#{$direction}-#{$i} {
       #{$propertyName}-top: #{$i}px !important;
       #{$propertyName}-bottom: #{$i}px !important;
@@ -86,7 +86,7 @@ $size-name: (
 
 @for $i from 9 through 40 {
   .ps-fs-#{$i} {
-    font-size: #{$i}px;
+    font-size: #{$i}px !important;
   }
 }
 
@@ -101,7 +101,7 @@ $size-name: (
 }
 
 @each $key, $value in $size-name {
-  @for $i from 1 through 100 {
+  @for $i from 1 through 500 {
     @include sizing($key, $value, $i);
     @if $value == 'height' {
       @include sizing($key, $value, $i, 'vh');
@@ -123,6 +123,5 @@ $size-name: (
 
   .ps-opacity-#{$i} {
     opacity: #{'0.'+#{$i}} !important;
-
   }
 }
