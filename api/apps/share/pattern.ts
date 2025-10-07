@@ -8,7 +8,7 @@ export const createCategoryPattern = createMicroserviceEvent('create');
 export const updateCategoryPattern = createMicroserviceEvent('update');
 export const deleteCategoryPattern = createMicroserviceEvent('delete');
 export const getCategoryPattern = createMicroserviceEvent('detail');
-export const getAllCategories = createMicroserviceEvent('all');
+export const getAllCategoriesPattern = createMicroserviceEvent('all');
 
 // user
 export const canSignupPattern = createMicroserviceEvent('can_signup');

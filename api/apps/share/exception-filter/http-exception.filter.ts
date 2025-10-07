@@ -13,8 +13,13 @@ export default class HttpExceptionFilter implements ExceptionFilter {
     const exceptionResponse = exception.getResponse() as any;
 
     if (status === HttpStatus.NOT_FOUND) {
-      response.status(status).json(exceptionResponse.response);
-      return next();
+      const responseData = Object.hasOwn(exceptionResponse.response, 'message')
+        ? exceptionResponse.response.message
+        : exceptionResponse.response;
+      if (typeof responseData === 'string') {
+        return response.status(status).json(createMessage(responseData));
+      }
+      return response.status(status).json(responseData);
     }
 
     if (Object.hasOwn(exceptionResponse, 'messages')) {

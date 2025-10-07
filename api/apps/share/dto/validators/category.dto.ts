@@ -1,14 +1,21 @@
-import { Type } from 'class-transformer';
-import { IsString, IsNumber, ValidateNested, IsOptional, IsBoolean, Length } from 'class-validator';
+import { Exclude, Expose, instanceToPlain, plainToInstance, Type } from 'class-transformer';
+import { IsDefined, IsString, IsNumber, IsOptional, IsBoolean, Length } from 'class-validator';
 
-export class CreateCategoryDto {
+export class CreateCategory {
+  @IsDefined()
   @IsString()
   name: string;
 
+  @Exclude({ toPlainOnly: true })
   @IsString()
   @Length(13)
   @IsOptional()
   categoryId: string;
+
+  @Expose({ toPlainOnly: true })
+  get category_id() {
+    return this.categoryId;
+  }
 }
 
 export class CategoryQuery {
@@ -19,16 +26,34 @@ export class CategoryQuery {
   @IsBoolean()
   @IsOptional()
   avatar: boolean;
+
+  @Expose({ toPlainOnly: true, groups: ['include_id'] })
+  get category_id() {
+    return true;
+  }
+
+  constructor() {
+    if (Object.values(this).every((v) => v === undefined)) {
+      this.name = true;
+      this.avatar = true;
+    }
+  }
+
+  static plainWithIncludeId(target: CategoryQuery) {
+    return instanceToPlain(plainToInstance(CategoryQuery, target), { groups: ['include_id'] });
+  }
 }
 
 export class PaginationCategory {
+  @IsDefined()
   @IsNumber()
   pageSize: number;
 
+  @IsDefined()
   @IsNumber()
   pageNumber: number;
 
-  @ValidateNested()
+  @IsDefined()
   @Type(() => CategoryQuery)
   query: CategoryQuery;
 }
@@ -52,7 +77,7 @@ export class GetCategory {
   @Length(13)
   categoryId: string;
 
-  @ValidateNested()
+  @IsDefined()
   @Type(() => CategoryQuery)
   query: CategoryQuery;
 }

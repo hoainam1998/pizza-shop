@@ -1,3 +1,4 @@
+import { ValidationError } from 'class-validator';
 import { EventPatternType, MessageResponseType } from '../interfaces';
 import {
   passwordHashing,
@@ -51,6 +52,27 @@ const checkArrayHaveValues = (array: any[]) => Array.isArray(array) && array.len
  */
 const calcSkip = (pageSize: number, pageNumber: number) => (pageNumber - 1) * pageSize;
 
+/**
+ * Get all errors message.
+ *
+ * @param {ValidationError[]} exceptions - The exceptions list.
+ * @returns {string[]} - The errors message.
+ */
+const handleValidateException = (exceptions: ValidationError[]): string[] => {
+  return exceptions.reduce<string[]>((messages: string[], exception: ValidationError) => {
+    if (exception.constraints) {
+      messages = messages.concat(Object.values(exception.constraints));
+    }
+
+    if (exception.children) {
+      const messagesChild = handleValidateException(exception.children || []);
+      messages = messages.concat(messagesChild);
+    }
+
+    return messages;
+  }, []);
+};
+
 export {
   createMicroserviceEvent,
   createMessage,
@@ -61,4 +83,5 @@ export {
   signingAdminResetPasswordToken,
   getAdminResetPasswordLink,
   calcSkip,
+  handleValidateException,
 };

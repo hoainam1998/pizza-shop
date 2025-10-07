@@ -4,7 +4,7 @@ import { ClientProvider, ClientsModule, Transport } from '@nestjs/microservices'
 import multer from 'multer';
 import CategoryController from './category.controller';
 import CategoryService from './category.service';
-import { CATEGORY_SERVICE } from 'apps/share/di-token';
+import { CATEGORY_SERVICE } from '@share/di-token';
 import { ConfigService } from '@nestjs/config';
 
 @Module({

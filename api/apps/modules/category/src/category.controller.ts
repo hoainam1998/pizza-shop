@@ -1,9 +1,8 @@
-import { BadRequestException, Controller, HttpStatus, Logger, NotFoundException } from '@nestjs/common';
-import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
-import { Prisma } from 'generated/prisma';
-import CategoryService from './category.service';
+import { Controller, NotFoundException } from '@nestjs/common';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import { category } from 'generated/prisma';
-import type { CategoryBody, CategoryPaginationResponse } from '@share/interfaces';
+import CategoryService from './category.service';
+import type { CategoryBodyType, CategoryPaginationResponse } from '@share/interfaces';
 import { checkArrayHaveValues } from '@share/utils';
 import {
   createCategoryPattern,
@@ -11,113 +10,69 @@ import {
   updateCategoryPattern,
   deleteCategoryPattern,
   getCategoryPattern,
-  getAllCategories,
+  getAllCategoriesPattern,
 } from '@share/pattern';
 import { CategoryDto, CategorySelect, GetCategory, PaginationCategory } from '@share/dto/validators/category.dto';
-import { PRISMA_ERROR_CODE } from '@share/enums';
-import messages from '@share/constants/messages';
+import LoggingService from '@share/libs/logging/logging.service';
+import HandleServiceError from '@share/decorators/handle-service-error.decorator';
 
 @Controller()
 export default class CategoryController {
   constructor(
     private readonly categoryService: CategoryService,
-    private readonly logger: Logger,
+    private readonly logger: LoggingService,
   ) {}
 
   @MessagePattern(createCategoryPattern)
-  createCategory(@Payload() data: CategoryBody): Promise<category> {
-    return this.categoryService.create(data).catch((error: Error) => {
-      this.logger.log('Create category', error.message);
-      throw new RpcException(error.message);
-    });
+  @HandleServiceError
+  createCategory(@Payload() data: CategoryBodyType): Promise<category> {
+    return this.categoryService.create(data);
   }
 
-  @MessagePattern(getAllCategories)
+  @MessagePattern(getAllCategoriesPattern)
+  @HandleServiceError
   getAllCategories(@Payload() select: CategorySelect): Promise<Partial<category>[]> {
-    return this.categoryService
-      .getAllCategories(select)
-      .then((categories) => {
-        if (!checkArrayHaveValues(categories)) {
-          throw new NotFoundException({
-            message: [],
-          });
-        }
-        return categories;
-      })
-      .catch((error) => {
-        this.logger.log('Get all categories', error.message);
-        if (error.status === HttpStatus.NOT_FOUND) {
-          throw new RpcException(error);
-        }
-        throw new RpcException(new BadRequestException(error));
-      });
+    return this.categoryService.getAllCategories(select).then((categories) => {
+      if (!checkArrayHaveValues(categories)) {
+        throw new NotFoundException([]);
+      }
+      return categories;
+    });
   }
 
   @MessagePattern(paginationPattern)
+  @HandleServiceError
   pagination(@Payload() select: PaginationCategory): Promise<CategoryPaginationResponse> {
-    return this.categoryService
-      .pagination(select)
-      .catch((error: Error) => {
-        throw new RpcException(error.message);
-      })
-      .then((response) => {
-        const [list, total] = response;
-        if (!checkArrayHaveValues(list as CategoryBody[])) {
-          throw new NotFoundException({
-            list: [],
-            total: 0,
-          });
-        }
-        return {
-          list: list as CategoryBody[],
-          total: total as number,
-        } satisfies CategoryPaginationResponse;
-      })
-      .catch((error) => {
-        this.logger.log('Category pagination', error.message);
-        if (error.status === HttpStatus.NOT_FOUND) {
-          throw new RpcException(error);
-        }
-        throw new RpcException(new BadRequestException(error));
-      });
+    return this.categoryService.pagination(select).then((response) => {
+      const [list, total] = response;
+      if (!checkArrayHaveValues(list as CategoryBodyType[])) {
+        throw new NotFoundException({
+          list: [],
+          total: 0,
+        });
+      }
+      return {
+        list: list as CategoryBodyType[],
+        total: total as number,
+      } satisfies CategoryPaginationResponse;
+    });
   }
 
   @MessagePattern(updateCategoryPattern)
-  updateCategory(@Payload() data: CategoryBody): Promise<category> {
-    return this.categoryService.update(data).catch((error: Error) => {
-      this.logger.log('Update category', error.message);
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === PRISMA_ERROR_CODE.NOT_FOUND) {
-          throw new RpcException(new NotFoundException(messages.CATEGORY.NOT_FOUND));
-        }
-      }
-      throw new RpcException(error.message);
-    });
+  @HandleServiceError
+  updateCategory(@Payload() data: CategoryBodyType): Promise<category> {
+    return this.categoryService.update(data);
   }
 
   @MessagePattern(getCategoryPattern)
+  @HandleServiceError
   getCategory(@Payload() category: GetCategory): Promise<Omit<CategoryDto, 'categoryId'>> {
-    return this.categoryService.getDetail(category).catch((error: Error) => {
-      this.logger.log('Get category', error.message);
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === PRISMA_ERROR_CODE.NOT_FOUND) {
-          throw new RpcException(new NotFoundException(messages.CATEGORY.NOT_FOUND));
-        }
-      }
-      throw new RpcException(new BadRequestException(error));
-    });
+    return this.categoryService.getDetail(category);
   }
 
   @MessagePattern(deleteCategoryPattern)
+  @HandleServiceError
   deleteCategory(@Payload() categoryId: string): Promise<category> {
-    return this.categoryService.delete(categoryId).catch((error: Error) => {
-      this.logger.log('Delete category', error.message);
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === PRISMA_ERROR_CODE.NOT_FOUND) {
-          throw new RpcException(new NotFoundException(messages.CATEGORY.NOT_FOUND));
-        }
-      }
-      throw new RpcException(new BadRequestException(error));
-    });
+    return this.categoryService.delete(categoryId);
   }
 }

@@ -1,7 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import { user, category, product } from 'generated/prisma';
 
-export type CategoryBody = Omit<category, 'category_id'> & {
+export type CategoryBodyType = Omit<category, 'category_id'> & {
   category_id?: category['category_id'];
   disabled?: boolean;
 };
@@ -11,11 +11,11 @@ export type PaginationResponse<T> = {
   total: number;
 };
 
-export type CategoryPaginationResponse = PaginationResponse<CategoryBody>;
+export type CategoryPaginationResponse = PaginationResponse<CategoryBodyType>;
 
 export type ProductPaginationResponse = PaginationResponse<product>;
 
-export type CategoryPaginationPrismaResponse = (CategoryBody[] | number)[];
+export type CategoryPaginationPrismaResponse = (CategoryBodyType[] | number)[];
 
 export type ProductPaginationPrismaResponse = (product[] | number)[];
 
@@ -25,7 +25,7 @@ export type MicroservicesErrorResponse = {
   status: HttpStatus;
   response?: any;
   message?: string;
-};
+} & Error;
 
 export type MessageResponseType = {
   message: string;

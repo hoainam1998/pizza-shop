@@ -4,6 +4,10 @@ export default Object.freeze({
     DATABASE_DISCONNECT: 'Database was disconnect. Please try again!',
     MUTATING_DATABASE_ERROR: 'Something error when working with your database!',
     ALREADY_EXIST: 'This record have been exist!',
+    COMMON_ERROR: 'Something have broken. Please try again!',
+    EMPTY_FILE: '{fieldname} is an empty file!',
+    FILE_TYPE_INVALID: 'File type is invalid!',
+    VALIDATE_ID_FAIL: 'An id must be a string number and contains 13 character!',
   },
   CATEGORY: {
     NOT_FOUND: 'The category item requirement is not found!',

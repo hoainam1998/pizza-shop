@@ -1,10 +1,4 @@
-import { IsNumber, IsNumberString, Length } from 'class-validator';
-
-export class FindOneParam {
-  @IsNumberString()
-  @Length(13)
-  id: string;
-}
+import { IsNumber } from 'class-validator';
 
 export abstract class Pagination {
   @IsNumber()
