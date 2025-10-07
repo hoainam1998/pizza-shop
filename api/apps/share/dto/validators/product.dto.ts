@@ -98,8 +98,6 @@ export class ProductCreateTransform extends OmitType(ProductCreate, [
 }
 
 export class ProductQuery {
-  product_id: boolean = true;
-
   @IsOptional()
   @IsBoolean()
   name: boolean;
@@ -134,7 +132,15 @@ export class ProductQuery {
 
   @IsOptional()
   @IsBoolean()
+  category_id: boolean;
+
+  @IsOptional()
+  @IsBoolean()
   ingredients: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  disabled: boolean;
 
   @Expose()
   get product_ingredient() {
@@ -156,8 +162,20 @@ export class ProductQuery {
   }
 
   @Expose()
-  get category_id() {
-    return this.category;
+  get _count() {
+    if (this.disabled) {
+      return {
+        select: {
+          bill_detail: true,
+        },
+      };
+    }
+    return false;
+  }
+
+  @Expose()
+  get product_id() {
+    return true;
   }
 }
 
@@ -166,6 +184,9 @@ export class ProductQueryTransform extends OmitType(ProductQuery, ['ingredients'
   ingredients: boolean;
 
   @Exclude()
+  disabled: boolean;
+
+  @Expose()
   category: boolean;
 
   @Expose()

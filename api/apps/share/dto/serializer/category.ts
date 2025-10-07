@@ -1,4 +1,4 @@
-import { IsNumber, IsPositive, IsArray, IsString, ArrayNotEmpty, ValidateNested, IsOptional } from 'class-validator';
+import { IsNumber, IsPositive, IsArray, IsString, ArrayNotEmpty, IsOptional } from 'class-validator';
 import { Exclude, Expose, Type } from 'class-transformer';
 
 export class CategoryFormatter {
@@ -24,7 +24,6 @@ export class CategoryFormatter {
 export class CategoryPaginationFormatter {
   @IsArray()
   @ArrayNotEmpty()
-  @ValidateNested({ each: true })
   @Type(() => CategoryFormatter)
   list: CategoryFormatter[];
 

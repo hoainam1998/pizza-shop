@@ -15,3 +15,12 @@ declare global {
     }
   }
 }
+
+declare module 'expect' {
+  interface AsymmetricMatchers {
+    toBeImageBase64(): void;
+  }
+  interface Matchers<R> {
+    toBeImageBase64(): R;
+  }
+}

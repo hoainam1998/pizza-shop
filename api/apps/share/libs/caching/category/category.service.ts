@@ -13,9 +13,7 @@ export default class CategoryCachingService {
   }
 
   checkExist(): Promise<boolean> {
-    return this.redisClient.Client.exists(constants.REDIS_PREFIX.CATEGORIES).then((result) => {
-      return result > 0;
-    });
+    return this.redisClient.Client.exists(constants.REDIS_PREFIX.CATEGORIES).then((result) => result > 0);
   }
 
   getAllCategories(): Promise<category[]> {

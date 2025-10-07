@@ -1,6 +1,6 @@
 import { ProductPaginationResponse } from '@share/interfaces';
-import { Exclude, Expose, Type } from 'class-transformer';
-import { IsArray, IsInt, IsOptional, IsString } from 'class-validator';
+import { Exclude, Expose, Transform, Type } from 'class-transformer';
+import { IsArray, IsInt, IsObject, IsOptional, IsString } from 'class-validator';
 
 export class ProductSerializer {
   @IsOptional()
@@ -44,15 +44,23 @@ export class ProductSerializer {
   @IsString()
   avatar: string;
 
+  @IsObject()
+  @IsString()
+  @Exclude({ toPlainOnly: true })
+  _count: object;
+
   @Expose({ toPlainOnly: true })
   get ingredients() {
-    return this.product_ingredient.map((ingredient) => ({
-      ingredientId: ingredient.ingredient_id,
-      amount: ingredient.count,
-      unit: ingredient.unit,
-      avatar: ingredient.ingredient.avatar,
-      name: ingredient.ingredient.name,
-    }));
+    if (this.product_ingredient) {
+      return this.product_ingredient.map((ingredient) => ({
+        ingredientId: ingredient.ingredient_id,
+        amount: ingredient.count,
+        unit: ingredient.unit,
+        avatar: ingredient.ingredient.avatar,
+        name: ingredient.ingredient.name,
+      }));
+    }
+    return undefined;
   }
 
   @Expose()
@@ -61,9 +69,10 @@ export class ProductSerializer {
   }
 
   @Expose()
-  get categoryId() {
-    return this.category_id;
-  }
+  @Transform(({ value }) => ({ name: value.name, categoryId: value.category_id, avatar: value.avatar }), {
+    toPlainOnly: true,
+  })
+  category: any;
 
   @Expose()
   get expiredTime() {
@@ -73,6 +82,13 @@ export class ProductSerializer {
   @Expose()
   get originalPrice() {
     return this.original_price;
+  }
+
+  @Expose()
+  get disabled() {
+    if (this._count) {
+      return Object.values(this._count).some((v) => v > 0);
+    }
   }
 }
 

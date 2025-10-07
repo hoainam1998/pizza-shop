@@ -2,16 +2,16 @@ import { Inject, Injectable } from '@nestjs/common';
 import { PRISMA_CLIENT } from '@share/di-token';
 import * as prisma from 'generated/prisma';
 import { ProductSelect } from '@share/dto/validators/product.dto';
-import HandlePrismaError from '@share/decorators/handle-prisma-error.decorator';
+import { HandlePrismaError } from '@share/decorators';
 import { ProductPaginationPrismaResponse } from '@share/interfaces';
-import { ProductQueryTransform } from '@share/dto/validators/product.dto';
 import { calcSkip } from '@share/utils';
+import messages from '@share/constants/messages';
 
 @Injectable()
 export default class ProductService {
   constructor(@Inject(PRISMA_CLIENT) private readonly prismaClient: prisma.PrismaClient) {}
 
-  @HandlePrismaError
+  @HandlePrismaError(messages.PRODUCT)
   createProduct(product: prisma.product): Promise<prisma.product> {
     return this.prismaClient.product.create({
       data: product,
@@ -32,8 +32,11 @@ export default class ProductService {
       this.prismaClient.product.findMany({
         take: select.pageSize,
         skip,
-        select: select.query as ProductQueryTransform,
+        select: select.query,
         where: condition,
+        orderBy: {
+          product_id: 'desc',
+        },
       }),
       this.prismaClient.product.count({
         where: condition,

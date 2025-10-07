@@ -5,6 +5,7 @@ import PrismaClient from './libs/prisma/prisma-client';
 import RedisClient from './libs/redis-client/redis';
 import CachingModule from './libs/caching/caching.module';
 import { PRISMA_CLIENT, REDIS_CLIENT } from './di-token';
+import LoggingModule from './libs/logging/logging.module';
 
 const prismaClient: Provider = {
   provide: PRISMA_CLIENT,
@@ -17,7 +18,7 @@ const redisClient: Provider = {
 };
 
 @Module({
-  imports: [EnvironmentConfigModule, SendEmailModule, CachingModule.register(redisClient)],
+  imports: [EnvironmentConfigModule, SendEmailModule, CachingModule.register(redisClient), LoggingModule],
   providers: [prismaClient, redisClient],
   exports: [prismaClient, redisClient, SendEmailModule, CachingModule],
 })

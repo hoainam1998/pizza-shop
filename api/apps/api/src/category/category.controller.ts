@@ -6,34 +6,45 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
-  NotFoundException,
   Param,
   Post,
   Put,
   SerializeOptions,
   UseInterceptors,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
-import { validate } from 'class-validator';
-import { catchError, map, Observable } from 'rxjs';
+import { validate, ValidationError } from 'class-validator';
+import { map, Observable } from 'rxjs';
 import CategoryService from './category.service';
 import { MessageSerializer } from '@share/dto/serializer/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ImageTransformPipe } from '@share/pipes';
-import { UploadImage } from '@share/decorators';
+import { IdValidationPipe, ImageTransformPipe } from '@share/pipes';
+import { HandleHttpError, UploadImage } from '@share/decorators';
 import {
   CategoryDto,
-  CategorySelect,
-  CreateCategoryDto,
+  CategoryQuery,
+  CreateCategory,
   GetCategory,
   PaginationCategory,
 } from '@share/dto/validators/category.dto';
-import { FindOneParam } from '@share/dto/validators/common.dto';
 import { CategoryPaginationFormatter, CategoryDetailSerializer, Categories } from '@share/dto/serializer/category';
-import { CategoryBody, MicroservicesErrorResponse } from '@share/interfaces';
+import { CategoryBodyType } from '@share/interfaces';
 import messages from '@share/constants/messages';
-import { createMessage } from '@share/utils';
+import { createMessage, handleValidateException } from '@share/utils';
 import { category } from 'generated/prisma';
+import { plainToInstance } from 'class-transformer';
 
+@UsePipes(
+  new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    exceptionFactory: (exceptions: ValidationError[]) => {
+      const errors = handleValidateException(exceptions);
+      throw new BadRequestException({ messages: errors });
+    },
+  }),
+)
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('category')
 export default class CategoryController {
@@ -42,29 +53,29 @@ export default class CategoryController {
   @Post('create')
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('avatar'))
+  @HandleHttpError
   create(
-    @Body() category: CreateCategoryDto,
+    @Body() category: CreateCategory,
     @UploadImage('avatar', ImageTransformPipe) file: string,
   ): Observable<MessageSerializer> {
-    const categoryInsert: CategoryBody = Object.assign(category, { avatar: file });
-    return this.categoryService.createCategory(categoryInsert).pipe(
-      map(() => MessageSerializer.create(messages.CATEGORY.ADD_CATEGORY_SUCCESS)),
-      catchError((error: Error) => {
-        throw new BadRequestException(createMessage(error.message));
-      }),
-    );
+    const categoryInsert: CategoryBodyType = Object.assign(category, { avatar: file });
+    return this.categoryService
+      .createCategory(categoryInsert)
+      .pipe(map(() => MessageSerializer.create(messages.CATEGORY.ADD_CATEGORY_SUCCESS)));
   }
 
   @Post('all')
   @HttpCode(HttpStatus.OK)
   @SerializeOptions({ type: CategoryDetailSerializer })
-  getAllCategories(@Body() select: CategorySelect): Observable<Promise<category[]>> {
+  @HandleHttpError
+  getAllCategories(@Body() select: CategoryQuery): Observable<Promise<category[]>> {
+    Object.assign(select, CategoryQuery.plainWithIncludeId(select));
     return this.categoryService.getAllCategories(select).pipe(
       map((categories) => {
         const categoriesObj = new Categories(categories);
         return validate(categoriesObj).then((errors) => {
           if (!errors.length) {
-            return categoriesObj.List;
+            return plainToInstance(CategoryDetailSerializer, categoriesObj.List);
           }
           throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
         });
@@ -75,44 +86,36 @@ export default class CategoryController {
   @Post('pagination')
   @HttpCode(HttpStatus.OK)
   @SerializeOptions({ type: CategoryPaginationFormatter })
+  @HandleHttpError
   pagination(@Body() select: PaginationCategory): Observable<Promise<CategoryPaginationFormatter>> {
+    const query = CategoryQuery.plainWithIncludeId(select.query);
+    Object.assign(select.query, query);
     return this.categoryService.pagination(select).pipe(
       map((response: CategoryPaginationFormatter) => {
         const paginationResult = new CategoryPaginationFormatter(response);
         return validate(paginationResult).then((errors) => {
-          if (!errors.length) {
+          if (errors.length) {
             throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
           }
           return paginationResult;
         });
-      }),
-      catchError((error: MicroservicesErrorResponse) => {
-        if (error.status === HttpStatus.NOT_FOUND) {
-          throw new NotFoundException(error);
-        }
-        throw new BadRequestException(createMessage(error.message!));
       }),
     );
   }
 
   @Post('detail')
   @HttpCode(HttpStatus.OK)
-  @SerializeOptions({ type: CategoryDto })
+  @SerializeOptions({ type: CategoryDetailSerializer })
+  @HandleHttpError
   getCategory(@Body() category: GetCategory): Observable<Promise<Omit<CategoryDto, 'categoryId'>>> {
     return this.categoryService.getCategory(category).pipe(
       map((response: CategoryDetailSerializer) => {
-        return validate(new CategoryDetailSerializer(response)).then((error) => {
-          if (error.length) {
+        return validate(new CategoryDetailSerializer(response)).then((errors) => {
+          if (errors.length) {
             throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
           }
-          return response;
+          return plainToInstance(CategoryDetailSerializer, response);
         });
-      }),
-      catchError((error: MicroservicesErrorResponse) => {
-        if (error.status === HttpStatus.NOT_FOUND) {
-          throw new NotFoundException(error);
-        }
-        throw new BadRequestException(createMessage(error.message!));
       }),
     );
   }
@@ -120,27 +123,25 @@ export default class CategoryController {
   @Put('update')
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('avatar'))
+  @HandleHttpError
   update(
-    @Body() category: CreateCategoryDto,
+    @Body() category: CreateCategory,
     @UploadImage('avatar', ImageTransformPipe) file: string,
   ): Observable<MessageSerializer> {
-    const categoryInsert: CategoryBody = Object.assign(category, { avatar: file, category_id: category.categoryId });
-    return this.categoryService.updateCategory(categoryInsert).pipe(
-      map(() => MessageSerializer.create(messages.CATEGORY.UPDATE_CATEGORY_SUCCESS)),
-      catchError((error: Error) => {
-        throw new BadRequestException(createMessage(error.message));
-      }),
-    );
+    const categoryInsert: CategoryBodyType = Object.assign(category, {
+      avatar: file,
+    });
+    return this.categoryService
+      .updateCategory(categoryInsert)
+      .pipe(map(() => MessageSerializer.create(messages.CATEGORY.UPDATE_CATEGORY_SUCCESS)));
   }
 
   @Delete('delete/:id')
   @HttpCode(HttpStatus.OK)
-  delete(@Param() param: FindOneParam): Observable<MessageSerializer> {
-    return this.categoryService.deleteCategory(param.id).pipe(
-      map(() => MessageSerializer.create(messages.CATEGORY.DELETE_CATEGORY_SUCCESS)),
-      catchError((error: Error) => {
-        throw new BadRequestException(createMessage(error.message));
-      }),
-    );
+  @HandleHttpError
+  delete(@Param('id', new IdValidationPipe()) id: string): Observable<MessageSerializer> {
+    return this.categoryService
+      .deleteCategory(id)
+      .pipe(map(() => MessageSerializer.create(messages.CATEGORY.DELETE_CATEGORY_SUCCESS)));
   }
 }

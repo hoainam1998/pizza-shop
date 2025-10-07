@@ -16,6 +16,22 @@
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:ut:category.create": "jest --watch apps\/modules\/category\/src\/__test__\/create-category.spec.ts",
+    "test:ut:category.get-all": "jest --watch apps\/modules\/category\/src\/__test__\/get-all-categories.spec.ts",
+    "test:ut:category.update": "jest --watch apps\/modules\/category\/src\/__test__\/update-category.spec.ts",
+    "test:ut:category.delete": "jest --watch apps\/modules\/category\/src\/__test__\/delete-category.spec.ts",
+    "test:ut:category.get-detail": "jest --watch apps\/modules\/category\/src\/__test__\/get-category.spec.ts",
+    "test:ut:category.pagination": "jest --watch apps\/modules\/category\/src\/__test__\/pagination.spec.ts",
+    "test:ut:category.store-cache": "jest --watch apps\/modules\/category\/src\/__test__\/store-cache-categories.spec.ts",
+    "test:ut:category.caching": "jest --watch apps\/modules\/category\/src\/__test__\/category-redis-caching.spec.ts",
+    "test:ut:category": "jest --watch --testPathPatterns=apps\/modules\/category\/src\/__test__",
+    "test:e2e:category.create": "jest --watch apps\/api\/src\/category\/__test__\/create-category.spec.ts",
+    "test:e2e:category.delete": "jest --watch apps\/api\/src\/category\/__test__\/delete-category.spec.ts",
+    "test:e2e:category.pagination": "jest --watch apps\/api\/src\/category\/__test__\/pagination.spec.ts",
+    "test:e2e:category.get-detail": "jest --watch apps\/api\/src\/category\/__test__\/get-detail.spec.ts",
+    "test:e2e:category.update": "jest --watch apps\/api\/src\/category\/__test__\/update-category.spec.ts",
+    "test:e2e:category.get-all": "jest --watch apps\/api\/src\/category\/__test__\/get-all-categories.spec.ts",
+    "test:e2e:category": "jest --watch apps\/api\/src\/category\/__test__",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/api/apps/users/api/apps/modules/users/api/test/jest-e2e.json"
@@ -45,7 +61,7 @@
     "@eslint/js": "^9.18.0",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
-    "@nestjs/testing": "^11.0.1",
+    "@nestjs/testing": "^11.1.6",
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.0",
     "@types/express-session": "^1.18.2",
@@ -78,7 +94,7 @@
       "json",
       "ts"
     ],
-    "rootDir": ".",
+    "rootDir": "./",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
@@ -88,12 +104,18 @@
     ],
     "coverageDirectory": "./coverage",
     "testEnvironment": "node",
+    "setupFiles": [
+      "<rootDir>/apps/share/test/pre-setup/mock/index.ts"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/apps/share/test/jest-extends/index.ts"
+    ],
     "roots": [
-      "<rootDir>/apps/",
-      "<rootDir>/libs/"
+      "<rootDir>/apps"
     ],
     "moduleNameMapper": {
-      "^@app/share(|/.*)$": "<rootDir>/libs/share/src/$1"
+      "^@share(|/.*)$": "<rootDir>/apps/share/$1",
+      "generated/prisma": "<rootDir>/generated/prisma"
     }
   }
 }
