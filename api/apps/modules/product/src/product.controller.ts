@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Controller, NotFoundException } from '@nestjs/common';
 import { MessagePattern, RpcException } from '@nestjs/microservices';
 import { createProductPattern, paginationPattern } from '@share/pattern';
 import * as prisma from 'generated/prisma';
@@ -6,20 +6,20 @@ import ProductService from './product.service';
 import { ProductSelect } from '@share/dto/validators/product.dto';
 import { ProductPaginationResponse } from '@share/interfaces';
 import { checkArrayHaveValues } from '@share/utils';
+import LoggingService from '@share/libs/logging/logging.service';
+import { HandleServiceError } from '@share/decorators';
 
 @Controller()
 export default class ProductController {
   constructor(
     private readonly productService: ProductService,
-    private readonly logger: Logger,
+    private readonly logger: LoggingService,
   ) {}
 
   @MessagePattern(createProductPattern)
+  @HandleServiceError
   createProduct(product: prisma.product): Promise<prisma.product> {
-    return this.productService.createProduct(product).catch((error: Error) => {
-      this.logger.log('Create product', error.message);
-      throw new RpcException(new BadRequestException(error));
-    });
+    return this.productService.createProduct(product);
   }
 
   @MessagePattern(paginationPattern)

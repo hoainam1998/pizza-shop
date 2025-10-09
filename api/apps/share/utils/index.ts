@@ -72,6 +72,21 @@ const handleValidateException = (exceptions: ValidationError[]): string[] => {
     return messages;
   }, []);
 };
+/**
+ * Convert date object to date time string.
+ *
+ * @param {Date} date - The date object.
+ * @returns {string} - The date time information string.
+ */
+const formatDateTime = (date: Date): string => {
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const seconds = date.getSeconds();
+  return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+};
 
 export {
   createMicroserviceEvent,
@@ -84,4 +99,5 @@ export {
   getAdminResetPasswordLink,
   calcSkip,
   handleValidateException,
+  formatDateTime,
 };

@@ -1,4 +1,5 @@
-import { Exclude, Expose, instanceToPlain, plainToInstance, Type } from 'class-transformer';
+import { OmitType } from '@nestjs/mapped-types';
+import { Exclude, Expose, instanceToPlain, plainToInstance, Transform, Type } from 'class-transformer';
 import { IsDefined, IsString, IsNumber, IsOptional, IsBoolean, Length } from 'class-validator';
 
 export class CreateCategory {
@@ -10,6 +11,7 @@ export class CreateCategory {
   @IsString()
   @Length(13)
   @IsOptional()
+  @Transform(({ value }) => (value ? value : Date.now().toString()))
   categoryId: string;
 
   @Expose({ toPlainOnly: true })
@@ -27,9 +29,26 @@ export class CategoryQuery {
   @IsOptional()
   avatar: boolean;
 
+  @Expose({ toClassOnly: true })
+  @IsBoolean()
+  @IsOptional()
+  disabled: boolean;
+
   @Expose({ toPlainOnly: true, groups: ['include_id'] })
   get category_id() {
     return true;
+  }
+
+  @Expose({ toPlainOnly: true })
+  get _count() {
+    if (this.disabled) {
+      return {
+        select: {
+          product: true,
+        },
+      };
+    }
+    return false;
   }
 
   constructor() {
@@ -40,8 +59,18 @@ export class CategoryQuery {
   }
 
   static plainWithIncludeId(target: CategoryQuery) {
-    return instanceToPlain(plainToInstance(CategoryQuery, target), { groups: ['include_id'] });
+    const query = instanceToPlain(plainToInstance(CategoryQuery, target), { groups: ['include_id'] });
+    const queryExcludeDisabled = instanceToPlain(plainToInstance(CategoryQueryTransform, query));
+    return queryExcludeDisabled;
   }
+}
+
+export class CategoryQueryTransform extends OmitType(CategoryQuery, ['disabled']) {
+  @Exclude()
+  disabled: true;
+
+  @Expose()
+  category_id: true;
 }
 
 export class PaginationCategory {
@@ -80,14 +109,4 @@ export class GetCategory {
   @IsDefined()
   @Type(() => CategoryQuery)
   query: CategoryQuery;
-}
-
-export class CategorySelect {
-  @IsOptional()
-  @IsBoolean()
-  name: boolean;
-
-  @IsOptional()
-  @IsBoolean()
-  avatar: boolean;
 }

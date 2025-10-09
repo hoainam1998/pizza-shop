@@ -1,1 +1,2 @@
 import './redis';
+import './cron';
