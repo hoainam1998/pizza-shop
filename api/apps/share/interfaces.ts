@@ -1,8 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import { user, category, product } from 'generated/prisma';
 
-export type CategoryBodyType = Omit<category, 'category_id'> & {
-  category_id?: category['category_id'];
+export type CategoryBodyType = category & {
   disabled?: boolean;
 };
 

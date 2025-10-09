@@ -23,14 +23,21 @@ const paginationBody = {
   query: {
     name: true,
     avatar: true,
+    disabled: true,
   },
 };
 
 const paginationBodyWidthId = {
   ...paginationBody,
   query: {
-    ...paginationBody.query,
+    name: paginationBody.query.name,
+    avatar: paginationBody.query.avatar,
     category_id: true,
+    _count: {
+      select: {
+        product: true,
+      },
+    },
   },
 };
 
@@ -225,6 +232,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, paginationCategoryUrl), () => {
         category_id: true,
         name: true,
         avatar: true,
+        _count: false,
       },
     };
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(responseData));

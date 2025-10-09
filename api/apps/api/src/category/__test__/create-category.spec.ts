@@ -17,6 +17,7 @@ const createCategoryUrl = '/category/create';
 const categoryBody = {
   name: category.name,
   avatar: expect.toBeImageBase64(),
+  category_id: expect.any(String),
 };
 
 describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
@@ -43,10 +44,6 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(category));
     const createCategory = jest.spyOn(categoryService, 'createCategory');
-    const categoryResponse = {
-      name: category.name,
-      avatar: expect.toBeImageBase64(),
-    };
     await api
       .post(createCategoryUrl)
       .field('name', category.name)
@@ -57,9 +54,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
         message: messages.CATEGORY.ADD_CATEGORY_SUCCESS,
       });
     expect(createCategory).toHaveBeenCalledTimes(1);
-    expect(createCategory).toHaveBeenCalledWith(categoryResponse);
+    expect(createCategory).toHaveBeenCalledWith(categoryBody);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(createCategoryPattern, categoryResponse);
+    expect(send).toHaveBeenCalledWith(createCategoryPattern, categoryBody);
   });
 
   it(createTestName('create category failed with undefined field', HttpStatus.BAD_REQUEST), async () => {
@@ -162,27 +159,6 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
     expect(response.body).toEqual(expect.any(Array));
     expect(createCategory).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
-  });
-
-  it(createTestName('create category failed with database disconnect', HttpStatus.BAD_REQUEST), async () => {
-    expect.hasAssertions();
-    const send = jest
-      .spyOn(clientProxy, 'send')
-      .mockReturnValue(throwError(() => new BadRequestException("Can't reach database server")));
-    const createCategory = jest.spyOn(categoryService, 'createCategory');
-    await api
-      .post(createCategoryUrl)
-      .attach('avatar', getStaticFile('test-image.png'))
-      .field('name', category.name)
-      .expect(HttpStatus.BAD_REQUEST)
-      .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.DATABASE_DISCONNECT,
-      });
-    expect(createCategory).toHaveBeenCalledTimes(1);
-    expect(createCategory).toHaveBeenCalledWith(categoryBody);
-    expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(createCategoryPattern, categoryBody);
   });
 
   it(createTestName('create category failed with database disconnect', HttpStatus.BAD_REQUEST), async () => {

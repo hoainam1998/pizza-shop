@@ -1,3 +1,4 @@
+/* eslint-disable no-var */
 import expressSession from 'express-session';
 
 declare module 'express-session' {
@@ -13,6 +14,9 @@ declare global {
     export interface Request {
       session: expressSession.Session & Partial<expressSession.SessionData>;
     }
+  }
+  namespace globalThis {
+    var cronJob: any;
   }
 }
 

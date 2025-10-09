@@ -12,7 +12,7 @@ import {
   getCategoryPattern,
   getAllCategoriesPattern,
 } from '@share/pattern';
-import { CategoryDto, CategorySelect, GetCategory, PaginationCategory } from '@share/dto/validators/category.dto';
+import { CategoryDto, CategoryQuery, GetCategory, PaginationCategory } from '@share/dto/validators/category.dto';
 import LoggingService from '@share/libs/logging/logging.service';
 import HandleServiceError from '@share/decorators/handle-service-error.decorator';
 
@@ -31,7 +31,7 @@ export default class CategoryController {
 
   @MessagePattern(getAllCategoriesPattern)
   @HandleServiceError
-  getAllCategories(@Payload() select: CategorySelect): Promise<Partial<category>[]> {
+  getAllCategories(@Payload() select: CategoryQuery): Promise<Partial<category>[]> {
     return this.categoryService.getAllCategories(select).then((categories) => {
       if (!checkArrayHaveValues(categories)) {
         throw new NotFoundException([]);

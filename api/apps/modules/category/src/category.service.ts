@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { PRISMA_CLIENT } from '@share/di-token';
 import { category, PrismaClient } from 'generated/prisma';
 import type { CategoryBodyType, CategoryPaginationPrismaResponse } from '@share/interfaces';
-import { PaginationCategory, GetCategory, CategoryDto, CategorySelect } from '@share/dto/validators/category.dto';
+import { PaginationCategory, GetCategory, CategoryDto, CategoryQuery } from '@share/dto/validators/category.dto';
 import CategoryCachingService from '@share/libs/caching/category/category.service';
 import { calcSkip } from '@share/utils';
 import { HandlePrismaError } from '@share/decorators';
@@ -10,11 +10,11 @@ import messages from '@share/constants/messages';
 
 /**
  * Select category field.
- * @param {CategorySelect} select - The category select.
+ * @param {CategoryQuery} select - The category select.
  * @param {category[]} categories - The category list.
  * @returns {Partial<category>[]} - A object select category field.
  */
-const selectCategory = (select: CategorySelect, categories: category[]): Partial<category>[] => {
+const selectCategory = (select: CategoryQuery, categories: category[]): Partial<category>[] => {
   return categories.map((category) =>
     Object.entries(select).reduce<Partial<category>>((obj, [key, value]: [keyof category, any]) => {
       if (value) {
@@ -36,10 +36,7 @@ export default class CategoryService {
   create(categoryBody: CategoryBodyType): Promise<category> {
     return this.prismaClient.category
       .create({
-        data: {
-          ...categoryBody,
-          category_id: Date.now().toString(),
-        },
+        data: categoryBody,
       })
       .then(async (result) => {
         await this.storeCacheCategories();
@@ -64,7 +61,7 @@ export default class CategoryService {
   }
 
   @HandlePrismaError(messages.CATEGORY)
-  async getAllCategories(select: CategorySelect): Promise<Partial<category>[]> {
+  async getAllCategories(select: CategoryQuery): Promise<Partial<category>[]> {
     let categories: category[] = [];
     const alreadyExist = await this.categoryCachingService.checkExist();
     if (alreadyExist) {
@@ -81,14 +78,7 @@ export default class CategoryService {
 
     return this.prismaClient.$transaction([
       this.prismaClient.category.findMany({
-        select: {
-          ...select.query,
-          _count: {
-            select: {
-              product: true,
-            },
-          },
-        },
+        select: select.query,
         take: select.pageSize,
         skip,
         orderBy: {

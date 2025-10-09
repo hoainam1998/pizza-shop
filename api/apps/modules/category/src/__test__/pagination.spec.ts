@@ -21,9 +21,14 @@ const query = {
   name: true,
   avatar: true,
   category_id: true,
+  _count: {
+    select: {
+      product: true,
+    },
+  },
 };
 
-const paginationBody = {
+const paginationBody: any = {
   pageSize: 10,
   pageNumber: 1,
   query,

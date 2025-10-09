@@ -1,5 +1,5 @@
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
-import { IsString, IsInt, IsNumberString, IsArray, ValidateNested, IsBoolean, IsOptional } from 'class-validator';
+import { IsString, IsInt, IsNumberString, IsArray, IsBoolean, IsOptional } from 'class-validator';
 import { OmitType } from '@nestjs/mapped-types';
 import { Status } from 'generated/prisma';
 import { Pagination } from './common.dto';
@@ -19,6 +19,7 @@ export class ProductCreate {
   @IsInt()
   price: number;
 
+  @IsOptional()
   avatar: string;
 
   @Transform(({ value }) => +value)
@@ -194,7 +195,6 @@ export class ProductQueryTransform extends OmitType(ProductQuery, ['ingredients'
 }
 
 export class ProductSelect extends Pagination {
-  @ValidateNested()
   @Type(() => ProductQuery)
   query: ProductQuery;
 

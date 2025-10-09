@@ -29,16 +29,16 @@ import {
   PaginationCategory,
 } from '@share/dto/validators/category.dto';
 import { CategoryPaginationFormatter, CategoryDetailSerializer, Categories } from '@share/dto/serializer/category';
-import { CategoryBodyType } from '@share/interfaces';
 import messages from '@share/constants/messages';
 import { createMessage, handleValidateException } from '@share/utils';
 import { category } from 'generated/prisma';
-import { plainToInstance } from 'class-transformer';
+import { instanceToPlain, plainToInstance } from 'class-transformer';
 
 @UsePipes(
   new ValidationPipe({
     whitelist: true,
     forbidNonWhitelisted: true,
+    transform: true,
     exceptionFactory: (exceptions: ValidationError[]) => {
       const errors = handleValidateException(exceptions);
       throw new BadRequestException({ messages: errors });
@@ -53,12 +53,13 @@ export default class CategoryController {
   @Post('create')
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('avatar'))
+  @UsePipes(new ValidationPipe({ transform: true }))
   @HandleHttpError
   create(
     @Body() category: CreateCategory,
     @UploadImage('avatar', ImageTransformPipe) file: string,
   ): Observable<MessageSerializer> {
-    const categoryInsert: CategoryBodyType = Object.assign(category, { avatar: file });
+    const categoryInsert: any = Object.assign(instanceToPlain(category), { avatar: file });
     return this.categoryService
       .createCategory(categoryInsert)
       .pipe(map(() => MessageSerializer.create(messages.CATEGORY.ADD_CATEGORY_SUCCESS)));
@@ -89,7 +90,7 @@ export default class CategoryController {
   @HandleHttpError
   pagination(@Body() select: PaginationCategory): Observable<Promise<CategoryPaginationFormatter>> {
     const query = CategoryQuery.plainWithIncludeId(select.query);
-    Object.assign(select.query, query);
+    select.query = query as any;
     return this.categoryService.pagination(select).pipe(
       map((response: CategoryPaginationFormatter) => {
         const paginationResult = new CategoryPaginationFormatter(response);
@@ -128,7 +129,7 @@ export default class CategoryController {
     @Body() category: CreateCategory,
     @UploadImage('avatar', ImageTransformPipe) file: string,
   ): Observable<MessageSerializer> {
-    const categoryInsert: CategoryBodyType = Object.assign(category, {
+    const categoryInsert: any = Object.assign(instanceToPlain(category), {
       avatar: file,
     });
     return this.categoryService
