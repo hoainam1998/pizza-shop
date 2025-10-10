@@ -140,15 +140,23 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(categories));
     const categoriesObj = new Categories(categories);
     const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
+    const query = {
+      ...getAllCategoriesRequestBody,
+      _count: {
+        select: {
+          product: true,
+        },
+      },
+    };
     await api
       .post(getAllCategoriesUrl)
       .send({})
       .expect(HttpStatus.OK)
       .expect(instanceToPlain(plainToInstance(CategoryDetailSerializer, categoriesObj.List)));
     expect(getAllCategories).toHaveBeenCalledTimes(1);
-    expect(getAllCategories).toHaveBeenCalledWith(getAllCategoriesRequestBody);
+    expect(getAllCategories).toHaveBeenCalledWith(query);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(getAllCategoriesPattern, getAllCategoriesRequestBody);
+    expect(send).toHaveBeenCalledWith(getAllCategoriesPattern, query);
   });
 
   it(createTestName('get all categories failed with undefined field', HttpStatus.BAD_REQUEST), async () => {

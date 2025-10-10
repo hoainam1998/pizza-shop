@@ -42,6 +42,7 @@ export default class ProductService {
       });
   }
 
+  @HandlePrismaError(messages.PRODUCT)
   pagination(select: ProductSelect): Promise<ProductPaginationPrismaResponse> {
     const skip = calcSkip(select.pageSize, select.pageNumber);
     const condition = select.search

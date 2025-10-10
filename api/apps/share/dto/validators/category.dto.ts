@@ -48,19 +48,18 @@ export class CategoryQuery {
         },
       };
     }
-    return false;
-  }
-
-  constructor() {
-    if (Object.values(this).every((v) => v === undefined)) {
-      this.name = true;
-      this.avatar = true;
-    }
   }
 
   static plainWithIncludeId(target: CategoryQuery) {
+    if (Object.values(target).every((v) => v === undefined)) {
+      target.name = true;
+      target.avatar = true;
+      target.disabled = true;
+    }
     const query = instanceToPlain(plainToInstance(CategoryQuery, target), { groups: ['include_id'] });
-    const queryExcludeDisabled = instanceToPlain(plainToInstance(CategoryQueryTransform, query));
+    const queryExcludeDisabled = instanceToPlain(plainToInstance(CategoryQueryTransform, query), {
+      exposeUnsetFields: false,
+    });
     return queryExcludeDisabled;
   }
 }

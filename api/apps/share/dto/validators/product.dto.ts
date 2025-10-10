@@ -1,5 +1,5 @@
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
-import { IsString, IsInt, IsNumberString, IsArray, IsBoolean, IsOptional } from 'class-validator';
+import { IsString, IsInt, IsNumberString, IsArray, IsBoolean, IsOptional, IsDefined } from 'class-validator';
 import { OmitType } from '@nestjs/mapped-types';
 import { Status } from 'generated/prisma';
 import { Pagination } from './common.dto';
@@ -117,7 +117,7 @@ export class ProductQuery {
 
   @IsOptional()
   @IsBoolean()
-  original_price: boolean;
+  originalPrice: boolean;
 
   @IsOptional()
   @IsBoolean()
@@ -125,7 +125,7 @@ export class ProductQuery {
 
   @IsOptional()
   @IsBoolean()
-  expired_time: boolean;
+  expiredTime: boolean;
 
   @IsOptional()
   @IsBoolean()
@@ -133,7 +133,7 @@ export class ProductQuery {
 
   @IsOptional()
   @IsBoolean()
-  category_id: boolean;
+  categoryId: boolean;
 
   @IsOptional()
   @IsBoolean()
@@ -178,9 +178,45 @@ export class ProductQuery {
   get product_id() {
     return true;
   }
+
+  @Expose()
+  get expired_time() {
+    return this.expiredTime;
+  }
+
+  @Expose()
+  get original_price() {
+    return this.originalPrice;
+  }
+
+  @Expose()
+  get category_id() {
+    return this.categoryId;
+  }
+
+  constructor() {
+    if (Object.values(this).every((v) => v === undefined)) {
+      this.name = true;
+      this.count = true;
+      this.price = true;
+      this.originalPrice = true;
+      this.status = true;
+      this.expiredTime = true;
+      this.category = true;
+      this.categoryId = true;
+      this.disabled = true;
+    }
+  }
 }
 
-export class ProductQueryTransform extends OmitType(ProductQuery, ['ingredients', 'category']) {
+export class ProductQueryTransform extends OmitType(ProductQuery, [
+  'ingredients',
+  'category',
+  'originalPrice',
+  'expiredTime',
+  'categoryId',
+  'disabled',
+]) {
   @Exclude()
   ingredients: boolean;
 
@@ -192,9 +228,19 @@ export class ProductQueryTransform extends OmitType(ProductQuery, ['ingredients'
 
   @Expose()
   product_id: boolean;
+
+  @Exclude()
+  expiredTime: boolean;
+
+  @Exclude()
+  originalPrice: boolean;
+
+  @Exclude()
+  categoryId: boolean;
 }
 
 export class ProductSelect extends Pagination {
+  @IsDefined()
   @Type(() => ProductQuery)
   query: ProductQuery;
 
