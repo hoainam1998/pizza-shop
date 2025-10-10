@@ -5,6 +5,7 @@ import ShareModule from '@share/module';
 import { ClientProvider, ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 import { PRODUCT_SERVICE } from '@share/di-token';
+import LoggingModule from '@share/libs/logging/logging.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { PRODUCT_SERVICE } from '@share/di-token';
       },
     ]),
     ShareModule,
+    LoggingModule,
   ],
   providers: [ProductService],
   controllers: [ProductController],

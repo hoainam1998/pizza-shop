@@ -70,7 +70,7 @@ export default class CategoryController {
   @SerializeOptions({ type: CategoryDetailSerializer })
   @HandleHttpError
   getAllCategories(@Body() select: CategoryQuery): Observable<Promise<category[]>> {
-    Object.assign(select, CategoryQuery.plainWithIncludeId(select));
+    select = CategoryQuery.plainWithIncludeId(select) as any;
     return this.categoryService.getAllCategories(select).pipe(
       map((categories) => {
         const categoriesObj = new Categories(categories);

@@ -1,13 +1,13 @@
 import {
-  Body,
-  UsePipes,
+  BadRequestException,
   Controller,
-  HttpCode,
+  ValidationPipe,
   HttpStatus,
+  HttpCode,
+  UsePipes,
   Post,
   UseInterceptors,
-  ValidationPipe,
-  BadRequestException,
+  Body,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { map, Observable } from 'rxjs';
@@ -27,6 +27,7 @@ import { MessageSerializer } from '@share/dto/serializer/common';
 import messages from '@share/constants/messages';
 import { PaginationProductSerializer } from '@share/dto/serializer/product';
 import { handleValidateException } from '@share/utils';
+import LoggingService from '@share/libs/logging/logging.service';
 
 @UsePipes(
   new ValidationPipe({
@@ -40,7 +41,10 @@ import { handleValidateException } from '@share/utils';
 )
 @Controller('product')
 export default class ProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(
+    private readonly productService: ProductService,
+    private readonly loggingService: LoggingService,
+  ) {}
 
   @Post('create')
   @HttpCode(HttpStatus.CREATED)
@@ -62,7 +66,9 @@ export default class ProductController {
   @HttpCode(HttpStatus.OK)
   @HandleHttpError
   pagination(@Body() select: ProductSelect): Observable<Promise<Record<string, any>>> {
-    const query = plainToInstance(ProductQueryTransform, select.query);
+    const query: any = instanceToPlain(plainToInstance(ProductQueryTransform, select.query), {
+      exposeUnsetFields: false,
+    });
     select.query = query;
     return this.productService.pagination(select).pipe(
       map((results) => {

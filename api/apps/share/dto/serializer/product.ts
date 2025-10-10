@@ -60,7 +60,6 @@ export class ProductSerializer {
         name: ingredient.ingredient.name,
       }));
     }
-    return undefined;
   }
 
   @Expose()

@@ -30,5 +30,6 @@ export default Object.freeze({
   PRODUCT: {
     PRICE_INVALID: 'Product price is invalid!',
     CREATE_PRODUCT_SUCCESS: 'Create product was success!',
+    NOT_FOUND: 'The product item requirement is not found!',
   },
 });

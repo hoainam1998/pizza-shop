@@ -232,7 +232,11 @@ describe(createDescribeTest(HTTP_METHOD.POST, paginationCategoryUrl), () => {
         category_id: true,
         name: true,
         avatar: true,
-        _count: false,
+        _count: {
+          select: {
+            product: true,
+          },
+        },
       },
     };
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(responseData));

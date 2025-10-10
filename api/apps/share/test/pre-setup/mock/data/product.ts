@@ -1,4 +1,4 @@
-import { Status } from 'generated/prisma';
+import prisma, { Status } from 'generated/prisma';
 
 export const product = {
   product_id: Date.now().toString(),
@@ -10,8 +10,20 @@ export const product = {
   status: Status.IN_STOCK,
   expired_time: (Date.now() + 1000 * 60 * 60).toString(),
   category_id: Date.now().toString(),
+  category: {
+    category_id: Date.now().toString(),
+    name: 'category name',
+    avatar: 'avatar',
+  },
   ingredients: [
     JSON.stringify({ ingredientId: '1757410124885', amount: 2, unit: 'GRAM' }),
     JSON.stringify({ ingredientId: '1757582086529', amount: 2, unit: 'GRAM' }),
   ],
+  _count: {
+    bill_detail: 0,
+  },
+};
+
+export const createProductList = (length: number): prisma.product[] => {
+  return Array.apply(this, Array(length)).map(() => product);
 };
