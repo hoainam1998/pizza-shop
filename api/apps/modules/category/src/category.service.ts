@@ -46,7 +46,7 @@ export default class CategoryService {
 
   @HandlePrismaError(messages.CATEGORY)
   getDetail(category: GetCategory): Promise<Omit<CategoryDto, 'categoryId'>> {
-    return this.prismaClient.category.findFirstOrThrow({
+    return this.prismaClient.category.findUniqueOrThrow({
       where: {
         category_id: category.categoryId,
       },

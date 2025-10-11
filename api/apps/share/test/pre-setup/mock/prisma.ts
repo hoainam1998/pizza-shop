@@ -5,6 +5,7 @@ export default {
     update: jest.fn(),
     delete: jest.fn(),
     findFirstOrThrow: jest.fn(),
+    findUniqueOrThrow: jest.fn(),
     count: jest.fn(),
   },
   product: {
@@ -13,6 +14,7 @@ export default {
     update: jest.fn(),
     delete: jest.fn(),
     findFirstOrThrow: jest.fn(),
+    findUniqueOrThrow: jest.fn(),
     count: jest.fn(),
   },
   $transaction: jest.fn().mockResolvedValue({}),

@@ -1,6 +1,6 @@
-import prisma, { Status } from 'generated/prisma';
+import prisma, { Status, Unit } from 'generated/prisma';
 
-export const product = {
+export const product: any = {
   product_id: Date.now().toString(),
   name: 'product name',
   avatar: 'avatar',
@@ -18,6 +18,17 @@ export const product = {
   ingredients: [
     JSON.stringify({ ingredientId: '1757410124885', amount: 2, unit: 'GRAM' }),
     JSON.stringify({ ingredientId: '1757582086529', amount: 2, unit: 'GRAM' }),
+  ],
+  product_ingredient: [
+    {
+      ingredient_id: Date.now().toString(),
+      count: 2,
+      unit: Unit.GRAM,
+      ingredient: {
+        name: 'ingredient name',
+        avatar: 'ingredient avatar',
+      },
+    },
   ],
   _count: {
     bill_detail: 0,

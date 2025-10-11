@@ -24,7 +24,7 @@ const query = {
   category_id: true,
 };
 
-const getCategoryBody = {
+const getCategoryBody: any = {
   categoryId: category.category_id,
   query,
 };
@@ -48,7 +48,7 @@ describe('get category', () => {
   it('get category was success', async () => {
     expect.hasAssertions();
     const findFirstOrThrowPrismaMethod = jest
-      .spyOn(prismaService.category, 'findFirstOrThrow')
+      .spyOn(prismaService.category, 'findUniqueOrThrow')
       .mockResolvedValue(category);
     const getDetailServiceMethod = jest.spyOn(categoryService, 'getDetail');
     const getAllControllerMethod = jest.spyOn(categoryController, 'getCategory');
@@ -69,7 +69,7 @@ describe('get category', () => {
   it('get category failed with not found error', async () => {
     expect.hasAssertions();
     const findFirstOrThrowPrismaMethod = jest
-      .spyOn(prismaService.category, 'findFirstOrThrow')
+      .spyOn(prismaService.category, 'findUniqueOrThrow')
       .mockRejectedValue(PrismaNotFoundError);
     const logMethod = jest.spyOn(loggerService, 'log');
     const getDetailServiceMethod = jest.spyOn(categoryService, 'getDetail');
@@ -95,7 +95,7 @@ describe('get category', () => {
   it('get category failed with unknown error', async () => {
     expect.hasAssertions();
     const findFirstOrThrowPrismaMethod = jest
-      .spyOn(prismaService.category, 'findFirstOrThrow')
+      .spyOn(prismaService.category, 'findUniqueOrThrow')
       .mockRejectedValue(UnknownError);
     const logMethod = jest.spyOn(loggerService, 'log');
     const getDetailServiceMethod = jest.spyOn(categoryService, 'getDetail');
@@ -120,7 +120,7 @@ describe('get category', () => {
   it('get category failed with database disconnect error', async () => {
     expect.hasAssertions();
     const findFirstOrThrowPrismaMethod = jest
-      .spyOn(prismaService.category, 'findFirstOrThrow')
+      .spyOn(prismaService.category, 'findUniqueOrThrow')
       .mockRejectedValue(PrismaDisconnectError);
     const logMethod = jest.spyOn(loggerService, 'log');
     const getDetailServiceMethod = jest.spyOn(categoryService, 'getDetail');

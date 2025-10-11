@@ -109,6 +109,7 @@ export default class CategoryController {
   @SerializeOptions({ type: CategoryDetailSerializer })
   @HandleHttpError
   getCategory(@Body() category: GetCategory): Observable<Promise<Omit<CategoryDto, 'categoryId'>>> {
+    category.query = CategoryQuery.plainWithExcludeId(category.query) as any;
     return this.categoryService.getCategory(category).pipe(
       map((response: CategoryDetailSerializer) => {
         return validate(new CategoryDetailSerializer(response)).then((errors) => {

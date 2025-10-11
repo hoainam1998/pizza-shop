@@ -163,7 +163,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getCategoryDetailUrl), () => {
       categoryIds: [Date.now().toString()],
     };
     const send = jest.spyOn(clientProxy, 'send');
-    const getCategoryService = jest.spyOn(categoryService, 'pagination');
+    const getCategoryService = jest.spyOn(categoryService, 'getCategory');
     const response = await api
       .post(getCategoryDetailUrl)
       .send(undefinedFieldBody)
@@ -174,7 +174,26 @@ describe(createDescribeTest(HTTP_METHOD.POST, getCategoryDetailUrl), () => {
     expect(send).not.toHaveBeenCalled();
   });
 
-  it(createTestName('pagination category failed with database disconnect', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('get category detail failed with empty query', HttpStatus.BAD_REQUEST), async () => {
+    expect.hasAssertions();
+    const queryEmptyBody = {
+      ...getCategoryRequestBody,
+      query: {},
+    };
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(category));
+    const getCategoryService = jest.spyOn(categoryService, 'getCategory');
+    await api
+      .post(getCategoryDetailUrl)
+      .send(queryEmptyBody)
+      .expect(HttpStatus.OK)
+      .expect(instanceToPlain(plainToInstance(CategoryDetailSerializer, category)));
+    expect(getCategoryService).toHaveBeenCalledTimes(1);
+    expect(getCategoryService).toHaveBeenCalledWith(getCategoryRequestBody);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledWith(getCategoryPattern, getCategoryRequestBody);
+  });
+
+  it(createTestName('get category detail failed with database disconnect', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest
       .spyOn(clientProxy, 'send')

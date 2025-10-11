@@ -1,11 +1,12 @@
-import { Exclude, Expose, Transform, Type } from 'class-transformer';
+import { Exclude, Expose, instanceToPlain, plainToInstance, Transform, Type } from 'class-transformer';
 import { IsString, IsInt, IsNumberString, IsArray, IsBoolean, IsOptional, IsDefined } from 'class-validator';
 import { OmitType } from '@nestjs/mapped-types';
 import { Status } from 'generated/prisma';
 import { Pagination } from './common.dto';
 
 export class ProductCreate {
-  @IsString()
+  @IsDefined()
+  @IsNumberString()
   productId: string;
 
   @IsString()
@@ -171,7 +172,6 @@ export class ProductQuery {
         },
       };
     }
-    return false;
   }
 
   @Expose()
@@ -194,18 +194,30 @@ export class ProductQuery {
     return this.categoryId;
   }
 
-  constructor() {
-    if (Object.values(this).every((v) => v === undefined)) {
-      this.name = true;
-      this.count = true;
-      this.price = true;
-      this.originalPrice = true;
-      this.status = true;
-      this.expiredTime = true;
-      this.category = true;
-      this.categoryId = true;
-      this.disabled = true;
+  static plain(target: any): Record<string, any> {
+    if (
+      Object.entries(target).every(([key, value]) => {
+        if (key === 'product_id') {
+          return true;
+        } else {
+          return value == undefined;
+        }
+      })
+    ) {
+      target.name = true;
+      target.count = true;
+      target.price = true;
+      target.originalPrice = true;
+      target.status = true;
+      target.expiredTime = true;
+      target.category = true;
+      target.categoryId = true;
+      target.disabled = true;
     }
+    const query = instanceToPlain(plainToInstance(ProductQuery, target));
+    return instanceToPlain(plainToInstance(ProductQueryTransform, query), {
+      exposeUnsetFields: false,
+    });
   }
 }
 
@@ -247,4 +259,14 @@ export class ProductSelect extends Pagination {
   @IsOptional()
   @IsString()
   search: string;
+}
+
+export class GetProduct {
+  @IsDefined()
+  @Type(() => ProductQuery)
+  query: ProductQuery;
+
+  @IsDefined()
+  @IsNumberString()
+  productId: string;
 }

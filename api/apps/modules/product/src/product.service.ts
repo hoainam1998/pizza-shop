@@ -69,6 +69,16 @@ export default class ProductService {
     ]);
   }
 
+  @HandlePrismaError(messages.PRODUCT)
+  getProduct(select: any): Promise<any> {
+    return this.prismaClient.product.findUniqueOrThrow({
+      where: {
+        product_id: select.productId,
+      },
+      select: select.query,
+    });
+  }
+
   delete(id: string): Promise<prisma.product> {
     return this.prismaClient
       .$transaction([

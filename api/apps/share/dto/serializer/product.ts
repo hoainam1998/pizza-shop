@@ -1,6 +1,7 @@
 import { ProductPaginationResponse } from '@share/interfaces';
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
-import { IsArray, IsInt, IsObject, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsInt, IsNumberString, IsObject, IsOptional, IsString } from 'class-validator';
+import { product } from 'generated/prisma';
 
 export class ProductSerializer {
   @IsOptional()
@@ -36,7 +37,7 @@ export class ProductSerializer {
   status: string;
 
   @IsOptional()
-  @IsInt()
+  @IsNumberString()
   @Exclude({ toPlainOnly: true })
   expired_time: number;
 
@@ -44,8 +45,8 @@ export class ProductSerializer {
   @IsString()
   avatar: string;
 
+  @IsOptional()
   @IsObject()
-  @IsString()
   @Exclude({ toPlainOnly: true })
   _count: object;
 
@@ -68,10 +69,13 @@ export class ProductSerializer {
   }
 
   @Expose()
-  @Transform(({ value }) => ({ name: value.name, categoryId: value.category_id, avatar: value.avatar }), {
-    toPlainOnly: true,
-  })
-  category: any;
+  @Transform(
+    ({ value }) => (value ? { name: value.name, categoryId: value.category_id, avatar: value.avatar } : undefined),
+    {
+      toPlainOnly: true,
+    },
+  )
+  category: object;
 
   @Expose()
   get expiredTime() {
@@ -84,10 +88,19 @@ export class ProductSerializer {
   }
 
   @Expose()
+  get categoryId() {
+    return this.category_id;
+  }
+
+  @Expose()
   get disabled() {
     if (this._count) {
       return Object.values(this._count).some((v) => v > 0);
     }
+  }
+
+  constructor(target: product) {
+    Object.assign(this, target);
   }
 }
 
