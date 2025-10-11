@@ -16,16 +16,17 @@ import { product } from 'generated/prisma';
 import { HandleHttpError, UploadImage } from '@share/decorators';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import {
+  GetProduct,
   ProductCreate,
   ProductCreateTransform,
-  ProductQueryTransform,
+  ProductQuery,
   ProductSelect,
 } from '@share/dto/validators/product.dto';
 import { ImageTransformPipe } from '@share/pipes';
 import ProductService from './product.service';
 import { MessageSerializer } from '@share/dto/serializer/common';
 import messages from '@share/constants/messages';
-import { PaginationProductSerializer } from '@share/dto/serializer/product';
+import { PaginationProductSerializer, ProductSerializer } from '@share/dto/serializer/product';
 import { handleValidateException } from '@share/utils';
 import LoggingService from '@share/libs/logging/logging.service';
 
@@ -66,10 +67,7 @@ export default class ProductController {
   @HttpCode(HttpStatus.OK)
   @HandleHttpError
   pagination(@Body() select: ProductSelect): Observable<Promise<Record<string, any>>> {
-    const query: any = instanceToPlain(plainToInstance(ProductQueryTransform, select.query), {
-      exposeUnsetFields: false,
-    });
-    select.query = query;
+    select.query = ProductQuery.plain(select.query) as any;
     return this.productService.pagination(select).pipe(
       map((results) => {
         const response = new PaginationProductSerializer(results);
@@ -79,6 +77,24 @@ export default class ProductController {
           }
           const paginationResultSerializer = plainToInstance(PaginationProductSerializer, results);
           return instanceToPlain(paginationResultSerializer);
+        });
+      }),
+    );
+  }
+
+  @Post('detail')
+  @HttpCode(HttpStatus.OK)
+  @HandleHttpError
+  getProduct(@Body() select: GetProduct): any {
+    select.query = ProductQuery.plain(select.query) as any;
+    return this.productService.getProduct(select).pipe(
+      map((product) => {
+        const response = new ProductSerializer(product);
+        return validate(response).then((errors) => {
+          if (errors.length) {
+            throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
+          }
+          return instanceToPlain(plainToInstance(ProductSerializer, product));
         });
       }),
     );

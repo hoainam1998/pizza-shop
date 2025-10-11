@@ -62,14 +62,27 @@ export class CategoryQuery {
     });
     return queryExcludeDisabled;
   }
+
+  static plainWithExcludeId(target: CategoryQuery) {
+    if (Object.values(target).every((v) => v === undefined)) {
+      target.name = true;
+      target.avatar = true;
+    }
+
+    const query = instanceToPlain(plainToInstance(CategoryQuery, target));
+    const queryExcludeDisabled = instanceToPlain(plainToInstance(CategoryQueryTransform, query), {
+      exposeUnsetFields: false,
+    });
+    return queryExcludeDisabled;
+  }
 }
 
 export class CategoryQueryTransform extends OmitType(CategoryQuery, ['disabled']) {
   @Exclude()
-  disabled: true;
+  disabled: boolean;
 
   @Expose()
-  category_id: true;
+  category_id: boolean;
 }
 
 export class PaginationCategory {

@@ -1,6 +1,6 @@
 import { Controller, NotFoundException } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { createProductPattern, paginationPattern } from '@share/pattern';
+import { createProductPattern, paginationPattern, getProductPattern } from '@share/pattern';
 import * as prisma from 'generated/prisma';
 import ProductService from './product.service';
 import { ProductSelect } from '@share/dto/validators/product.dto';
@@ -38,5 +38,11 @@ export default class ProductController {
         total,
       } as ProductPaginationResponse;
     });
+  }
+
+  @MessagePattern(getProductPattern)
+  @HandleServiceError
+  getProduct(select: any): Promise<prisma.product> {
+    return this.productService.getProduct(select);
   }
 }
