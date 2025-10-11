@@ -1,6 +1,7 @@
 import { ProductPaginationResponse } from '@share/interfaces';
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
 import { IsArray, IsInt, IsNumberString, IsObject, IsOptional, IsString } from 'class-validator';
+import { product } from 'generated/prisma';
 
 export class ProductSerializer {
   @IsOptional()
@@ -98,7 +99,7 @@ export class ProductSerializer {
     }
   }
 
-  constructor(target: ProductSerializer) {
+  constructor(target: product) {
     Object.assign(this, target);
   }
 }

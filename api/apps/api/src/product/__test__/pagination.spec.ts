@@ -241,7 +241,6 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
           },
         },
       },
-      search: undefined,
     };
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(paginationResponse));
     const pagination = jest.spyOn(productService, 'pagination');

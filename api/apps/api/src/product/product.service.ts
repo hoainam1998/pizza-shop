@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { createProductPattern, getProductPattern, paginationPattern } from '@share/pattern';
 import { ClientProxy } from '@nestjs/microservices';
-import { PRODUCT_SERVICE } from '@share/di-token';
+import { Observable } from 'rxjs';
 import { product } from 'generated/prisma';
+import { createProductPattern, getProductPattern, paginationPattern } from '@share/pattern';
+import { PRODUCT_SERVICE } from '@share/di-token';
 import { GetProduct, ProductSelect } from '@share/dto/validators/product.dto';
 import { ProductPaginationResponse } from '@share/interfaces';
 
@@ -19,7 +19,7 @@ export default class ProductService {
     return this.product.send<ProductPaginationResponse>(paginationPattern, select);
   }
 
-  getProduct(select: GetProduct): Observable<any> {
+  getProduct(select: GetProduct): Observable<product> {
     return this.product.send<any>(getProductPattern, select);
   }
 }

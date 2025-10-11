@@ -85,7 +85,7 @@ export default class ProductController {
   @Post('detail')
   @HttpCode(HttpStatus.OK)
   @HandleHttpError
-  getProduct(@Body() select: GetProduct): any {
+  getProduct(@Body() select: GetProduct): Observable<Promise<Record<string, any>>> {
     select.query = ProductQuery.plain(select.query) as any;
     return this.productService.getProduct(select).pipe(
       map((product) => {

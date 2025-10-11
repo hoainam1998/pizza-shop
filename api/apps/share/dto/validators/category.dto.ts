@@ -50,7 +50,7 @@ export class CategoryQuery {
     }
   }
 
-  static plainWithIncludeId(target: CategoryQuery) {
+  static plainWithIncludeId(target: CategoryQuery): Record<string, any> {
     if (Object.values(target).every((v) => v === undefined)) {
       target.name = true;
       target.avatar = true;
@@ -63,7 +63,7 @@ export class CategoryQuery {
     return queryExcludeDisabled;
   }
 
-  static plainWithExcludeId(target: CategoryQuery) {
+  static plainWithExcludeId(target: CategoryQuery): Record<string, any> {
     if (Object.values(target).every((v) => v === undefined)) {
       target.name = true;
       target.avatar = true;
