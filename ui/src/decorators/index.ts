@@ -15,7 +15,7 @@ export function HandleNotFoundError(
   const originMethod = descriptor.value!;
 
   descriptor.value = function (...args: any[]) {
-    const allowNotFound = args[2].allowNotFound;
+    const allowNotFound = args[2]?.allowNotFound;
     return originMethod.apply(this, args).catch((error: AxiosError) => {
       if (error.status === HttpStatusCode.NotFound && allowNotFound) {
         return error.response!;
