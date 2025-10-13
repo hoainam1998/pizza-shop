@@ -46,6 +46,7 @@ const adminRoutes: RouterOptions['routes'] = [
           {
             path: `${paths.ID}`,
             component: ProductDetail,
+            props: true,
           }
         ],
       },

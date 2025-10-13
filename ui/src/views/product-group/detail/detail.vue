@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount, reactive, ref, type Ref } from 'vue';
+import { onBeforeMount, reactive, ref, type Ref, defineProps, inject } from 'vue';
 import type { AxiosResponse } from 'axios';
 import type { FormInstance, FormRules, UploadRawFile } from 'element-plus';
 import UploadBox from '@/components/upload-box.vue';
@@ -70,6 +70,8 @@ import ExpiredDaySelect from './expired-time-select.vue';
 import IngredientSelect from './ingredient-select.vue';
 import { CategoryService, ProductService } from '@/services';
 import { type CategoryType, type IngredientType, } from '@/interfaces';
+import { convertBase64ToSingleFile } from '@/utils';
+import { ROUTE_NAME } from '@/di-token';
 
 const FORM_ID = 'productForm';
 
@@ -85,6 +87,10 @@ type ProductFormRule = {
   ingredients: IngredientType[],
 };
 
+const routeName = inject(ROUTE_NAME) as any;
+const { id } = defineProps<{
+  id: string;
+}>();
 const categories: Ref<CategoryType[]> = ref([]);
 const productRef = ref<FormInstance>();
 const rules = reactive<FormRules<ProductFormRule>>({
@@ -167,12 +173,39 @@ const onSubmit = async (): Promise<void> => {
 onBeforeMount(() => {
   CategoryService.post('all', {
     name: true,
-    categoryId: true,
   }).then((response: AxiosResponse) => {
     categories.value = response.data;
   }).catch(() => {
     categories.value = [];
   });
+
+  if (id) {
+    ProductService.post('detail', {
+      productId: id,
+      query: {
+        name: true,
+        count: true,
+        price: true,
+        status: true,
+        categoryId: true,
+        ingredients: true,
+        avatar: true,
+        originalPrice: true,
+        expiredTime: true
+      }
+    }).then(async (response: AxiosResponse) => {
+      const product = response.data;
+      form.productId = product.productId;
+      form.name = product.name;
+      form.count = product.count;
+      form.category = product.categoryId;
+      form.expiredTime = product.expiredTime;
+      const file = await convertBase64ToSingleFile(product.avatar, product.name);
+      form.avatar = [file];
+      form.ingredients = product.ingredients;
+      routeName.setName(product.name);
+    });
+  }
 });
 </script>
 

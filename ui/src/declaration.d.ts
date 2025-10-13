@@ -19,5 +19,3 @@ declare global {
     var isAdmin: boolean;
   }
 };
-declare module '*.module.scss';
-declare module '@/assets/*';

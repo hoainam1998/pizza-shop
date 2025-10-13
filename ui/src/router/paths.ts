@@ -10,5 +10,5 @@ export default Object.freeze({
     }),
     CATEGORY: new RouterPath('category'),
   }),
-  ID: new RouterPath(':/id'),
+  ID: new RouterPath(':id'),
 });

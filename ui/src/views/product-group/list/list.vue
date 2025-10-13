@@ -21,7 +21,7 @@
     </template>
     <template #operation="props">
       <div class="ps-text-align-center">
-        <el-button size="small" class="ps-fw-bold" type="success">
+        <el-button size="small" class="ps-fw-bold" type="success" @click="() => navigateToDetail(props.row.productId)">
           Update
         </el-button>
         <el-button size="small" class="ps-fw-bold" type="danger" :disabled="props.row.disabled" @click="deleteProduct">
@@ -44,7 +44,6 @@ import useWrapperRouter from '@/composables/use-router';
 import confirmDeleteMessageBox from './confirm-delete-message-box';
 
 const { push } = useWrapperRouter();
-
 const PAGE_SIZE = constants.PAGINATION.PAGE_SIZE;
 const PAGE_NUMBER = constants.PAGINATION.PAGE_NUMBER;
 const keyword: Ref<string> = ref('');
@@ -93,8 +92,12 @@ const fields: TableFieldType[] = [
 const data: Ref<any[]> = ref([]);
 const total: Ref<number> = ref(0);
 
-const navigateToDetail = (): void => {
-  push(paths.HOME.PRODUCT);
+const navigateToDetail = (productId?: string): void => {
+  if (productId) {
+    push(`${paths.HOME.PRODUCT}/${productId}`);
+  } else {
+    push(`${paths.HOME.PRODUCT}/${paths.HOME.PRODUCT.NEW}`);
+  }
 };
 
 const search = (keyword: string): void => {
@@ -127,9 +130,9 @@ const fetchProducts = (pageSize: number, pageNumber: number, keyword?: string): 
       avatar: true,
       count: true,
       price: true,
-      'original_price': true,
+      originalPrice: true,
       status: true,
-      'expired_time': true,
+      expiredTime: true,
       category: true,
       ingredients: true,
       disabled: true,

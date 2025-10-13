@@ -7,12 +7,13 @@
       :to="{ path: match.path }"
     >
       {{ match.name }}
+      {{ lastName ?? lastName }}
     </el-breadcrumb-item>
   </el-breadcrumb>
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, h } from 'vue';
+import { ref, watch, h, defineProps } from 'vue';
 import { ArrowRightBold } from '@element-plus/icons-vue';
 import { whiteColor } from '@/assets/scss/variables.module.scss';
 import { useRoute } from 'vue-router';
@@ -20,6 +21,10 @@ import { useRoute } from 'vue-router';
 const separatorIcon = h(ArrowRightBold, { color: whiteColor });
 const route = useRoute();
 const matched = ref(route.matched);
+
+const { lastName } = defineProps<{
+  lastName: string,
+}>();
 
 watch(route, (_, newRoute): void => {
   matched.value = newRoute.matched;

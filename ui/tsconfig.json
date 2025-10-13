@@ -1,6 +1,6 @@
 {
   "extends": "@vue/tsconfig/tsconfig.dom.json",
-  "include": ["src/**/*", "src/**/*.vue", "declaration.d.ts"],
+  "include": ["src/**/*", "src/**/*.vue", "src/**/*.d.ts"],
   "exclude": ["src/**/__tests__/*"],
   "compilerOptions": {
     "experimentalDecorators": true,
@@ -11,8 +11,7 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "vuex": ["./node_modules/vuex/types"]
+      "@/*": ["src/*"]
     }
   }
 }
