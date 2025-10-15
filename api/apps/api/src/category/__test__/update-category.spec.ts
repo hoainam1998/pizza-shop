@@ -8,7 +8,7 @@ import { updateCategoryPattern } from '@share/pattern';
 import { category } from '@share/test/pre-setup/mock/data/category';
 import { getStaticFile, createDescribeTest, createTestName } from '@share/test/helpers';
 import CategoryService from '../category.service';
-import { HttpStatus, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
@@ -91,6 +91,28 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
       .expect('Content-Type', /application\/json/)
       .expect({
         message: UnknownError.message,
+      });
+    expect(updateCategory).toHaveBeenCalledTimes(1);
+    expect(updateCategory).toHaveBeenCalledWith(categoryResponse);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledWith(updateCategoryPattern, categoryResponse);
+  });
+
+  it(createTestName('update category failed with not found error', HttpStatus.NOT_FOUND), async () => {
+    expect.hasAssertions();
+    const send = jest
+      .spyOn(clientProxy, 'send')
+      .mockReturnValue(throwError(() => new NotFoundException(messages.CATEGORY.NOT_FOUND)));
+    const updateCategory = jest.spyOn(categoryService, 'updateCategory');
+    await api
+      .put(updateCategoryUrl)
+      .field('categoryId', categoryResponse.category_id)
+      .field('name', category.name)
+      .attach('avatar', getStaticFile('test-image.png'))
+      .expect(HttpStatus.NOT_FOUND)
+      .expect('Content-Type', /application\/json/)
+      .expect({
+        message: messages.CATEGORY.NOT_FOUND,
       });
     expect(updateCategory).toHaveBeenCalledTimes(1);
     expect(updateCategory).toHaveBeenCalledWith(categoryResponse);
