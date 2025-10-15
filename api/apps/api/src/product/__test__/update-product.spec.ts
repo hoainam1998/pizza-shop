@@ -8,7 +8,7 @@ import { updateProductPattern } from '@share/pattern';
 import { product } from '@share/test/pre-setup/mock/data/product';
 import { getStaticFile, createDescribeTest, createTestName } from '@share/test/helpers';
 import ProductService from '../product.service';
-import { BadRequestException, HttpStatus, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
@@ -129,6 +129,34 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     expect(send).toHaveBeenCalledWith(updateProductPattern, productUpdate);
   });
 
+  it(createTestName('update product failed with not found error', HttpStatus.NOT_FOUND), async () => {
+    expect.hasAssertions();
+    const send = jest
+      .spyOn(clientProxy, 'send')
+      .mockReturnValue(throwError(() => new NotFoundException(messages.PRODUCT.NOT_FOUND)));
+    const updateProduct = jest.spyOn(productService, 'updateProduct');
+    await api
+      .put(updateProductUrl)
+      .field('productId', product.product_id)
+      .field('name', product.name)
+      .field('count', product.count)
+      .field('price', product.price)
+      .field('originalPrice', product.original_price)
+      .field('expiredTime', product.expired_time)
+      .field('category', product.category_id)
+      .field('ingredients', product.ingredients)
+      .attach('avatar', getStaticFile('test-image.png'))
+      .expect(HttpStatus.NOT_FOUND)
+      .expect('Content-Type', /application\/json/)
+      .expect({
+        message: messages.PRODUCT.NOT_FOUND,
+      });
+    expect(updateProduct).toHaveBeenCalledTimes(1);
+    expect(updateProduct).toHaveBeenCalledWith(productUpdate);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledWith(updateProductPattern, productUpdate);
+  });
+
   it(createTestName('update product failed with avatar empty', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const errorMessage = messages.COMMON.EMPTY_FILE.replace(/{fieldname}/, 'avatar');
@@ -201,7 +229,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     expect(send).not.toHaveBeenCalled();
   });
 
-  it(createTestName('create product failed with missing productId field', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('update product failed with missing productId field', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
     const updateProduct = jest.spyOn(productService, 'updateProduct');
