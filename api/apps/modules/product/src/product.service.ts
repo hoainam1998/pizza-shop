@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import * as cron from 'cron';
 import { PRISMA_CLIENT } from '@share/di-token';
 import * as prisma from 'generated/prisma';
-import { ProductSelect } from '@share/dto/validators/product.dto';
+import { ProductCreate, ProductSelect } from '@share/dto/validators/product.dto';
 import { HandlePrismaError } from '@share/decorators';
 import { ProductPaginationPrismaResponse } from '@share/interfaces';
 import { calcSkip } from '@share/utils';
@@ -19,6 +19,21 @@ export default class ProductService {
     private readonly logger: LoggingService,
   ) {}
 
+  private deleteProductWhenExpired(product: prisma.product, actionName: string): void {
+    const date = new Date(+product.expired_time);
+    const dateStr = formatDateTime(date);
+    const jobName = 'delete_expired_product';
+    const job = new cron.CronJob(date, async () => {
+      await this.delete(product.product_id);
+      this.logger.log(messages.PRODUCT.PRODUCT_DELETED, actionName);
+    });
+
+    this.schedulerRegistry.addCronJob(jobName, job);
+    job.start();
+
+    this.logger.log(`job "${jobName}" added at ${dateStr}!`, actionName);
+  }
+
   @HandlePrismaError(messages.PRODUCT)
   createProduct(product: prisma.product): Promise<prisma.product> {
     return this.prismaClient.product
@@ -26,18 +41,7 @@ export default class ProductService {
         data: product,
       })
       .then((product) => {
-        const date = new Date(+product.expired_time);
-        const dateStr = formatDateTime(date);
-        const jobName = 'deleteExpiredProduct';
-        const job = new cron.CronJob(date, async () => {
-          await this.delete(product.product_id);
-          this.logger.log('The product was deleted!', this.createProduct.name);
-        });
-
-        this.schedulerRegistry.addCronJob(jobName, job);
-        job.start();
-
-        this.logger.log(`job "${jobName}" added at ${dateStr}!`, this.createProduct.name);
+        this.deleteProductWhenExpired(product, this.createProduct.name);
         return product;
       });
   }
@@ -95,6 +99,38 @@ export default class ProductService {
       ])
       .then((results) => {
         return results[1];
+      });
+  }
+
+  @HandlePrismaError(messages.PRODUCT)
+  updateProduct(product: ProductCreate): Promise<prisma.product> {
+    return this.prismaClient
+      .$transaction([
+        this.prismaClient.product_ingredient.deleteMany({
+          where: {
+            product_id: product.product_id,
+          },
+        }),
+        this.prismaClient.product.update({
+          where: {
+            product_id: product.product_id,
+          },
+          data: {
+            name: product.name,
+            avatar: product.avatar,
+            count: product.count,
+            price: product.price,
+            original_price: product.price,
+            expired_time: product.expired_time,
+            category_id: product.category_id,
+            product_ingredient: product.product_ingredient,
+          },
+        }),
+      ])
+      .then((results) => {
+        const product = results[1];
+        this.deleteProductWhenExpired(product, this.updateProduct.name);
+        return product;
       });
   }
 }

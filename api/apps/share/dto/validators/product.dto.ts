@@ -96,7 +96,10 @@ export class ProductCreateTransform extends OmitType(ProductCreate, [
   @Exclude()
   productId: string;
 
-  status = Status.IN_STOCK;
+  @Expose({ groups: ['create'] })
+  get status() {
+    return Status.IN_STOCK;
+  }
 }
 
 export class ProductQuery {

@@ -4,7 +4,7 @@ import TestAgent from 'supertest/lib/agent';
 import { ClientProxy } from '@nestjs/microservices';
 import startUp from './pre-setup';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
-import { createProductPattern } from '@share/pattern';
+import { updateProductPattern } from '@share/pattern';
 import { product } from '@share/test/pre-setup/mock/data/product';
 import { getStaticFile, createDescribeTest, createTestName } from '@share/test/helpers';
 import ProductService from '../product.service';
@@ -14,7 +14,7 @@ import { HTTP_METHOD } from '@share/enums';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { ProductCreate, ProductCreateTransform } from '@share/dto/validators/product.dto';
-const createProductUrl = '/product/create';
+const updateProductUrl = '/product/update';
 
 const productRequestBody = {
   productId: product.product_id,
@@ -28,7 +28,13 @@ const productRequestBody = {
   ingredients: product.ingredients,
 };
 
-describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
+const productBody = instanceToPlain(plainToInstance(ProductCreate, productRequestBody), {
+  exposeUnsetFields: false,
+});
+const productUpdate: any = instanceToPlain(plainToInstance(ProductCreateTransform, productBody));
+productUpdate.avatar = expect.toBeImageBase64();
+
+describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
   let api: TestAgent;
   let clientProxy: ClientProxy;
   let close: () => Promise<void>;
@@ -48,16 +54,12 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
     }
   });
 
-  const productBody = instanceToPlain(plainToInstance(ProductCreate, productRequestBody));
-  const productCreate: any = plainToInstance(ProductCreateTransform, productBody, { groups: ['create'] });
-  productCreate.avatar = expect.toBeImageBase64();
-
-  it(createTestName('create product success', HttpStatus.CREATED), async () => {
+  it(createTestName('update product success', HttpStatus.CREATED), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
-    const createProduct = jest.spyOn(productService, 'createProduct');
+    const updateProduct = jest.spyOn(productService, 'updateProduct');
     await api
-      .post(createProductUrl)
+      .put(updateProductUrl)
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)
@@ -70,20 +72,20 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
       .expect(HttpStatus.CREATED)
       .expect('Content-Type', /application\/json/)
       .expect({
-        message: messages.PRODUCT.CREATE_PRODUCT_SUCCESS,
+        message: messages.PRODUCT.UPDATE_PRODUCT_SUCCESS,
       });
-    expect(createProduct).toHaveBeenCalledTimes(1);
-    expect(createProduct).toHaveBeenCalledWith(productCreate);
+    expect(updateProduct).toHaveBeenCalledTimes(1);
+    expect(updateProduct).toHaveBeenCalledWith(productUpdate);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(createProductPattern, productCreate);
+    expect(send).toHaveBeenCalledWith(updateProductPattern, productUpdate);
   });
 
-  it(createTestName('create product failed with undefined field', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('update product failed with undefined field', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
-    const createProduct = jest.spyOn(productService, 'createProduct');
+    const updateProduct = jest.spyOn(productService, 'updateProduct');
     const response = await api
-      .post(createProductUrl)
+      .put(updateProductUrl)
       .field('categoryIds', Date.now().toString())
       .field('productId', product.product_id)
       .field('name', product.name)
@@ -97,16 +99,16 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
     expect(response.body).toEqual(expect.any(Array));
-    expect(createProduct).not.toHaveBeenCalled();
+    expect(updateProduct).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
 
-  it(createTestName('create product failed with unknown error', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('update product failed with unknown error', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockImplementation(() => throwError(() => UnknownError));
-    const createProduct = jest.spyOn(productService, 'createProduct');
+    const updateProduct = jest.spyOn(productService, 'updateProduct');
     await api
-      .post(createProductUrl)
+      .put(updateProductUrl)
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)
@@ -121,19 +123,19 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
       .expect({
         message: UnknownError.message,
       });
-    expect(createProduct).toHaveBeenCalledTimes(1);
-    expect(createProduct).toHaveBeenCalledWith(productCreate);
+    expect(updateProduct).toHaveBeenCalledTimes(1);
+    expect(updateProduct).toHaveBeenCalledWith(productUpdate);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(createProductPattern, productCreate);
+    expect(send).toHaveBeenCalledWith(updateProductPattern, productUpdate);
   });
 
-  it(createTestName('create product failed with avatar empty', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('update product failed with avatar empty', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const errorMessage = messages.COMMON.EMPTY_FILE.replace(/{fieldname}/, 'avatar');
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
-    const createProduct = jest.spyOn(productService, 'createProduct');
+    const updateProduct = jest.spyOn(productService, 'updateProduct');
     await api
-      .post(createProductUrl)
+      .put(updateProductUrl)
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)
@@ -148,16 +150,16 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
       .expect({
         message: errorMessage,
       });
-    expect(createProduct).not.toHaveBeenCalled();
+    expect(updateProduct).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
 
-  it(createTestName('create product failed with avatar wrong type', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('update product failed with avatar wrong type', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
-    const createProduct = jest.spyOn(productService, 'createProduct');
+    const updateProduct = jest.spyOn(productService, 'updateProduct');
     await api
-      .post(createProductUrl)
+      .put(updateProductUrl)
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)
@@ -172,16 +174,16 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
       .expect({
         message: messages.COMMON.FILE_TYPE_INVALID,
       });
-    expect(createProduct).not.toHaveBeenCalled();
+    expect(updateProduct).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
 
-  it(createTestName('create product failed with missing avatar field', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('update product failed with missing avatar field', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
-    const createProduct = jest.spyOn(productService, 'createProduct');
+    const updateProduct = jest.spyOn(productService, 'updateProduct');
     const response = await api
-      .post(createProductUrl)
+      .put(updateProductUrl)
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)
@@ -195,16 +197,16 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
     expect(response.body).toEqual({
       message: expect.any(String),
     });
-    expect(createProduct).not.toHaveBeenCalled();
+    expect(updateProduct).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
 
   it(createTestName('create product failed with missing productId field', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
-    const createProduct = jest.spyOn(productService, 'createProduct');
+    const updateProduct = jest.spyOn(productService, 'updateProduct');
     const response = await api
-      .post(createProductUrl)
+      .put(updateProductUrl)
       .field('name', product.name)
       .field('count', product.count)
       .field('price', product.price)
@@ -216,18 +218,18 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
     expect(response.body).toEqual(expect.any(Array));
-    expect(createProduct).not.toHaveBeenCalled();
+    expect(updateProduct).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
 
-  it(createTestName('create product failed with database disconnect', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('update product failed with database disconnect', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest
       .spyOn(clientProxy, 'send')
       .mockReturnValue(throwError(() => new BadRequestException(PrismaDisconnectError.message)));
-    const createProduct = jest.spyOn(productService, 'createProduct');
+    const updateProduct = jest.spyOn(productService, 'updateProduct');
     await api
-      .post(createProductUrl)
+      .put(updateProductUrl)
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)
@@ -242,19 +244,19 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
       .expect({
         message: messages.COMMON.DATABASE_DISCONNECT,
       });
-    expect(createProduct).toHaveBeenCalledTimes(1);
-    expect(createProduct).toHaveBeenCalledWith(productCreate);
+    expect(updateProduct).toHaveBeenCalledTimes(1);
+    expect(updateProduct).toHaveBeenCalledWith(productUpdate);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(createProductPattern, productCreate);
+    expect(send).toHaveBeenCalledWith(updateProductPattern, productUpdate);
   });
 
-  it(createTestName('create product failed with server error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
+  it(createTestName('update product failed with server error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
     const serverError = new InternalServerErrorException();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => serverError));
-    const createProduct = jest.spyOn(productService, 'createProduct');
+    const updateProduct = jest.spyOn(productService, 'updateProduct');
     await api
-      .post(createProductUrl)
+      .put(updateProductUrl)
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)
@@ -269,9 +271,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
       .expect({
         message: serverError.message,
       });
-    expect(createProduct).toHaveBeenCalledTimes(1);
-    expect(createProduct).toHaveBeenCalledWith(productCreate);
+    expect(updateProduct).toHaveBeenCalledTimes(1);
+    expect(updateProduct).toHaveBeenCalledWith(productUpdate);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(createProductPattern, productCreate);
+    expect(send).toHaveBeenCalledWith(updateProductPattern, productUpdate);
   });
 });

@@ -8,6 +8,7 @@ import {
   Post,
   UseInterceptors,
   Body,
+  Put,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { map, Observable } from 'rxjs';
@@ -57,7 +58,7 @@ export default class ProductController {
     @UploadImage('avatar', ImageTransformPipe) avatar: string,
   ): Observable<MessageSerializer> {
     product.avatar = avatar;
-    const productCreate: product = plainToInstance(ProductCreateTransform, product);
+    const productCreate: product = plainToInstance(ProductCreateTransform, product, { groups: ['create'] });
     return this.productService
       .createProduct(productCreate)
       .pipe(map(() => MessageSerializer.create(messages.PRODUCT.CREATE_PRODUCT_SUCCESS)));
@@ -98,5 +99,21 @@ export default class ProductController {
         });
       }),
     );
+  }
+
+  @Put('update')
+  @HttpCode(HttpStatus.CREATED)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @UseInterceptors(FileInterceptor('avatar'))
+  @HandleHttpError
+  updateProduct(
+    @Body() product: ProductCreate,
+    @UploadImage('avatar', ImageTransformPipe) avatar: string,
+  ): Observable<MessageSerializer> {
+    product.avatar = avatar;
+    const productUpdate = instanceToPlain(plainToInstance(ProductCreateTransform, product));
+    return this.productService
+      .updateProduct(productUpdate)
+      .pipe(map(() => MessageSerializer.create(messages.PRODUCT.UPDATE_PRODUCT_SUCCESS)));
   }
 }
