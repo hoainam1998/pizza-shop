@@ -17,5 +17,8 @@ export default {
     findUniqueOrThrow: jest.fn(),
     count: jest.fn(),
   },
+  product_ingredient: {
+    deleteMany: jest.fn(),
+  },
   $transaction: jest.fn().mockResolvedValue({}),
 };

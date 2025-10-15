@@ -1,9 +1,9 @@
 import { Controller, NotFoundException } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { createProductPattern, paginationPattern, getProductPattern } from '@share/pattern';
+import { createProductPattern, paginationPattern, getProductPattern, updateProductPattern } from '@share/pattern';
 import * as prisma from 'generated/prisma';
 import ProductService from './product.service';
-import { ProductSelect } from '@share/dto/validators/product.dto';
+import { ProductCreate, ProductSelect } from '@share/dto/validators/product.dto';
 import { ProductPaginationResponse } from '@share/interfaces';
 import { checkArrayHaveValues } from '@share/utils';
 import LoggingService from '@share/libs/logging/logging.service';
@@ -44,5 +44,11 @@ export default class ProductController {
   @HandleServiceError
   getProduct(select: any): Promise<prisma.product> {
     return this.productService.getProduct(select);
+  }
+
+  @MessagePattern(updateProductPattern)
+  @HandleServiceError
+  updateProduct(product: ProductCreate): Promise<prisma.product> {
+    return this.productService.updateProduct(product);
   }
 }

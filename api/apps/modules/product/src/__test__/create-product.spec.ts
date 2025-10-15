@@ -1,6 +1,4 @@
 import { PrismaClient } from 'generated/prisma';
-import { SchedulerRegistry } from '@nestjs/schedule';
-import { CronJob } from 'cron';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { RpcException } from '@nestjs/microservices';
@@ -9,7 +7,6 @@ import ProductController from '../product.controller';
 import ProductService from '../product.service';
 import { product } from '@share/test/pre-setup/mock/data/product';
 import { PRISMA_CLIENT } from '@share/di-token';
-import LoggingService from '@share/libs/logging/logging.service';
 import { BadRequestException } from '@nestjs/common';
 import { createMessage } from '@share/utils';
 import messages from '@share/constants/messages';
@@ -17,16 +14,12 @@ import messages from '@share/constants/messages';
 let productController: ProductController;
 let productService: ProductService;
 let prismaService: PrismaClient;
-let loggerService: LoggingService;
-let schedulerService: SchedulerRegistry;
 
 beforeEach(async () => {
   const moduleRef = await startUp();
 
   productService = moduleRef.get(ProductService);
   productController = moduleRef.get(ProductController);
-  loggerService = moduleRef.get(LoggingService);
-  schedulerService = moduleRef.get(SchedulerRegistry);
   prismaService = moduleRef.get(PRISMA_CLIENT);
 });
 
@@ -39,8 +32,7 @@ afterEach((done) => {
 describe('create product', () => {
   it('create product was success', async () => {
     expect.hasAssertions();
-    const log = jest.spyOn(loggerService, 'log');
-    const addJob = jest.spyOn(schedulerService, 'addCronJob');
+    const deleteProductWhenExpired = jest.spyOn(productService as any, 'deleteProductWhenExpired');
     const createPrismaMethod = jest.spyOn(prismaService.product, 'create').mockResolvedValue(product);
     const createMethodService = jest.spyOn(productService, 'createProduct');
     const createMethodController = jest.spyOn(productController, 'createProduct');
@@ -53,17 +45,13 @@ describe('create product', () => {
     expect(createPrismaMethod).toHaveBeenCalledWith({
       data: product,
     });
-    expect(addJob).toHaveBeenCalledTimes(1);
-    expect(addJob).toHaveBeenCalledWith(expect.any(String), expect.any(CronJob));
-    expect(globalThis.cronJob.start).toHaveBeenCalledTimes(1);
-    expect(log).toHaveBeenCalledTimes(1);
-    expect(log).toHaveBeenCalledWith(expect.any(String), expect.any(String));
+    expect(deleteProductWhenExpired).toHaveBeenCalledTimes(1);
+    expect(deleteProductWhenExpired).toHaveBeenCalledWith(product, productService.createProduct.name);
   });
 
   it('create product failed with unknown error', async () => {
     expect.hasAssertions();
-    const log = jest.spyOn(loggerService, 'log');
-    const addJob = jest.spyOn(schedulerService, 'addCronJob');
+    const deleteProductWhenExpired = jest.spyOn(productService as any, 'deleteProductWhenExpired');
     const createPrismaMethod = jest.spyOn(prismaService.product, 'create').mockRejectedValue(UnknownError);
     const createMethodService = jest.spyOn(productService, 'createProduct');
     const createMethodController = jest.spyOn(productController, 'createProduct');
@@ -78,16 +66,12 @@ describe('create product', () => {
     expect(createPrismaMethod).toHaveBeenCalledWith({
       data: product,
     });
-    expect(addJob).not.toHaveBeenCalled();
-    expect(globalThis.cronJob.start).not.toHaveBeenCalled();
-    expect(log).toHaveBeenCalledTimes(1);
-    expect(log).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
+    expect(deleteProductWhenExpired).not.toHaveBeenCalled();
   });
 
-  it('create product failed with unknown error', async () => {
+  it('create product failed with database disconnect error', async () => {
     expect.hasAssertions();
-    const log = jest.spyOn(loggerService, 'log');
-    const addJob = jest.spyOn(schedulerService, 'addCronJob');
+    const deleteProductWhenExpired = jest.spyOn(productService as any, 'deleteProductWhenExpired');
     const createPrismaMethod = jest.spyOn(prismaService.product, 'create').mockRejectedValue(PrismaDisconnectError);
     const createMethodService = jest.spyOn(productService, 'createProduct');
     const createMethodController = jest.spyOn(productController, 'createProduct');
@@ -102,9 +86,6 @@ describe('create product', () => {
     expect(createPrismaMethod).toHaveBeenCalledWith({
       data: product,
     });
-    expect(addJob).not.toHaveBeenCalled();
-    expect(globalThis.cronJob.start).not.toHaveBeenCalled();
-    expect(log).toHaveBeenCalledTimes(1);
-    expect(log).toHaveBeenCalledWith(PrismaDisconnectError.message, expect.any(String));
+    expect(deleteProductWhenExpired).not.toHaveBeenCalled();
   });
 });
