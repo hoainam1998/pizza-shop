@@ -9,6 +9,8 @@ import {
   UseInterceptors,
   Body,
   Put,
+  Delete,
+  Param,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { map, Observable } from 'rxjs';
@@ -23,7 +25,7 @@ import {
   ProductQuery,
   ProductSelect,
 } from '@share/dto/validators/product.dto';
-import { ImageTransformPipe } from '@share/pipes';
+import { IdValidationPipe, ImageTransformPipe } from '@share/pipes';
 import ProductService from './product.service';
 import { MessageSerializer } from '@share/dto/serializer/common';
 import messages from '@share/constants/messages';
@@ -115,5 +117,14 @@ export default class ProductController {
     return this.productService
       .updateProduct(productUpdate)
       .pipe(map(() => MessageSerializer.create(messages.PRODUCT.UPDATE_PRODUCT_SUCCESS)));
+  }
+
+  @Delete('delete/:id')
+  @HttpCode(HttpStatus.OK)
+  @HandleHttpError
+  deleteProduct(@Param('id', new IdValidationPipe()) productId: string): Observable<MessageSerializer> {
+    return this.productService
+      .deleteProduct(productId)
+      .pipe(map(() => MessageSerializer.create(messages.PRODUCT.DELETE_PRODUCT_SUCCESS)));
   }
 }

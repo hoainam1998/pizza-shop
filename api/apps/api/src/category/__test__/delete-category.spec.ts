@@ -1,10 +1,9 @@
-import { BadRequestException, HttpStatus, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { of, throwError } from 'rxjs';
 import TestAgent from 'supertest/lib/agent';
 import { expect } from '@jest/globals';
 import { ClientProxy } from '@nestjs/microservices';
 import startUp from './pre-setup';
-import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { deleteCategoryPattern } from '@share/pattern';
 import { category } from '@share/test/pre-setup/mock/data/category';
 import { createDescribeTest, createTestName } from '@share/test/helpers';
@@ -16,7 +15,7 @@ const deleteCategoryBaseUrl = '/category/delete';
 const categoryId: string = Date.now().toString();
 const deleteCategoryUrl: string = `${deleteCategoryBaseUrl}/${categoryId}`;
 
-describe(createDescribeTest(HTTP_METHOD.POST, deleteCategoryBaseUrl), () => {
+describe(createDescribeTest(HTTP_METHOD.DELETE, deleteCategoryBaseUrl), () => {
   let api: TestAgent;
   let clientProxy: ClientProxy;
   let close: () => Promise<void>;
@@ -70,16 +69,35 @@ describe(createDescribeTest(HTTP_METHOD.POST, deleteCategoryBaseUrl), () => {
 
   it(createTestName('delete category failed with unknown error', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
-    const send = jest.spyOn(clientProxy, 'send').mockImplementation(() => {
-      return throwError(() => UnknownError);
-    });
+    const send = jest
+      .spyOn(clientProxy, 'send')
+      .mockReturnValue(throwError(() => new BadRequestException(messages.COMMON.COMMON_ERROR)));
     const deleteCategory = jest.spyOn(categoryService, 'deleteCategory');
     await api
       .delete(deleteCategoryUrl)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect({
-        message: UnknownError.message,
+        message: messages.COMMON.COMMON_ERROR,
+      });
+    expect(deleteCategory).toHaveBeenCalledTimes(1);
+    expect(deleteCategory).toHaveBeenCalledWith(categoryId);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledWith(deleteCategoryPattern, categoryId);
+  });
+
+  it(createTestName('delete category failed with not found error', HttpStatus.NOT_FOUND), async () => {
+    expect.hasAssertions();
+    const send = jest
+      .spyOn(clientProxy, 'send')
+      .mockReturnValue(throwError(() => new NotFoundException(messages.PRODUCT.NOT_FOUND)));
+    const deleteCategory = jest.spyOn(categoryService, 'deleteCategory');
+    await api
+      .delete(deleteCategoryUrl)
+      .expect(HttpStatus.NOT_FOUND)
+      .expect('Content-Type', /application\/json/)
+      .expect({
+        message: messages.PRODUCT.NOT_FOUND,
       });
     expect(deleteCategory).toHaveBeenCalledTimes(1);
     expect(deleteCategory).toHaveBeenCalledWith(categoryId);

@@ -33,5 +33,6 @@ export default Object.freeze({
     UPDATE_PRODUCT_SUCCESS: 'Update product was success!',
     NOT_FOUND: 'The product item requirement is not found!',
     PRODUCT_DELETED: 'The product was deleted!',
+    DELETE_PRODUCT_SUCCESS: 'Delete product was success!',
   },
 });

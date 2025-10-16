@@ -83,7 +83,7 @@ export default class ProductService {
     });
   }
 
-  delete(id: string): Promise<prisma.product> {
+  private delete(id: string): Promise<prisma.product> {
     return this.prismaClient
       .$transaction([
         this.prismaClient.product_ingredient.deleteMany({
@@ -97,9 +97,12 @@ export default class ProductService {
           },
         }),
       ])
-      .then((results) => {
-        return results[1];
-      });
+      .then((results) => results[1]);
+  }
+
+  @HandlePrismaError(messages.PRODUCT)
+  deleteProduct(productId: string): Promise<prisma.product> {
+    return this.delete(productId);
   }
 
   @HandlePrismaError(messages.PRODUCT)
