@@ -23,3 +23,4 @@ export const getAllIngredients = createMicroserviceEvent('get_all_ingredients');
 export const createProductPattern = createMicroserviceEvent('create_product');
 export const getProductPattern = createMicroserviceEvent('get_product');
 export const updateProductPattern = createMicroserviceEvent('update_product');
+export const deleteProductPattern = createMicroserviceEvent('delete_product');

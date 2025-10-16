@@ -64,7 +64,7 @@ describe('delete category', () => {
     expect(deletePrismaMethod).toHaveBeenCalledTimes(1);
     expect(deletePrismaMethod).toHaveBeenCalledWith({
       where: {
-        category_id: expect.stringMatching(/(\d+){13}/),
+        category_id: category.category_id,
       },
     });
   });
