@@ -1,10 +1,7 @@
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import api from '@/axios';
 import { HandleNotFoundError } from '@/decorators';
-
-type ExtraConfigs = AxiosRequestConfig & {
-  allowNotFound: boolean;
-};
+import type { ExtraConfigs } from '../interfaces';
 
 type RequestBody = {
   [key: string]: any;

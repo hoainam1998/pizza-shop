@@ -31,22 +31,22 @@ const adminRoutes: RouterOptions['routes'] = [
       },
       {
         path: `${paths.HOME.PRODUCT}`,
-        name: 'product',
+        name: 'products',
         component: RouterView,
         children: [
           {
             path: '',
-            name: 'product_list',
+            name: '_',
             component: ProductList,
           },
           {
             path: `${paths.HOME.PRODUCT.NEW}`,
             component: ProductDetail,
+            name: 'new',
           },
           {
             path: `${paths.ID}`,
             component: ProductDetail,
-            props: true,
           }
         ],
       },

@@ -1,13 +1,13 @@
 <template>
-  <div class="ingredient-select ps-pl-5 ps-pr-5">
+  <div class="ingredient-select ps-pl-5 ps-pr-5 ps-w-100">
     <h4 class="require-icon ps-text-color-606266">Ingredients</h4>
     <div class="ps-display-flex ps-justify-content-space-between ps-mt-7 ps-mb-7">
-      <el-button size="small" type="success" :onClick="addNewIngredient">New</el-button>
+      <el-button size="small" type="success" :disabled="disableAddNewBtn" :onClick="addNewIngredient">New</el-button>
       <h5 class="ps-text-align-end">Temporary product price: {{ temporaryProductPrice }}</h5>
     </div>
     <ul class="ps-list-style-none ps-pl-0">
       <IngredientItem v-for="(props, index) in ingredients"
-        :key="index"
+        :key="props.value"
         :options="props.options"
         :value="props.value"
         :amount="props.amount"
@@ -15,8 +15,8 @@
         :index="index"
         :units="props.units"
         :avatar="props.avatar"
-        @onDelete="(v) => deleteIngredientItem(index)(v)"
-        @onSelected="(v) => selectedIngredient(index)(v)" />
+        @onDelete="() => deleteIngredientItem(index)"
+        @onSelected="(v) => selectedIngredient(index)(v)"/>
     </ul>
   </div>
 </template>
@@ -33,12 +33,13 @@ import {
   computed,
   watchEffect,
 } from 'vue';
+import type { AxiosResponse } from 'axios';
 import { ElFormItem, ElSelect, ElOption, ElIcon, ElInput, ElRow, ElCol } from 'element-plus';
 import { CloseBold } from '@element-plus/icons-vue';
 import { dangerColor } from '@/assets/scss/variables.module.scss';
 import { IngredientService } from '@/services';
 import { type IngredientType, type OptionType } from '@/interfaces';
-import type { AxiosResponse } from 'axios';
+import spicePng from '@/assets/images/spice.png';
 
 type IngredientItemsProp = {
   options: OptionType[];
@@ -53,7 +54,7 @@ type IngredientStore = {
   [key: string]: {
     units: string[];
     avatar: string;
-  }
+  };
 };
 
 const ingredients: Ref<IngredientItemsProp[]> = ref([]);
@@ -64,22 +65,34 @@ const ingredientIdsSelected: Ref<string[]> =
   computed(() => (ingredientSelected.value || []).map((i) => i.ingredientId));
 const options: Ref<OptionType[]> = ref([]);
 const ingredientStore: IngredientStore = {};
+const disableAddNewBtn = computed(() => options.value.length === ingredientIdsSelected.value.length);
 
-watch(ingredientSelected.value!, () => {
-  ingredients.value = assignIngredientItems(ingredients.value, ingredientIdsSelected.value);
-  IngredientService.post('compute-product-price', {
-    temporaryProductId,
-    productIngredients: ingredientSelected.value
-  }).then((response: AxiosResponse<number>) => {
-    temporaryProductPrice.value = response.data;
-  }).catch(() => {
-    temporaryProductPrice.value = 0;
-  });
-});
+const computedProductPrice = (): void => {
+  const shouldSendRequest
+    = ingredientSelected.value?.every((ingredient) => Object.values(ingredient).every((v) => !!v));
 
-const assignIngredientItems = (ingredients: (IngredientItemsProp | string)[], ingredientIdsSelected: string[])
+  if (shouldSendRequest) {
+    IngredientService.post('compute-product-price', {
+      temporaryProductId,
+      productIngredients: ingredientSelected.value
+    }, {
+      showSpinner: false,
+    }).then((response: AxiosResponse<number>) => {
+      temporaryProductPrice.value = response.data;
+    }).catch(() => {
+      temporaryProductPrice.value = 0;
+    });
+  }
+};
+
+watch(() => ingredientSelected.value, () => {
+  ingredients.value = assignIngredientItems(ingredientIdsSelected.value);
+  computedProductPrice();
+}, { deep: true });
+
+const assignIngredientItems = (ingredientIdsSelected: string[])
   : IngredientItemsProp[] => {
-  return ingredients.map((_, index) => {
+  return ingredientIdsSelected.map((_, index) => {
     const currentIngredient = ingredientStore[ingredientIdsSelected[index] as keyof typeof ingredientStore];
     return {
       options: options.value
@@ -107,10 +120,9 @@ const addNewIngredient = (): void => {
   });
 };
 
-const deleteIngredientItem = (index: number) => (ingredientId: string): void => {
-  const indexSelected = ingredientIdsSelected.value.indexOf(ingredientId);
-  ingredientSelected.value!.splice(indexSelected, 1);
+const deleteIngredientItem = (index: number): void => {
   ingredients.value.splice(index, 1);
+  ingredientSelected.value!.splice(index, 1);
 };
 
 const selectedIngredient = (index: number) => (ingredient: IngredientType): void => {
@@ -161,7 +173,7 @@ const IngredientItem = defineComponent((props:
               h(ElCol, { xl: 3 }, {
                 default: () => h('img',
                   {
-                    src: props.avatar,
+                    src: props.avatar || spicePng,
                     class: 'ps-mt-10',
                     width: 50,
                     height: 50,
@@ -188,7 +200,10 @@ const IngredientItem = defineComponent((props:
             }),
               h(ElCol, { xl: 4 }, {
                 default: () => h(ElFormItem, {
-                  rules: { required: true, trigger: 'change' },
+                  rules: [
+                    { required: true, trigger: 'change' },
+                    { type: 'number', min: 1, trigger: 'change' }
+                  ],
                   prop: `ingredients.${props.index}.amount`,
                   showMessage: false,
                 }, {
@@ -199,7 +214,8 @@ const IngredientItem = defineComponent((props:
                     class: 'ps-flex-grow-1',
                     'onUpdate:modelValue': (newValue) => {
                       amount.value = +newValue!;
-                    }
+                    },
+                    min: 1,
                   })
                 })
               }),
@@ -260,7 +276,6 @@ onBeforeMount(() => {
         value: ingredient.ingredientId,
       };
     });
-    ingredients.value = assignIngredientItems(ingredientIdsSelected.value, ingredientIdsSelected.value);
   });
 });
 </script>

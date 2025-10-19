@@ -1,6 +1,6 @@
 <template>
   <div class="ps-display-flex ps-flex-gap-5 ps-mt-5 ps-mb-5">
-    <el-button class="ps-bg-2ecc71 ps-text-color-white" @click="navigateToDetail">New</el-button>
+    <el-button class="ps-bg-2ecc71 ps-text-color-white" @click="navigateToDetail()">New</el-button>
     <SearchBox v-model="keyword" @search="search" />
   </div>
   <Table :fields="fields" :data="data" :total="total" emptyText="Products are empty!" @pagination="fetchProducts">
@@ -17,11 +17,11 @@
       {{ $formatDateHyphen(props.row.expiredTime) }}
     </template>
     <template #price="props">
-      {{ $formatVNDCurrency(props.row.price ) }}
+      {{ $formatVNDCurrency(props.row.price) }}
     </template>
     <template #operation="props">
       <div class="ps-text-align-center">
-        <el-button size="small" class="ps-fw-bold" type="success" @click="() => navigateToDetail(props.row.productId)">
+        <el-button size="small" class="ps-fw-bold" type="success" @click="navigateToDetail(props.row.productId)">
           Update
         </el-button>
         <el-button size="small" class="ps-fw-bold" type="danger" :disabled="props.row.disabled" @click="deleteProduct">
@@ -140,6 +140,9 @@ const fetchProducts = (pageSize: number, pageNumber: number, keyword?: string): 
   }, { allowNotFound: true }).then((response) => {
     data.value = response.data.list;
     total.value = response.data.total;
+  }).catch(() => {
+    data.value = [];
+    total.value = 0;
   });
 };
 
