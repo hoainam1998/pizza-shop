@@ -3,7 +3,13 @@
     <el-button class="ps-bg-2ecc71 ps-text-color-white" @click="navigateToDetail()">New</el-button>
     <SearchBox v-model="keyword" @search="search" />
   </div>
-  <Table :fields="fields" :data="data" :total="total" emptyText="Products are empty!" @pagination="fetchProducts">
+  <Table
+    ref="productTable"
+    :fields="fields"
+    :data="data"
+    :total="total"
+    emptyText="Products are empty!"
+    @pagination="fetchProducts">
     <template #avatar="props">
       <img :src="props.row.avatar" height="50" width="50" :alt="props.row.name" />
     </template>
@@ -24,8 +30,13 @@
         <el-button size="small" class="ps-fw-bold" type="success" @click="navigateToDetail(props.row.productId)">
           Update
         </el-button>
-        <el-button size="small" class="ps-fw-bold" type="danger" :disabled="props.row.disabled" @click="deleteProduct">
-          Delete
+        <el-button
+          size="small"
+          class="ps-fw-bold"
+          type="danger"
+          :disabled="props.row.disabled"
+          @click="deleteProduct(props.row.productId)">
+            Delete
         </el-button>
       </div>
     </template>
@@ -33,7 +44,8 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount, ref, type Ref } from 'vue';
+import { onBeforeMount, ref, useTemplateRef, type Ref } from 'vue';
+import type { AxiosResponse } from 'axios';
 import Table from '@/components/table.vue';
 import SearchBox from '@/components/search-box.vue';
 import type { TableFieldType } from '@/interfaces';
@@ -44,6 +56,7 @@ import useWrapperRouter from '@/composables/use-router';
 import confirmDeleteMessageBox from './confirm-delete-message-box';
 
 const { push } = useWrapperRouter();
+const productTableRef = useTemplateRef('productTable');
 const PAGE_SIZE = constants.PAGINATION.PAGE_SIZE;
 const PAGE_NUMBER = constants.PAGINATION.PAGE_NUMBER;
 const keyword: Ref<string> = ref('');
@@ -104,19 +117,13 @@ const search = (keyword: string): void => {
   fetchProducts(PAGE_SIZE, PAGE_NUMBER, keyword);
 };
 
-const deleteProduct = () => {
-  const deleteProductService = (): Promise<any> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          data: {
-            message: 'Delete product!',
-          }
-        });
-      }, 100);
+const deleteProduct = (productId: string): void => {
+  const deleteProductService = (): Promise<AxiosResponse> => {
+    return ProductService.delete(`delete/${productId}`).then((response) => {
+      productTableRef.value?.refresh();
+      return response;
     });
   };
-
   confirmDeleteMessageBox(deleteProductService);
 };
 

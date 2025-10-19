@@ -3,13 +3,13 @@
     <template v-for="(match, index) in matched" :key="index">
       <el-breadcrumb-item
         v-if="shouldShowBreadcrumbItem(match.name)"
-        :class="{ 'ps-text-color-white ps-fw-bold': index === matched.length - 1 }"
+        class="breadcrumb-item"
         :to="{ path: match.path }"
         @click="push(match.path)">
           {{ match.name }}
         </el-breadcrumb-item>
     </template>
-    <el-breadcrumb-item v-if="lastName">{{ lastName }}</el-breadcrumb-item>
+    <el-breadcrumb-item class="breadcrumb-item" v-if="lastName">{{ lastName }}</el-breadcrumb-item>
   </el-breadcrumb>
 </template>
 
@@ -37,4 +37,11 @@ watch(route, (_, newRoute): void => {
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss">
+.breadcrumb-item:last-of-type {
+  & > span {
+    color: v-bind(whiteColor) !important;
+    font-weight: bold !important;
+  }
+}
+</style>
