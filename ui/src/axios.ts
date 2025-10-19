@@ -43,8 +43,10 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use(
-  function (config) {
-    loadingStore.showLoading();
+  function (config: any) {
+    if (config.showSpinner !== false) {
+      loadingStore.showLoading();
+    }
     return config;
   },
   function (error) {

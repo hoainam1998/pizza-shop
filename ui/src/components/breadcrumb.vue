@@ -1,14 +1,15 @@
 <template>
   <el-breadcrumb :separator-icon="separatorIcon" class="breadcrumb ps-py-5 ps-px-5 ps-bg-f39c12">
-    <el-breadcrumb-item
-      v-for="(match, index) in matched"
-      :class="{ 'ps-text-color-white ps-fw-bold': index === matched.length - 1 }"
-      :key="index"
-      :to="{ path: match.path }"
-    >
-      {{ match.name }}
-      {{ lastName ?? lastName }}
-    </el-breadcrumb-item>
+    <template v-for="(match, index) in matched" :key="index">
+      <el-breadcrumb-item
+        v-if="shouldShowBreadcrumbItem(match.name)"
+        :class="{ 'ps-text-color-white ps-fw-bold': index === matched.length - 1 }"
+        :to="{ path: match.path }"
+        @click="push(match.path)">
+          {{ match.name }}
+        </el-breadcrumb-item>
+    </template>
+    <el-breadcrumb-item v-if="lastName">{{ lastName }}</el-breadcrumb-item>
   </el-breadcrumb>
 </template>
 
@@ -16,11 +17,16 @@
 import { ref, watch, h, defineProps } from 'vue';
 import { ArrowRightBold } from '@element-plus/icons-vue';
 import { whiteColor } from '@/assets/scss/variables.module.scss';
-import { useRoute } from 'vue-router';
+import { useRoute, type RouteLocationMatched } from 'vue-router';
+import useWrapperRouter from '@/composables/use-router';
 
+const { push } = useWrapperRouter();
 const separatorIcon = h(ArrowRightBold, { color: whiteColor });
 const route = useRoute();
 const matched = ref(route.matched);
+
+const shouldShowBreadcrumbItem =
+  (matchName: RouteLocationMatched['name']) => ((matchName || '') as string).trim() && matchName !== '_';
 
 const { lastName } = defineProps<{
   lastName: string,

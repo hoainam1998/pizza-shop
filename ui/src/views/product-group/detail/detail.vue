@@ -4,27 +4,21 @@
       <el-row>
         <el-col :xl="20">
           <el-row :gutter="15" justify="space-between">
-            <el-col :xl="5">
+            <el-col :xl="4">
               <el-form-item label="Name" prop="name">
                 <el-input v-model="form.name" name="name" autocomplete="off" />
               </el-form-item>
             </el-col>
             <el-col :xl="2">
               <el-form-item label="Amount" prop="count">
-                <el-input v-model="form.count" name="count" type="number" />
+                <el-input v-model.number="form.count" name="count" min="1" type="number" />
               </el-form-item>
             </el-col>
             <el-col :xl="4">
               <el-form-item label="Category" prop="category">
-                <el-select
-                  v-model="form.category"
-                  :value-key="form.category"
-                  name="category"
+                <el-select v-model="form.category" :value-key="form.category" name="category"
                   placeholder="Please select a category!">
-                  <el-option
-                    v-for="(category, index) in categories"
-                    :key="index"
-                    :value="category.categoryId"
+                  <el-option v-for="(category, index) in categories" :key="index" :value="category.categoryId"
                     :label="category.name" />
                 </el-select>
               </el-form-item>
@@ -34,11 +28,19 @@
                 <ExpiredDaySelect v-model="form.expiredTime" name="expiredTime" />
               </el-form-item>
             </el-col>
-            <el-col :xl="9">
-              <IngredientSelect
-                v-model:ingredients="form.ingredients"
-                v-model:temporary-price="form.originalPrice"
-                v-model:temporary-product-id="form.productId" />
+            <el-col :xl="8">
+              <el-form-item prop="ingredientLength">
+                <el-input type="hidden" v-model.number="form.ingredientLength" name="ingredientLength" />
+                <IngredientSelect
+                  v-model:ingredients="form.ingredients"
+                  v-model:temporary-price="form.originalPrice"
+                  v-model:temporary-product-id="form.productId" />
+              </el-form-item>
+            </el-col>
+            <el-col :xl="2">
+              <el-form-item label="Price" prop="price">
+                <el-input v-model.number="form.price" name="price" min="1" type="number" />
+              </el-form-item>
             </el-col>
           </el-row>
         </el-col>
@@ -62,7 +64,8 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount, reactive, ref, type Ref, defineProps, inject } from 'vue';
+import { onBeforeMount, reactive, ref, type Ref, inject, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import type { AxiosResponse } from 'axios';
 import type { FormInstance, FormRules, UploadRawFile } from 'element-plus';
 import UploadBox from '@/components/upload-box.vue';
@@ -70,8 +73,10 @@ import ExpiredDaySelect from './expired-time-select.vue';
 import IngredientSelect from './ingredient-select.vue';
 import { CategoryService, ProductService } from '@/services';
 import { type CategoryType, type IngredientType, } from '@/interfaces';
-import { convertBase64ToSingleFile } from '@/utils';
+import { convertBase64ToSingleFile, showErrorNotification, showSuccessNotification } from '@/utils';
+import useWrapperRouter from '@/composables/use-router';
 import { ROUTE_NAME } from '@/di-token';
+import paths from '@/router/paths';
 
 const FORM_ID = 'productForm';
 
@@ -85,12 +90,13 @@ type ProductFormRule = {
   price: number;
   originalPrice: number;
   ingredients: IngredientType[],
+  ingredientLength: number;
 };
 
+const { push } = useWrapperRouter();
 const routeName = inject(ROUTE_NAME) as any;
-const { id } = defineProps<{
-  id: string;
-}>();
+const route = useRoute();
+const { id } = route.params;
 const categories: Ref<CategoryType[]> = ref([]);
 const productRef = ref<FormInstance>();
 const rules = reactive<FormRules<ProductFormRule>>({
@@ -102,6 +108,9 @@ const rules = reactive<FormRules<ProductFormRule>>({
   count: [
     {
       required: true, message: 'Count is required!', trigger: 'change',
+    },
+    {
+      type: 'number', min: 1, message: 'Count must be larger than 0', trigger: 'change',
     }
   ],
   expiredTime: [
@@ -122,6 +131,14 @@ const rules = reactive<FormRules<ProductFormRule>>({
   price: [
     {
       required: true, message: 'Price is required!', trigger: 'change',
+    },
+    {
+      type: 'number', min: 1, message: 'Price must be larger than 0', trigger: 'change',
+    }
+  ],
+  ingredientLength: [
+    {
+      type: 'number', min: 2, message: 'Accept at least the two ingredient!',
     }
   ]
 });
@@ -135,17 +152,20 @@ const form = reactive<ProductFormRule>({
   avatar: [],
   price: 0,
   originalPrice: 0,
-  ingredients: [{
-    ingredientId: '1757410124885',
-    amount: 2,
-    unit: 'GRAM'
-  },
-  {
-    ingredientId: '1757582086529',
-    amount: 2,
-    unit: 'GRAM'
-  }],
+  ingredients: [],
+  ingredientLength: 1,
 });
+
+const resetForm = (): void => {
+  productRef.value?.resetFields();
+  productRef.value?.clearValidate();
+};
+
+watch(() => form.ingredients.length, (length) => {
+  form.ingredientLength = length;
+});
+
+const backToProducts = () => push(`${paths.HOME}/${paths.HOME.PRODUCT}`);
 
 const onSubmit = async (): Promise<void> => {
   if (productRef.value) {
@@ -154,7 +174,9 @@ const onSubmit = async (): Promise<void> => {
         const formData = new FormData();
         const formEntries = Object.entries(form) as [string, any];
         for (const [key, value] of formEntries) {
-          if (!/(ingredients|avatar)/.test(key)) {
+          if (key === 'ingredientLength') {
+            continue;
+          } else if (!/(ingredients|avatar)/.test(key)) {
             formData.append(key, value);
           } else if (key === 'avatar') {
             formData.append(key, (value as Array<File>)[0]);
@@ -164,7 +186,24 @@ const onSubmit = async (): Promise<void> => {
             });
           }
         }
-        ProductService.post('create', formData);
+
+        if (id) {
+          ProductService.put('update', formData)
+            .then((response) => {
+              showSuccessNotification('Update product!', response.data.message);
+              resetForm();
+              backToProducts();
+            })
+            .catch((error) => showErrorNotification('Update product!', error.response.data.message));
+        } else {
+          ProductService.post('create', formData)
+            .then((response) => {
+              showSuccessNotification('Create product!', response.data.message);
+              resetForm();
+              backToProducts();
+            })
+            .catch((error) => showErrorNotification(error.response.data.message));
+        }
       }
     });
   }
@@ -173,11 +212,9 @@ const onSubmit = async (): Promise<void> => {
 onBeforeMount(() => {
   CategoryService.post('all', {
     name: true,
-  }).then((response: AxiosResponse) => {
-    categories.value = response.data;
-  }).catch(() => {
-    categories.value = [];
-  });
+  })
+  .then((response: AxiosResponse) => categories.value = response.data)
+  .catch(() => categories.value = []);
 
   if (id) {
     ProductService.post('detail', {
@@ -199,7 +236,7 @@ onBeforeMount(() => {
       form.name = product.name;
       form.count = product.count;
       form.category = product.categoryId;
-      form.expiredTime = product.expiredTime;
+      form.expiredTime = +product.expiredTime;
       const file = await convertBase64ToSingleFile(product.avatar, product.name);
       form.avatar = [file];
       form.ingredients = product.ingredients;
@@ -212,7 +249,7 @@ onBeforeMount(() => {
 <style lang="scss">
 .expired-time-select {
   .el-input {
-    width: auto !important;
+    width: 100% !important;
   }
 }
 </style>

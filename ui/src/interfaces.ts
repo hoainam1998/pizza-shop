@@ -1,3 +1,5 @@
+import type { AxiosRequestConfig } from 'axios';
+
 export type TableFieldType = {
   key: string;
   label?: string;
@@ -26,4 +28,9 @@ export type CategoryType = {
   categoryId: string;
   name: string;
   avatar: string;
+};
+
+export type ExtraConfigs = AxiosRequestConfig & {
+  allowNotFound?: boolean;
+  showSpinner?: boolean;
 };
