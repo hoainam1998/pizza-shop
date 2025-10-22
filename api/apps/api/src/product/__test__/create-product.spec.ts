@@ -127,6 +127,75 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
     expect(send).toHaveBeenCalledWith(createProductPattern, productCreate);
   });
 
+  it(createTestName('create product failed with count field is zero value', HttpStatus.BAD_REQUEST), async () => {
+    expect.hasAssertions();
+    const send = jest.spyOn(clientProxy, 'send').mockImplementation(() => throwError(() => UnknownError));
+    const createProduct = jest.spyOn(productService, 'createProduct');
+    const response = await api
+      .post(createProductUrl)
+      .field('productId', product.product_id)
+      .field('name', product.name)
+      .field('count', 0)
+      .field('price', product.price)
+      .field('originalPrice', product.original_price)
+      .field('expiredTime', product.expired_time)
+      .field('category', product.category_id)
+      .field('ingredients', product.ingredients)
+      .attach('avatar', getStaticFile('test-image.png'))
+      .expect(HttpStatus.BAD_REQUEST)
+      .expect('Content-Type', /application\/json/);
+    expect(response.body).toEqual(['count must be a positive number']);
+    expect(createProduct).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it(createTestName('create product failed with price field is zero value', HttpStatus.BAD_REQUEST), async () => {
+    expect.hasAssertions();
+    const send = jest.spyOn(clientProxy, 'send').mockImplementation(() => throwError(() => UnknownError));
+    const createProduct = jest.spyOn(productService, 'createProduct');
+    const response = await api
+      .post(createProductUrl)
+      .field('productId', product.product_id)
+      .field('name', product.name)
+      .field('count', product.count)
+      .field('price', 0)
+      .field('originalPrice', product.original_price)
+      .field('expiredTime', product.expired_time)
+      .field('category', product.category_id)
+      .field('ingredients', product.ingredients)
+      .attach('avatar', getStaticFile('test-image.png'))
+      .expect(HttpStatus.BAD_REQUEST)
+      .expect('Content-Type', /application\/json/);
+    expect(response.body).toEqual(['price must be a positive number']);
+    expect(createProduct).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it(
+    createTestName('create product failed with originalPrice field is zero value', HttpStatus.BAD_REQUEST),
+    async () => {
+      expect.hasAssertions();
+      const send = jest.spyOn(clientProxy, 'send').mockImplementation(() => throwError(() => UnknownError));
+      const createProduct = jest.spyOn(productService, 'createProduct');
+      const response = await api
+        .post(createProductUrl)
+        .field('productId', product.product_id)
+        .field('name', product.name)
+        .field('count', product.count)
+        .field('price', product.price)
+        .field('originalPrice', 0)
+        .field('expiredTime', product.expired_time)
+        .field('category', product.category_id)
+        .field('ingredients', product.ingredients)
+        .attach('avatar', getStaticFile('test-image.png'))
+        .expect(HttpStatus.BAD_REQUEST)
+        .expect('Content-Type', /application\/json/);
+      expect(response.body).toEqual(['originalPrice must be a positive number']);
+      expect(createProduct).not.toHaveBeenCalled();
+      expect(send).not.toHaveBeenCalled();
+    },
+  );
+
   it(createTestName('create product failed with avatar empty', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const errorMessage = messages.COMMON.EMPTY_FILE.replace(/{fieldname}/, 'avatar');

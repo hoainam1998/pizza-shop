@@ -17,6 +17,9 @@ export default {
     findUniqueOrThrow: jest.fn(),
     count: jest.fn(),
   },
+  ingredient: {
+    findMany: jest.fn(),
+  },
   product_ingredient: {
     deleteMany: jest.fn(),
   },

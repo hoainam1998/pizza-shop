@@ -11,11 +11,13 @@ import LoggingService from '@share/libs/logging/logging.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { createMessage } from '@share/utils';
 import messages from '@share/constants/messages';
+import IngredientCachingService from '@share/libs/caching/ingredient/ingredient.service';
 
 let productController: ProductController;
 let productService: ProductService;
 let prismaService: PrismaClient;
 let loggerService: LoggingService;
+let ingredientCachingService: IngredientCachingService;
 
 beforeEach(async () => {
   const moduleRef = await startUp();
@@ -24,6 +26,7 @@ beforeEach(async () => {
   productController = moduleRef.get(ProductController);
   loggerService = moduleRef.get(LoggingService);
   prismaService = moduleRef.get(PRISMA_CLIENT);
+  ingredientCachingService = moduleRef.get(IngredientCachingService);
 });
 
 afterEach((done) => {
@@ -35,6 +38,9 @@ afterEach((done) => {
 describe('update product', () => {
   it('update product was success', async () => {
     expect.hasAssertions();
+    const deleteAllProductIngredients = jest
+      .spyOn(ingredientCachingService, 'deleteAllProductIngredients')
+      .mockResolvedValue(1);
     const deleteProductWhenExpired = jest.spyOn(productService as any, 'deleteProductWhenExpired');
     const deleteIngredientPrismaMethod = jest.spyOn(prismaService.product_ingredient, 'deleteMany');
     const updatePrismaMethod = jest.spyOn(prismaService.product, 'update');
@@ -73,6 +79,8 @@ describe('update product', () => {
         product_ingredient: product.product_ingredient,
       },
     });
+    expect(deleteAllProductIngredients).toHaveBeenCalledTimes(1);
+    expect(deleteAllProductIngredients).toHaveBeenCalledWith(product.product_id);
   });
 
   it('update product failed with not found error', async () => {

@@ -1,20 +1,6 @@
-import { Exclude, Expose, Transform } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import { IsInt, IsString, IsNumberString, IsArray } from 'class-validator';
 import { ingredient, Status, Unit } from 'generated/prisma';
-
-export class PriceProduct {
-  @IsInt()
-  @Transform((value) => +value)
-  private _price: number | string;
-
-  constructor(price: number | string) {
-    Object.assign(this, { _price: price });
-  }
-
-  get Price() {
-    return +this._price;
-  }
-}
 
 export class Ingredient implements ingredient {
   @Exclude({ toPlainOnly: true })

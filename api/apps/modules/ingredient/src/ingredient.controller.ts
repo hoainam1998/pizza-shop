@@ -1,16 +1,18 @@
-import { BadRequestException, Controller, HttpStatus, Logger, NotFoundException } from '@nestjs/common';
-import { Prisma, type ingredient } from 'generated/prisma';
+import { BadRequestException, Controller, HttpStatus, NotFoundException } from '@nestjs/common';
+import { type ingredient } from 'generated/prisma';
 import { MessagePattern, RpcException } from '@nestjs/microservices';
 import IngredientService from './ingredient.service';
-import { computeProductPrice, createIngredientPattern, getAllIngredients } from '@share/pattern';
+import { computeProductPricePattern, createIngredientPattern, getAllIngredients } from '@share/pattern';
 import { ComputeProductPrice, IngredientSelect } from '@share/dto/validators/ingredient.dto';
-import { checkArrayHaveValues, createMessage } from '@share/utils';
+import { checkArrayHaveValues } from '@share/utils';
+import LoggingService from '@share/libs/logging/logging.service';
+import { HandleServiceError } from '@share/decorators';
 
 @Controller()
 export default class IngredientController {
   constructor(
     private readonly ingredientService: IngredientService,
-    private readonly logger: Logger,
+    private readonly logger: LoggingService,
   ) {}
 
   @MessagePattern(createIngredientPattern)
@@ -21,18 +23,11 @@ export default class IngredientController {
     });
   }
 
-  @MessagePattern(computeProductPrice)
+  @MessagePattern(computeProductPricePattern)
+  @HandleServiceError
   computeProductPrice(productIngredientsPrice: ComputeProductPrice): Promise<number> {
     const { temporaryProductId, productIngredients } = productIngredientsPrice;
-    return this.ingredientService
-      .computeProductIngredients(temporaryProductId, productIngredients)
-      .catch((error: Error) => {
-        this.logger.error('Compute product price!', error.message);
-        if (error instanceof Prisma.PrismaClientInitializationError) {
-          throw new RpcException(new BadRequestException(createMessage(error.message)));
-        }
-        throw new RpcException(new BadRequestException(error));
-      });
+    return this.ingredientService.computeProductIngredients(temporaryProductId, productIngredients);
   }
 
   @MessagePattern(getAllIngredients)

@@ -26,6 +26,7 @@ export default Object.freeze({
   INGREDIENT: {
     CREATE_INGREDIENT_SUCCESS: 'Create ingredient was success!',
     NAME_ALREADY_EXIST: 'Ingredient name has been exist!',
+    NOT_FOUND: 'The ingredient item requirement is not found!',
   },
   PRODUCT: {
     PRICE_INVALID: 'Product price is invalid!',
@@ -34,5 +35,6 @@ export default Object.freeze({
     NOT_FOUND: 'The product item requirement is not found!',
     PRODUCT_DELETED: 'The product was deleted!',
     DELETE_PRODUCT_SUCCESS: 'Delete product was success!',
+    SCHEDULE_DELETE_PRODUCT_FAILED: 'Date in past. Delete product will never be fired.',
   },
 });

@@ -49,7 +49,7 @@ describe('update category', () => {
     expect(updatePrismaMethod).toHaveBeenCalledTimes(1);
     expect(updatePrismaMethod).toHaveBeenCalledWith({
       where: {
-        category_id: expect.stringMatching(/(\d+){13}/),
+        category_id: category.category_id,
       },
       data: {
         name: category.name,
@@ -78,7 +78,7 @@ describe('update category', () => {
     expect(updatePrismaMethod).toHaveBeenCalledTimes(1);
     expect(updatePrismaMethod).toHaveBeenCalledWith({
       where: {
-        category_id: expect.stringMatching(/(\d+){13}/),
+        category_id: category.category_id,
       },
       data: {
         name: category.name,
@@ -107,7 +107,7 @@ describe('update category', () => {
     expect(updatePrismaMethod).toHaveBeenCalled();
     expect(updatePrismaMethod).toHaveBeenCalledWith({
       where: {
-        category_id: expect.stringMatching(/(\d+){13}/),
+        category_id: category.category_id,
       },
       data: {
         name: category.name,
@@ -136,7 +136,7 @@ describe('update category', () => {
     expect(updatePrismaMethod).toHaveBeenCalled();
     expect(updatePrismaMethod).toHaveBeenCalledWith({
       where: {
-        category_id: expect.stringMatching(/(\d+){13}/),
+        category_id: category.category_id,
       },
       data: {
         name: category.name,
