@@ -1,11 +1,12 @@
-import { Logger, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import IngredientController from './ingredient.controller';
 import IngredientService from './ingredient.service';
 import ShareModule from '@share/module';
+import LoggingModule from '@share/libs/logging/logging.module';
 
 @Module({
-  imports: [ShareModule],
+  imports: [ShareModule, LoggingModule],
   controllers: [IngredientController],
-  providers: [IngredientService, Logger],
+  providers: [IngredientService],
 })
 export default class IngredientModule {}

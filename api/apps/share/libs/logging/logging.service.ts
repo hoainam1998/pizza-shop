@@ -9,4 +9,14 @@ export default class LoggingService {
   log(message: string, context: string) {
     this.logger.log(message, context);
   }
+
+  @HandleContextLogging
+  warn(message: string, context: string) {
+    this.logger.warn(message, context);
+  }
+
+  @HandleContextLogging
+  error(message: string, context: string) {
+    this.logger.error(message, context);
+  }
 }

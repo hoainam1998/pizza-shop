@@ -14,18 +14,29 @@ import {
 import { catchError, map, Observable } from 'rxjs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
-import { validate } from 'class-validator';
+import { validate, isPositive, isInt, ValidationError } from 'class-validator';
 import { ingredient } from 'generated/prisma';
 import IngredientService from './ingredient.service';
-import { UploadImage } from '@share/decorators';
+import { HandleHttpError, UploadImage } from '@share/decorators';
 import { ImageTransformPipe } from '@share/pipes';
 import { IngredientCreate, ComputeProductPrice, IngredientSelect } from '@share/dto/validators/ingredient.dto';
-import { PriceProduct, IngredientList, Ingredient } from '@share/dto/serializer/ingredient';
+import { IngredientList, Ingredient } from '@share/dto/serializer/ingredient';
 import { MessageSerializer } from '@share/dto/serializer/common';
 import messages from '@share/constants/messages';
-import { createMessage } from '@share/utils';
+import { createMessage, handleValidateException } from '@share/utils';
 import { MicroservicesErrorResponse } from '@share/interfaces';
 
+@UsePipes(
+  new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true,
+    exceptionFactory: (exceptions: ValidationError[]) => {
+      const errors = handleValidateException(exceptions);
+      throw new BadRequestException({ messages: errors });
+    },
+  }),
+)
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('ingredient')
 export default class IngredientController {
@@ -55,19 +66,16 @@ export default class IngredientController {
 
   @Post('compute-product-price')
   @HttpCode(HttpStatus.OK)
-  computeProductPrice(@Body() productIngredient: ComputeProductPrice): Observable<Promise<number>> {
+  @HandleHttpError
+  computeProductPrice(@Body() productIngredient: ComputeProductPrice): Observable<number> {
     return this.ingredientService.computeProductPrice(productIngredient).pipe(
       map((result) => {
-        const productPrice = new PriceProduct(result);
-        return validate(productPrice).then((errors) => {
-          if (!errors.length) {
-            return productPrice.Price;
-          }
+        const price = +result;
+        if (isInt(price) && (isPositive(price) || price === 0)) {
+          return result;
+        } else {
           throw new BadRequestException(createMessage(messages.PRODUCT.PRICE_INVALID));
-        });
-      }),
-      catchError((error: MicroservicesErrorResponse) => {
-        throw new BadRequestException(createMessage(error.message!));
+        }
       }),
     );
   }

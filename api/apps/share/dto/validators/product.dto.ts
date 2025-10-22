@@ -1,5 +1,14 @@
 import { Exclude, Expose, instanceToPlain, plainToInstance, Transform, Type } from 'class-transformer';
-import { IsString, IsInt, IsNumberString, IsArray, IsBoolean, IsOptional, IsDefined } from 'class-validator';
+import {
+  IsString,
+  IsInt,
+  IsNumberString,
+  IsArray,
+  IsBoolean,
+  IsOptional,
+  IsDefined,
+  IsPositive,
+} from 'class-validator';
 import { OmitType } from '@nestjs/mapped-types';
 import { Status } from 'generated/prisma';
 import { Pagination } from './common.dto';
@@ -13,10 +22,12 @@ export class ProductCreate {
   name: string;
 
   @Transform(({ value }) => +value)
+  @IsPositive()
   @IsInt()
   count: number;
 
   @Transform(({ value }) => +value)
+  @IsPositive()
   @IsInt()
   price: number;
 
@@ -24,6 +35,7 @@ export class ProductCreate {
   avatar: string;
 
   @Transform(({ value }) => +value)
+  @IsPositive()
   @IsInt()
   originalPrice: number;
 

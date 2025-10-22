@@ -10,6 +10,7 @@ import messages from '@share/constants/messages';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { formatDateTime } from '@share/utils';
 import LoggingService from '@share/libs/logging/logging.service';
+import IngredientCachingService from '@share/libs/caching/ingredient/ingredient.service';
 
 @Injectable()
 export default class ProductService {
@@ -17,21 +18,28 @@ export default class ProductService {
     @Inject(PRISMA_CLIENT) private readonly prismaClient: prisma.PrismaClient,
     private schedulerRegistry: SchedulerRegistry,
     private readonly logger: LoggingService,
+    private readonly ingredientCachingService: IngredientCachingService,
   ) {}
 
   private deleteProductWhenExpired(product: prisma.product, actionName: string): void {
-    const date = new Date(+product.expired_time);
-    const dateStr = formatDateTime(date);
-    const jobName = 'delete_expired_product';
-    const job = new cron.CronJob(date, async () => {
-      await this.delete(product.product_id);
-      this.logger.log(messages.PRODUCT.PRODUCT_DELETED, actionName);
-    });
-
-    this.schedulerRegistry.addCronJob(jobName, job);
-    job.start();
-
-    this.logger.log(`job "${jobName}" added at ${dateStr}!`, actionName);
+    if (+product.expired_time > Date.now()) {
+      const date = new Date(+product.expired_time);
+      const dateStr = formatDateTime(date);
+      const jobName = 'delete_expired_product';
+      if (this.schedulerRegistry.doesExist('cron', jobName)) {
+        const cronJob = this.schedulerRegistry.getCronJob(jobName);
+        cronJob.setTime(new cron.CronTime(date));
+      } else {
+        const job = new cron.CronJob(date, async () => {
+          await this.delete(product.product_id);
+          this.logger.log(messages.PRODUCT.PRODUCT_DELETED, actionName);
+        });
+        this.schedulerRegistry.addCronJob(jobName, job);
+        job.start();
+      }
+      this.logger.log(`job "${jobName}" added at ${dateStr}!`, actionName);
+    }
+    this.logger.warn(messages.PRODUCT.SCHEDULE_DELETE_PRODUCT_FAILED, actionName);
   }
 
   @HandlePrismaError(messages.PRODUCT)
@@ -40,8 +48,9 @@ export default class ProductService {
       .create({
         data: product,
       })
-      .then((product) => {
+      .then(async (product) => {
         this.deleteProductWhenExpired(product, this.createProduct.name);
+        await this.ingredientCachingService.deleteAllProductIngredients(product.product_id);
         return product;
       });
   }
@@ -130,9 +139,10 @@ export default class ProductService {
           },
         }),
       ])
-      .then((results) => {
+      .then(async (results) => {
         const product = results[1];
         this.deleteProductWhenExpired(product, this.updateProduct.name);
+        await this.ingredientCachingService.deleteAllProductIngredients(product.product_id);
         return product;
       });
   }

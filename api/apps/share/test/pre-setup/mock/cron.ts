@@ -8,5 +8,6 @@ jest.mock('cron', () => {
       }
       start = jest.fn();
     },
+    CronTime: class extends actualCron.CronTime {},
   };
 });

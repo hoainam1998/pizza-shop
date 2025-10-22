@@ -11,7 +11,10 @@ export default (msgs: any) => (target: any, propertyName: string, descriptor: Ty
     return originMethod?.apply(this, args).catch((error: Error) => {
       switch (true) {
         case error instanceof Prisma.PrismaClientInitializationError:
-          if (error.errorCode === PRISMA_ERROR_CODE.DATABASE_LOST_CONNECT) {
+          if (
+            error.errorCode === PRISMA_ERROR_CODE.DATABASE_LOST_CONNECT ||
+            error.message.includes("Can't reach database server")
+          ) {
             throw new RpcException(new BadRequestException(createMessage(error.message)));
           }
           throw error;

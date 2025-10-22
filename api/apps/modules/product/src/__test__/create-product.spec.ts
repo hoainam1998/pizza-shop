@@ -10,10 +10,12 @@ import { PRISMA_CLIENT } from '@share/di-token';
 import { BadRequestException } from '@nestjs/common';
 import { createMessage } from '@share/utils';
 import messages from '@share/constants/messages';
+import IngredientCachingService from '@share/libs/caching/ingredient/ingredient.service';
 
 let productController: ProductController;
 let productService: ProductService;
 let prismaService: PrismaClient;
+let ingredientCachingService: IngredientCachingService;
 
 beforeEach(async () => {
   const moduleRef = await startUp();
@@ -21,6 +23,7 @@ beforeEach(async () => {
   productService = moduleRef.get(ProductService);
   productController = moduleRef.get(ProductController);
   prismaService = moduleRef.get(PRISMA_CLIENT);
+  ingredientCachingService = moduleRef.get(IngredientCachingService);
 });
 
 afterEach((done) => {
@@ -32,6 +35,9 @@ afterEach((done) => {
 describe('create product', () => {
   it('create product was success', async () => {
     expect.hasAssertions();
+    const deleteAllProductIngredients = jest
+      .spyOn(ingredientCachingService, 'deleteAllProductIngredients')
+      .mockResolvedValue(1);
     const deleteProductWhenExpired = jest.spyOn(productService as any, 'deleteProductWhenExpired');
     const createPrismaMethod = jest.spyOn(prismaService.product, 'create').mockResolvedValue(product);
     const createMethodService = jest.spyOn(productService, 'createProduct');
@@ -47,6 +53,8 @@ describe('create product', () => {
     });
     expect(deleteProductWhenExpired).toHaveBeenCalledTimes(1);
     expect(deleteProductWhenExpired).toHaveBeenCalledWith(product, productService.createProduct.name);
+    expect(deleteAllProductIngredients).toHaveBeenCalledTimes(1);
+    expect(deleteAllProductIngredients).toHaveBeenCalledWith(product.product_id);
   });
 
   it('create product failed with unknown error', async () => {
