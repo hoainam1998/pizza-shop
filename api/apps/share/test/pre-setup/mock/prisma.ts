@@ -19,6 +19,7 @@ export default {
   },
   ingredient: {
     findMany: jest.fn(),
+    create: jest.fn(),
   },
   product_ingredient: {
     deleteMany: jest.fn(),

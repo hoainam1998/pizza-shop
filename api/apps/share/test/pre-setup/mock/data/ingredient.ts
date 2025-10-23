@@ -1,4 +1,4 @@
-import { Unit } from 'generated/prisma';
+import { Status, Unit } from 'generated/prisma';
 import { type ProductIngredientType } from '@share/interfaces';
 
 export const ingredient = {
@@ -6,6 +6,10 @@ export const ingredient = {
   name: 'ingredient name',
   price: 10000,
   unit: Unit.GRAM,
+  avatar: 'ingredient_avatar',
+  count: 10,
+  status: Status.IN_STOCK,
+  expired_time: (Date.now() + 60 * 1000).toString(),
 };
 
 export const createIngredientsJson = (length: number): string[] => {

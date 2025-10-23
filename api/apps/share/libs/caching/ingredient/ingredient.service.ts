@@ -1,6 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { REDIS_CLIENT } from '@share/di-token';
 import RedisClient from '@share/libs/redis-client/redis';
+import constants from '@share/constants';
+import { ingredient } from 'generated/prisma';
+const ingredientKey = constants.REDIS_PREFIX.INGREDIENTS;
 
 export const ingredientName = (id: string) => `ingredient_${id}`;
 
@@ -22,5 +25,19 @@ export default class IngredientCachingService {
 
   deleteAllProductIngredients(productId: string): Promise<number> {
     return this.redisClient.Client.del(ingredientName(productId));
+  }
+
+  storeAllIngredients(ingredients: ingredient[]): ReturnType<typeof this.redisClient.Client.json.set> {
+    return this.redisClient.Client.json.set(ingredientKey, '$', ingredients);
+  }
+
+  getAllIngredients(): Promise<ingredient[]> {
+    return this.redisClient.Client.json
+      .get(ingredientKey, { path: '$' })
+      .then((result: Array<ingredient[]>) => result[0]);
+  }
+
+  deleteAllIngredients(): Promise<number> {
+    return this.redisClient.Client.del(ingredientKey);
   }
 }

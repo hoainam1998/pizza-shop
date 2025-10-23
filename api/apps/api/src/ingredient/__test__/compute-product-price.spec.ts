@@ -30,26 +30,26 @@ const requestBody = {
   ],
 };
 
+let api: TestAgent;
+let clientProxy: ClientProxy;
+let close: () => Promise<void>;
+let ingredientService: IngredientService;
+
+beforeEach(async () => {
+  const requestTest = await startUp();
+  api = requestTest.api;
+  clientProxy = requestTest.clientProxy;
+  close = () => requestTest.app.close();
+  ingredientService = requestTest.app.get(IngredientService);
+});
+
+afterEach(async () => {
+  if (close) {
+    await close();
+  }
+});
+
 describe(createDescribeTest(HTTP_METHOD.POST, computeProductPriceUrl), () => {
-  let api: TestAgent;
-  let clientProxy: ClientProxy;
-  let close: () => Promise<void>;
-  let ingredientService: IngredientService;
-
-  beforeEach(async () => {
-    const requestTest = await startUp();
-    api = requestTest.api;
-    clientProxy = requestTest.clientProxy;
-    close = () => requestTest.app.close();
-    ingredientService = requestTest.app.get(IngredientService);
-  });
-
-  afterEach(async () => {
-    if (close) {
-      await close();
-    }
-  });
-
   it(createTestName('compute product price was success', HttpStatus.OK), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(price));

@@ -1,5 +1,5 @@
-import { Expose, Transform } from 'class-transformer';
-import { IsString, IsInt, IsNumberString, IsArray, IsBoolean, IsOptional } from 'class-validator';
+import { Expose, Transform, Exclude } from 'class-transformer';
+import { IsString, IsInt, IsNumberString, IsArray, IsBoolean, IsOptional, IsPositive } from 'class-validator';
 import { type ProductIngredientType, type IngredientSelectType } from '@share/interfaces';
 
 export class IngredientCreate {
@@ -9,15 +9,19 @@ export class IngredientCreate {
   @IsString()
   unit: string;
 
-  @IsInt()
+  @IsOptional()
+  avatar: string;
+
   @Transform(({ value }) => +value)
+  @IsPositive()
   count: number;
 
-  @IsInt()
   @Transform(({ value }) => +value)
+  @IsPositive()
   price: number;
 
-  @IsString()
+  @Exclude({ toPlainOnly: true })
+  @IsNumberString()
   expiredTime: string;
 
   @Expose({ toPlainOnly: true })
