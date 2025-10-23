@@ -36,6 +36,7 @@
     "test:ut:ingredient.store-product-ingredients": "jest --watch --testPathPatterns=apps/modules/ingredient/src/__test__/store-product-ingredients.spec.ts",
     "test:ut:ingredient.get-product-ingredients-stored": "jest --watch --testPathPatterns=apps/modules/ingredient/src/__test__/get-product-ingredients-stored.spec.ts",
     "test:ut:ingredient.delete-all-product-ingredients": "jest --watch --testPathPatterns=apps/modules/ingredient/src/__test__/delete-all-product-ingredients.spec.ts",
+    "test:ut:ingredient.create": "jest --watch --testPathPatterns=apps/modules/ingredient/src/__test__/create-ingredient.spec.ts",
     "test:e2e:product.create": "jest --watch apps/api/src/product/__test__/create-product.spec.ts",
     "test:e2e:product.pagination": "jest --watch apps/api/src/product/__test__/pagination.spec.ts",
     "test:e2e:product.get-product": "jest --watch apps/api/src/product/__test__/get-product.spec.ts",
@@ -50,6 +51,7 @@
     "test:e2e:category.get-all": "jest --watch apps/api/src/category/__test__/get-all-categories.spec.ts",
     "test:e2e:category": "jest --watch apps/api/src/category/__test__",
     "test:e2e:ingredient.compute-product-price": "jest --watch apps/api/src/ingredient/__test__/compute-product-price.spec.ts",
+    "test:e2e:ingredient.create": "jest --watch apps/api/src/ingredient/__test__/create-ingredient.spec.ts",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/api/apps/users/api/apps/modules/users/api/test/jest-e2e.json"

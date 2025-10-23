@@ -10,7 +10,7 @@ import { ComputeProductPrice, IngredientSelect } from '@share/dto/validators/ing
 export default class IngredientService {
   constructor(@Inject(INGREDIENT_SERVICE) private ingredient: ClientProxy) {}
 
-  createIngredient(ingredient: ingredient): Observable<ingredient> {
+  createIngredient(ingredient: Record<string, any>): Observable<ingredient> {
     return this.ingredient.send<ingredient>(createIngredientPattern, ingredient);
   }
 

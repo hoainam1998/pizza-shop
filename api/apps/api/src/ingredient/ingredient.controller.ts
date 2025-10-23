@@ -15,7 +15,6 @@ import { catchError, map, Observable } from 'rxjs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { validate, isPositive, isInt, ValidationError } from 'class-validator';
-import { ingredient } from 'generated/prisma';
 import IngredientService from './ingredient.service';
 import { HandleHttpError, UploadImage } from '@share/decorators';
 import { ImageTransformPipe } from '@share/pipes';
@@ -44,24 +43,17 @@ export default class IngredientController {
 
   @Post('create')
   @UseInterceptors(FileInterceptor('avatar'))
-  @UsePipes(new ValidationPipe({ transform: true }))
   @HttpCode(HttpStatus.CREATED)
+  @HandleHttpError
   createIngredient(
     @Body() ingredient: IngredientCreate,
     @UploadImage('avatar', ImageTransformPipe) file: string,
   ): Observable<MessageSerializer> {
+    ingredient.avatar = file;
+    const ingredientPlain = instanceToPlain(ingredient);
     return this.ingredientService
-      .createIngredient(
-        Object.assign(instanceToPlain(ingredient, { excludePrefixes: ['expiredTime'] }), {
-          avatar: file,
-        }) as ingredient,
-      )
-      .pipe(
-        map(() => MessageSerializer.create(messages.INGREDIENT.CREATE_INGREDIENT_SUCCESS)),
-        catchError((error: MicroservicesErrorResponse) => {
-          throw new BadRequestException(createMessage(error.message!));
-        }),
-      );
+      .createIngredient(ingredientPlain)
+      .pipe(map(() => MessageSerializer.create(messages.INGREDIENT.CREATE_INGREDIENT_SUCCESS)));
   }
 
   @Post('compute-product-price')

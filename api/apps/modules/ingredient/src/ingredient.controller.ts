@@ -1,6 +1,6 @@
-import { BadRequestException, Controller, HttpStatus, NotFoundException } from '@nestjs/common';
+import { Controller, NotFoundException } from '@nestjs/common';
 import { type ingredient } from 'generated/prisma';
-import { MessagePattern, RpcException } from '@nestjs/microservices';
+import { MessagePattern } from '@nestjs/microservices';
 import IngredientService from './ingredient.service';
 import { computeProductPricePattern, createIngredientPattern, getAllIngredients } from '@share/pattern';
 import { ComputeProductPrice, IngredientSelect } from '@share/dto/validators/ingredient.dto';
@@ -16,11 +16,9 @@ export default class IngredientController {
   ) {}
 
   @MessagePattern(createIngredientPattern)
+  @HandleServiceError
   createIngredient(ingredient: ingredient): Promise<ingredient> {
-    return this.ingredientService.createIngredient(ingredient).catch((error: Error) => {
-      this.logger.error('Create ingredient!', error.message);
-      throw new RpcException(new BadRequestException(error));
-    });
+    return this.ingredientService.createIngredient(ingredient);
   }
 
   @MessagePattern(computeProductPricePattern)
@@ -32,20 +30,11 @@ export default class IngredientController {
 
   @MessagePattern(getAllIngredients)
   getAllIngredients(select: IngredientSelect): Promise<ingredient[]> {
-    return this.ingredientService
-      .getAll(select)
-      .then((ingredients) => {
-        if (!checkArrayHaveValues(ingredients)) {
-          throw new NotFoundException([]);
-        }
-        return ingredients;
-      })
-      .catch((error) => {
-        this.logger.log('Get all ingredient', error.message);
-        if (error.status === HttpStatus.NOT_FOUND) {
-          throw new RpcException(error);
-        }
-        throw new RpcException(new BadRequestException(error));
-      });
+    return this.ingredientService.getAll(select).then((ingredients) => {
+      if (!checkArrayHaveValues(ingredients)) {
+        throw new NotFoundException([]);
+      }
+      return ingredients;
+    });
   }
 }

@@ -1,11 +1,11 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { ingredient, PrismaClient, Unit } from 'generated/prisma';
+import { RpcException } from '@nestjs/microservices';
+import prisma, { PrismaClient, Unit } from 'generated/prisma';
 import { PRISMA_CLIENT } from '@share/di-token';
 import { type ProductIngredientType, type IngredientSelectType } from '@share/interfaces';
 import IngredientCachingService from '@share/libs/caching/ingredient/ingredient.service';
 import { HandlePrismaError } from '@share/decorators';
 import messages from '@share/constants/messages';
-import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export default class IngredientService {
@@ -14,10 +14,16 @@ export default class IngredientService {
     private readonly ingredientCachingService: IngredientCachingService,
   ) {}
 
-  createIngredient(ingredient: ingredient): Promise<ingredient> {
-    return this.prismaClient.ingredient.create({
-      data: ingredient,
-    });
+  @HandlePrismaError(messages.INGREDIENT)
+  createIngredient(ingredient: prisma.ingredient): Promise<prisma.ingredient> {
+    return this.prismaClient.ingredient
+      .create({
+        data: ingredient,
+      })
+      .then(async (ingredient) => {
+        await this.ingredientCachingService.deleteAllIngredients();
+        return ingredient;
+      });
   }
 
   @HandlePrismaError(messages.INGREDIENT)
@@ -101,7 +107,7 @@ export default class IngredientService {
     }, 0);
   }
 
-  getAll(select: IngredientSelectType): Promise<ingredient[]> {
+  getAll(select: IngredientSelectType): Promise<prisma.ingredient[]> {
     return this.prismaClient.ingredient.findMany({
       select: {
         ingredient_id: true,

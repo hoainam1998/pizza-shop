@@ -11,5 +11,6 @@ export default Object.freeze({
   REDIS_PREFIX: {
     SESSION_KEY: 'ps:',
     CATEGORIES: 'categories',
+    INGREDIENTS: 'ingredients',
   },
 });
