@@ -3,6 +3,7 @@ import { PRISMA_CLIENT, REDIS_CLIENT } from '@share/di-token';
 import prisma from './pre-setup/mock/prisma';
 import CachingModule from '@share/libs/caching/caching.module';
 import RedisClient from '@share/libs/redis-client/redis';
+import SchedulerModule from '@share/libs/scheduler/scheduler.module';
 
 const prismaClient: Provider = {
   provide: PRISMA_CLIENT,
@@ -15,8 +16,8 @@ const redisClient: Provider = {
 };
 
 @Module({
-  imports: [CachingModule.register(redisClient)],
+  imports: [CachingModule.register(redisClient), SchedulerModule],
   providers: [prismaClient],
-  exports: [prismaClient, CachingModule],
+  exports: [prismaClient, CachingModule, SchedulerModule],
 })
 export default class ShareTestingModule {}

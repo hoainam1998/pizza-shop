@@ -6,6 +6,7 @@ import RedisClient from './libs/redis-client/redis';
 import CachingModule from './libs/caching/caching.module';
 import { PRISMA_CLIENT, REDIS_CLIENT } from './di-token';
 import LoggingModule from './libs/logging/logging.module';
+import SchedulerModule from './libs/scheduler/scheduler.module';
 
 const prismaClient: Provider = {
   provide: PRISMA_CLIENT,
@@ -18,8 +19,14 @@ const redisClient: Provider = {
 };
 
 @Module({
-  imports: [EnvironmentConfigModule, SendEmailModule, CachingModule.register(redisClient), LoggingModule],
+  imports: [
+    EnvironmentConfigModule,
+    SendEmailModule,
+    CachingModule.register(redisClient),
+    LoggingModule,
+    SchedulerModule,
+  ],
   providers: [prismaClient, redisClient],
-  exports: [prismaClient, redisClient, SendEmailModule, CachingModule],
+  exports: [prismaClient, redisClient, SendEmailModule, CachingModule, SchedulerModule],
 })
 export default class ShareModule {}

@@ -2,6 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 import { ingredient, Prisma, PrismaClient, PrismaPromise, Status } from 'generated/prisma';
 import messages from '@share/constants/messages';
 import { createMessage } from '@share/utils';
+import { RpcException } from '@nestjs/microservices';
 
 type PrismaIngredientCreateParameter = {
   args: Omit<Prisma.ingredientCreateArgs, 'data'> & {
@@ -22,7 +23,7 @@ export default (prisma: PrismaClient) => ({
       });
 
       if (count > 0) {
-        throw new BadRequestException(createMessage(messages.INGREDIENT.NAME_ALREADY_EXIST));
+        throw new RpcException(new BadRequestException(createMessage(messages.INGREDIENT.NAME_ALREADY_EXIST)));
       }
     }
 

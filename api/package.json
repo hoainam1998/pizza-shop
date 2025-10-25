@@ -37,6 +37,7 @@
     "test:ut:ingredient.get-product-ingredients-stored": "jest --watch --testPathPatterns=apps/modules/ingredient/src/__test__/get-product-ingredients-stored.spec.ts",
     "test:ut:ingredient.delete-all-product-ingredients": "jest --watch --testPathPatterns=apps/modules/ingredient/src/__test__/delete-all-product-ingredients.spec.ts",
     "test:ut:ingredient.create": "jest --watch --testPathPatterns=apps/modules/ingredient/src/__test__/create-ingredient.spec.ts",
+    "test:ut:ingredient.delete-ingredient-expired": "jest --watch --testPathPatterns=apps/modules/ingredient/src/__test__/delete-ingredient-expired.spec.ts",
     "test:e2e:product.create": "jest --watch apps/api/src/product/__test__/create-product.spec.ts",
     "test:e2e:product.pagination": "jest --watch apps/api/src/product/__test__/pagination.spec.ts",
     "test:e2e:product.get-product": "jest --watch apps/api/src/product/__test__/get-product.spec.ts",
