@@ -6,13 +6,59 @@ import { type ProductIngredientType, type IngredientSelectType } from '@share/in
 import IngredientCachingService from '@share/libs/caching/ingredient/ingredient.service';
 import { HandlePrismaError } from '@share/decorators';
 import messages from '@share/constants/messages';
+import SchedulerService from '@share/libs/scheduler/scheduler.service';
 
 @Injectable()
 export default class IngredientService {
   constructor(
     @Inject(PRISMA_CLIENT) private readonly prismaClient: PrismaClient,
     private readonly ingredientCachingService: IngredientCachingService,
+    private readonly schedulerService: SchedulerService,
   ) {}
+
+  private delete(ingredientId: string): Promise<any[]> {
+    return this.prismaClient.product_ingredient
+      .findMany({
+        where: {
+          ingredient_id: ingredientId,
+        },
+        select: {
+          product_id: true,
+        },
+      })
+      .then((products) => {
+        const productIds = products.map((p) => p.product_id);
+        return this.prismaClient.$transaction([
+          this.prismaClient.product_ingredient.deleteMany({
+            where: {
+              ingredient_id: ingredientId,
+            },
+          }),
+          this.prismaClient.ingredient.delete({
+            where: {
+              ingredient_id: ingredientId,
+            },
+          }),
+          this.prismaClient.product.deleteMany({
+            where: {
+              product_id: {
+                in: productIds,
+              },
+            },
+          }),
+        ]);
+      });
+  }
+
+  private deleteIngredientExpired(ingredient: prisma.ingredient, actionName: string): void {
+    const jobName = 'delete_expired_ingredient';
+    this.schedulerService.deleteItemExpired(
+      +ingredient.expired_time,
+      () => this.delete(ingredient.ingredient_id),
+      jobName,
+      actionName,
+    );
+  }
 
   @HandlePrismaError(messages.INGREDIENT)
   createIngredient(ingredient: prisma.ingredient): Promise<prisma.ingredient> {
@@ -22,6 +68,7 @@ export default class IngredientService {
       })
       .then(async (ingredient) => {
         await this.ingredientCachingService.deleteAllIngredients();
+        this.deleteIngredientExpired(ingredient, this.createIngredient.name);
         return ingredient;
       });
   }

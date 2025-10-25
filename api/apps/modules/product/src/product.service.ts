@@ -1,5 +1,4 @@
 import { Inject, Injectable } from '@nestjs/common';
-import * as cron from 'cron';
 import { PRISMA_CLIENT } from '@share/di-token';
 import * as prisma from 'generated/prisma';
 import { ProductCreate, ProductSelect } from '@share/dto/validators/product.dto';
@@ -7,39 +6,25 @@ import { HandlePrismaError } from '@share/decorators';
 import { ProductPaginationPrismaResponse } from '@share/interfaces';
 import { calcSkip } from '@share/utils';
 import messages from '@share/constants/messages';
-import { SchedulerRegistry } from '@nestjs/schedule';
-import { formatDateTime } from '@share/utils';
-import LoggingService from '@share/libs/logging/logging.service';
 import IngredientCachingService from '@share/libs/caching/ingredient/ingredient.service';
+import SchedulerService from '@share/libs/scheduler/scheduler.service';
 
 @Injectable()
 export default class ProductService {
   constructor(
     @Inject(PRISMA_CLIENT) private readonly prismaClient: prisma.PrismaClient,
-    private schedulerRegistry: SchedulerRegistry,
-    private readonly logger: LoggingService,
     private readonly ingredientCachingService: IngredientCachingService,
+    private readonly schedulerService: SchedulerService,
   ) {}
 
   private deleteProductWhenExpired(product: prisma.product, actionName: string): void {
-    if (+product.expired_time > Date.now()) {
-      const date = new Date(+product.expired_time);
-      const dateStr = formatDateTime(date);
-      const jobName = 'delete_expired_product';
-      if (this.schedulerRegistry.doesExist('cron', jobName)) {
-        const cronJob = this.schedulerRegistry.getCronJob(jobName);
-        cronJob.setTime(new cron.CronTime(date));
-      } else {
-        const job = new cron.CronJob(date, async () => {
-          await this.delete(product.product_id);
-          this.logger.log(messages.PRODUCT.PRODUCT_DELETED, actionName);
-        });
-        this.schedulerRegistry.addCronJob(jobName, job);
-        job.start();
-      }
-      this.logger.log(`job "${jobName}" added at ${dateStr}!`, actionName);
-    }
-    this.logger.warn(messages.PRODUCT.SCHEDULE_DELETE_PRODUCT_FAILED, actionName);
+    const jobName = 'delete_expired_product';
+    this.schedulerService.deleteItemExpired(
+      +product.expired_time,
+      () => this.delete(product.product_id),
+      jobName,
+      actionName,
+    );
   }
 
   @HandlePrismaError(messages.PRODUCT)
