@@ -1,8 +1,8 @@
 import { BadRequestException } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import { ingredient, Prisma, PrismaClient, PrismaPromise, Status } from 'generated/prisma';
 import messages from '@share/constants/messages';
 import { createMessage } from '@share/utils';
-import { RpcException } from '@nestjs/microservices';
 
 type PrismaIngredientCreateParameter = {
   args: Omit<Prisma.ingredientCreateArgs, 'data'> & {

@@ -12,6 +12,13 @@ export const ingredient = {
   expired_time: (Date.now() + 60 * 1000).toString(),
 };
 
+export const product_ingredient = {
+  ingredient_id: Date.now().toString(),
+  product_id: Date.now().toString(),
+  unit: Unit.GRAM,
+  count: 10,
+};
+
 export const createIngredientsJson = (length: number): string[] => {
   return Array.apply(this, Array(length)).map(() => JSON.stringify(ingredient));
 };
@@ -26,6 +33,10 @@ export const createProductIngredients = (length: number): ProductIngredientType[
     amount: 5,
     unit: Unit.GRAM,
   }));
+};
+
+export const createProductIngredientDatabaseList = (length: number): (typeof product_ingredient)[] => {
+  return Array.apply(this, Array(length)).map(() => product_ingredient);
 };
 
 export const createRedisProductIngredients = (length: number): Record<string, string> => {

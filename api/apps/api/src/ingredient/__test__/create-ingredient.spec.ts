@@ -1,4 +1,5 @@
 import TestAgent from 'supertest/lib/agent';
+import { expect } from '@jest/globals';
 import { of, throwError } from 'rxjs';
 import { BadRequestException, HttpStatus, InternalServerErrorException } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
@@ -13,6 +14,7 @@ import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-
 import messages from '@share/constants/messages';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { IngredientCreate } from '@share/dto/validators/ingredient.dto';
+import { createMessage } from '@share/utils';
 
 const createIngredientUrl = '/ingredient/create';
 let api: TestAgent;
@@ -49,7 +51,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(ingredient));
     const createIngredient = jest.spyOn(ingredientService, 'createIngredient');
-    ingredientBody.avatar = expect.any(String);
+    ingredientBody.avatar = expect.toBeImageBase64();
 
     await api
       .post(createIngredientUrl)
@@ -222,6 +224,31 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
       .expect('Content-Type', /application\/json/)
       .expect({
         message: UnknownError.message,
+      });
+    expect(createIngredient).toHaveBeenCalledTimes(1);
+    expect(createIngredient).toHaveBeenCalledWith(ingredientBody);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledWith(createIngredientPattern, ingredientBody);
+  });
+
+  it(createTestName('create ingredient failed with rpc unknown error', HttpStatus.BAD_REQUEST), async () => {
+    expect.hasAssertions();
+    const send = jest
+      .spyOn(clientProxy, 'send')
+      .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.COMMON.COMMON_ERROR))));
+    const createIngredient = jest.spyOn(ingredientService, 'createIngredient');
+    await api
+      .post(createIngredientUrl)
+      .field('name', ingredient.name)
+      .field('unit', ingredient.unit)
+      .field('count', ingredient.count)
+      .field('price', ingredient.price)
+      .field('expiredTime', ingredient.expired_time)
+      .attach('avatar', getStaticFile('test-image.png'))
+      .expect(HttpStatus.BAD_REQUEST)
+      .expect('Content-Type', /application\/json/)
+      .expect({
+        message: messages.COMMON.COMMON_ERROR,
       });
     expect(createIngredient).toHaveBeenCalledTimes(1);
     expect(createIngredient).toHaveBeenCalledWith(ingredientBody);

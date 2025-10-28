@@ -10,6 +10,8 @@ import {
   HttpCode,
   HttpStatus,
   NotFoundException,
+  Delete,
+  Param,
 } from '@nestjs/common';
 import { catchError, map, Observable } from 'rxjs';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -17,7 +19,7 @@ import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { validate, isPositive, isInt, ValidationError } from 'class-validator';
 import IngredientService from './ingredient.service';
 import { HandleHttpError, UploadImage } from '@share/decorators';
-import { ImageTransformPipe } from '@share/pipes';
+import { IdValidationPipe, ImageTransformPipe } from '@share/pipes';
 import { IngredientCreate, ComputeProductPrice, IngredientSelect } from '@share/dto/validators/ingredient.dto';
 import { IngredientList, Ingredient } from '@share/dto/serializer/ingredient';
 import { MessageSerializer } from '@share/dto/serializer/common';
@@ -70,6 +72,15 @@ export default class IngredientController {
         }
       }),
     );
+  }
+
+  @Delete('delete/:id')
+  @HttpCode(HttpStatus.OK)
+  @HandleHttpError
+  deleteIngredient(@Param('id', new IdValidationPipe()) id: string): Observable<MessageSerializer> {
+    return this.ingredientService
+      .deleteIngredient(id)
+      .pipe(map(() => MessageSerializer.create(messages.INGREDIENT.DELETE_INGREDIENT_SUCCESS)));
   }
 
   @Post('all')
