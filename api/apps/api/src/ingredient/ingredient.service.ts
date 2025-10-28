@@ -2,7 +2,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
 import { ingredient } from 'generated/prisma';
-import { createIngredientPattern, computeProductPricePattern, getAllIngredients } from '@share/pattern';
+import {
+  createIngredientPattern,
+  computeProductPricePattern,
+  getAllIngredients,
+  deleteIngredientPattern,
+} from '@share/pattern';
 import { INGREDIENT_SERVICE } from '@share/di-token';
 import { ComputeProductPrice, IngredientSelect } from '@share/dto/validators/ingredient.dto';
 
@@ -20,5 +25,9 @@ export default class IngredientService {
 
   getAll(select: IngredientSelect): Observable<ingredient[]> {
     return this.ingredient.send<ingredient[]>(getAllIngredients, select);
+  }
+
+  deleteIngredient(ingredientId: string): Observable<ingredient> {
+    return this.ingredient.send<ingredient>(deleteIngredientPattern, ingredientId);
   }
 }

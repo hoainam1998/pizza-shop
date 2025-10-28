@@ -2,21 +2,23 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import prisma, { PrismaClient, Unit } from 'generated/prisma';
 import { PRISMA_CLIENT } from '@share/di-token';
+import SchedulerService from '@share/libs/scheduler/scheduler.service';
 import { type ProductIngredientType, type IngredientSelectType } from '@share/interfaces';
 import IngredientCachingService from '@share/libs/caching/ingredient/ingredient.service';
 import { HandlePrismaError } from '@share/decorators';
 import messages from '@share/constants/messages';
-import SchedulerService from '@share/libs/scheduler/scheduler.service';
 
 @Injectable()
 export default class IngredientService {
+  private readonly _jobName = 'delete_expired_ingredient';
+
   constructor(
     @Inject(PRISMA_CLIENT) private readonly prismaClient: PrismaClient,
     private readonly ingredientCachingService: IngredientCachingService,
     private readonly schedulerService: SchedulerService,
   ) {}
 
-  private delete(ingredientId: string): Promise<any[]> {
+  private delete(ingredientId: string): Promise<prisma.ingredient> {
     return this.prismaClient.product_ingredient
       .findMany({
         where: {
@@ -28,34 +30,37 @@ export default class IngredientService {
       })
       .then((products) => {
         const productIds = products.map((p) => p.product_id);
-        return this.prismaClient.$transaction([
-          this.prismaClient.product_ingredient.deleteMany({
-            where: {
-              ingredient_id: ingredientId,
-            },
-          }),
-          this.prismaClient.ingredient.delete({
-            where: {
-              ingredient_id: ingredientId,
-            },
-          }),
-          this.prismaClient.product.deleteMany({
-            where: {
-              product_id: {
-                in: productIds,
+        return this.prismaClient
+          .$transaction([
+            this.prismaClient.product_ingredient.deleteMany({
+              where: {
+                product_id: {
+                  in: productIds,
+                },
               },
-            },
-          }),
-        ]);
+            }),
+            this.prismaClient.ingredient.delete({
+              where: {
+                ingredient_id: ingredientId,
+              },
+            }),
+            this.prismaClient.product.deleteMany({
+              where: {
+                product_id: {
+                  in: productIds,
+                },
+              },
+            }),
+          ])
+          .then((results) => results[1]);
       });
   }
 
   private deleteIngredientExpired(ingredient: prisma.ingredient, actionName: string): void {
-    const jobName = 'delete_expired_ingredient';
     this.schedulerService.deleteItemExpired(
       +ingredient.expired_time,
       () => this.delete(ingredient.ingredient_id),
-      jobName,
+      this._jobName,
       actionName,
     );
   }
@@ -71,6 +76,15 @@ export default class IngredientService {
         this.deleteIngredientExpired(ingredient, this.createIngredient.name);
         return ingredient;
       });
+  }
+
+  @HandlePrismaError(messages.INGREDIENT)
+  deleteIngredient(ingredientId: string): Promise<prisma.ingredient> {
+    return this.delete(ingredientId).then(async (ingredient) => {
+      this.schedulerService.deleteScheduler(this._jobName, this.deleteIngredient.name);
+      await this.ingredientCachingService.deleteAllIngredients();
+      return ingredient;
+    });
   }
 
   @HandlePrismaError(messages.INGREDIENT)

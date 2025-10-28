@@ -11,6 +11,8 @@ import SchedulerService from '@share/libs/scheduler/scheduler.service';
 
 @Injectable()
 export default class ProductService {
+  private readonly _jobName: string = 'delete_expired_product';
+
   constructor(
     @Inject(PRISMA_CLIENT) private readonly prismaClient: prisma.PrismaClient,
     private readonly ingredientCachingService: IngredientCachingService,
@@ -18,11 +20,10 @@ export default class ProductService {
   ) {}
 
   private deleteProductWhenExpired(product: prisma.product, actionName: string): void {
-    const jobName = 'delete_expired_product';
     this.schedulerService.deleteItemExpired(
       +product.expired_time,
       () => this.delete(product.product_id),
-      jobName,
+      this._jobName,
       actionName,
     );
   }
@@ -68,7 +69,7 @@ export default class ProductService {
   }
 
   @HandlePrismaError(messages.PRODUCT)
-  getProduct(select: any): Promise<any> {
+  getProduct(select: Record<string, any>): Promise<any> {
     return this.prismaClient.product.findUniqueOrThrow({
       where: {
         product_id: select.productId,
@@ -96,7 +97,10 @@ export default class ProductService {
 
   @HandlePrismaError(messages.PRODUCT)
   deleteProduct(productId: string): Promise<prisma.product> {
-    return this.delete(productId);
+    return this.delete(productId).then((product) => {
+      this.schedulerService.deleteScheduler(this._jobName, this.deleteProduct.name);
+      return product;
+    });
   }
 
   @HandlePrismaError(messages.PRODUCT)

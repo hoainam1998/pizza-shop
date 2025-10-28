@@ -31,4 +31,13 @@ export default class SchedulerService {
     }
     this.logger.warn(messages.PRODUCT.SCHEDULE_DELETE_PRODUCT_FAILED, actionName);
   }
+
+  deleteScheduler(jobName: string, actionName: string): void {
+    try {
+      this.schedulerRegistry.deleteCronJob(jobName);
+      this.logger.log(`${jobName} was cancel!`, actionName);
+    } catch (error) {
+      this.logger.log(error.message, actionName);
+    }
+  }
 }

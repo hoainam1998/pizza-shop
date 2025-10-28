@@ -13,6 +13,7 @@ export default {
     findMany: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
+    deleteMany: jest.fn(),
     findFirstOrThrow: jest.fn(),
     findUniqueOrThrow: jest.fn(),
     count: jest.fn(),
@@ -20,9 +21,11 @@ export default {
   ingredient: {
     findMany: jest.fn(),
     create: jest.fn(),
+    delete: jest.fn(),
   },
   product_ingredient: {
     deleteMany: jest.fn(),
+    findMany: jest.fn(),
   },
   $transaction: jest.fn().mockResolvedValue({}),
 };

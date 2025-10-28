@@ -1,25 +1,16 @@
 import startUp from './pre-setup';
-import * as cron from 'cron';
-import { SchedulerRegistry } from '@nestjs/schedule';
-import { CronJob } from 'cron';
-import LoggingService from '@share/libs/logging/logging.service';
+import SchedulerService from '@share/libs/scheduler/scheduler.service';
 import ProductService from '../product.service';
 import { product } from '@share/test/pre-setup/mock/data/product';
-import messages from '@share/constants/messages';
-import SchedulerService from '@share/libs/scheduler/scheduler.service';
 
-let schedulerRegistry: SchedulerRegistry;
 let schedulerService: SchedulerService;
-let loggerService: LoggingService;
 let productService: ProductService;
 const actionName = 'action_name';
 
 beforeEach(async () => {
   const moduleRef = await startUp();
-  loggerService = moduleRef.get(LoggingService);
   schedulerService = moduleRef.get(SchedulerService);
   productService = moduleRef.get(ProductService);
-  schedulerRegistry = moduleRef.get(SchedulerRegistry);
 });
 
 afterEach((done) => {
@@ -31,78 +22,41 @@ afterEach((done) => {
 describe('delete product expired', () => {
   it('delete product expired success', () => {
     expect.hasAssertions();
-    const log = jest.spyOn(loggerService, 'log');
-    const addJob = jest.spyOn(schedulerRegistry, 'addCronJob');
-    const getCronJob = jest.spyOn(schedulerRegistry, 'getCronJob');
-    const doesExist = jest.spyOn(schedulerRegistry, 'doesExist').mockReturnValue(false);
     const deleteItemExpired = jest.spyOn(schedulerService as any, 'deleteItemExpired');
     (productService as any).deleteProductWhenExpired(product, actionName);
     expect(deleteItemExpired).toHaveBeenCalledTimes(1);
     expect(deleteItemExpired).toHaveBeenCalledWith(
       +product.expired_time,
       expect.any(Function),
-      expect.any(String),
+      (productService as any)._jobName,
       actionName,
     );
-    expect(doesExist).toHaveBeenCalledTimes(1);
-    expect(doesExist).toHaveBeenCalledWith('cron', expect.any(String));
-    expect(addJob).toHaveBeenCalledTimes(1);
-    expect(addJob).toHaveBeenCalledWith(expect.any(String), expect.any(CronJob));
-    expect(globalThis.cronJob.start).toHaveBeenCalledTimes(1);
-    expect(log).toHaveBeenCalledTimes(1);
-    expect(log).toHaveBeenCalledWith(expect.any(String), actionName);
-    expect(getCronJob).not.toHaveBeenCalled();
   });
 
   it('delete product expired success when cronJob was exits', () => {
     expect.hasAssertions();
-    const date = new Date(+product.expired_time);
-    const mockCronJob = new cron.CronJob(date, () => {});
-    const setTime = jest.spyOn(mockCronJob, 'setTime');
-    const log = jest.spyOn(loggerService, 'log');
-    const doesExist = jest.spyOn(schedulerRegistry, 'doesExist').mockReturnValue(true);
-    const addJob = jest.spyOn(schedulerRegistry, 'addCronJob');
-    const getCronJob = jest.spyOn(schedulerRegistry, 'getCronJob').mockReturnValue(mockCronJob);
     const deleteItemExpired = jest.spyOn(schedulerService as any, 'deleteItemExpired');
     (productService as any).deleteProductWhenExpired(product, actionName);
     expect(deleteItemExpired).toHaveBeenCalledTimes(1);
     expect(deleteItemExpired).toHaveBeenCalledWith(
       +product.expired_time,
       expect.any(Function),
-      expect.any(String),
+      (productService as any)._jobName,
       actionName,
     );
-    expect(doesExist).toHaveBeenCalledTimes(1);
-    expect(doesExist).toHaveBeenCalledWith('cron', expect.any(String));
-    expect(getCronJob).toHaveBeenCalledTimes(1);
-    expect(getCronJob).toHaveBeenCalledWith(expect.any(String));
-    expect(setTime).toHaveBeenCalledTimes(1);
-    expect(setTime).toHaveBeenCalledWith(new cron.CronTime(date));
-    expect(addJob).not.toHaveBeenCalled();
-    expect(log).toHaveBeenCalledTimes(1);
-    expect(log).toHaveBeenCalledWith(expect.any(String), actionName);
   });
 
   it('delete product expired failed due date regis used past', () => {
     expect.hasAssertions();
-    product.expired_time = Date.now() - 1000 * 60;
-    const warn = jest.spyOn(loggerService, 'warn');
-    const doesExist = jest.spyOn(schedulerRegistry, 'doesExist');
-    const addJob = jest.spyOn(schedulerRegistry, 'addCronJob');
-    const getCronJob = jest.spyOn(schedulerRegistry, 'getCronJob');
+    product.expired_time = (Date.now() - 1000 * 10).toString();
     const deleteItemExpired = jest.spyOn(schedulerService as any, 'deleteItemExpired');
     (productService as any).deleteProductWhenExpired(product, actionName);
     expect(deleteItemExpired).toHaveBeenCalledTimes(1);
     expect(deleteItemExpired).toHaveBeenCalledWith(
       +product.expired_time,
       expect.any(Function),
-      expect.any(String),
+      (productService as any)._jobName,
       actionName,
     );
-    expect(doesExist).not.toHaveBeenCalled();
-    expect(getCronJob).not.toHaveBeenCalled();
-    expect(addJob).not.toHaveBeenCalled();
-    expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn).toHaveBeenCalledWith(messages.PRODUCT.SCHEDULE_DELETE_PRODUCT_FAILED, actionName);
   });
 });

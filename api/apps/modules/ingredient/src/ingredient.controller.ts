@@ -2,7 +2,12 @@ import { Controller, NotFoundException } from '@nestjs/common';
 import { type ingredient } from 'generated/prisma';
 import { MessagePattern } from '@nestjs/microservices';
 import IngredientService from './ingredient.service';
-import { computeProductPricePattern, createIngredientPattern, getAllIngredients } from '@share/pattern';
+import {
+  computeProductPricePattern,
+  createIngredientPattern,
+  getAllIngredients,
+  deleteIngredientPattern,
+} from '@share/pattern';
 import { ComputeProductPrice, IngredientSelect } from '@share/dto/validators/ingredient.dto';
 import { checkArrayHaveValues } from '@share/utils';
 import LoggingService from '@share/libs/logging/logging.service';
@@ -36,5 +41,10 @@ export default class IngredientController {
       }
       return ingredients;
     });
+  }
+
+  @MessagePattern(deleteIngredientPattern)
+  deleteIngredientPattern(ingredientId: string): Promise<ingredient> {
+    return this.ingredientService.deleteIngredient(ingredientId);
   }
 }
