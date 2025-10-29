@@ -11,12 +11,14 @@ import messages from '@share/constants/messages';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { createMessage } from '@share/utils';
 import { PrismaDisconnectError, PrismaNotFoundError } from '@share/test/pre-setup/mock/errors/prisma-errors';
+import CategoryCachingService from '@share/libs/caching/category/category.service';
 delete category._count;
 
 let categoryController: CategoryController;
 let categoryService: CategoryService;
 let prismaService: PrismaClient;
 let loggerService: LoggingService;
+let categoryCachingService: CategoryCachingService;
 
 beforeEach(async () => {
   const moduleRef = await startUp();
@@ -25,6 +27,7 @@ beforeEach(async () => {
   categoryController = moduleRef.get(CategoryController);
   loggerService = moduleRef.get(LoggingService);
   prismaService = moduleRef.get(PRISMA_CLIENT);
+  categoryCachingService = moduleRef.get(CategoryCachingService);
 });
 
 afterEach((done) => {
@@ -40,7 +43,7 @@ describe('delete category', () => {
     const deletePrismaMethod = jest.spyOn(prismaService.category, 'delete');
     const transactionPrismaMethod = jest.spyOn(prismaService, '$transaction').mockResolvedValue(createCategoryList(2));
     const deleteMethodService = jest.spyOn(categoryService, 'delete');
-    const storeCacheCategoriesMethod = jest.spyOn(categoryService as any, 'storeCacheCategories');
+    const deleteCacheCategoriesMethod = jest.spyOn(categoryCachingService, 'deleteAllCategories');
     const deleteCategoryControllerMethod = jest.spyOn(categoryController, 'deleteCategory');
     await expect(categoryController.deleteCategory(category.category_id)).resolves.toBe(category);
     expect(deleteCategoryControllerMethod).toHaveBeenCalledTimes(1);
@@ -49,7 +52,7 @@ describe('delete category', () => {
     expect(transactionPrismaMethod).toHaveBeenLastCalledWith(expect.any(Array));
     expect(deleteMethodService).toHaveBeenCalledTimes(1);
     expect(deleteMethodService).toHaveBeenCalledWith(category.category_id);
-    expect(storeCacheCategoriesMethod).toHaveBeenCalledTimes(1);
+    expect(deleteCacheCategoriesMethod).toHaveBeenCalledTimes(1);
     expect(updatePrismaMethod).toHaveBeenCalledTimes(1);
     expect(updatePrismaMethod).toHaveBeenCalledWith({
       where: {
@@ -75,7 +78,7 @@ describe('delete category', () => {
     const deletePrismaMethod = jest.spyOn(prismaService.category, 'delete');
     const transactionPrismaMethod = jest.spyOn(prismaService, '$transaction').mockRejectedValue(PrismaNotFoundError);
     const deleteMethodService = jest.spyOn(categoryService, 'delete');
-    const storeCacheCategoriesMethod = jest.spyOn(categoryService as any, 'storeCacheCategories');
+    const deleteCacheCategoriesMethod = jest.spyOn(categoryCachingService, 'deleteAllCategories');
     const deleteMethodController = jest.spyOn(categoryController, 'deleteCategory');
     const logMethod = jest.spyOn(loggerService, 'log');
     await expect(categoryController.deleteCategory(category.category_id)).rejects.toThrow(
@@ -89,7 +92,7 @@ describe('delete category', () => {
     expect(transactionPrismaMethod).toHaveBeenCalledWith(expect.any(Array));
     expect(deleteMethodService).toHaveBeenCalledTimes(1);
     expect(deleteMethodService).toHaveBeenCalledWith(category.category_id);
-    expect(storeCacheCategoriesMethod).not.toHaveBeenCalled();
+    expect(deleteCacheCategoriesMethod).not.toHaveBeenCalled();
     expect(updatePrismaMethod).toHaveBeenCalledTimes(1);
     expect(updatePrismaMethod).toHaveBeenCalledWith({
       where: {
@@ -115,7 +118,7 @@ describe('delete category', () => {
     const deletePrismaMethod = jest.spyOn(prismaService.category, 'delete');
     const transactionPrismaMethod = jest.spyOn(prismaService, '$transaction').mockRejectedValue(UnknownError);
     const deleteMethodService = jest.spyOn(categoryService, 'delete');
-    const storeCacheCategoriesMethod = jest.spyOn(categoryService as any, 'storeCacheCategories');
+    const deleteCacheCategoriesMethod = jest.spyOn(categoryCachingService, 'deleteAllCategories');
     const deleteMethodController = jest.spyOn(categoryController, 'deleteCategory');
     const logMethod = jest.spyOn(loggerService, 'log');
     await expect(categoryController.deleteCategory(category.category_id)).rejects.toThrow(
@@ -129,7 +132,7 @@ describe('delete category', () => {
     expect(transactionPrismaMethod).toHaveBeenCalledWith(expect.any(Array));
     expect(deleteMethodService).toHaveBeenCalledTimes(1);
     expect(deleteMethodService).toHaveBeenCalledWith(category.category_id);
-    expect(storeCacheCategoriesMethod).not.toHaveBeenCalled();
+    expect(deleteCacheCategoriesMethod).not.toHaveBeenCalled();
     expect(updatePrismaMethod).toHaveBeenCalledTimes(1);
     expect(updatePrismaMethod).toHaveBeenCalledWith({
       where: {
@@ -155,7 +158,7 @@ describe('delete category', () => {
     const deletePrismaMethod = jest.spyOn(prismaService.category, 'delete');
     const transactionPrismaMethod = jest.spyOn(prismaService, '$transaction').mockRejectedValue(PrismaDisconnectError);
     const deleteMethodService = jest.spyOn(categoryService, 'delete');
-    const storeCacheCategoriesMethod = jest.spyOn(categoryService as any, 'storeCacheCategories');
+    const deleteCacheCategoriesMethod = jest.spyOn(categoryCachingService, 'deleteAllCategories');
     const deleteMethodController = jest.spyOn(categoryController, 'deleteCategory');
     const logMethod = jest.spyOn(loggerService, 'log');
     await expect(categoryController.deleteCategory(category.category_id)).rejects.toThrow(
@@ -169,7 +172,7 @@ describe('delete category', () => {
     expect(transactionPrismaMethod).toHaveBeenCalledWith(expect.any(Array));
     expect(deleteMethodService).toHaveBeenCalledTimes(1);
     expect(deleteMethodService).toHaveBeenCalledWith(category.category_id);
-    expect(storeCacheCategoriesMethod).not.toHaveBeenCalled();
+    expect(deleteCacheCategoriesMethod).not.toHaveBeenCalled();
     expect(updatePrismaMethod).toHaveBeenCalledTimes(1);
     expect(updatePrismaMethod).toHaveBeenCalledWith({
       where: {

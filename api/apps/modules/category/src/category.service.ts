@@ -39,7 +39,7 @@ export default class CategoryService {
         data: categoryBody,
       })
       .then(async (result) => {
-        await this.storeCacheCategories();
+        await this.categoryCachingService.deleteAllCategories();
         return result;
       });
   }
@@ -103,7 +103,7 @@ export default class CategoryService {
         },
       })
       .then(async (result) => {
-        await this.storeCacheCategories();
+        await this.categoryCachingService.deleteAllCategories();
         return result;
       });
   }
@@ -129,7 +129,7 @@ export default class CategoryService {
         }),
       ])
       .then(async (result) => {
-        await this.storeCacheCategories();
+        await this.categoryCachingService.deleteAllCategories();
         return result[1];
       });
   }

@@ -1,19 +1,7 @@
-import { Module, Provider } from '@nestjs/common';
-import { PRISMA_CLIENT, REDIS_CLIENT } from '@share/di-token';
-import prisma from './pre-setup/mock/prisma';
+import { Module } from '@nestjs/common';
 import CachingModule from '@share/libs/caching/caching.module';
-import RedisClient from '@share/libs/redis-client/redis';
 import SchedulerModule from '@share/libs/scheduler/scheduler.module';
-
-const prismaClient: Provider = {
-  provide: PRISMA_CLIENT,
-  useValue: prisma,
-};
-
-const redisClient: Provider = {
-  provide: REDIS_CLIENT,
-  useValue: RedisClient.Instance,
-};
+import { redisClient, prismaClient } from '@share/providers';
 
 @Module({
   imports: [CachingModule.register(redisClient), SchedulerModule],
