@@ -17,7 +17,7 @@ let prismaService: PrismaClient;
 let categoryCachingService: CategoryCachingService;
 let loggerService: LoggingService;
 
-const query = {
+const query: any = {
   name: true,
   avatar: true,
 };

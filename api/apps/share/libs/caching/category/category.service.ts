@@ -9,7 +9,7 @@ const categoryKey = constants.REDIS_PREFIX.CATEGORIES;
 export default class CategoryCachingService {
   constructor(@Inject(REDIS_CLIENT) private readonly redisClient: RedisClient) {}
 
-  storeAllCategories(categories: category[]): ReturnType<typeof this.redisClient.Client.json.set> {
+  storeAllCategories(categories: category[]): Promise<'OK' | null> {
     return this.redisClient.Client.json.set(categoryKey, '$', categories);
   }
 
@@ -18,8 +18,10 @@ export default class CategoryCachingService {
   }
 
   getAllCategories(): Promise<category[]> {
-    return this.redisClient.Client.json
-      .get(constants.REDIS_PREFIX.CATEGORIES, { path: '$' })
-      .then((result: Array<category[]>) => result[0]);
+    return this.redisClient.Client.json.get(categoryKey, { path: '$' }).then((result: Array<category[]>) => result[0]);
+  }
+
+  deleteAllCategories(): Promise<number> {
+    return this.redisClient.Client.del(categoryKey);
   }
 }

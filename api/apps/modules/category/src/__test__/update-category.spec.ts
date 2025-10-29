@@ -4,6 +4,7 @@ import { PrismaDisconnectError, PrismaNotFoundError } from '@share/test/pre-setu
 import startUp from './pre-setup';
 import CategoryController from '../category.controller';
 import CategoryService from '../category.service';
+import CategoryCachingService from '@share/libs/caching/category/category.service';
 import { category } from '@share/test/pre-setup/mock/data/category';
 import { PRISMA_CLIENT } from '@share/di-token';
 import LoggingService from '@share/libs/logging/logging.service';
@@ -17,6 +18,7 @@ let categoryController: CategoryController;
 let categoryService: CategoryService;
 let prismaService: PrismaClient;
 let loggerService: LoggingService;
+let categoryCachingService: CategoryCachingService;
 
 beforeEach(async () => {
   const moduleRef = await startUp();
@@ -25,6 +27,7 @@ beforeEach(async () => {
   categoryController = moduleRef.get(CategoryController);
   loggerService = moduleRef.get(LoggingService);
   prismaService = moduleRef.get(PRISMA_CLIENT);
+  categoryCachingService = moduleRef.get(CategoryCachingService);
 });
 
 afterEach((done) => {
@@ -38,14 +41,14 @@ describe('update category', () => {
     expect.hasAssertions();
     const updatePrismaMethod = jest.spyOn(prismaService.category, 'update').mockResolvedValue(category);
     const updateMethodService = jest.spyOn(categoryService, 'update');
-    const storeCacheCategoriesMethod = jest.spyOn(categoryService as any, 'storeCacheCategories');
+    const deleteCacheCategoriesMethod = jest.spyOn(categoryCachingService, 'deleteAllCategories');
     const updateCategoryControllerMethod = jest.spyOn(categoryController, 'updateCategory');
     await expect(categoryController.updateCategory(category)).resolves.toBe(category);
     expect(updateCategoryControllerMethod).toHaveBeenCalledTimes(1);
     expect(updateCategoryControllerMethod).toHaveBeenCalledWith(category);
     expect(updateMethodService).toHaveBeenCalledTimes(1);
     expect(updateMethodService).toHaveBeenCalledWith(category);
-    expect(storeCacheCategoriesMethod).toHaveBeenCalledTimes(1);
+    expect(deleteCacheCategoriesMethod).toHaveBeenCalledTimes(1);
     expect(updatePrismaMethod).toHaveBeenCalledTimes(1);
     expect(updatePrismaMethod).toHaveBeenCalledWith({
       where: {
@@ -62,7 +65,7 @@ describe('update category', () => {
     expect.hasAssertions();
     const updatePrismaMethod = jest.spyOn(prismaService.category, 'update').mockRejectedValue(PrismaNotFoundError);
     const updateMethodService = jest.spyOn(categoryService, 'update');
-    const storeCacheCategoriesMethod = jest.spyOn(categoryService as any, 'storeCacheCategories');
+    const deleteCacheCategoriesMethod = jest.spyOn(categoryCachingService, 'deleteAllCategories');
     const updateMethodController = jest.spyOn(categoryController, 'updateCategory');
     const logMethod = jest.spyOn(loggerService, 'log');
     await expect(categoryController.updateCategory(category)).rejects.toThrow(
@@ -74,7 +77,7 @@ describe('update category', () => {
     expect(logMethod).toHaveBeenCalledWith(messages.CATEGORY.NOT_FOUND, expect.any(String));
     expect(updateMethodService).toHaveBeenCalledTimes(1);
     expect(updateMethodService).toHaveBeenCalledWith(category);
-    expect(storeCacheCategoriesMethod).not.toHaveBeenCalled();
+    expect(deleteCacheCategoriesMethod).not.toHaveBeenCalled();
     expect(updatePrismaMethod).toHaveBeenCalledTimes(1);
     expect(updatePrismaMethod).toHaveBeenCalledWith({
       where: {
@@ -91,7 +94,7 @@ describe('update category', () => {
     expect.hasAssertions();
     const updatePrismaMethod = jest.spyOn(prismaService.category, 'update').mockRejectedValue(UnknownError);
     const updateMethodService = jest.spyOn(categoryService, 'update');
-    const storeCacheCategoriesMethod = jest.spyOn(categoryService as any, 'storeCacheCategories');
+    const deleteCacheCategoriesMethod = jest.spyOn(categoryCachingService, 'deleteAllCategories');
     const updateMethodController = jest.spyOn(categoryController, 'updateCategory');
     const logMethod = jest.spyOn(loggerService, 'log');
     await expect(categoryController.updateCategory(category)).rejects.toThrow(
@@ -103,7 +106,7 @@ describe('update category', () => {
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
     expect(updateMethodService).toHaveBeenCalledTimes(1);
     expect(updateMethodService).toHaveBeenCalledWith(category);
-    expect(storeCacheCategoriesMethod).not.toHaveBeenCalled();
+    expect(deleteCacheCategoriesMethod).not.toHaveBeenCalled();
     expect(updatePrismaMethod).toHaveBeenCalled();
     expect(updatePrismaMethod).toHaveBeenCalledWith({
       where: {
@@ -120,7 +123,7 @@ describe('update category', () => {
     expect.hasAssertions();
     const updatePrismaMethod = jest.spyOn(prismaService.category, 'update').mockRejectedValue(PrismaDisconnectError);
     const updateMethodService = jest.spyOn(categoryService, 'update');
-    const storeCacheCategoriesMethod = jest.spyOn(categoryService as any, 'storeCacheCategories');
+    const deleteCacheCategoriesMethod = jest.spyOn(categoryCachingService, 'deleteAllCategories');
     const updateMethodController = jest.spyOn(categoryController, 'updateCategory');
     const logMethod = jest.spyOn(loggerService, 'log');
     await expect(categoryController.updateCategory(category)).rejects.toThrow(
@@ -132,7 +135,7 @@ describe('update category', () => {
     expect(logMethod).toHaveBeenCalledWith(PrismaDisconnectError.message, expect.any(String));
     expect(updateMethodService).toHaveBeenCalledTimes(1);
     expect(updateMethodService).toHaveBeenCalledWith(category);
-    expect(storeCacheCategoriesMethod).not.toHaveBeenCalled();
+    expect(deleteCacheCategoriesMethod).not.toHaveBeenCalled();
     expect(updatePrismaMethod).toHaveBeenCalled();
     expect(updatePrismaMethod).toHaveBeenCalledWith({
       where: {

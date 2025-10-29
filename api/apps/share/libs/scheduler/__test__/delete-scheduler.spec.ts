@@ -31,14 +31,14 @@ describe('delete scheduler', () => {
 
   it('delete scheduler failed', () => {
     expect.hasAssertions();
-    const log = jest.spyOn(loggerService, 'log');
+    const logError = jest.spyOn(loggerService, 'error');
     const deleteCronJob = jest.spyOn(schedulerRegistry, 'deleteCronJob').mockImplementation(() => {
       throw UnknownError;
     });
     schedulerService.deleteScheduler(jobName, actionName);
     expect(deleteCronJob).toHaveBeenCalledTimes(1);
     expect(deleteCronJob).toHaveBeenCalledWith(jobName);
-    expect(log).toHaveBeenCalledTimes(1);
-    expect(log).toHaveBeenCalledWith(UnknownError.message, actionName);
+    expect(logError).toHaveBeenCalledTimes(1);
+    expect(logError).toHaveBeenCalledWith(UnknownError.message, actionName);
   });
 });

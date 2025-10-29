@@ -15,9 +15,3 @@ export default (): Promise<TestingModule> => {
     .useModule(ShareTestingModule)
     .compile();
 };
-
-afterEach((done) => {
-  jest.restoreAllMocks();
-  jest.resetAllMocks();
-  done();
-});

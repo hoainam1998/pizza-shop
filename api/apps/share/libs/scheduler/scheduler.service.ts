@@ -13,23 +13,27 @@ export default class SchedulerService {
   ) {}
 
   deleteItemExpired(expiredTime: number, action: () => Promise<any>, jobName: string, actionName: string): void {
-    if (expiredTime > Date.now()) {
-      const date = new Date(expiredTime);
-      const dateStr = formatDateTime(date);
-      if (this.schedulerRegistry.doesExist('cron', jobName)) {
-        const cronJob = this.schedulerRegistry.getCronJob(jobName);
-        cronJob.setTime(new cron.CronTime(date));
-      } else {
-        const job = new cron.CronJob(date, async () => {
-          await action();
-          this.logger.log(messages.PRODUCT.PRODUCT_DELETED, actionName);
-        });
-        this.schedulerRegistry.addCronJob(jobName, job);
-        job.start();
+    try {
+      if (expiredTime > Date.now()) {
+        const date = new Date(expiredTime);
+        const dateStr = formatDateTime(date);
+        if (this.schedulerRegistry.doesExist('cron', jobName)) {
+          const cronJob = this.schedulerRegistry.getCronJob(jobName);
+          cronJob.setTime(new cron.CronTime(date));
+        } else {
+          const job = new cron.CronJob(date, async () => {
+            await action();
+            this.logger.log(messages.PRODUCT.PRODUCT_DELETED, actionName);
+          });
+          this.schedulerRegistry.addCronJob(jobName, job);
+          job.start();
+        }
+        this.logger.log(`job "${jobName}" added at ${dateStr}!`, actionName);
       }
-      this.logger.log(`job "${jobName}" added at ${dateStr}!`, actionName);
+      this.logger.warn(messages.PRODUCT.SCHEDULE_DELETE_PRODUCT_FAILED, actionName);
+    } catch (error) {
+      this.logger.error(error.message, actionName);
     }
-    this.logger.warn(messages.PRODUCT.SCHEDULE_DELETE_PRODUCT_FAILED, actionName);
   }
 
   deleteScheduler(jobName: string, actionName: string): void {
@@ -37,7 +41,7 @@ export default class SchedulerService {
       this.schedulerRegistry.deleteCronJob(jobName);
       this.logger.log(`${jobName} was cancel!`, actionName);
     } catch (error) {
-      this.logger.log(error.message, actionName);
+      this.logger.error(error.message, actionName);
     }
   }
 }
