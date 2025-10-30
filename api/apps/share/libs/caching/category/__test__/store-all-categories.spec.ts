@@ -19,6 +19,7 @@ beforeEach(async () => {
 
 describe('store all categories', () => {
   it('store all categories success', async () => {
+    expect.hasAssertions();
     const result = 'OK';
     const jsonSet = jest.spyOn(redisClient.Client.json, 'set').mockResolvedValue(result);
     await expect(categoryCachingService.storeAllCategories(categories)).resolves.toBe(result);
@@ -27,6 +28,7 @@ describe('store all categories', () => {
   });
 
   it('store all categories return null', async () => {
+    expect.hasAssertions();
     const jsonSet = jest.spyOn(redisClient.Client.json, 'set').mockResolvedValue(null);
     await expect(categoryCachingService.storeAllCategories(categories)).resolves.toBe(null);
     expect(jsonSet).toHaveBeenCalledTimes(1);
@@ -34,6 +36,7 @@ describe('store all categories', () => {
   });
 
   it('store all categories failed', async () => {
+    expect.hasAssertions();
     const jsonSet = jest.spyOn(redisClient.Client.json, 'set').mockRejectedValue(UnknownError);
     await expect(categoryCachingService.storeAllCategories(categories)).rejects.toThrow(UnknownError);
     expect(jsonSet).toHaveBeenCalledTimes(1);

@@ -19,6 +19,7 @@ beforeEach(async () => {
 
 describe('store all ingredients', () => {
   it('store all ingredients success', async () => {
+    expect.hasAssertions();
     const result = 'OK';
     const jsonSet = jest.spyOn(redisClient.Client.json, 'set').mockResolvedValue(result);
     await expect(ingredientCachingService.storeAllIngredients(ingredients)).resolves.toBe(result);
@@ -27,6 +28,7 @@ describe('store all ingredients', () => {
   });
 
   it('store all ingredients failed with unknown error', async () => {
+    expect.hasAssertions();
     const jsonSet = jest.spyOn(redisClient.Client.json, 'set').mockRejectedValue(UnknownError);
     await expect(ingredientCachingService.storeAllIngredients(ingredients)).rejects.toThrow(UnknownError);
     expect(jsonSet).toHaveBeenCalledTimes(1);

@@ -17,6 +17,7 @@ beforeEach(async () => {
 
 describe('delete all caching ingredient', () => {
   it('delete all caching ingredient success', async () => {
+    expect.hasAssertions();
     const del = jest.spyOn(redisClient.Client, 'del').mockResolvedValue(1);
     await expect(ingredientCachingService.deleteAllIngredients()).resolves.toBe(1);
     expect(del).toHaveBeenCalledTimes(1);
@@ -24,6 +25,7 @@ describe('delete all caching ingredient', () => {
   });
 
   it('delete all caching ingredient failed with unknown error', async () => {
+    expect.hasAssertions();
     const del = jest.spyOn(redisClient.Client, 'del').mockRejectedValue(UnknownError);
     await expect(ingredientCachingService.deleteAllIngredients()).rejects.toThrow(UnknownError);
     expect(del).toHaveBeenCalledTimes(1);

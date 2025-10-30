@@ -17,6 +17,7 @@ beforeEach(async () => {
 
 describe('delete all caching categories', () => {
   it('delete all caching categories success', async () => {
+    expect.hasAssertions();
     const del = jest.spyOn(redisClient.Client, 'del').mockResolvedValue(1);
     await expect(categoryCachingService.deleteAllCategories()).resolves.toBe(1);
     expect(del).toHaveBeenCalledTimes(1);
@@ -24,6 +25,7 @@ describe('delete all caching categories', () => {
   });
 
   it('delete all caching categories failed with unknown error', async () => {
+    expect.hasAssertions();
     const del = jest.spyOn(redisClient.Client, 'del').mockRejectedValue(UnknownError);
     await expect(categoryCachingService.deleteAllCategories()).rejects.toThrow(UnknownError);
     expect(del).toHaveBeenCalledTimes(1);

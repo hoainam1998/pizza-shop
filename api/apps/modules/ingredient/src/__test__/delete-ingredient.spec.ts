@@ -25,6 +25,7 @@ beforeEach(async () => {
 
 describe('delete ingredient', () => {
   it('delete ingredient success', async () => {
+    expect.hasAssertions();
     const privateDelete = jest.spyOn(ingredientService as any, 'delete').mockResolvedValue(ingredient);
     const deleteScheduler = jest.spyOn(schedulerService, 'deleteScheduler').mockImplementation(() => jest.fn());
     const deleteAllIngredients = jest.spyOn(ingredientCachingService, 'deleteAllIngredients');
@@ -37,6 +38,7 @@ describe('delete ingredient', () => {
   });
 
   it('delete ingredient failed with not found error', async () => {
+    expect.hasAssertions();
     const privateDelete = jest.spyOn(ingredientService as any, 'delete').mockRejectedValue(PrismaNotFoundError);
     const deleteScheduler = jest.spyOn(schedulerService, 'deleteScheduler').mockImplementation(() => jest.fn());
     const deleteAllIngredients = jest.spyOn(ingredientCachingService, 'deleteAllIngredients');
@@ -50,6 +52,7 @@ describe('delete ingredient', () => {
   });
 
   it('delete ingredient failed with private delete got unknown error', async () => {
+    expect.hasAssertions();
     const privateDelete = jest.spyOn(ingredientService as any, 'delete').mockRejectedValue(UnknownError);
     const deleteScheduler = jest.spyOn(schedulerService, 'deleteScheduler').mockImplementation(() => jest.fn());
     const deleteAllIngredients = jest.spyOn(ingredientCachingService, 'deleteAllIngredients');
@@ -61,6 +64,7 @@ describe('delete ingredient', () => {
   });
 
   it('delete ingredient failed with deleteScheduler got unknown error', async () => {
+    expect.hasAssertions();
     const privateDelete = jest.spyOn(ingredientService as any, 'delete').mockResolvedValue(ingredient);
     const deleteScheduler = jest.spyOn(schedulerService, 'deleteScheduler').mockImplementation(() => {
       throw UnknownError;
@@ -75,6 +79,7 @@ describe('delete ingredient', () => {
   });
 
   it('delete ingredient failed with deleteAllIngredients got unknown error', async () => {
+    expect.hasAssertions();
     const privateDelete = jest.spyOn(ingredientService as any, 'delete').mockResolvedValue(ingredient);
     const deleteScheduler = jest.spyOn(schedulerService, 'deleteScheduler').mockImplementation(() => jest.fn());
     const deleteAllIngredients = jest
@@ -89,6 +94,7 @@ describe('delete ingredient', () => {
   });
 
   it('delete ingredient failed with private delete got database disconnect error', async () => {
+    expect.hasAssertions();
     const privateDelete = jest.spyOn(ingredientService as any, 'delete').mockRejectedValue(PrismaDisconnectError);
     const deleteScheduler = jest.spyOn(schedulerService, 'deleteScheduler').mockImplementation(() => jest.fn());
     const deleteAllIngredients = jest.spyOn(ingredientCachingService, 'deleteAllIngredients');

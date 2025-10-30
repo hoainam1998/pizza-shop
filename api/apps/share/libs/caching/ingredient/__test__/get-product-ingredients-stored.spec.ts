@@ -21,6 +21,7 @@ beforeEach(async () => {
 
 describe('get product ingredient stored', () => {
   it('get product ingredient stored success', async () => {
+    expect.hasAssertions();
     const hmGet = jest.spyOn(redisClient.Client, 'hmGet').mockResolvedValue(ingredientJson);
     await expect(ingredientCachingService.getProductIngredientsStored(productId, ingredientIds)).resolves.toBe(
       ingredientJson,
@@ -30,6 +31,7 @@ describe('get product ingredient stored', () => {
   });
 
   it('get product ingredient stored failed with unknown error', async () => {
+    expect.hasAssertions();
     const hmGet = jest.spyOn(redisClient.Client, 'hmGet').mockRejectedValue(UnknownError);
     await expect(ingredientCachingService.getProductIngredientsStored(productId, ingredientIds)).rejects.toThrow(
       UnknownError,
