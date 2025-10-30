@@ -23,12 +23,6 @@ beforeEach(async () => {
   ingredientCachingService = moduleRef.get(IngredientCachingService);
 });
 
-afterEach((done) => {
-  jest.restoreAllMocks();
-  jest.resetAllMocks();
-  done();
-});
-
 describe('delete ingredient', () => {
   it('delete ingredient success', async () => {
     const privateDelete = jest.spyOn(ingredientService as any, 'delete').mockResolvedValue(ingredient);

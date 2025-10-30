@@ -43,12 +43,6 @@ beforeEach(async () => {
   prismaService = moduleRef.get(PRISMA_CLIENT);
 });
 
-afterEach((done) => {
-  jest.restoreAllMocks();
-  jest.resetAllMocks();
-  done();
-});
-
 describe('category pagination', () => {
   it('category pagination was success', async () => {
     expect.hasAssertions();

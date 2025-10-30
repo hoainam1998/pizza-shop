@@ -17,12 +17,6 @@ beforeEach(async () => {
   redisClient = moduleRef.get(REDIS_CLIENT);
 });
 
-afterEach((done) => {
-  jest.restoreAllMocks();
-  jest.resetAllMocks();
-  done();
-});
-
 describe('get all caching categories', () => {
   it('get all caching categories success', async () => {
     const get = jest.spyOn(redisClient.Client.json, 'get').mockResolvedValue([categories]);

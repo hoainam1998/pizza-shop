@@ -30,12 +30,6 @@ beforeEach(async () => {
   categoryCachingService = moduleRef.get(CategoryCachingService);
 });
 
-afterEach((done) => {
-  jest.restoreAllMocks();
-  jest.resetAllMocks();
-  done();
-});
-
 describe('delete category', () => {
   it('delete category was success', async () => {
     expect.hasAssertions();

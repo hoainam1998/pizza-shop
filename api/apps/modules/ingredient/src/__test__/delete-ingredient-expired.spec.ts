@@ -14,12 +14,6 @@ beforeEach(async () => {
   schedulerService = moduleRef.get(SchedulerService);
 });
 
-afterEach((done) => {
-  jest.restoreAllMocks();
-  jest.resetAllMocks();
-  done();
-});
-
 describe('delete ingredient expired', () => {
   it('delete ingredient expired success', () => {
     expect.hasAssertions();

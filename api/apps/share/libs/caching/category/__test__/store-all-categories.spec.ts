@@ -17,12 +17,6 @@ beforeEach(async () => {
   redisClient = moduleRef.get(REDIS_CLIENT);
 });
 
-afterEach((done) => {
-  jest.restoreAllMocks();
-  jest.resetAllMocks();
-  done();
-});
-
 describe('store all categories', () => {
   it('store all categories success', async () => {
     const result = 'OK';

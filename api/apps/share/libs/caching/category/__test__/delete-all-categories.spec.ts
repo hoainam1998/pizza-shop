@@ -15,12 +15,6 @@ beforeEach(async () => {
   redisClient = moduleRef.get(REDIS_CLIENT);
 });
 
-afterEach((done) => {
-  jest.restoreAllMocks();
-  jest.resetAllMocks();
-  done();
-});
-
 describe('delete all caching categories', () => {
   it('delete all caching categories success', async () => {
     const del = jest.spyOn(redisClient.Client, 'del').mockResolvedValue(1);

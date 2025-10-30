@@ -15,12 +15,6 @@ beforeEach(async () => {
   redisClient = moduleRef.get(REDIS_CLIENT);
 });
 
-afterEach((done) => {
-  jest.restoreAllMocks();
-  jest.resetAllMocks();
-  done();
-});
-
 describe('check exist', () => {
   it('check exist return true', async () => {
     const exists = jest.spyOn(redisClient.Client, 'exists').mockResolvedValue(1);

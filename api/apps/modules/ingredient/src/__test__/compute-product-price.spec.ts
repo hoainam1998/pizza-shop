@@ -36,12 +36,6 @@ beforeEach(async () => {
   ingredientCachingService = moduleRef.get(IngredientCachingService);
 });
 
-afterEach((done) => {
-  jest.restoreAllMocks();
-  jest.resetAllMocks();
-  done();
-});
-
 describe('compute product price', () => {
   it('calculator product price success without missing list', async () => {
     expect.hasAssertions();
