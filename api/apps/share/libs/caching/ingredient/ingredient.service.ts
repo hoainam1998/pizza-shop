@@ -23,7 +23,7 @@ export default class IngredientCachingService {
     return this.redisClient.Client.del(ingredientName(productId));
   }
 
-  storeAllIngredients(ingredients: ingredient[]): ReturnType<typeof this.redisClient.Client.json.set> {
+  storeAllIngredients(ingredients: ingredient[]): Promise<'OK' | null> {
     return this.redisClient.Client.json.set(ingredientKey, '$', ingredients);
   }
 

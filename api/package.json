@@ -22,7 +22,6 @@
     "test:ut:category.delete": "jest --watch apps/modules/category/src/__test__/delete-category.spec.ts",
     "test:ut:category.get-detail": "jest --watch apps/modules/category/src/__test__/get-category.spec.ts",
     "test:ut:category.pagination": "jest --watch apps/modules/category/src/__test__/pagination.spec.ts",
-    "test:ut:category.store-cache": "jest --watch apps/modules/category/src/__test__/store-cache-categories.spec.ts",
     "test:ut:category.caching": "jest --watch apps/modules/category/src/__test__/category-redis-caching.spec.ts",
     "test:ut:caching.category.delete-all": "jest --watch apps/share/libs/caching/category/__test__/delete-all-categories.spec.ts",
     "test:ut:caching.category.get-all": "jest --watch apps/share/libs/caching/category/__test__/get-all-categories.spec.ts",
@@ -38,13 +37,15 @@
     "test:ut:product.delete": "jest --watch --testPathPatterns=apps/modules/product/src/__test__/delete-product.spec.ts",
     "test:ut:product": "jest --watch --testPathPatterns=apps/modules/product/src/__test__/",
     "test:ut:ingredient.compute-product-price": "jest --watch --testPathPatterns=apps/modules/ingredient/src/__test__/compute-product-price.spec.ts",
-    "test:ut:ingredient.store-product-ingredients": "jest --watch --testPathPatterns=apps/modules/ingredient/src/__test__/store-product-ingredients.spec.ts",
-    "test:ut:ingredient.get-product-ingredients-stored": "jest --watch --testPathPatterns=apps/modules/ingredient/src/__test__/get-product-ingredients-stored.spec.ts",
-    "test:ut:ingredient.delete-all-product-ingredients": "jest --watch --testPathPatterns=apps/modules/ingredient/src/__test__/delete-all-product-ingredients.spec.ts",
     "test:ut:ingredient.create": "jest --watch --testPathPatterns=apps/modules/ingredient/src/__test__/create-ingredient.spec.ts",
     "test:ut:ingredient.delete-ingredient-expired": "jest --watch --testPathPatterns=apps/modules/ingredient/src/__test__/delete-ingredient-expired.spec.ts",
     "test:ut:ingredient.private-delete": "jest --watch --testPathPatterns=apps/modules/ingredient/src/__test__/private-delete.spec.ts",
     "test:ut:ingredient.delete": "jest --watch --testPathPatterns=apps/modules/ingredient/src/__test__/delete-ingredient.spec.ts",
+    "test:ut:caching.ingredient.delete-all-ingredients": "jest --watch apps/share/libs/caching/ingredient/__test__/delete-all-ingredients.spec.ts",
+    "test:ut:caching.ingredient.delete-all-product-ingredients": "jest --watch apps/share/libs/caching/ingredient/__test__/delete-all-product-ingredients.spec.ts",
+    "test:ut:caching.ingredient.get-product-ingredients-stored": "jest --watch apps/share/libs/caching/ingredient/__test__/get-product-ingredients-stored.spec.ts",
+    "test:ut:caching.ingredient.get-all-ingredients": "jest --watch apps/share/libs/caching/ingredient/__test__/get-all-ingredients.spec.ts",
+    "test:ut:caching.ingredient.store-all-ingredients": "jest --watch apps/share/libs/caching/ingredient/__test__/store-all-ingredients.spec.ts",
     "test:ut:scheduler.delete-item-expired": "jest --watch --testPathPatterns=apps/share/libs/scheduler/__test__/delete-item-expired.spec.ts",
     "test:ut:scheduler.delete-scheduler": "jest --watch --testPathPatterns=apps/share/libs/scheduler/__test__/delete-scheduler.spec.ts",
     "test:e2e:product.create": "jest --watch apps/api/src/product/__test__/create-product.spec.ts",
@@ -140,7 +141,8 @@
       "<rootDir>/apps/share/test/pre-setup/mock/index.ts"
     ],
     "setupFilesAfterEnv": [
-      "<rootDir>/apps/share/test/jest-extends/index.ts"
+      "<rootDir>/apps/share/test/jest-extends/index.ts",
+      "<rootDir>/apps/share/test/pre-setup/test-run-setup.ts"
     ],
     "roots": [
       "<rootDir>/apps"

@@ -29,12 +29,6 @@ beforeEach(async () => {
   ingredientCachingService = moduleRef.get(IngredientCachingService);
 });
 
-afterEach((done) => {
-  jest.restoreAllMocks();
-  jest.resetAllMocks();
-  done();
-});
-
 describe('create ingredient', () => {
   it('create ingredient success', async () => {
     expect.hasAssertions();

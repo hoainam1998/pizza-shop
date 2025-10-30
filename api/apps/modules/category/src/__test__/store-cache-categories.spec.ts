@@ -17,14 +17,9 @@ beforeEach(async () => {
   prismaService = moduleRef.get(PRISMA_CLIENT);
 });
 
-afterEach((done) => {
-  jest.restoreAllMocks();
-  jest.resetAllMocks();
-  done();
-});
-
 describe('store cache categories', () => {
   it('store cache success', async () => {
+    expect.hasAssertions();
     const categories = createCategoryList(2);
     const findManyMethod = jest.spyOn(prismaService.category, 'findMany').mockResolvedValue(categories);
     const storeAllCategoriesCachingServiceMethod = jest.spyOn(categoryCachingService, 'storeAllCategories');
@@ -37,6 +32,7 @@ describe('store cache categories', () => {
   });
 
   it('store cache failed with findMany got unknown error', async () => {
+    expect.hasAssertions();
     const findManyMethod = jest.spyOn(prismaService.category, 'findMany').mockRejectedValue(UnknownError);
     const storeAllCategoriesCachingServiceMethod = jest.spyOn(categoryCachingService, 'storeAllCategories');
     const storeCacheCategoriesServiceMethod = jest.spyOn(categoryService as any, 'storeCacheCategories');
@@ -47,6 +43,7 @@ describe('store cache categories', () => {
   });
 
   it('store cache failed with storeAllCategories service method got unknown error', async () => {
+    expect.hasAssertions();
     const categories = createCategoryList(2);
     const findManyMethod = jest.spyOn(prismaService.category, 'findMany').mockResolvedValue(categories);
     const storeAllCategoriesCachingServiceMethod = jest
@@ -61,6 +58,7 @@ describe('store cache categories', () => {
   });
 
   it('store cache failed with findMany got database disconnect error', async () => {
+    expect.hasAssertions();
     const findManyMethod = jest.spyOn(prismaService.category, 'findMany').mockRejectedValue(PrismaDisconnectError);
     const storeAllCategoriesCachingServiceMethod = jest.spyOn(categoryCachingService, 'storeAllCategories');
     const storeCacheCategoriesServiceMethod = jest.spyOn(categoryService as any, 'storeCacheCategories');
