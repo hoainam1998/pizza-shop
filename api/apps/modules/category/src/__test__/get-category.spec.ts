@@ -65,7 +65,7 @@ describe('get category', () => {
     const findFirstOrThrowPrismaMethod = jest
       .spyOn(prismaService.category, 'findUniqueOrThrow')
       .mockRejectedValue(PrismaNotFoundError);
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     const getDetailServiceMethod = jest.spyOn(categoryService, 'getDetail');
     const getAllControllerMethod = jest.spyOn(categoryController, 'getCategory');
     await expect(categoryController.getCategory(getCategoryBody)).rejects.toThrow(
@@ -91,7 +91,7 @@ describe('get category', () => {
     const findFirstOrThrowPrismaMethod = jest
       .spyOn(prismaService.category, 'findUniqueOrThrow')
       .mockRejectedValue(UnknownError);
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     const getDetailServiceMethod = jest.spyOn(categoryService, 'getDetail');
     const getAllControllerMethod = jest.spyOn(categoryController, 'getCategory');
     await expect(categoryController.getCategory(getCategoryBody)).rejects.toThrow(
@@ -116,7 +116,7 @@ describe('get category', () => {
     const findFirstOrThrowPrismaMethod = jest
       .spyOn(prismaService.category, 'findUniqueOrThrow')
       .mockRejectedValue(PrismaDisconnectError);
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     const getDetailServiceMethod = jest.spyOn(categoryService, 'getDetail');
     const getAllControllerMethod = jest.spyOn(categoryController, 'getCategory');
     await expect(categoryController.getCategory(getCategoryBody)).rejects.toThrow(

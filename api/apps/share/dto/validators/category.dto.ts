@@ -1,14 +1,18 @@
 import { OmitType } from '@nestjs/mapped-types';
 import { Exclude, Expose, instanceToPlain, plainToInstance, Transform, Type } from 'class-transformer';
-import { IsDefined, IsString, IsNumber, IsOptional, IsBoolean, Length } from 'class-validator';
+import { IsDefined, IsString, IsNumber, IsOptional, IsBoolean, Length, IsNumberString } from 'class-validator';
 
 export class CreateCategory {
   @IsDefined()
   @IsString()
   name: string;
 
-  @Exclude({ toPlainOnly: true })
+  @IsOptional()
   @IsString()
+  avatar: string;
+
+  @Exclude({ toPlainOnly: true })
+  @IsNumberString()
   @Length(13)
   @IsOptional()
   @Transform(({ value }) => (value ? value : Date.now().toString()))

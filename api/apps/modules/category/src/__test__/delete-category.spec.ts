@@ -74,7 +74,7 @@ describe('delete category', () => {
     const deleteMethodService = jest.spyOn(categoryService, 'delete');
     const deleteCacheCategoriesMethod = jest.spyOn(categoryCachingService, 'deleteAllCategories');
     const deleteMethodController = jest.spyOn(categoryController, 'deleteCategory');
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     await expect(categoryController.deleteCategory(category.category_id)).rejects.toThrow(
       new RpcException(new NotFoundException(messages.CATEGORY.NOT_FOUND)),
     );
@@ -114,7 +114,7 @@ describe('delete category', () => {
     const deleteMethodService = jest.spyOn(categoryService, 'delete');
     const deleteCacheCategoriesMethod = jest.spyOn(categoryCachingService, 'deleteAllCategories');
     const deleteMethodController = jest.spyOn(categoryController, 'deleteCategory');
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     await expect(categoryController.deleteCategory(category.category_id)).rejects.toThrow(
       new RpcException(new BadRequestException(createMessage(messages.COMMON.COMMON_ERROR))),
     );
@@ -154,7 +154,7 @@ describe('delete category', () => {
     const deleteMethodService = jest.spyOn(categoryService, 'delete');
     const deleteCacheCategoriesMethod = jest.spyOn(categoryCachingService, 'deleteAllCategories');
     const deleteMethodController = jest.spyOn(categoryController, 'deleteCategory');
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     await expect(categoryController.deleteCategory(category.category_id)).rejects.toThrow(
       new RpcException(new BadRequestException(createMessage(PrismaDisconnectError.message))),
     );

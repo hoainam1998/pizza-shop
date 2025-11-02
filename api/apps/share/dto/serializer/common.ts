@@ -1,12 +1,12 @@
 class MessageSerializer {
-  message: string;
+  messages: string[];
 
   constructor(messageObject: Partial<MessageSerializer>) {
     Object.assign(this, messageObject);
   }
 
   static create(message: string): MessageSerializer {
-    return new MessageSerializer({ message });
+    return new MessageSerializer({ messages: [message] });
   }
 }
 

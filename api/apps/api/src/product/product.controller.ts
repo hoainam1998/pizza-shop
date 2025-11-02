@@ -1,10 +1,8 @@
 import {
   BadRequestException,
   Controller,
-  ValidationPipe,
   HttpStatus,
   HttpCode,
-  UsePipes,
   Post,
   UseInterceptors,
   Body,
@@ -14,7 +12,6 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { map, Observable } from 'rxjs';
-import { validate, ValidationError } from 'class-validator';
 import { product } from 'generated/prisma';
 import { HandleHttpError, UploadImage } from '@share/decorators';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
@@ -30,29 +27,20 @@ import ProductService from './product.service';
 import { MessageSerializer } from '@share/dto/serializer/common';
 import messages from '@share/constants/messages';
 import { PaginationProductSerializer, ProductSerializer } from '@share/dto/serializer/product';
-import { handleValidateException } from '@share/utils';
 import LoggingService from '@share/libs/logging/logging.service';
+import BaseController from '../controller';
 
-@UsePipes(
-  new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    exceptionFactory: (exceptions: ValidationError[]) => {
-      const errors = handleValidateException(exceptions);
-      throw new BadRequestException({ messages: errors });
-    },
-  }),
-)
 @Controller('product')
-export default class ProductController {
+export default class ProductController extends BaseController {
   constructor(
     private readonly productService: ProductService,
     private readonly loggingService: LoggingService,
-  ) {}
+  ) {
+    super(loggingService, 'product');
+  }
 
   @Post('create')
   @HttpCode(HttpStatus.CREATED)
-  @UsePipes(new ValidationPipe({ transform: true }))
   @UseInterceptors(FileInterceptor('avatar'))
   @HandleHttpError
   createProduct(
@@ -73,9 +61,9 @@ export default class ProductController {
     select.query = ProductQuery.plain(select.query) as any;
     return this.productService.pagination(select).pipe(
       map((results) => {
-        const response = new PaginationProductSerializer(results);
-        return validate(response).then((errors) => {
+        return new PaginationProductSerializer(results).validate().then((errors) => {
           if (errors.length) {
+            this.logError(errors, this.pagination.name);
             throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
           }
           const paginationResultSerializer = plainToInstance(PaginationProductSerializer, results);
@@ -92,8 +80,7 @@ export default class ProductController {
     select.query = ProductQuery.plain(select.query) as any;
     return this.productService.getProduct(select).pipe(
       map((product) => {
-        const response = new ProductSerializer(product);
-        return validate(response).then((errors) => {
+        return new ProductSerializer(product).validate().then((errors) => {
           if (errors.length) {
             throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
           }
@@ -105,7 +92,6 @@ export default class ProductController {
 
   @Put('update')
   @HttpCode(HttpStatus.CREATED)
-  @UsePipes(new ValidationPipe({ transform: true }))
   @UseInterceptors(FileInterceptor('avatar'))
   @HandleHttpError
   updateProduct(

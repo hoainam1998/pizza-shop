@@ -6,17 +6,17 @@ export default class LoggingService {
   constructor(private readonly logger: Logger) {}
 
   @HandleContextLogging
-  log(message: string, context: string) {
+  log(message: string, context: string): void {
     this.logger.log(message, context);
   }
 
   @HandleContextLogging
-  warn(message: string, context: string) {
+  warn(message: string, context: string): void {
     this.logger.warn(message, context);
   }
 
   @HandleContextLogging
-  error(message: string, context: string) {
+  error(message: string, context: string): void {
     this.logger.error(message, context);
   }
 }

@@ -5,6 +5,7 @@ import CategoryModule from '../category.module';
 import { CATEGORY_SERVICE } from '@share/di-token';
 import { App } from 'supertest/types';
 import { HttpExceptionFilter } from '@share/exception-filter';
+import { GlobalValidatePipe } from '@share/pipes';
 
 const startUp = async () => {
   const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -18,6 +19,7 @@ const startUp = async () => {
 
   const app = moduleFixture.createNestApplication();
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalPipes(GlobalValidatePipe.getInstance());
   await app.listen(0);
   const clientProxy = app.get<ClientProxy>(CATEGORY_SERVICE);
 

@@ -59,7 +59,7 @@ describe('create category', () => {
     const createPrismaMethod = jest.spyOn(prismaService.category, 'create').mockRejectedValue(UnknownError);
     const createMethodService = jest.spyOn(categoryService, 'create');
     const createMethodController = jest.spyOn(categoryController, 'createCategory');
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     await expect(categoryController.createCategory(category)).rejects.toThrow(
       new RpcException(new BadRequestException(createMessage(messages.COMMON.COMMON_ERROR))),
     );
@@ -86,7 +86,7 @@ describe('create category', () => {
     const createPrismaMethod = jest.spyOn(prismaService.category, 'create').mockRejectedValue(PrismaDisconnectError);
     const createMethodService = jest.spyOn(categoryService, 'create');
     const createMethodController = jest.spyOn(categoryController, 'createCategory');
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     await expect(categoryController.createCategory(category)).rejects.toThrow(
       new RpcException(new BadRequestException(createMessage(PrismaDisconnectError.message))),
     );

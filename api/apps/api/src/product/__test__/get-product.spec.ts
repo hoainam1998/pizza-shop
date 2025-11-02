@@ -13,7 +13,7 @@ import { createDescribeTest, createTestName } from '@share/test/helpers';
 import ProductService from '../product.service';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
-import { createMessage } from '@share/utils';
+import { createMessage, createMessages } from '@share/utils';
 import { ProductSerializer } from '@share/dto/serializer/product';
 import { GetProduct, ProductQuery } from '@share/dto/validators/product.dto';
 delete product.ingredients;
@@ -87,9 +87,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
       .send(getProductRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.OUTPUT_VALIDATE,
-      });
+      .expect(createMessages(messages.COMMON.OUTPUT_VALIDATE));
     expect(getProductService).toHaveBeenCalledTimes(1);
     expect(getProductService).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
@@ -107,9 +105,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
       .send(getProductRequestBody)
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.PRODUCT.NOT_FOUND,
-      });
+      .expect(createMessages(messages.PRODUCT.NOT_FOUND));
     expect(getProductService).toHaveBeenCalledTimes(1);
     expect(getProductService).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
@@ -125,9 +121,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
       .send(getProductRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: UnknownError.message,
-      });
+      .expect(createMessages(UnknownError.message));
     expect(getProductService).toHaveBeenCalledTimes(1);
     expect(getProductService).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
@@ -144,9 +138,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
       .send(getProductRequestBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: serverError.message,
-      });
+      .expect(createMessages(serverError.message));
     expect(getProductService).toHaveBeenCalledTimes(1);
     expect(getProductService).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
@@ -165,7 +157,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
       .send(missingQueryFieldBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual(expect.any(Array));
+    expect(response.body).toEqual({ messages: expect.any(Array) });
     expect(getProductService).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -183,12 +175,12 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
       .send(undefinedFieldBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual(expect.any(Array));
+    expect(response.body).toEqual({ messages: expect.any(Array) });
     expect(getProductService).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
 
-  it(createTestName('get product detail failed with empty query field', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('get product detail success with empty query field', HttpStatus.OK), async () => {
     expect.hasAssertions();
     const queryFieldEmptyBody = {
       productId: getProductRequestBody.productId,
@@ -226,7 +218,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
       .send(undefinedFieldBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual(expect.any(Array));
+    expect(response.body).toEqual({ messages: expect.any(Array) });
     expect(getProductService).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -242,9 +234,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
       .send(getProductRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.DATABASE_DISCONNECT,
-      });
+      .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
     expect(getProductService).toHaveBeenCalledTimes(1);
     expect(getProductService).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);

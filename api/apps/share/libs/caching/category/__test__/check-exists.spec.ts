@@ -18,25 +18,34 @@ beforeEach(async () => {
 describe('check exist', () => {
   it('check exist return true', async () => {
     expect.hasAssertions();
-    const exists = jest.spyOn(redisClient.Client, 'exists').mockResolvedValue(1);
-    await expect(categoryCachingService.checkExist()).resolves.toBe(true);
+    const redisExists = jest.spyOn(redisClient.Client, 'exists').mockResolvedValue(1);
+    const exists = jest.spyOn(categoryCachingService as any, 'exists');
+    await expect(categoryCachingService.checkExists()).resolves.toBe(true);
     expect(exists).toHaveBeenCalledTimes(1);
     expect(exists).toHaveBeenCalledWith(categoryKey);
+    expect(redisExists).toHaveBeenCalledTimes(1);
+    expect(redisExists).toHaveBeenCalledWith(categoryKey);
   });
 
   it('check exist return false', async () => {
     expect.hasAssertions();
-    const exists = jest.spyOn(redisClient.Client, 'exists').mockResolvedValue(0);
-    await expect(categoryCachingService.checkExist()).resolves.toBe(false);
+    const redisExists = jest.spyOn(redisClient.Client, 'exists').mockResolvedValue(0);
+    const exists = jest.spyOn(categoryCachingService as any, 'exists');
+    await expect(categoryCachingService.checkExists()).resolves.toBe(false);
     expect(exists).toHaveBeenCalledTimes(1);
     expect(exists).toHaveBeenCalledWith(categoryKey);
+    expect(redisExists).toHaveBeenCalledTimes(1);
+    expect(redisExists).toHaveBeenCalledWith(categoryKey);
   });
 
   it('check exist failed with unknown error', async () => {
     expect.hasAssertions();
-    const exists = jest.spyOn(redisClient.Client, 'exists').mockRejectedValue(UnknownError);
-    await expect(categoryCachingService.checkExist()).rejects.toThrow(UnknownError);
+    const redisExists = jest.spyOn(redisClient.Client, 'exists').mockRejectedValue(UnknownError);
+    const exists = jest.spyOn(categoryCachingService as any, 'exists');
+    await expect(categoryCachingService.checkExists()).rejects.toThrow(UnknownError);
     expect(exists).toHaveBeenCalledTimes(1);
     expect(exists).toHaveBeenCalledWith(categoryKey);
+    expect(redisExists).toHaveBeenCalledTimes(1);
+    expect(redisExists).toHaveBeenCalledWith(categoryKey);
   });
 });

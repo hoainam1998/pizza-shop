@@ -14,7 +14,7 @@ import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-
 import messages from '@share/constants/messages';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { IngredientCreate } from '@share/dto/validators/ingredient.dto';
-import { createMessage } from '@share/utils';
+import { createMessage, createMessages } from '@share/utils';
 
 const createIngredientUrl = '/ingredient/create';
 let api: TestAgent;
@@ -63,9 +63,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.CREATED)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.INGREDIENT.CREATE_INGREDIENT_SUCCESS,
-      });
+      .expect(createMessages(messages.INGREDIENT.CREATE_INGREDIENT_SUCCESS));
     expect(createIngredient).toHaveBeenCalledTimes(1);
     expect(createIngredient).toHaveBeenCalledWith(ingredientBody);
     expect(send).toHaveBeenCalledTimes(1);
@@ -87,7 +85,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual(expect.any(Array));
+    expect(response.body).toEqual({ messages: expect.any(Array) });
     expect(createIngredient).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -107,9 +105,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
       .attach('avatar', getStaticFile('empty.png'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: errorMessage,
-      });
+      .expect(createMessages(errorMessage));
     expect(createIngredient).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -128,9 +124,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
       .attach('avatar', getStaticFile('favicon.ico'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.FILE_TYPE_INVALID,
-      });
+      .expect(createMessages(messages.COMMON.FILE_TYPE_INVALID));
     expect(createIngredient).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -148,9 +142,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
       .field('expiredTime', ingredient.expired_time)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual({
-      message: expect.any(String),
-    });
+    expect(response.body).toEqual(createMessages(expect.any(String)));
     expect(createIngredient).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -167,7 +159,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
       .field('expiredTime', ingredient.expired_time)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual(expect.any(Array));
+    expect(response.body).toEqual({ messages: expect.any(Array) });
     expect(createIngredient).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -185,7 +177,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
       .field('expiredTime', ingredient.expired_time)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual(['count must be a positive number']);
+    expect(response.body).toEqual(createMessages('count must be a positive number'));
     expect(createIngredient).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -203,7 +195,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
       .field('expiredTime', ingredient.expired_time)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual(['price must be a positive number']);
+    expect(response.body).toEqual(createMessages('price must be a positive number'));
     expect(createIngredient).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -222,9 +214,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: UnknownError.message,
-      });
+      .expect(createMessages(UnknownError.message));
     expect(createIngredient).toHaveBeenCalledTimes(1);
     expect(createIngredient).toHaveBeenCalledWith(ingredientBody);
     expect(send).toHaveBeenCalledTimes(1);
@@ -247,9 +237,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.COMMON_ERROR,
-      });
+      .expect(createMessages(messages.COMMON.COMMON_ERROR));
     expect(createIngredient).toHaveBeenCalledTimes(1);
     expect(createIngredient).toHaveBeenCalledWith(ingredientBody);
     expect(send).toHaveBeenCalledTimes(1);
@@ -272,9 +260,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.DATABASE_DISCONNECT,
-      });
+      .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
     expect(createIngredient).toHaveBeenCalledTimes(1);
     expect(createIngredient).toHaveBeenCalledWith(ingredientBody);
     expect(send).toHaveBeenCalledTimes(1);
@@ -296,9 +282,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: serverError.message,
-      });
+      .expect(createMessages(serverError.message));
     expect(createIngredient).toHaveBeenCalledTimes(1);
     expect(createIngredient).toHaveBeenCalledWith(ingredientBody);
     expect(send).toHaveBeenCalledTimes(1);

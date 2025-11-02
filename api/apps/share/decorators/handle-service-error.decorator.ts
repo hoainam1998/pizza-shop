@@ -11,7 +11,7 @@ export default function (target: any, propertyName: string, descriptor: TypedPro
         throw new RpcException(error);
       }
 
-      this.logger.log(error.message, propertyName);
+      this.logger.error(error.message, propertyName);
       if (error instanceof RpcException) {
         throw error;
       }

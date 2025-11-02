@@ -2,8 +2,9 @@ import { ProductPaginationResponse } from '@share/interfaces';
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
 import { IsArray, IsInt, IsNumberString, IsObject, IsOptional, IsString } from 'class-validator';
 import { product } from 'generated/prisma';
+import Validator from './validator';
 
-export class ProductSerializer {
+export class ProductSerializer extends Validator {
   @IsOptional()
   @IsArray()
   @Exclude({ toPlainOnly: true })
@@ -100,11 +101,12 @@ export class ProductSerializer {
   }
 
   constructor(target: product) {
+    super();
     Object.assign(this, target);
   }
 }
 
-export class PaginationProductSerializer {
+export class PaginationProductSerializer extends Validator {
   @IsInt()
   total: number;
 
@@ -113,6 +115,7 @@ export class PaginationProductSerializer {
   list: ProductPaginationResponse['list'];
 
   constructor(results: ProductPaginationResponse) {
+    super();
     if (results) {
       this.total = results.total;
       this.list = results.list;

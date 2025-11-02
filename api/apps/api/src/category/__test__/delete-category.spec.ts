@@ -11,30 +11,31 @@ import CategoryService from '../category.service';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
+import { createMessages } from '@share/utils';
 const deleteCategoryBaseUrl = '/category/delete';
 const categoryId: string = Date.now().toString();
 const deleteCategoryUrl: string = `${deleteCategoryBaseUrl}/${categoryId}`;
 
+let api: TestAgent;
+let clientProxy: ClientProxy;
+let close: () => Promise<void>;
+let categoryService: CategoryService;
+
+beforeEach(async () => {
+  const requestTest = await startUp();
+  api = requestTest.api;
+  clientProxy = requestTest.clientProxy;
+  close = () => requestTest.app.close();
+  categoryService = requestTest.app.get(CategoryService);
+});
+
+afterEach(async () => {
+  if (close) {
+    await close();
+  }
+});
+
 describe(createDescribeTest(HTTP_METHOD.DELETE, deleteCategoryBaseUrl), () => {
-  let api: TestAgent;
-  let clientProxy: ClientProxy;
-  let close: () => Promise<void>;
-  let categoryService: CategoryService;
-
-  beforeEach(async () => {
-    const requestTest = await startUp();
-    api = requestTest.api;
-    clientProxy = requestTest.clientProxy;
-    close = () => requestTest.app.close();
-    categoryService = requestTest.app.get(CategoryService);
-  });
-
-  afterEach(async () => {
-    if (close) {
-      await close();
-    }
-  });
-
   it(createTestName('delete category success', HttpStatus.OK), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(category));
@@ -43,9 +44,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteCategoryBaseUrl), () => {
       .delete(deleteCategoryUrl)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.CATEGORY.DELETE_CATEGORY_SUCCESS,
-      });
+      .expect(createMessages(messages.CATEGORY.DELETE_CATEGORY_SUCCESS));
     expect(deleteCategory).toHaveBeenCalledTimes(1);
     expect(deleteCategory).toHaveBeenCalledWith(categoryId);
     expect(send).toHaveBeenCalledTimes(1);
@@ -60,9 +59,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteCategoryBaseUrl), () => {
       .delete('/category/delete/xzy')
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.VALIDATE_ID_FAIL,
-      });
+      .expect(createMessages(messages.COMMON.VALIDATE_ID_FAIL));
     expect(deleteCategory).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -77,9 +74,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteCategoryBaseUrl), () => {
       .delete(deleteCategoryUrl)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.COMMON_ERROR,
-      });
+      .expect(createMessages(messages.COMMON.COMMON_ERROR));
     expect(deleteCategory).toHaveBeenCalledTimes(1);
     expect(deleteCategory).toHaveBeenCalledWith(categoryId);
     expect(send).toHaveBeenCalledTimes(1);
@@ -96,9 +91,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteCategoryBaseUrl), () => {
       .delete(deleteCategoryUrl)
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.PRODUCT.NOT_FOUND,
-      });
+      .expect(createMessages(messages.PRODUCT.NOT_FOUND));
     expect(deleteCategory).toHaveBeenCalledTimes(1);
     expect(deleteCategory).toHaveBeenCalledWith(categoryId);
     expect(send).toHaveBeenCalledTimes(1);
@@ -115,9 +108,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteCategoryBaseUrl), () => {
       .delete(deleteCategoryUrl)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.DATABASE_DISCONNECT,
-      });
+      .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
     expect(deleteCategory).toHaveBeenCalledTimes(1);
     expect(deleteCategory).toHaveBeenCalledWith(categoryId);
     expect(send).toHaveBeenCalledTimes(1);
@@ -127,17 +118,13 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteCategoryBaseUrl), () => {
   it(createTestName('delete category failed with server error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
     const serverError = new InternalServerErrorException();
-    const send = jest.spyOn(clientProxy, 'send').mockImplementation(() => {
-      return throwError(() => serverError);
-    });
+    const send = jest.spyOn(clientProxy, 'send').mockImplementation(() => throwError(() => serverError));
     const deleteCategory = jest.spyOn(categoryService, 'deleteCategory');
     await api
       .delete(deleteCategoryUrl)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: serverError.message,
-      });
+      .expect(createMessages(serverError.message));
     expect(deleteCategory).toHaveBeenCalledTimes(1);
     expect(deleteCategory).toHaveBeenCalledWith(categoryId);
     expect(send).toHaveBeenCalledTimes(1);

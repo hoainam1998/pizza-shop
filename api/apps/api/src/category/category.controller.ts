@@ -11,10 +11,8 @@ import {
   Put,
   SerializeOptions,
   UseInterceptors,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
-import { validate, ValidationError } from 'class-validator';
+import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { map, Observable } from 'rxjs';
 import CategoryService from './category.service';
 import { MessageSerializer } from '@share/dto/serializer/common';
@@ -30,36 +28,31 @@ import {
 } from '@share/dto/validators/category.dto';
 import { CategoryPaginationFormatter, CategoryDetailSerializer, Categories } from '@share/dto/serializer/category';
 import messages from '@share/constants/messages';
-import { createMessage, handleValidateException } from '@share/utils';
+import { createMessage } from '@share/utils';
 import { category } from 'generated/prisma';
-import { instanceToPlain, plainToInstance } from 'class-transformer';
+import BaseController from '../controller';
+import LoggingService from '@share/libs/logging/logging.service';
 
-@UsePipes(
-  new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-    exceptionFactory: (exceptions: ValidationError[]) => {
-      const errors = handleValidateException(exceptions);
-      throw new BadRequestException({ messages: errors });
-    },
-  }),
-)
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('category')
-export default class CategoryController {
-  constructor(private readonly categoryService: CategoryService) {}
+export default class CategoryController extends BaseController {
+  constructor(
+    private readonly categoryService: CategoryService,
+    private readonly loggingService: LoggingService,
+  ) {
+    super(loggingService, 'category');
+  }
 
   @Post('create')
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('avatar'))
-  @UsePipes(new ValidationPipe({ transform: true }))
   @HandleHttpError
   create(
     @Body() category: CreateCategory,
     @UploadImage('avatar', ImageTransformPipe) file: string,
   ): Observable<MessageSerializer> {
-    const categoryInsert: any = Object.assign(instanceToPlain(category), { avatar: file });
+    category.avatar = file;
+    const categoryInsert: Record<string, any> = instanceToPlain(plainToInstance(CreateCategory, category));
     return this.categoryService
       .createCategory(categoryInsert)
       .pipe(map(() => MessageSerializer.create(messages.CATEGORY.ADD_CATEGORY_SUCCESS)));
@@ -74,10 +67,11 @@ export default class CategoryController {
     return this.categoryService.getAllCategories(select).pipe(
       map((categories) => {
         const categoriesObj = new Categories(categories);
-        return validate(categoriesObj).then((errors) => {
+        return categoriesObj.validate().then((errors) => {
           if (!errors.length) {
             return plainToInstance(CategoryDetailSerializer, categoriesObj.List);
           }
+          this.logError(errors, this.getAllCategories.name);
           throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
         });
       }),
@@ -89,13 +83,13 @@ export default class CategoryController {
   @SerializeOptions({ type: CategoryPaginationFormatter })
   @HandleHttpError
   pagination(@Body() select: PaginationCategory): Observable<Promise<CategoryPaginationFormatter>> {
-    const query = CategoryQuery.plainWithIncludeId(select.query);
-    select.query = query as any;
+    select.query = CategoryQuery.plainWithIncludeId(select.query) as any;
     return this.categoryService.pagination(select).pipe(
       map((response: CategoryPaginationFormatter) => {
         const paginationResult = new CategoryPaginationFormatter(response);
-        return validate(paginationResult).then((errors) => {
+        return paginationResult.validate().then((errors) => {
           if (errors.length) {
+            this.logError(errors, this.pagination.name);
             throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
           }
           return paginationResult;
@@ -112,7 +106,7 @@ export default class CategoryController {
     category.query = CategoryQuery.plainWithExcludeId(category.query) as any;
     return this.categoryService.getCategory(category).pipe(
       map((response: CategoryDetailSerializer) => {
-        return validate(new CategoryDetailSerializer(response)).then((errors) => {
+        return new CategoryDetailSerializer(response).validate().then((errors) => {
           if (errors.length) {
             throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
           }
@@ -130,9 +124,8 @@ export default class CategoryController {
     @Body() category: CreateCategory,
     @UploadImage('avatar', ImageTransformPipe) file: string,
   ): Observable<MessageSerializer> {
-    const categoryInsert: any = Object.assign(instanceToPlain(category), {
-      avatar: file,
-    });
+    category.avatar = file;
+    const categoryInsert: Record<string, any> = instanceToPlain(category);
     return this.categoryService
       .updateCategory(categoryInsert)
       .pipe(map(() => MessageSerializer.create(messages.CATEGORY.UPDATE_CATEGORY_SUCCESS)));

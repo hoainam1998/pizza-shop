@@ -47,6 +47,7 @@ export type ProductIngredientType = {
 };
 
 export type IngredientSelectType = {
+  ingredient_id: boolean;
   name: boolean;
   avatar: boolean;
   unit: boolean;
@@ -58,4 +59,8 @@ export type IngredientSelectType = {
 
 export type ValidationCustomErrorType = {
   messages: (string | string[])[];
+};
+
+export type MessagesType = {
+  messages: string[];
 };

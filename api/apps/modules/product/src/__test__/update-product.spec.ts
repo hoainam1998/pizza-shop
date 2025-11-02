@@ -128,7 +128,7 @@ describe('update product', () => {
 
   it('update product failed with unknown error', async () => {
     expect.hasAssertions();
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     const deleteAllProductIngredients = jest.spyOn(ingredientCachingService, 'deleteAllProductIngredients');
     const deleteProductWhenExpired = jest.spyOn(productService as any, 'deleteProductWhenExpired');
     const deleteIngredientPrismaMethod = jest.spyOn(prismaService.product_ingredient, 'deleteMany');
@@ -174,7 +174,7 @@ describe('update product', () => {
 
   it('update product failed with database disconnect error', async () => {
     expect.hasAssertions();
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     const deleteAllProductIngredients = jest.spyOn(ingredientCachingService, 'deleteAllProductIngredients');
     const deleteProductWhenExpired = jest.spyOn(productService as any, 'deleteProductWhenExpired');
     const deleteIngredientPrismaMethod = jest.spyOn(prismaService.product_ingredient, 'deleteMany');

@@ -11,6 +11,7 @@ import ProductService from '../product.service';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
+import { createMessages } from '@share/utils';
 const deleteProductBaseUrl = '/product/delete';
 const productId: string = Date.now().toString();
 const deleteProductUrl: string = `${deleteProductBaseUrl}/${productId}`;
@@ -43,9 +44,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteProductBaseUrl), () => {
       .delete(deleteProductUrl)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.PRODUCT.DELETE_PRODUCT_SUCCESS,
-      });
+      .expect(createMessages(messages.PRODUCT.DELETE_PRODUCT_SUCCESS));
     expect(deleteProduct).toHaveBeenCalledTimes(1);
     expect(deleteProduct).toHaveBeenCalledWith(productId);
     expect(send).toHaveBeenCalledTimes(1);
@@ -60,9 +59,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteProductBaseUrl), () => {
       .delete('/product/delete/xzy')
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.VALIDATE_ID_FAIL,
-      });
+      .expect(createMessages(messages.COMMON.VALIDATE_ID_FAIL));
     expect(deleteProduct).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -77,9 +74,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteProductBaseUrl), () => {
       .delete(deleteProductUrl)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.COMMON_ERROR,
-      });
+      .expect(createMessages(messages.COMMON.COMMON_ERROR));
     expect(deleteProduct).toHaveBeenCalledTimes(1);
     expect(deleteProduct).toHaveBeenCalledWith(productId);
     expect(send).toHaveBeenCalledTimes(1);
@@ -96,9 +91,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteProductBaseUrl), () => {
       .delete(deleteProductUrl)
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.PRODUCT.NOT_FOUND,
-      });
+      .expect(createMessages(messages.PRODUCT.NOT_FOUND));
     expect(deleteProduct).toHaveBeenCalledTimes(1);
     expect(deleteProduct).toHaveBeenCalledWith(productId);
     expect(send).toHaveBeenCalledTimes(1);
@@ -115,9 +108,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteProductBaseUrl), () => {
       .delete(deleteProductUrl)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.DATABASE_DISCONNECT,
-      });
+      .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
     expect(deleteProduct).toHaveBeenCalledTimes(1);
     expect(deleteProduct).toHaveBeenCalledWith(productId);
     expect(send).toHaveBeenCalledTimes(1);
@@ -133,9 +124,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteProductBaseUrl), () => {
       .delete(deleteProductUrl)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: serverError.message,
-      });
+      .expect(createMessages(serverError.message));
     expect(deleteProduct).toHaveBeenCalledTimes(1);
     expect(deleteProduct).toHaveBeenCalledWith(productId);
     expect(send).toHaveBeenCalledTimes(1);

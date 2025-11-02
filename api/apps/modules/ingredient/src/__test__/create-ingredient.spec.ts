@@ -53,7 +53,7 @@ describe('create ingredient', () => {
 
   it('create ingredient failed with create method got unknown error', async () => {
     expect.hasAssertions();
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     const createIngredient = jest.spyOn(prismaService.ingredient, 'create').mockRejectedValue(UnknownError);
     const deleteIngredientExpired = jest.spyOn(ingredientService as any, 'deleteIngredientExpired');
     const deleteAllIngredients = jest.spyOn(ingredientCachingService, 'deleteAllIngredients');
@@ -78,7 +78,7 @@ describe('create ingredient', () => {
 
   it('create ingredient failed with deleteAllIngredients method got unknown error', async () => {
     expect.hasAssertions();
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     const createIngredient = jest.spyOn(prismaService.ingredient, 'create').mockResolvedValue(ingredient);
     const deleteIngredientExpired = jest.spyOn(ingredientService as any, 'deleteIngredientExpired');
     const deleteAllIngredients = jest
@@ -105,7 +105,7 @@ describe('create ingredient', () => {
 
   it('create ingredient failed with deleteIngredientExpired method got unknown error', async () => {
     expect.hasAssertions();
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     const createIngredient = jest.spyOn(prismaService.ingredient, 'create').mockResolvedValue(ingredient);
     const deleteIngredientExpired = jest
       .spyOn(ingredientService as any, 'deleteIngredientExpired')
@@ -135,7 +135,7 @@ describe('create ingredient', () => {
 
   it('create ingredient failed with database disconnect error', async () => {
     expect.hasAssertions();
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     const createIngredient = jest.spyOn(prismaService.ingredient, 'create').mockRejectedValue(PrismaDisconnectError);
     const deleteIngredientExpired = jest.spyOn(ingredientService as any, 'deleteIngredientExpired');
     const deleteAllIngredients = jest.spyOn(ingredientCachingService, 'deleteAllIngredients');

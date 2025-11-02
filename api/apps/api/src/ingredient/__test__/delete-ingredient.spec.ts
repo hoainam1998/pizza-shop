@@ -12,7 +12,7 @@ import { ingredient } from '@share/test/pre-setup/mock/data/ingredient';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import messages from '@share/constants/messages';
-import { createMessage } from '@share/utils';
+import { createMessage, createMessages } from '@share/utils';
 const ingredientId = ingredient.ingredient_id;
 const baseUrl = '/ingredient/delete';
 const deleteIngredientUrl = `${baseUrl}/${ingredientId}`;
@@ -44,9 +44,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, baseUrl), () => {
       .delete(deleteIngredientUrl)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.INGREDIENT.DELETE_INGREDIENT_SUCCESS,
-      });
+      .expect(createMessages(messages.INGREDIENT.DELETE_INGREDIENT_SUCCESS));
     expect(deleteIngredient).toHaveBeenCalledTimes(1);
     expect(deleteIngredient).toHaveBeenCalledWith(ingredientId);
     expect(send).toHaveBeenCalledTimes(1);
@@ -60,9 +58,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, baseUrl), () => {
       .delete(`${baseUrl}/xyz`)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.VALIDATE_ID_FAIL,
-      });
+      .expect(createMessages(messages.COMMON.VALIDATE_ID_FAIL));
     expect(deleteIngredient).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -76,9 +72,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, baseUrl), () => {
       .delete(deleteIngredientUrl)
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.INGREDIENT.NOT_FOUND,
-      });
+      .expect(createMessages(messages.INGREDIENT.NOT_FOUND));
     expect(deleteIngredient).toHaveBeenCalledTimes(1);
     expect(deleteIngredient).toHaveBeenCalledWith(ingredientId);
     expect(send).toHaveBeenCalledTimes(1);
@@ -94,9 +88,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, baseUrl), () => {
       .delete(deleteIngredientUrl)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.COMMON_ERROR,
-      });
+      .expect(createMessages(messages.COMMON.COMMON_ERROR));
     expect(deleteIngredient).toHaveBeenCalledTimes(1);
     expect(deleteIngredient).toHaveBeenCalledWith(ingredientId);
     expect(send).toHaveBeenCalledTimes(1);
@@ -110,9 +102,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, baseUrl), () => {
       .delete(deleteIngredientUrl)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: UnknownError.message,
-      });
+      .expect(createMessages(UnknownError.message));
     expect(deleteIngredient).toHaveBeenCalledTimes(1);
     expect(deleteIngredient).toHaveBeenCalledWith(ingredientId);
     expect(send).toHaveBeenCalledTimes(1);
@@ -128,9 +118,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, baseUrl), () => {
       .delete(deleteIngredientUrl)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.DATABASE_DISCONNECT,
-      });
+      .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
     expect(deleteIngredient).toHaveBeenCalledTimes(1);
     expect(deleteIngredient).toHaveBeenCalledWith(ingredientId);
     expect(send).toHaveBeenCalledTimes(1);
@@ -145,9 +133,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, baseUrl), () => {
       .delete(deleteIngredientUrl)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: serverError.message,
-      });
+      .expect(createMessages(serverError.message));
     expect(deleteIngredient).toHaveBeenCalledTimes(1);
     expect(deleteIngredient).toHaveBeenCalledWith(ingredientId);
     expect(send).toHaveBeenCalledTimes(1);
