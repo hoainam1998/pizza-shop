@@ -7,6 +7,7 @@ import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { createCategoryPattern } from '@share/pattern';
 import { category } from '@share/test/pre-setup/mock/data/category';
 import { getStaticFile, createDescribeTest, createTestName } from '@share/test/helpers';
+import { createMessages } from '@share/utils';
 import CategoryService from '../category.service';
 import { BadRequestException, HttpStatus, InternalServerErrorException } from '@nestjs/common';
 import messages from '@share/constants/messages';
@@ -50,9 +51,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.CREATED)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.CATEGORY.ADD_CATEGORY_SUCCESS,
-      });
+      .expect(createMessages(messages.CATEGORY.ADD_CATEGORY_SUCCESS));
     expect(createCategory).toHaveBeenCalledTimes(1);
     expect(createCategory).toHaveBeenCalledWith(categoryBody);
     expect(send).toHaveBeenCalledTimes(1);
@@ -70,7 +69,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual(expect.any(Array));
+    expect(response.body).toEqual({ messages: expect.any(Array) });
     expect(createCategory).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -87,9 +86,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: UnknownError.message,
-      });
+      .expect(createMessages(UnknownError.message));
     expect(createCategory).toHaveBeenCalledTimes(1);
     expect(createCategory).toHaveBeenCalledWith(categoryBody);
     expect(send).toHaveBeenCalledTimes(1);
@@ -107,9 +104,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
       .attach('avatar', getStaticFile('empty.png'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: errorMessage,
-      });
+      .expect(createMessages(errorMessage));
     expect(createCategory).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -124,9 +119,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
       .attach('avatar', getStaticFile('favicon.ico'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.FILE_TYPE_INVALID,
-      });
+      .expect(createMessages(messages.COMMON.FILE_TYPE_INVALID));
     expect(createCategory).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -140,9 +133,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
       .field('name', category.name)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual({
-      message: expect.any(String),
-    });
+    expect(response.body).toEqual(createMessages(expect.any(String)));
     expect(createCategory).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -156,7 +147,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual(expect.any(Array));
+    expect(response.body).toEqual({ messages: expect.any(Array) });
     expect(createCategory).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -173,9 +164,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
       .field('name', category.name)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.DATABASE_DISCONNECT,
-      });
+      .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
     expect(createCategory).toHaveBeenCalledTimes(1);
     expect(createCategory).toHaveBeenCalledWith(categoryBody);
     expect(send).toHaveBeenCalledTimes(1);
@@ -193,9 +182,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: serverError.message,
-      });
+      .expect(createMessages(serverError.message));
     expect(createCategory).toHaveBeenCalledTimes(1);
     expect(createCategory).toHaveBeenCalledWith(categoryBody);
     expect(send).toHaveBeenCalledTimes(1);

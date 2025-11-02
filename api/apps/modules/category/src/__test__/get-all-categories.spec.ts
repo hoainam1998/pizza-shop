@@ -1,3 +1,5 @@
+import { RpcException } from '@nestjs/microservices';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaClient } from 'generated/prisma';
 import startUp from './pre-setup';
 import CategoryController from '../category.controller';
@@ -6,8 +8,6 @@ import { createCategoryList } from '@share/test/pre-setup/mock/data/category';
 import { PRISMA_CLIENT } from '@share/di-token';
 import LoggingService from '@share/libs/logging/logging.service';
 import CategoryCachingService from '@share/libs/caching/category/category.service';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { createMessage } from '@share/utils';
 import messages from '@share/constants/messages';
@@ -36,7 +36,7 @@ describe('get all categories', () => {
   it('get all categories was success with have not caching data', async () => {
     expect.hasAssertions();
     const categoryList = createCategoryList(2);
-    const checkExistMethod = jest.spyOn(categoryCachingService, 'checkExist').mockResolvedValue(false);
+    const checkExistsMethod = jest.spyOn(categoryCachingService, 'checkExists').mockResolvedValue(false);
     const storeRedisCache = jest.spyOn(categoryCachingService, 'storeAllCategories');
     const findManyPrismaMethod = jest.spyOn(prismaService.category, 'findMany').mockResolvedValue(categoryList);
     const getAllServiceMethod = jest.spyOn(categoryService, 'getAllCategories');
@@ -46,7 +46,7 @@ describe('get all categories', () => {
     expect(getAllControllerMethod).toHaveBeenCalledWith(query);
     expect(getAllServiceMethod).toHaveBeenCalledTimes(1);
     expect(getAllServiceMethod).toHaveBeenCalledWith(query);
-    expect(checkExistMethod).toHaveBeenCalledTimes(1);
+    expect(checkExistsMethod).toHaveBeenCalledTimes(1);
     expect(findManyPrismaMethod).toHaveBeenCalledTimes(1);
     expect(storeRedisCache).toHaveBeenCalledTimes(1);
     expect(storeRedisCache).toHaveBeenCalledWith(categoryList);
@@ -55,7 +55,7 @@ describe('get all categories', () => {
   it('get all categories was success when caching data have exist', async () => {
     expect.hasAssertions();
     const categoryList = createCategoryList(2);
-    const checkExistMethod = jest.spyOn(categoryCachingService, 'checkExist').mockResolvedValue(true);
+    const checkExistsMethod = jest.spyOn(categoryCachingService, 'checkExists').mockResolvedValue(true);
     const getAllCategoriesCache = jest
       .spyOn(categoryCachingService, 'getAllCategories')
       .mockResolvedValue(categoryList);
@@ -67,7 +67,7 @@ describe('get all categories', () => {
     expect(getAllControllerMethod).toHaveBeenCalledWith(query);
     expect(getAllServiceMethod).toHaveBeenCalledTimes(1);
     expect(getAllServiceMethod).toHaveBeenCalledWith(query);
-    expect(checkExistMethod).toHaveBeenCalledTimes(1);
+    expect(checkExistsMethod).toHaveBeenCalledTimes(1);
     expect(findManyPrismaMethod).not.toHaveBeenCalled();
     expect(getAllCategoriesCache).toHaveBeenCalledTimes(1);
     await expect(getAllCategoriesCache.mock.results[0].value).resolves.toBe(categoryList);
@@ -75,7 +75,7 @@ describe('get all categories', () => {
 
   it('get all categories failed when categories empty', async () => {
     expect.hasAssertions();
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     const getAllServiceMethod = jest.spyOn(categoryService, 'getAllCategories').mockResolvedValue([]);
     const getAllControllerMethod = jest.spyOn(categoryController, 'getAllCategories');
     await expect(categoryController.getAllCategories(query)).rejects.toThrow(
@@ -94,7 +94,7 @@ describe('get all categories', () => {
 
   it('get all categories failed with unknown error', async () => {
     expect.hasAssertions();
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     const getAllServiceMethod = jest.spyOn(categoryService, 'getAllCategories').mockRejectedValue(UnknownError);
     const getAllControllerMethod = jest.spyOn(categoryController, 'getAllCategories');
     await expect(categoryController.getAllCategories(query)).rejects.toThrow(

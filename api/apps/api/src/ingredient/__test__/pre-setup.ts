@@ -5,6 +5,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import IngredientModule from '../ingredient.module';
 import { INGREDIENT_SERVICE } from '@share/di-token';
 import { HttpExceptionFilter } from '@share/exception-filter';
+import { GlobalValidatePipe } from '@share/pipes';
 
 const startUp = async () => {
   const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -18,6 +19,7 @@ const startUp = async () => {
 
   const app = moduleFixture.createNestApplication();
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalPipes(GlobalValidatePipe.getInstance());
   await app.listen(0);
   const clientProxy = app.get<ClientProxy>(INGREDIENT_SERVICE);
 

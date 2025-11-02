@@ -20,17 +20,23 @@ beforeEach(async () => {
 describe('get all ingredients', () => {
   it('get all ingredients success', async () => {
     expect.hasAssertions();
-    const jsonGet = jest.spyOn(redisClient.Client.json, 'get').mockResolvedValue([ingredients]);
+    const redisJsonGet = jest.spyOn(redisClient.Client.json, 'get').mockResolvedValue([ingredients]);
+    const jsonGet = jest.spyOn(ingredientCachingService as any, 'jsonGet');
     await expect(ingredientCachingService.getAllIngredients()).resolves.toBe(ingredients);
     expect(jsonGet).toHaveBeenCalledTimes(1);
-    expect(jsonGet).toHaveBeenCalledWith(ingredientKey, { path: '$' });
+    expect(jsonGet).toHaveBeenCalledWith(ingredientKey);
+    expect(redisJsonGet).toHaveBeenCalledTimes(1);
+    expect(redisJsonGet).toHaveBeenCalledWith(ingredientKey, { path: '$' });
   });
 
   it('get all ingredients failed with unknown error', async () => {
     expect.hasAssertions();
-    const jsonGet = jest.spyOn(redisClient.Client.json, 'get').mockRejectedValue(UnknownError);
+    const redisJsonGet = jest.spyOn(redisClient.Client.json, 'get').mockRejectedValue(UnknownError);
+    const jsonGet = jest.spyOn(ingredientCachingService as any, 'jsonGet');
     await expect(ingredientCachingService.getAllIngredients()).rejects.toThrow(UnknownError);
     expect(jsonGet).toHaveBeenCalledTimes(1);
-    expect(jsonGet).toHaveBeenCalledWith(ingredientKey, { path: '$' });
+    expect(jsonGet).toHaveBeenCalledWith(ingredientKey);
+    expect(redisJsonGet).toHaveBeenCalledTimes(1);
+    expect(redisJsonGet).toHaveBeenCalledWith(ingredientKey, { path: '$' });
   });
 });

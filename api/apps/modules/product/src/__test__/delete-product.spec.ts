@@ -55,7 +55,7 @@ describe('delete product', () => {
     const deleteScheduler = jest.spyOn(schedulerService, 'deleteScheduler').mockImplementation(() => jest.fn());
     const deleteMethodService = jest.spyOn(productService, 'deleteProduct');
     const deleteProductControllerMethod = jest.spyOn(productController, 'deleteProduct');
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     await expect(productController.deleteProduct(product.product_id)).rejects.toThrow(
       new RpcException(new NotFoundException(messages.PRODUCT.NOT_FOUND)),
     );
@@ -76,7 +76,7 @@ describe('delete product', () => {
     const deleteScheduler = jest.spyOn(schedulerService, 'deleteScheduler').mockImplementation(() => jest.fn());
     const deleteMethodService = jest.spyOn(productService, 'deleteProduct');
     const deleteProductControllerMethod = jest.spyOn(productController, 'deleteProduct');
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     await expect(productController.deleteProduct(product.product_id)).rejects.toThrow(
       new RpcException(new BadRequestException(createMessage(messages.COMMON.COMMON_ERROR))),
     );
@@ -97,7 +97,7 @@ describe('delete product', () => {
     const deleteScheduler = jest.spyOn(schedulerService, 'deleteScheduler').mockImplementation(() => jest.fn());
     const deleteMethodService = jest.spyOn(productService, 'deleteProduct');
     const deleteProductControllerMethod = jest.spyOn(productController, 'deleteProduct');
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     await expect(productController.deleteProduct(product.product_id)).rejects.toThrow(
       new RpcException(new BadRequestException(createMessage(PrismaDisconnectError.message))),
     );

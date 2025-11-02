@@ -3,7 +3,6 @@ import { ClientProxy } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 import { category } from 'generated/prisma';
 import { CATEGORY_SERVICE } from '@share/di-token';
-import type { CategoryBodyType } from '@share/interfaces';
 import {
   createCategoryPattern,
   paginationPattern,
@@ -19,7 +18,7 @@ import { CategoryPaginationFormatter } from '@share/dto/serializer/category';
 export default class CategoryService {
   constructor(@Inject(CATEGORY_SERVICE) private category: ClientProxy) {}
 
-  createCategory(category: CategoryBodyType): Observable<category> {
+  createCategory(category: Record<string, any>): Observable<category> {
     return this.category.send<category>(createCategoryPattern, category);
   }
 
@@ -35,7 +34,7 @@ export default class CategoryService {
     return this.category.send<CategoryPaginationFormatter>(paginationPattern, select);
   }
 
-  updateCategory(category: CategoryBodyType): Observable<category> {
+  updateCategory(category: Record<string, any>): Observable<category> {
     return this.category.send<category>(updateCategoryPattern, category);
   }
 

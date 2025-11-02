@@ -12,6 +12,7 @@ import { HttpStatus, InternalServerErrorException, NotFoundException } from '@ne
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
+import { createMessages } from '@share/utils';
 const updateCategoryUrl = '/category/update';
 
 const categoryResponse = {
@@ -20,26 +21,26 @@ const categoryResponse = {
   avatar: expect.toBeImageBase64(),
 };
 
+let api: TestAgent;
+let clientProxy: ClientProxy;
+let close: () => Promise<void>;
+let categoryService: CategoryService;
+
+beforeEach(async () => {
+  const requestTest = await startUp();
+  api = requestTest.api;
+  clientProxy = requestTest.clientProxy;
+  close = () => requestTest.app.close();
+  categoryService = requestTest.app.get(CategoryService);
+});
+
+afterEach(async () => {
+  if (close) {
+    await close();
+  }
+});
+
 describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
-  let api: TestAgent;
-  let clientProxy: ClientProxy;
-  let close: () => Promise<void>;
-  let categoryService: CategoryService;
-
-  beforeEach(async () => {
-    const requestTest = await startUp();
-    api = requestTest.api;
-    clientProxy = requestTest.clientProxy;
-    close = () => requestTest.app.close();
-    categoryService = requestTest.app.get(CategoryService);
-  });
-
-  afterEach(async () => {
-    if (close) {
-      await close();
-    }
-  });
-
   it(createTestName('update category success', HttpStatus.CREATED), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(category));
@@ -51,9 +52,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.CREATED)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.CATEGORY.UPDATE_CATEGORY_SUCCESS,
-      });
+      .expect(createMessages(messages.CATEGORY.UPDATE_CATEGORY_SUCCESS));
     expect(updateCategory).toHaveBeenCalledTimes(1);
     expect(updateCategory).toHaveBeenCalledWith(categoryResponse);
     expect(send).toHaveBeenCalledTimes(1);
@@ -71,7 +70,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual(expect.any(Array));
+    expect(response.body).toEqual({ messages: expect.any(Array) });
     expect(updateCategory).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -89,9 +88,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: UnknownError.message,
-      });
+      .expect(createMessages(UnknownError.message));
     expect(updateCategory).toHaveBeenCalledTimes(1);
     expect(updateCategory).toHaveBeenCalledWith(categoryResponse);
     expect(send).toHaveBeenCalledTimes(1);
@@ -111,9 +108,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.CATEGORY.NOT_FOUND,
-      });
+      .expect(createMessages(messages.CATEGORY.NOT_FOUND));
     expect(updateCategory).toHaveBeenCalledTimes(1);
     expect(updateCategory).toHaveBeenCalledWith(categoryResponse);
     expect(send).toHaveBeenCalledTimes(1);
@@ -132,9 +127,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
       .attach('avatar', getStaticFile('empty.png'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: errorMessage,
-      });
+      .expect(createMessages(errorMessage));
     expect(createCategory).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -150,9 +143,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
       .attach('avatar', getStaticFile('favicon.ico'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.FILE_TYPE_INVALID,
-      });
+      .expect(createMessages(messages.COMMON.FILE_TYPE_INVALID));
     expect(updateCategory).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -167,9 +158,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
       .field('name', category.name)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual({
-      message: expect.any(String),
-    });
+    expect(response.body).toEqual(createMessages(expect.any(String)));
     expect(updateCategory).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -184,7 +173,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual(expect.any(Array));
+    expect(response.body).toEqual({ messages: expect.any(Array) });
     expect(updateCategory).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -200,9 +189,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
       .field('name', category.name)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.DATABASE_DISCONNECT,
-      });
+      .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
     expect(updateCategory).toHaveBeenCalledTimes(1);
     expect(updateCategory).toHaveBeenCalledWith(categoryResponse);
     expect(send).toHaveBeenCalledTimes(1);
@@ -221,9 +208,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: serverError.message,
-      });
+      .expect(createMessages(serverError.message));
     expect(updateCategory).toHaveBeenCalledTimes(1);
     expect(updateCategory).toHaveBeenCalledWith(categoryResponse);
     expect(send).toHaveBeenCalledTimes(1);

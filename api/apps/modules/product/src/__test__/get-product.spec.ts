@@ -91,7 +91,7 @@ describe('get product', () => {
     const findUniqueOrThrowPrismaMethod = jest
       .spyOn(prismaService.product, 'findUniqueOrThrow')
       .mockRejectedValue(PrismaNotFoundError);
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     const getDetailServiceMethod = jest.spyOn(productService, 'getProduct');
     const getAllControllerMethod = jest.spyOn(productController, 'getProduct');
     await expect(productController.getProduct(getProductBody)).rejects.toThrow(
@@ -117,7 +117,7 @@ describe('get product', () => {
     const findUniqueOrThrowPrismaMethod = jest
       .spyOn(prismaService.product, 'findUniqueOrThrow')
       .mockRejectedValue(UnknownError);
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     const getDetailServiceMethod = jest.spyOn(productService, 'getProduct');
     const getAllControllerMethod = jest.spyOn(productController, 'getProduct');
     await expect(productController.getProduct(getProductBody)).rejects.toThrow(
@@ -142,7 +142,7 @@ describe('get product', () => {
     const findUniqueOrThrowPrismaMethod = jest
       .spyOn(prismaService.product, 'findUniqueOrThrow')
       .mockRejectedValue(PrismaDisconnectError);
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     const getDetailServiceMethod = jest.spyOn(productService, 'getProduct');
     const getAllControllerMethod = jest.spyOn(productController, 'getProduct');
     await expect(productController.getProduct(getProductBody)).rejects.toThrow(

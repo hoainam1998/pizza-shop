@@ -1,5 +1,6 @@
 import { of, throwError } from 'rxjs';
 import { expect } from '@jest/globals';
+import { instanceToPlain, plainToInstance } from 'class-transformer';
 import TestAgent from 'supertest/lib/agent';
 import { ClientProxy } from '@nestjs/microservices';
 import startUp from './pre-setup';
@@ -12,8 +13,8 @@ import { BadRequestException, HttpStatus, InternalServerErrorException, NotFound
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
-import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { ProductCreate, ProductCreateTransform } from '@share/dto/validators/product.dto';
+import { createMessages } from '@share/utils';
 const updateProductUrl = '/product/update';
 
 const productRequestBody = {
@@ -71,9 +72,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.CREATED)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.PRODUCT.UPDATE_PRODUCT_SUCCESS,
-      });
+      .expect(createMessages(messages.PRODUCT.UPDATE_PRODUCT_SUCCESS));
     expect(updateProduct).toHaveBeenCalledTimes(1);
     expect(updateProduct).toHaveBeenCalledWith(productUpdate);
     expect(send).toHaveBeenCalledTimes(1);
@@ -98,7 +97,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual(expect.any(Array));
+    expect(response.body).toEqual(createMessages(expect.any(String)));
     expect(updateProduct).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -120,7 +119,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual(['count must be a positive number']);
+    expect(response.body).toEqual(createMessages('count must be a positive number'));
     expect(updateProduct).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -142,7 +141,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual(['price must be a positive number']);
+    expect(response.body).toEqual(createMessages('price must be a positive number'));
     expect(updateProduct).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -166,7 +165,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
         .attach('avatar', getStaticFile('test-image.png'))
         .expect(HttpStatus.BAD_REQUEST)
         .expect('Content-Type', /application\/json/);
-      expect(response.body).toEqual(['originalPrice must be a positive number']);
+      expect(response.body).toEqual(createMessages('originalPrice must be a positive number'));
       expect(updateProduct).not.toHaveBeenCalled();
       expect(send).not.toHaveBeenCalled();
     },
@@ -189,9 +188,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: UnknownError.message,
-      });
+      .expect(createMessages(UnknownError.message));
     expect(updateProduct).toHaveBeenCalledTimes(1);
     expect(updateProduct).toHaveBeenCalledWith(productUpdate);
     expect(send).toHaveBeenCalledTimes(1);
@@ -217,9 +214,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.PRODUCT.NOT_FOUND,
-      });
+      .expect(createMessages(messages.PRODUCT.NOT_FOUND));
     expect(updateProduct).toHaveBeenCalledTimes(1);
     expect(updateProduct).toHaveBeenCalledWith(productUpdate);
     expect(send).toHaveBeenCalledTimes(1);
@@ -244,9 +239,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
       .attach('avatar', getStaticFile('empty.png'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: errorMessage,
-      });
+      .expect(createMessages(errorMessage));
     expect(updateProduct).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -268,9 +261,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
       .attach('avatar', getStaticFile('favicon.ico'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.FILE_TYPE_INVALID,
-      });
+      .expect(createMessages(messages.COMMON.FILE_TYPE_INVALID));
     expect(updateProduct).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -291,9 +282,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
       .field('ingredients', product.ingredients)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual({
-      message: expect.any(String),
-    });
+    expect(response.body).toEqual(createMessages(expect.any(String)));
     expect(updateProduct).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -314,7 +303,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual(expect.any(Array));
+    expect(response.body).toEqual({ messages: expect.any(Array) });
     expect(updateProduct).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -338,9 +327,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.DATABASE_DISCONNECT,
-      });
+      .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
     expect(updateProduct).toHaveBeenCalledTimes(1);
     expect(updateProduct).toHaveBeenCalledWith(productUpdate);
     expect(send).toHaveBeenCalledTimes(1);
@@ -365,9 +352,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: serverError.message,
-      });
+      .expect(createMessages(serverError.message));
     expect(updateProduct).toHaveBeenCalledTimes(1);
     expect(updateProduct).toHaveBeenCalledWith(productUpdate);
     expect(send).toHaveBeenCalledTimes(1);

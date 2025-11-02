@@ -6,6 +6,7 @@ import SchedulerService from '@share/libs/scheduler/scheduler.service';
 import { type ProductIngredientType, type IngredientSelectType } from '@share/interfaces';
 import IngredientCachingService from '@share/libs/caching/ingredient/ingredient.service';
 import { HandlePrismaError } from '@share/decorators';
+import { selectFields } from '@share/utils';
 import messages from '@share/constants/messages';
 
 @Injectable()
@@ -168,12 +169,20 @@ export default class IngredientService {
     }, 0);
   }
 
-  getAll(select: IngredientSelectType): Promise<prisma.ingredient[]> {
-    return this.prismaClient.ingredient.findMany({
-      select: {
-        ingredient_id: true,
-        ...select,
-      },
-    });
+  private async storeCacheIngredients(): Promise<prisma.ingredient[]> {
+    const ingredients = await this.prismaClient.ingredient.findMany();
+    await this.ingredientCachingService.storeAllIngredients(ingredients);
+    return ingredients;
+  }
+
+  @HandlePrismaError(messages.INGREDIENT)
+  async getAll(select: IngredientSelectType): Promise<Partial<prisma.ingredient>[]> {
+    let ingredients: prisma.ingredient[] = [];
+    if (await this.ingredientCachingService.checkExists()) {
+      ingredients = await this.ingredientCachingService.getAllIngredients();
+    } else {
+      ingredients = await this.storeCacheIngredients();
+    }
+    return selectFields<IngredientSelectType, prisma.ingredient>(select, ingredients);
   }
 }

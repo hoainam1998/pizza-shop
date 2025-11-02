@@ -1,11 +1,12 @@
 import { ValidationError } from 'class-validator';
-import { EventPatternType, MessageResponseType } from '../interfaces';
+import { EventPatternType } from '../interfaces';
 import {
   passwordHashing,
   autoGeneratePassword,
   signingAdminResetPasswordToken,
   getAdminResetPasswordLink,
 } from './auth';
+import { createMessage, createMessages } from './message';
 
 /**
  * Create microservice event.
@@ -15,16 +16,6 @@ import {
  * cmd: string}} - The pattern object.
  */
 const createMicroserviceEvent = (pattern: string): EventPatternType => ({ cmd: pattern });
-
-/**
- * Create message response.
- *
- * @param {string} message - The message.
- * @returns {{
- * message: string
- * errorCode: string}} - The message object.
- */
-const createMessage = (message: string, errorCode?: string): MessageResponseType => ({ message, errorCode });
 
 /**
  * Convert file to base64 image file string.
@@ -88,9 +79,59 @@ const formatDateTime = (date: Date): string => {
   return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
 };
 
+/**
+ * Select specific fields for a list.
+ *
+ * @param {T extends object} select - The select object.
+ * @param {R extends Array<any>} list - The origin list.
+ * @returns {Partial<R>[]} - A list after select.
+ */
+const selectFields = <T extends object, R extends object>(select: T, list: R[]): Partial<R>[] => {
+  return list.map((item) =>
+    Object.entries(select).reduce<Partial<R>>((obj, [key, value]: [unknown, any]) => {
+      if (value) {
+        obj[key as keyof R] = item[key as keyof R];
+      }
+      return obj;
+    }, {}),
+  );
+};
+
+/**
+ * Get exception messages.
+ *
+ * @param {ValidationError[]} errors - The errors
+ * @returns {string} - A messages.
+ */
+const getExceptionMessages = (errors: ValidationError[]): string => {
+  return handleValidateException(errors)
+    .reduce((messages, message, index) => {
+      messages += `${index + 1}: ${message} \n`;
+      return messages;
+    }, '')
+    .trim();
+};
+
+/**
+ * Return context with action name.
+ *
+ * @callback returnFullContextName
+ * @param {string} actionName - The actionName
+ * @returns {string} - The full context name.
+ */
+
+/**
+ * Get exception messages.
+ *
+ * @param {string} controllerName - The controller name.
+ * @returns {returnFullContextName} The callback will return the full context name.
+ */
+const getControllerContext = (controllerName: string) => (actionName: string) => `${controllerName} - ${actionName}`;
+
 export {
   createMicroserviceEvent,
   createMessage,
+  createMessages,
   convertFileToBase64,
   checkArrayHaveValues,
   passwordHashing,
@@ -100,4 +141,7 @@ export {
   calcSkip,
   handleValidateException,
   formatDateTime,
+  selectFields,
+  getExceptionMessages,
+  getControllerContext,
 };

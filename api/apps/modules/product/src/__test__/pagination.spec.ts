@@ -168,7 +168,7 @@ describe('product pagination', () => {
   it('product pagination failed with unknown error', async () => {
     expect.hasAssertions();
     const skip = calcSkip(paginationBody.pageSize, paginationBody.pageNumber);
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     const findManyPrismaMethod = jest.spyOn(prismaService.product, 'findMany');
     const countPrismaMethod = jest.spyOn(prismaService.product, 'count');
     const transactionPrismaMethod = jest.spyOn(prismaService, '$transaction').mockRejectedValue(UnknownError);
@@ -201,7 +201,7 @@ describe('product pagination', () => {
   it('product pagination failed with database disconnect error', async () => {
     expect.hasAssertions();
     const skip = calcSkip(paginationBody.pageSize, paginationBody.pageNumber);
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     const findManyPrismaMethod = jest.spyOn(prismaService.product, 'findMany');
     const countPrismaMethod = jest.spyOn(prismaService.product, 'count');
     const transactionPrismaMethod = jest.spyOn(prismaService, '$transaction').mockRejectedValue(PrismaDisconnectError);

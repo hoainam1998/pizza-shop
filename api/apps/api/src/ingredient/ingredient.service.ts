@@ -5,11 +5,11 @@ import { ingredient } from 'generated/prisma';
 import {
   createIngredientPattern,
   computeProductPricePattern,
-  getAllIngredients,
+  getAllIngredientsPattern,
   deleteIngredientPattern,
 } from '@share/pattern';
 import { INGREDIENT_SERVICE } from '@share/di-token';
-import { ComputeProductPrice, IngredientSelect } from '@share/dto/validators/ingredient.dto';
+import { ComputeProductPrice } from '@share/dto/validators/ingredient.dto';
 
 @Injectable()
 export default class IngredientService {
@@ -23,8 +23,8 @@ export default class IngredientService {
     return this.ingredient.send<number>(computeProductPricePattern, productIngredient);
   }
 
-  getAll(select: IngredientSelect): Observable<ingredient[]> {
-    return this.ingredient.send<ingredient[]>(getAllIngredients, select);
+  getAllIngredients(select: Record<string, boolean>): Observable<ingredient[]> {
+    return this.ingredient.send<ingredient[]>(getAllIngredientsPattern, select);
   }
 
   deleteIngredient(ingredientId: string): Observable<ingredient> {

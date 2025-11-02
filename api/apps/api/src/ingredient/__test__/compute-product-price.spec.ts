@@ -11,6 +11,7 @@ import startUp from './pre-setup';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import messages from '@share/constants/messages';
+import { createMessages } from '@share/utils';
 
 const computeProductPriceUrl = '/ingredient/compute-product-price';
 const price = 20000;
@@ -79,7 +80,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, computeProductPriceUrl), () => {
       .send(requestBodyWithUndefinedField)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual(expect.any(Array));
+    expect(response.body).toEqual({ messages: expect.any(Array) });
     expect(computeProductPrice).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -96,7 +97,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, computeProductPriceUrl), () => {
       .send(requestBodyWithMissingField)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual(expect.any(Array));
+    expect(response.body).toEqual({ messages: expect.any(Array) });
     expect(computeProductPrice).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -110,9 +111,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, computeProductPriceUrl), () => {
       .send(requestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: UnknownError.message,
-      });
+      .expect(createMessages(UnknownError.message));
     expect(computeProductPrice).toHaveBeenCalledTimes(1);
     expect(computeProductPrice).toHaveBeenCalledWith(requestBody);
     expect(send).toHaveBeenCalledTimes(1);
@@ -129,9 +128,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, computeProductPriceUrl), () => {
       .send(requestBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: serverError.message,
-      });
+      .expect(createMessages(serverError.message));
     expect(computeProductPrice).toHaveBeenCalledTimes(1);
     expect(computeProductPrice).toHaveBeenCalledWith(requestBody);
     expect(send).toHaveBeenCalledTimes(1);
@@ -149,9 +146,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, computeProductPriceUrl), () => {
         .send(requestBody)
         .expect(HttpStatus.BAD_REQUEST)
         .expect('Content-Type', /application\/json/)
-        .expect({
-          message: messages.COMMON.DATABASE_DISCONNECT,
-        });
+        .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
       expect(computeProductPrice).toHaveBeenCalledTimes(1);
       expect(computeProductPrice).toHaveBeenCalledWith(requestBody);
       expect(send).toHaveBeenCalledTimes(1);

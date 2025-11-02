@@ -1,22 +1,19 @@
 import {
-  Body,
   Controller,
+  Body,
   Post,
-  ValidationPipe,
-  UsePipes,
   ClassSerializerInterceptor,
   UseInterceptors,
   BadRequestException,
   HttpCode,
   HttpStatus,
-  NotFoundException,
   Delete,
   Param,
 } from '@nestjs/common';
-import { catchError, map, Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
-import { validate, isPositive, isInt, ValidationError } from 'class-validator';
+import { isPositive, isInt } from 'class-validator';
 import IngredientService from './ingredient.service';
 import { HandleHttpError, UploadImage } from '@share/decorators';
 import { IdValidationPipe, ImageTransformPipe } from '@share/pipes';
@@ -24,24 +21,19 @@ import { IngredientCreate, ComputeProductPrice, IngredientSelect } from '@share/
 import { IngredientList, Ingredient } from '@share/dto/serializer/ingredient';
 import { MessageSerializer } from '@share/dto/serializer/common';
 import messages from '@share/constants/messages';
-import { createMessage, handleValidateException } from '@share/utils';
-import { MicroservicesErrorResponse } from '@share/interfaces';
+import { createMessage } from '@share/utils';
+import LoggingService from '@share/libs/logging/logging.service';
+import BaseController from '../controller';
 
-@UsePipes(
-  new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-    exceptionFactory: (exceptions: ValidationError[]) => {
-      const errors = handleValidateException(exceptions);
-      throw new BadRequestException({ messages: errors });
-    },
-  }),
-)
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('ingredient')
-export default class IngredientController {
-  constructor(private readonly ingredientService: IngredientService) {}
+export default class IngredientController extends BaseController {
+  constructor(
+    private readonly ingredientService: IngredientService,
+    private readonly loggingService: LoggingService,
+  ) {
+    super(loggingService, 'ingredient');
+  }
 
   @Post('create')
   @UseInterceptors(FileInterceptor('avatar'))
@@ -85,36 +77,28 @@ export default class IngredientController {
 
   @Post('all')
   @HttpCode(HttpStatus.OK)
-  getAll(@Body() select: IngredientSelect): Observable<Promise<Record<keyof typeof Ingredient, any>>> {
-    const selectObject = { ...select };
-    if (select.units) {
-      Object.assign(selectObject, { unit: true });
-    }
-
-    return this.ingredientService
-      .getAll(plainToInstance(IngredientSelect, selectObject, { excludePrefixes: ['units'] }))
-      .pipe(
-        map(async (ingredients) => {
-          const ingredientList = new IngredientList(ingredients);
-          return validate(ingredientList).then((errors) => {
-            if (!errors.length) {
-              const options = select.units ? { groups: ['units'] } : { groups: [] };
-              if (select.unit) {
-                Object.assign(options, { groups: [...options.groups, 'unit'] });
+  @HandleHttpError
+  getAllIngredients(@Body() select: IngredientSelect): Observable<Promise<Record<keyof typeof Ingredient, any>>> {
+    select = IngredientSelect.plain(select);
+    return this.ingredientService.getAllIngredients(instanceToPlain(plainToInstance(IngredientSelect, select))).pipe(
+      map(async (ingredients) => {
+        const ingredientList = new IngredientList(ingredients);
+        return ingredientList.validate().then((errors) => {
+          if (!errors.length) {
+            let groups = ['units', 'unit'].reduce<string[]>((groups, key: keyof typeof select) => {
+              if (select[key]) {
+                groups.push(key);
               }
-              return instanceToPlain(plainToInstance(Ingredient, ingredientList.List, { groups: ['unit'] }), options);
-            } else {
-              throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
-            }
-          });
-        }),
-        catchError((error: MicroservicesErrorResponse) => {
-          if (error.status === HttpStatus.NOT_FOUND) {
-            throw new NotFoundException(error);
+              return groups;
+            }, []);
+            groups = groups.length ? groups : ['units', 'unit'];
+            return instanceToPlain(plainToInstance(Ingredient, ingredientList.List, { groups: ['unit'] }), { groups });
           } else {
-            throw new BadRequestException(createMessage(error.message!));
+            this.logError(errors, this.getAllIngredients.name);
+            throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
           }
-        }),
-      );
+        });
+      }),
+    );
   }
 }

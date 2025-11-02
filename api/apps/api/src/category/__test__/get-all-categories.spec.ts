@@ -10,11 +10,13 @@ import { getAllCategoriesPattern } from '@share/pattern';
 import { createCategoryList } from '@share/test/pre-setup/mock/data/category';
 import { createDescribeTest, createTestName } from '@share/test/helpers';
 import CategoryService from '../category.service';
+import CategoryController from '../category.controller';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { Categories, CategoryDetailSerializer } from '@share/dto/serializer/category';
-import { createMessage } from '@share/utils';
+import { createMessages } from '@share/utils';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
+import { ValidationError } from 'class-validator';
 const getAllCategoriesUrl: string = '/category/all';
 
 const getAllCategoriesRequestBody = {
@@ -24,29 +26,31 @@ const getAllCategoriesRequestBody = {
 };
 
 const categories = createCategoryList(2, false);
+let api: TestAgent;
+let clientProxy: ClientProxy;
+let close: () => Promise<void>;
+let categoryService: CategoryService;
+let categoryController: CategoryController;
+
+beforeEach(async () => {
+  const requestTest = await startUp();
+  api = requestTest.api;
+  clientProxy = requestTest.clientProxy;
+  close = () => requestTest.app.close();
+  categoryService = requestTest.app.get(CategoryService);
+  categoryController = requestTest.app.get(CategoryController);
+});
+
+afterEach(async () => {
+  if (close) {
+    await close();
+  }
+});
 
 describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
-  let api: TestAgent;
-  let clientProxy: ClientProxy;
-  let close: () => Promise<void>;
-  let categoryService: CategoryService;
-
-  beforeEach(async () => {
-    const requestTest = await startUp();
-    api = requestTest.api;
-    clientProxy = requestTest.clientProxy;
-    close = () => requestTest.app.close();
-    categoryService = requestTest.app.get(CategoryService);
-  });
-
-  afterEach(async () => {
-    if (close) {
-      await close();
-    }
-  });
-
   it(createTestName('get all categories success', HttpStatus.OK), async () => {
     expect.hasAssertions();
+    const logError = jest.spyOn(categoryController as any, 'logError');
     const categoriesObj = new Categories(categories);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(categories));
     const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
@@ -60,30 +64,33 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
     expect(getAllCategories).toHaveBeenCalledWith(getAllCategoriesRequestBody);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(getAllCategoriesPattern, getAllCategoriesRequestBody);
+    expect(logError).not.toHaveBeenCalled();
   });
 
   it(createTestName('get all categories failed with output validate', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
-    const send = jest
-      .spyOn(clientProxy, 'send')
-      .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE))));
+    const validateErrors = [new ValidationError()];
+    jest.spyOn(Categories.prototype, 'validate').mockResolvedValue(validateErrors);
+    const logError = jest.spyOn(categoryController as any, 'logError').mockImplementation(() => jest.fn());
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(categories));
     const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
     await api
       .post(getAllCategoriesUrl)
       .send(getAllCategoriesRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.OUTPUT_VALIDATE,
-      });
+      .expect(createMessages(messages.COMMON.OUTPUT_VALIDATE));
     expect(getAllCategories).toHaveBeenCalledTimes(1);
     expect(getAllCategories).toHaveBeenCalledWith(getAllCategoriesRequestBody);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(getAllCategoriesPattern, getAllCategoriesRequestBody);
+    expect(logError).toHaveBeenCalledTimes(1);
+    expect(logError).toHaveBeenCalledWith(validateErrors, expect.any(String));
   });
 
   it(createTestName('get all categories failed with not found error', HttpStatus.NOT_FOUND), async () => {
     expect.hasAssertions();
+    const logError = jest.spyOn(categoryController as any, 'logError');
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => new NotFoundException([])));
     const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
     await api
@@ -96,10 +103,12 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
     expect(getAllCategories).toHaveBeenCalledWith(getAllCategoriesRequestBody);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(getAllCategoriesPattern, getAllCategoriesRequestBody);
+    expect(logError).not.toHaveBeenCalled();
   });
 
   it(createTestName('get all categories failed with unknown error', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
+    const logError = jest.spyOn(categoryController as any, 'logError');
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
     const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
     await api
@@ -107,17 +116,17 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
       .send(getAllCategoriesRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: UnknownError.message,
-      });
+      .expect(createMessages(UnknownError.message));
     expect(getAllCategories).toHaveBeenCalledTimes(1);
     expect(getAllCategories).toHaveBeenCalledWith(getAllCategoriesRequestBody);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(getAllCategoriesPattern, getAllCategoriesRequestBody);
+    expect(logError).not.toHaveBeenCalled();
   });
 
   it(createTestName('get all categories failed with server error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
+    const logError = jest.spyOn(categoryController as any, 'logError');
     const serverError = new InternalServerErrorException();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => serverError));
     const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
@@ -126,17 +135,17 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
       .send(getAllCategoriesRequestBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: serverError.message,
-      });
+      .expect(createMessages(serverError.message));
     expect(getAllCategories).toHaveBeenCalledTimes(1);
     expect(getAllCategories).toHaveBeenCalledWith(getAllCategoriesRequestBody);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(getAllCategoriesPattern, getAllCategoriesRequestBody);
+    expect(logError).not.toHaveBeenCalled();
   });
 
   it(createTestName('get all categories success with empty request body', HttpStatus.OK), async () => {
     expect.hasAssertions();
+    const logError = jest.spyOn(categoryController as any, 'logError');
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(categories));
     const categoriesObj = new Categories(categories);
     const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
@@ -157,10 +166,12 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
     expect(getAllCategories).toHaveBeenCalledWith(query);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(getAllCategoriesPattern, query);
+    expect(logError).not.toHaveBeenCalled();
   });
 
   it(createTestName('get all categories failed with undefined field', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
+    const logError = jest.spyOn(categoryController as any, 'logError');
     const undefinedFieldRequestBody = {
       ...getAllCategoriesRequestBody,
       categoryId: Date.now().toString(),
@@ -172,13 +183,15 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
       .send(undefinedFieldRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual(expect.any(Array));
+    expect(response.body).toEqual({ messages: expect.any(Array) });
     expect(getAllCategories).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
+    expect(logError).not.toHaveBeenCalled();
   });
 
   it(createTestName('get all categories failed with database disconnect', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
+    const logError = jest.spyOn(categoryController as any, 'logError');
     const send = jest
       .spyOn(clientProxy, 'send')
       .mockReturnValue(throwError(() => new BadRequestException(PrismaDisconnectError.message)));
@@ -188,12 +201,11 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
       .send(getAllCategoriesRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.DATABASE_DISCONNECT,
-      });
+      .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
     expect(getAllCategories).toHaveBeenCalledTimes(1);
     expect(getAllCategories).toHaveBeenCalledWith(getAllCategoriesRequestBody);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(getAllCategoriesPattern, getAllCategoriesRequestBody);
+    expect(logError).not.toHaveBeenCalled();
   });
 });

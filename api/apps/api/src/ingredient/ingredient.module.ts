@@ -5,6 +5,7 @@ import { ClientProvider, ClientsModule, Transport } from '@nestjs/microservices'
 import { INGREDIENT_SERVICE } from '@share/di-token';
 import { ConfigService } from '@nestjs/config';
 import ShareModule from '@share/module';
+import LoggingModule from '@share/libs/logging/logging.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import ShareModule from '@share/module';
       },
     ]),
     ShareModule,
+    LoggingModule,
   ],
   providers: [IngredientService],
   controllers: [IngredientController],

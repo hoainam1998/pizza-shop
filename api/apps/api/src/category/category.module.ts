@@ -6,6 +6,7 @@ import CategoryController from './category.controller';
 import CategoryService from './category.service';
 import { CATEGORY_SERVICE } from '@share/di-token';
 import { ConfigService } from '@nestjs/config';
+import LoggingModule from '@share/libs/logging/logging.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ConfigService } from '@nestjs/config';
     MulterModule.register({
       storage: multer.memoryStorage(),
     }),
+    LoggingModule,
   ],
   controllers: [CategoryController],
   providers: [CategoryService],

@@ -5,13 +5,14 @@ import IngredientService from './ingredient.service';
 import {
   computeProductPricePattern,
   createIngredientPattern,
-  getAllIngredients,
+  getAllIngredientsPattern,
   deleteIngredientPattern,
 } from '@share/pattern';
-import { ComputeProductPrice, IngredientSelect } from '@share/dto/validators/ingredient.dto';
+import { ComputeProductPrice } from '@share/dto/validators/ingredient.dto';
 import { checkArrayHaveValues } from '@share/utils';
 import LoggingService from '@share/libs/logging/logging.service';
 import { HandleServiceError } from '@share/decorators';
+import type { IngredientSelectType } from '@share/interfaces';
 
 @Controller()
 export default class IngredientController {
@@ -33,8 +34,9 @@ export default class IngredientController {
     return this.ingredientService.computeProductIngredients(temporaryProductId, productIngredients);
   }
 
-  @MessagePattern(getAllIngredients)
-  getAllIngredients(select: IngredientSelect): Promise<ingredient[]> {
+  @MessagePattern(getAllIngredientsPattern)
+  @HandleServiceError
+  getAllIngredients(select: IngredientSelectType): Promise<Partial<ingredient>[]> {
     return this.ingredientService.getAll(select).then((ingredients) => {
       if (!checkArrayHaveValues(ingredients)) {
         throw new NotFoundException([]);

@@ -1,6 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { REDIS_CLIENT } from '@share/di-token';
-import RedisClient from '@share/libs/redis-client/redis';
+import { Injectable } from '@nestjs/common';
+import CachingService from '../caching';
 import constants from '@share/constants';
 import { ingredient } from 'generated/prisma';
 const ingredientKey = constants.REDIS_PREFIX.INGREDIENTS;
@@ -8,32 +7,32 @@ const ingredientKey = constants.REDIS_PREFIX.INGREDIENTS;
 export const ingredientName = (id: string) => `ingredient_${id}`;
 
 @Injectable()
-export default class IngredientCachingService {
-  constructor(@Inject(REDIS_CLIENT) private readonly redisClient: RedisClient) {}
-
+export default class IngredientCachingService extends CachingService {
   storeProductIngredients(productId: string, data: Record<string, string>): Promise<number> {
-    return this.redisClient.Client.hSet(ingredientName(productId), data);
+    return this.RedisClientInstance.hSet(ingredientName(productId), data);
   }
 
   getProductIngredientsStored(productId: string, ingredientIds: string[]): Promise<(string | null)[]> {
-    return this.redisClient.Client.hmGet(ingredientName(productId), ingredientIds);
+    return this.RedisClientInstance.hmGet(ingredientName(productId), ingredientIds);
   }
 
   deleteAllProductIngredients(productId: string): Promise<number> {
-    return this.redisClient.Client.del(ingredientName(productId));
+    return this.RedisClientInstance.del(ingredientName(productId));
+  }
+
+  checkExists(): Promise<boolean> {
+    return this.exists(ingredientKey);
   }
 
   storeAllIngredients(ingredients: ingredient[]): Promise<'OK' | null> {
-    return this.redisClient.Client.json.set(ingredientKey, '$', ingredients);
+    return this.jsonSet(ingredientKey, ingredients);
   }
 
   getAllIngredients(): Promise<ingredient[]> {
-    return this.redisClient.Client.json
-      .get(ingredientKey, { path: '$' })
-      .then((result: Array<ingredient[]>) => result[0]);
+    return this.jsonGet(ingredientKey);
   }
 
   deleteAllIngredients(): Promise<number> {
-    return this.redisClient.Client.del(ingredientKey);
+    return this.RedisClientInstance.del(ingredientKey);
   }
 }

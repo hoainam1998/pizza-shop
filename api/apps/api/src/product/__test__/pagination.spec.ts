@@ -15,7 +15,9 @@ import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { PaginationProductSerializer } from '@share/dto/serializer/product';
 import { ProductQueryTransform, ProductSelect } from '@share/dto/validators/product.dto';
-import { createMessage } from '@share/utils';
+import { createMessages } from '@share/utils';
+import { ValidationError } from 'class-validator';
+import ProductController from '../product.controller';
 const productPaginationUrl = '/product/pagination';
 
 const paginationBody = {
@@ -43,28 +45,31 @@ const select = instanceToPlain(plainToInstance(ProductSelect, paginationBody));
 const query: any = plainToInstance(ProductQueryTransform, select.query);
 select.query = query;
 
+let api: TestAgent;
+let clientProxy: ClientProxy;
+let close: () => Promise<void>;
+let productService: ProductService;
+let productController: ProductController;
+
+beforeEach(async () => {
+  const requestTest = await startUp();
+  api = requestTest.api;
+  clientProxy = requestTest.clientProxy;
+  close = () => requestTest.app.close();
+  productService = requestTest.app.get(ProductService);
+  productController = requestTest.app.get(ProductController);
+});
+
+afterEach(async () => {
+  if (close) {
+    await close();
+  }
+});
+
 describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
-  let api: TestAgent;
-  let clientProxy: ClientProxy;
-  let close: () => Promise<void>;
-  let productService: ProductService;
-
-  beforeEach(async () => {
-    const requestTest = await startUp();
-    api = requestTest.api;
-    clientProxy = requestTest.clientProxy;
-    close = () => requestTest.app.close();
-    productService = requestTest.app.get(ProductService);
-  });
-
-  afterEach(async () => {
-    if (close) {
-      await close();
-    }
-  });
-
   it(createTestName('pagination product success', HttpStatus.OK), async () => {
     expect.hasAssertions();
+    const logError = jest.spyOn(productController as any, 'logError');
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(paginationResponse));
     const paginationResult = plainToInstance(PaginationProductSerializer, paginationResponse);
     const pagination = jest.spyOn(productService, 'pagination');
@@ -78,30 +83,33 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
     expect(pagination).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(paginationPattern, select);
+    expect(logError).not.toHaveBeenCalled();
   });
 
   it(createTestName('pagination product failed with output validate', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
-    const send = jest
-      .spyOn(clientProxy, 'send')
-      .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE))));
+    const logError = jest.spyOn(productController as any, 'logError');
+    const validateErrors = [new ValidationError()];
+    jest.spyOn(PaginationProductSerializer.prototype, 'validate').mockResolvedValue(validateErrors);
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(paginationResponse));
     const pagination = jest.spyOn(productService, 'pagination');
     await api
       .post(productPaginationUrl)
       .send(paginationBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.OUTPUT_VALIDATE,
-      });
+      .expect(createMessages(messages.COMMON.OUTPUT_VALIDATE));
     expect(pagination).toHaveBeenCalledTimes(1);
     expect(pagination).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(paginationPattern, select);
+    expect(logError).toHaveBeenCalledTimes(1);
+    expect(logError).toHaveBeenCalledWith(validateErrors, expect.any(String));
   });
 
   it(createTestName('pagination product failed with not found error', HttpStatus.NOT_FOUND), async () => {
     expect.hasAssertions();
+    const logError = jest.spyOn(productController as any, 'logError');
     const notFoundResponse = {
       list: [],
       total: 0,
@@ -120,10 +128,12 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
     expect(pagination).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(paginationPattern, select);
+    expect(logError).not.toHaveBeenCalled();
   });
 
   it(createTestName('pagination product failed with unknown error', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
+    const logError = jest.spyOn(productController as any, 'logError');
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
     const pagination = jest.spyOn(productService, 'pagination');
     await api
@@ -131,17 +141,17 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
       .send(paginationBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: UnknownError.message,
-      });
+      .expect(createMessages(UnknownError.message));
     expect(pagination).toHaveBeenCalledTimes(1);
     expect(pagination).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(paginationPattern, select);
+    expect(logError).not.toHaveBeenCalled();
   });
 
   it(createTestName('pagination product failed with server error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
+    const logError = jest.spyOn(productController as any, 'logError');
     const serverError = new InternalServerErrorException();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => serverError));
     const pagination = jest.spyOn(productService, 'pagination');
@@ -150,17 +160,17 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
       .send(paginationBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: serverError.message,
-      });
+      .expect(createMessages(serverError.message));
     expect(pagination).toHaveBeenCalledTimes(1);
     expect(pagination).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(paginationPattern, select);
+    expect(logError).not.toHaveBeenCalled();
   });
 
   it(createTestName('pagination product failed with missing query field', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
+    const logError = jest.spyOn(productController as any, 'logError');
     const missingQueryFieldBody = {
       pageSize: paginationBody.pageSize,
       pageNumber: paginationBody.pageNumber,
@@ -172,13 +182,15 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
       .send(missingQueryFieldBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual(expect.any(Array));
+    expect(response.body).toEqual({ messages: expect.any(Array) });
     expect(pagination).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
+    expect(logError).not.toHaveBeenCalled();
   });
 
   it(createTestName('pagination product failed with undefined field', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
+    const logError = jest.spyOn(productController as any, 'logError');
     const undefinedFieldRequestBody = {
       pageSize: paginationBody.pageSize,
       pageNumber: paginationBody.pageNumber,
@@ -192,13 +204,15 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
       .send(undefinedFieldRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual(expect.any(Array));
+    expect(response.body).toEqual({ messages: expect.any(Array) });
     expect(pagination).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
+    expect(logError).not.toHaveBeenCalled();
   });
 
   it(createTestName('pagination product failed with database disconnect', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
+    const logError = jest.spyOn(productController as any, 'logError');
     const send = jest
       .spyOn(clientProxy, 'send')
       .mockReturnValue(throwError(() => new BadRequestException(PrismaDisconnectError.message)));
@@ -208,17 +222,17 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
       .send(paginationBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        message: messages.COMMON.DATABASE_DISCONNECT,
-      });
+      .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
     expect(pagination).toHaveBeenCalledTimes(1);
     expect(pagination).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(paginationPattern, select);
+    expect(logError).not.toHaveBeenCalled();
   });
 
   it(createTestName('pagination product success with empty query', HttpStatus.OK), async () => {
     expect.hasAssertions();
+    const logError = jest.spyOn(productController as any, 'logError');
     const paginationEmptyQueryRequestBody = {
       ...paginationBody,
       query: {},
@@ -255,5 +269,6 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
     expect(pagination).toHaveBeenCalledWith(finalPaginationRequestBody);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(paginationPattern, finalPaginationRequestBody);
+    expect(logError).not.toHaveBeenCalled();
   });
 });

@@ -60,6 +60,7 @@ export class IngredientSelect implements IngredientSelectType {
 
   @IsOptional()
   @IsBoolean()
+  @Transform(({ value, obj }) => (obj.units ? true : value))
   unit: boolean;
 
   @IsOptional()
@@ -80,5 +81,34 @@ export class IngredientSelect implements IngredientSelectType {
 
   @IsOptional()
   @IsBoolean()
+  @Exclude({ toPlainOnly: true })
   units: boolean;
+
+  @Expose()
+  get ingredient_id() {
+    return true;
+  }
+
+  static plain(target: IngredientSelect): IngredientSelect {
+    if (
+      Object.entries(target).every(([key, value]) => {
+        if (key === 'ingredient_id') {
+          return true;
+        } else {
+          return value === undefined;
+        }
+      })
+    ) {
+      target.name = true;
+      target.avatar = true;
+      target.unit = true;
+      target.units = true;
+      target.count = true;
+      target.expired_time = true;
+      target.status = true;
+      target.price = true;
+      target.units = true;
+    }
+    return target;
+  }
 }

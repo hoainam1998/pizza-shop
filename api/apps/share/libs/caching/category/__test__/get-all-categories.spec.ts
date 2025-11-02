@@ -21,7 +21,10 @@ describe('get all caching categories', () => {
   it('get all caching categories success', async () => {
     expect.hasAssertions();
     const get = jest.spyOn(redisClient.Client.json, 'get').mockResolvedValue([categories]);
+    const jsonGet = jest.spyOn(categoryCachingService as any, 'jsonGet');
     await expect(categoryCachingService.getAllCategories()).resolves.toBe(categories);
+    expect(jsonGet).toHaveBeenCalledTimes(1);
+    expect(jsonGet).toHaveBeenCalledWith(categoryKey);
     expect(get).toHaveBeenCalledTimes(1);
     expect(get).toHaveBeenCalledWith(categoryKey, { path: '$' });
   });
@@ -29,7 +32,10 @@ describe('get all caching categories', () => {
   it('get all caching categories with unknown error', async () => {
     expect.hasAssertions();
     const get = jest.spyOn(redisClient.Client.json, 'get').mockRejectedValue(UnknownError);
+    const jsonGet = jest.spyOn(categoryCachingService as any, 'jsonGet');
     await expect(categoryCachingService.getAllCategories()).rejects.toThrow(UnknownError);
+    expect(jsonGet).toHaveBeenCalledTimes(1);
+    expect(jsonGet).toHaveBeenCalledWith(categoryKey);
     expect(get).toHaveBeenCalledTimes(1);
     expect(get).toHaveBeenCalledWith(categoryKey, { path: '$' });
   });

@@ -119,7 +119,7 @@ describe('compute product price', () => {
     const storeProductIngredients = jest
       .spyOn(ingredientCachingService, 'storeProductIngredients')
       .mockResolvedValue(1);
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     const findManyPrismaMethod = jest.spyOn(prismaService.ingredient, 'findMany').mockResolvedValue(ingredients);
     const computeProductPriceControllerMethod = jest.spyOn(ingredientController, 'computeProductPrice');
     const computeProductPriceServiceMethod = jest.spyOn(ingredientService, 'computeProductIngredients');
@@ -154,7 +154,7 @@ describe('compute product price', () => {
     const storeProductIngredients = jest
       .spyOn(ingredientCachingService, 'storeProductIngredients')
       .mockResolvedValue(1);
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     const findManyPrismaMethod = jest.spyOn(prismaService.ingredient, 'findMany').mockRejectedValue(UnknownError);
     const computeProductPriceControllerMethod = jest.spyOn(ingredientController, 'computeProductPrice');
     const computeProductPriceServiceMethod = jest.spyOn(ingredientService, 'computeProductIngredients');
@@ -202,7 +202,7 @@ describe('compute product price', () => {
     const storeProductIngredients = jest
       .spyOn(ingredientCachingService, 'storeProductIngredients')
       .mockResolvedValue(1);
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     const findManyPrismaMethod = jest
       .spyOn(prismaService.ingredient, 'findMany')
       .mockRejectedValue(PrismaNotFoundError);
@@ -252,7 +252,7 @@ describe('compute product price', () => {
     const storeProductIngredients = jest
       .spyOn(ingredientCachingService, 'storeProductIngredients')
       .mockResolvedValue(1);
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     const findManyPrismaMethod = jest
       .spyOn(prismaService.ingredient, 'findMany')
       .mockRejectedValue(PrismaDisconnectError);
@@ -302,7 +302,7 @@ describe('compute product price', () => {
     const storeProductIngredients = jest
       .spyOn(ingredientCachingService, 'storeProductIngredients')
       .mockResolvedValue(1);
-    const logMethod = jest.spyOn(loggerService, 'log');
+    const logMethod = jest.spyOn(loggerService, 'error');
     const findManyPrismaMethod = jest.spyOn(prismaService.ingredient, 'findMany').mockResolvedValue(ingredients);
     const computeProductPriceControllerMethod = jest.spyOn(ingredientController, 'computeProductPrice');
     const computeProductPriceServiceMethod = jest
