@@ -17,8 +17,13 @@ import { isPositive, isInt } from 'class-validator';
 import IngredientService from './ingredient.service';
 import { HandleHttpError, UploadImage } from '@share/decorators';
 import { IdValidationPipe, ImageTransformPipe } from '@share/pipes';
-import { IngredientCreate, ComputeProductPrice, IngredientSelect } from '@share/dto/validators/ingredient.dto';
-import { IngredientList, Ingredient } from '@share/dto/serializer/ingredient';
+import {
+  IngredientCreate,
+  ComputeProductPrice,
+  IngredientSelect,
+  IngredientPaginationSelect,
+} from '@share/dto/validators/ingredient.dto';
+import { IngredientList, Ingredient, PaginationIngredientSerializer } from '@share/dto/serializer/ingredient';
 import { MessageSerializer } from '@share/dto/serializer/common';
 import messages from '@share/constants/messages';
 import { createMessage } from '@share/utils';
@@ -97,6 +102,37 @@ export default class IngredientController extends BaseController {
             this.logError(errors, this.getAllIngredients.name);
             throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
           }
+        });
+      }),
+    );
+  }
+
+  @Post('pagination')
+  @HttpCode(HttpStatus.OK)
+  @HandleHttpError
+  pagination(@Body() select: IngredientPaginationSelect): Observable<any> {
+    const query = instanceToPlain(plainToInstance(IngredientSelect, IngredientSelect.plain(select.query)));
+    return this.ingredientService.pagination({ ...select, query }).pipe(
+      map((result) => {
+        const response = new PaginationIngredientSerializer(result);
+        return response.validate().then((errors) => {
+          if (errors.length) {
+            this.logError(errors, this.pagination.name);
+            throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
+          }
+          let groups = ['units', 'unit'].reduce<string[]>((groups, key: keyof typeof select.query) => {
+            if (select.query[key]) {
+              groups.push(key);
+            }
+            return groups;
+          }, []);
+          groups = groups.length ? groups : ['units', 'unit'];
+          return {
+            total: response.total,
+            list: instanceToPlain(response.list, {
+              groups,
+            }),
+          };
         });
       }),
     );

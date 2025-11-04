@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { user, category, product } from 'generated/prisma';
+import { user, category, product, ingredient } from 'generated/prisma';
 
 export type CategoryBodyType = category & {
   disabled?: boolean;
@@ -14,9 +14,18 @@ export type CategoryPaginationResponse = PaginationResponse<CategoryBodyType>;
 
 export type ProductPaginationResponse = PaginationResponse<product>;
 
+export type IngredientPrismaOmitType = Omit<
+  ingredient,
+  'units' | 'ingredientId' | '_count' | 'disabled' | 'expiredTime'
+>;
+
+export type IngredientPaginationResponse = PaginationResponse<IngredientPrismaOmitType>;
+
 export type CategoryPaginationPrismaResponse = (CategoryBodyType[] | number)[];
 
 export type ProductPaginationPrismaResponse = (product[] | number)[];
+
+export type IngredientPaginationPrismaResponseType = (ingredient[] | number)[];
 
 export type EventPatternType = { cmd: string };
 

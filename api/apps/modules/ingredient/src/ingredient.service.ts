@@ -3,11 +3,16 @@ import { RpcException } from '@nestjs/microservices';
 import prisma, { PrismaClient, Unit } from 'generated/prisma';
 import { PRISMA_CLIENT } from '@share/di-token';
 import SchedulerService from '@share/libs/scheduler/scheduler.service';
-import { type ProductIngredientType, type IngredientSelectType } from '@share/interfaces';
+import {
+  type ProductIngredientType,
+  type IngredientSelectType,
+  IngredientPaginationPrismaResponseType,
+} from '@share/interfaces';
 import IngredientCachingService from '@share/libs/caching/ingredient/ingredient.service';
 import { HandlePrismaError } from '@share/decorators';
-import { selectFields } from '@share/utils';
+import { calcSkip, selectFields } from '@share/utils';
 import messages from '@share/constants/messages';
+import { IngredientPaginationSelect } from '@share/dto/validators/ingredient.dto';
 
 @Injectable()
 export default class IngredientService {
@@ -170,7 +175,23 @@ export default class IngredientService {
   }
 
   private async storeCacheIngredients(): Promise<prisma.ingredient[]> {
-    const ingredients = await this.prismaClient.ingredient.findMany();
+    const ingredients = await this.prismaClient.ingredient.findMany({
+      select: {
+        ingredient_id: true,
+        name: true,
+        price: true,
+        avatar: true,
+        count: true,
+        unit: true,
+        expired_time: true,
+        status: true,
+        _count: {
+          select: {
+            product_ingredient: true,
+          },
+        },
+      },
+    });
     await this.ingredientCachingService.storeAllIngredients(ingredients);
     return ingredients;
   }
@@ -184,5 +205,31 @@ export default class IngredientService {
       ingredients = await this.storeCacheIngredients();
     }
     return selectFields<IngredientSelectType, prisma.ingredient>(select, ingredients);
+  }
+
+  @HandlePrismaError(messages.INGREDIENT)
+  pagination(select: IngredientPaginationSelect): Promise<IngredientPaginationPrismaResponseType> {
+    const skip = calcSkip(select.pageSize, select.pageNumber);
+    const condition = select.search
+      ? {
+          name: {
+            contains: select.search,
+          },
+        }
+      : {};
+    return this.prismaClient.$transaction([
+      this.prismaClient.ingredient.findMany({
+        take: select.pageSize,
+        skip,
+        select: select.query,
+        where: condition,
+        orderBy: {
+          ingredient_id: 'desc',
+        },
+      }),
+      this.prismaClient.ingredient.count({
+        where: condition,
+      }),
+    ]);
   }
 }

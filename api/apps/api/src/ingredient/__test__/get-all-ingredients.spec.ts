@@ -26,14 +26,16 @@ const getAllIngredientsRequestBody = {
   unit: true,
   units: true,
   count: true,
-  expired_time: true,
+  expiredTime: true,
   status: true,
   price: true,
+  disabled: true,
 };
 
 const getIngredientsResponse = (groups: string[]): Record<string, any> => {
   return instanceToPlain(plainToInstance(Ingredient, ingredientList.List, { groups: ['unit'] }), {
     groups,
+    exposeUnsetFields: false,
   });
 };
 

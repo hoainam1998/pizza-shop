@@ -7,9 +7,11 @@ import {
   computeProductPricePattern,
   getAllIngredientsPattern,
   deleteIngredientPattern,
+  paginationPattern,
 } from '@share/pattern';
 import { INGREDIENT_SERVICE } from '@share/di-token';
 import { ComputeProductPrice } from '@share/dto/validators/ingredient.dto';
+import { IngredientPaginationResponse } from '@share/interfaces';
 
 @Injectable()
 export default class IngredientService {
@@ -29,5 +31,9 @@ export default class IngredientService {
 
   deleteIngredient(ingredientId: string): Observable<ingredient> {
     return this.ingredient.send<ingredient>(deleteIngredientPattern, ingredientId);
+  }
+
+  pagination(select: any): Observable<IngredientPaginationResponse> {
+    return this.ingredient.send<IngredientPaginationResponse>(paginationPattern, select);
   }
 }

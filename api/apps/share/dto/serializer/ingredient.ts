@@ -1,7 +1,17 @@
-import { Exclude, Expose, Type } from 'class-transformer';
-import { IsInt, IsString, IsNumberString, IsArray, ValidateNested, IsOptional } from 'class-validator';
+import { Exclude, Expose, plainToInstance, Type } from 'class-transformer';
+import {
+  IsInt,
+  IsString,
+  IsNumberString,
+  IsArray,
+  ValidateNested,
+  IsOptional,
+  IsDefined,
+  IsObject,
+} from 'class-validator';
 import { ingredient, Status, Unit } from 'generated/prisma';
 import Validator from './validator';
+import type { IngredientPaginationResponse, IngredientPrismaOmitType } from '@share/interfaces';
 
 export class Ingredient implements ingredient {
   @Exclude({ toPlainOnly: true })
@@ -27,6 +37,7 @@ export class Ingredient implements ingredient {
 
   @IsOptional()
   @IsNumberString()
+  @Exclude({ toPlainOnly: true })
   expired_time: string;
 
   @IsOptional()
@@ -49,7 +60,22 @@ export class Ingredient implements ingredient {
     return this.ingredient_id;
   }
 
-  constructor(ingredient: Omit<Ingredient, 'units' | 'ingredientId'>) {
+  @IsOptional()
+  @IsObject()
+  @Exclude({ toPlainOnly: true })
+  _count: any;
+
+  @Expose({ toPlainOnly: true })
+  get disabled() {
+    return Object.hasOwn(this._count || {}, 'product_ingredient') ? this._count.product_ingredient > 0 : undefined;
+  }
+
+  @Expose({ toPlainOnly: true })
+  get expiredTime() {
+    return this.expired_time;
+  }
+
+  constructor(ingredient: IngredientPrismaOmitType) {
     Object.assign(this, ingredient);
   }
 }
@@ -60,12 +86,31 @@ export class IngredientList extends Validator {
   @Type(() => Ingredient)
   private _list: Ingredient[];
 
-  constructor(ingredients: Omit<Ingredient, 'units' | 'ingredientId'>[]) {
+  constructor(ingredients: IngredientPrismaOmitType[]) {
     super();
     Object.assign(this, { _list: ingredients.map((ingredient) => new Ingredient(ingredient)) });
   }
 
   get List() {
     return this._list;
+  }
+}
+
+export class PaginationIngredientSerializer extends Validator {
+  @IsDefined()
+  @IsInt()
+  total: number;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => Ingredient)
+  list: Ingredient[];
+
+  constructor(results: IngredientPaginationResponse) {
+    super();
+    if (results) {
+      this.total = results.total;
+      this.list = results.list.map((ingredient) => plainToInstance(Ingredient, ingredient, { groups: ['unit'] }));
+    }
   }
 }
