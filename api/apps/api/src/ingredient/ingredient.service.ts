@@ -33,7 +33,7 @@ export default class IngredientService {
     return this.ingredient.send<ingredient>(deleteIngredientPattern, ingredientId);
   }
 
-  pagination(select: any): Observable<IngredientPaginationResponse> {
+  pagination(select: Record<string, any>): Observable<IngredientPaginationResponse> {
     return this.ingredient.send<IngredientPaginationResponse>(paginationPattern, select);
   }
 }
