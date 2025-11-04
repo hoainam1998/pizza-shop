@@ -1,6 +1,17 @@
-import { Expose, Transform, Exclude } from 'class-transformer';
-import { IsString, IsInt, IsNumberString, IsArray, IsBoolean, IsOptional, IsPositive } from 'class-validator';
+import { Expose, Transform, Exclude, Type } from 'class-transformer';
+import {
+  IsString,
+  IsInt,
+  IsNumberString,
+  IsArray,
+  IsBoolean,
+  IsOptional,
+  IsPositive,
+  IsDefined,
+  ValidateNested,
+} from 'class-validator';
 import { type ProductIngredientType, type IngredientSelectType } from '@share/interfaces';
+import { Pagination } from './common.dto';
 
 export class IngredientCreate {
   @IsString()
@@ -69,7 +80,8 @@ export class IngredientSelect implements IngredientSelectType {
 
   @IsOptional()
   @IsBoolean()
-  expired_time: boolean;
+  @Exclude({ toPlainOnly: true })
+  expiredTime: boolean;
 
   @IsOptional()
   @IsBoolean()
@@ -84,9 +96,30 @@ export class IngredientSelect implements IngredientSelectType {
   @Exclude({ toPlainOnly: true })
   units: boolean;
 
+  @Exclude({ toPlainOnly: true })
+  @IsOptional()
+  @IsBoolean()
+  disabled: boolean;
+
   @Expose()
   get ingredient_id() {
     return true;
+  }
+
+  @Expose()
+  get expired_time() {
+    return this.expiredTime;
+  }
+
+  @Expose()
+  get _count() {
+    if (this.disabled) {
+      return {
+        select: {
+          product_ingredient: true,
+        },
+      };
+    }
   }
 
   static plain(target: IngredientSelect): IngredientSelect {
@@ -104,11 +137,23 @@ export class IngredientSelect implements IngredientSelectType {
       target.unit = true;
       target.units = true;
       target.count = true;
-      target.expired_time = true;
+      target.expiredTime = true;
       target.status = true;
       target.price = true;
       target.units = true;
+      target.disabled = true;
     }
     return target;
   }
+}
+
+export class IngredientPaginationSelect extends Pagination {
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => IngredientSelect)
+  query: IngredientSelect;
+
+  @IsOptional()
+  @IsString()
+  search: string;
 }

@@ -10,6 +10,9 @@ export const ingredient = {
   count: 10,
   status: Status.IN_STOCK,
   expired_time: (Date.now() + 60 * 1000).toString(),
+  _count: {
+    product_ingredient: 0,
+  },
 };
 
 export const product_ingredient = {
