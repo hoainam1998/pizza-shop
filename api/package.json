@@ -44,6 +44,7 @@
     "test:ut:ingredient.get-all": "jest --watch --testPathPatterns=apps/modules/ingredient/src/__test__/get-all-ingredients.spec.ts",
     "test:ut:ingredient.store-cache-ingredients": "jest --watch --testPathPatterns=apps/modules/ingredient/src/__test__/store-cache-ingredients.spec.ts",
     "test:ut:ingredient.pagination": "jest --watch --testPathPatterns=apps/modules/ingredient/src/__test__/pagination.spec.ts",
+    "test:ut:ingredient.update": "jest --watch --testPathPatterns=apps/modules/ingredient/src/__test__/update-ingredient.spec.ts",
     "test:ut:caching.ingredient.delete-all-ingredients": "jest --watch apps/share/libs/caching/ingredient/__test__/delete-all-ingredients.spec.ts",
     "test:ut:caching.ingredient.delete-all-product-ingredients": "jest --watch apps/share/libs/caching/ingredient/__test__/delete-all-product-ingredients.spec.ts",
     "test:ut:caching.ingredient.get-product-ingredients-stored": "jest --watch apps/share/libs/caching/ingredient/__test__/get-product-ingredients-stored.spec.ts",
@@ -70,6 +71,7 @@
     "test:e2e:ingredient.delete": "jest --watch apps/api/src/ingredient/__test__/delete-ingredient.spec.ts",
     "test:e2e:ingredient.get-all": "jest --watch apps/api/src/ingredient/__test__/get-all-ingredients.spec.ts",
     "test:e2e:ingredient.pagination": "jest --watch apps/api/src/ingredient/__test__/pagination.spec.ts",
+    "test:e2e:ingredient.update": "jest --watch apps/api/src/ingredient/__test__/update-ingredient.spec.ts",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/api/apps/users/api/apps/modules/users/api/test/jest-e2e.json"

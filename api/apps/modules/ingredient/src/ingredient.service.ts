@@ -232,4 +232,27 @@ export default class IngredientService {
       }),
     ]);
   }
+
+  @HandlePrismaError(messages.INGREDIENT)
+  updateIngredient(ingredient: prisma.ingredient): Promise<prisma.ingredient> {
+    return this.prismaClient.ingredient
+      .update({
+        where: {
+          ingredient_id: ingredient.ingredient_id,
+        },
+        data: {
+          name: ingredient.name,
+          avatar: ingredient.avatar,
+          unit: ingredient.unit,
+          count: ingredient.count,
+          price: ingredient.price,
+          expired_time: ingredient.expired_time,
+        },
+      })
+      .then(async (ingredient) => {
+        await this.ingredientCachingService.deleteAllIngredients();
+        this.deleteIngredientExpired(ingredient, this.updateIngredient.name);
+        return ingredient;
+      });
+  }
 }
