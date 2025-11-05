@@ -13,7 +13,7 @@ import {
 import { type ProductIngredientType, type IngredientSelectType } from '@share/interfaces';
 import { Pagination } from './common.dto';
 
-export class IngredientCreate {
+export class IngredientBody {
   @IsString()
   name: string;
 
@@ -38,6 +38,19 @@ export class IngredientCreate {
   @Expose({ toPlainOnly: true })
   get expired_time() {
     return this.expiredTime;
+  }
+}
+
+export class IngredientCreate extends IngredientBody {}
+
+export class IngredientUpdate extends IngredientBody {
+  @IsOptional()
+  @IsNumberString()
+  ingredientId: string;
+
+  @Expose({ toPlainOnly: true, groups: ['update'] })
+  get ingredient_id() {
+    return this.ingredientId;
   }
 }
 

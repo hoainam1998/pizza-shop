@@ -9,6 +9,7 @@ import {
   HttpStatus,
   Delete,
   Param,
+  Put,
 } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -22,6 +23,7 @@ import {
   ComputeProductPrice,
   IngredientSelect,
   IngredientPaginationSelect,
+  IngredientUpdate,
 } from '@share/dto/validators/ingredient.dto';
 import { IngredientList, Ingredient, PaginationIngredientSerializer } from '@share/dto/serializer/ingredient';
 import { MessageSerializer } from '@share/dto/serializer/common';
@@ -136,5 +138,20 @@ export default class IngredientController extends BaseController {
         });
       }),
     );
+  }
+
+  @Put('update')
+  @UseInterceptors(FileInterceptor('avatar'))
+  @HttpCode(HttpStatus.CREATED)
+  @HandleHttpError
+  updateIngredient(
+    @Body() ingredient: IngredientUpdate,
+    @UploadImage('avatar', ImageTransformPipe) file: string,
+  ): Observable<MessageSerializer> {
+    ingredient.avatar = file;
+    const ingredientPlain = instanceToPlain(ingredient);
+    return this.ingredientService
+      .updateIngredient(ingredientPlain)
+      .pipe(map(() => MessageSerializer.create(messages.INGREDIENT.UPDATE_INGREDIENT_SUCCESS)));
   }
 }
