@@ -8,6 +8,9 @@ export default Object.freeze({
     PRODUCT: new RouterPath('product', {
       NEW: new RouterPath('new'),
     }),
+    INGREDIENT: new RouterPath('ingredient', {
+      NEW: new RouterPath('new'),
+    }),
     CATEGORY: new RouterPath('category'),
   }),
   ID: new RouterPath(':id'),

@@ -7,6 +7,7 @@ import Signup from '@/views/login-group/signup.vue';
 import Login from '@/views/login-group/login.vue';
 import ProductDetail from '@/views/product-group/detail/detail.vue';
 import ProductList from '@/views/product-group/list/list.vue';
+import IngredientList from '@/views/ingredient-group/list/list.vue';
 
 const adminRoutes: RouterOptions['routes'] = [
   {
@@ -47,7 +48,28 @@ const adminRoutes: RouterOptions['routes'] = [
           {
             path: `${paths.ID}`,
             component: ProductDetail,
-          }
+          },
+        ],
+      },
+      {
+        path: `${paths.HOME.INGREDIENT}`,
+        name: 'ingredients',
+        component: RouterView,
+        children: [
+          {
+            path: '',
+            name: '_',
+            component: IngredientList,
+          },
+          // {
+          //   path: `${paths.HOME.PRODUCT.NEW}`,
+          //   component: ProductDetail,
+          //   name: 'new',
+          // },
+          // {
+          //   path: `${paths.ID}`,
+          //   component: ProductDetail,
+          // },
         ],
       },
     ],

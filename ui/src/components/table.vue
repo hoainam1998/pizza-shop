@@ -86,6 +86,7 @@ const pageNumberChange = (pageNumber: number): void => {
 };
 
 defineExpose({
-  refresh
+  refresh,
+  pageSize,
 });
 </script>

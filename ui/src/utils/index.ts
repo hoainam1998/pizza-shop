@@ -1,4 +1,9 @@
-import { showErrorNotification, showSuccessNotification, showInfoNotification } from './show-notification';
+import {
+  showErrorNotification,
+  showSuccessNotification,
+  showInfoNotification,
+  confirmDeleteMessageBox,
+} from './show-notification';
 
 /**
  * Return promise of file from base64 string.
@@ -68,5 +73,6 @@ export {
   convertBase64ToSingleFile,
   formatDateHyphen,
   formatDateSlash,
-  formatVNDCurrency
+  formatVNDCurrency,
+  confirmDeleteMessageBox,
 };
