@@ -4,20 +4,14 @@
     <SearchBox v-model="keyword" @search="search" />
   </div>
   <Table
-    ref="productTable"
+    ref="ingredientTable"
     :fields="fields"
     :data="data"
     :total="total"
-    emptyText="Products are empty!"
-    @pagination="fetchProducts">
+    emptyText="Ingredients are empty!"
+    @pagination="fetchIngredients">
     <template #avatar="props">
       <img :src="props.row.avatar" height="50" width="50" :alt="props.row.name" />
-    </template>
-    <template #category="props">
-      <div class="ps-display-flex ps-align-items-center ps-flex-gap-7">
-        <img :src="props.row.avatar" height="50" width="50" :alt="props.row.name" />
-        {{ props.row.category.name }}
-      </div>
     </template>
     <template #expiredTime="props">
       {{ $formatDateHyphen(props.row.expiredTime) }}
@@ -27,7 +21,7 @@
     </template>
     <template #operation="props">
       <div class="ps-text-align-center">
-        <el-button size="small" class="ps-fw-bold" type="success" @click="navigateToDetail(props.row.productId)">
+        <el-button size="small" class="ps-fw-bold" type="success" @click="navigateToDetail(props.row.ingredientId)">
           Update
         </el-button>
         <el-button
@@ -35,7 +29,7 @@
           class="ps-fw-bold"
           type="danger"
           :disabled="props.row.disabled"
-          @click="deleteProduct(props.row.productId)">
+          @click="deleteIngredient(props.row.ingredientId)">
             Delete
         </el-button>
       </div>
@@ -51,16 +45,17 @@ import SearchBox from '@/components/search-box.vue';
 import type { TableFieldType } from '@/interfaces';
 import constants from '@/constants';
 import paths from '@/router/paths';
-import { ProductService } from '@/services';
+import { IngredientService } from '@/services';
 import useWrapperRouter from '@/composables/use-router';
 import { confirmDeleteMessageBox } from '@/utils';
 
 const showDeleteDialog = confirmDeleteMessageBox(
-  'Delete product!',
-  'This product and all information about it will be delete! Are you sure to be continue?',
-  'Delete product request was cancel!');
+  'Delete ingredient!',
+  'This ingredient and all information about it will be delete! Are you sure to be continue?',
+  'Delete ingredient request was cancel!');
+
 const { push } = useWrapperRouter();
-const productTableRef = useTemplateRef('productTable');
+const ingredientTableRef = useTemplateRef('ingredientTable');
 const PAGE_SIZE = constants.PAGINATION.PAGE_SIZE;
 const PAGE_NUMBER = constants.PAGINATION.PAGE_NUMBER;
 const keyword: Ref<string> = ref('');
@@ -69,17 +64,12 @@ const fields: TableFieldType[] = [
   {
     label: 'Avatar',
     key: 'avatar',
-    width: 100,
+    width: 150,
   },
   {
     label: 'Name',
     key: 'name',
-    width: 300,
-  },
-  {
-    label: 'Category',
-    key: 'category',
-    width: 250,
+    width: 350,
   },
   {
     label: 'Count',
@@ -99,7 +89,7 @@ const fields: TableFieldType[] = [
   {
     label: 'Status',
     key: 'status',
-    width: 150,
+    width: 200,
   },
   {
     key: 'operation',
@@ -113,26 +103,26 @@ const navigateToDetail = (productId?: string): void => {
   if (productId) {
     push(`${paths.HOME.PRODUCT}/${productId}`);
   } else {
-    push(`${paths.HOME.PRODUCT}/${paths.HOME.PRODUCT.NEW}`);
+    push(`${paths.HOME.INGREDIENT}/${paths.HOME.INGREDIENT.NEW}`);
   }
 };
 
 const search = (): void => {
-  fetchProducts(productTableRef.value?.pageSize || PAGE_SIZE, PAGE_NUMBER);
+  fetchIngredients(ingredientTableRef.value?.pageSize || PAGE_SIZE, PAGE_NUMBER);
 };
 
-const deleteProduct = (productId: string): void => {
-  const deleteProductService = (): Promise<AxiosResponse> => {
-    return ProductService.delete(`delete/${productId}`).then((response) => {
-      productTableRef.value?.refresh();
+const deleteIngredient = (productId: string): void => {
+  const deleteIngredientService = (): Promise<AxiosResponse> => {
+    return IngredientService.delete(`delete/${productId}`).then((response) => {
+      ingredientTableRef.value?.refresh();
       return response;
     });
   };
-  showDeleteDialog(deleteProductService);
+  showDeleteDialog(deleteIngredientService);
 };
 
-const fetchProducts = (pageSize: number, pageNumber: number): void => {
-  ProductService.post('pagination', {
+const fetchIngredients = (pageSize: number, pageNumber: number): void => {
+  IngredientService.post('pagination', {
     pageSize,
     pageNumber,
     search: keyword.value,
@@ -141,11 +131,8 @@ const fetchProducts = (pageSize: number, pageNumber: number): void => {
       avatar: true,
       count: true,
       price: true,
-      originalPrice: true,
       status: true,
       expiredTime: true,
-      category: true,
-      ingredients: true,
       disabled: true,
     }
   }, { allowNotFound: true }).then((response) => {
@@ -157,5 +144,5 @@ const fetchProducts = (pageSize: number, pageNumber: number): void => {
   });
 };
 
-onBeforeMount(() => fetchProducts(PAGE_SIZE, PAGE_NUMBER));
+onBeforeMount(() => fetchIngredients(PAGE_SIZE, PAGE_NUMBER));
 </script>

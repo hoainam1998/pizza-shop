@@ -3,7 +3,7 @@
     <template v-for="(match, index) in matched" :key="index">
       <el-breadcrumb-item
         v-if="shouldShowBreadcrumbItem(match.name)"
-        class="breadcrumb-item"
+        class="breadcrumb-item ps-text-transform-capitalize"
         :to="{ path: match.path }"
         @click="push(match.path)">
           {{ match.name }}
@@ -38,10 +38,12 @@ watch(route, (_, newRoute): void => {
 </script>
 
 <style lang="scss">
-.breadcrumb-item:last-of-type {
-  & > span {
-    color: v-bind(whiteColor) !important;
-    font-weight: bold !important;
+.breadcrumb-item {
+  &:last-of-type {
+    & > span {
+      color: v-bind(whiteColor) !important;
+      font-weight: bold !important;
+    }
   }
 }
 </style>
