@@ -114,7 +114,7 @@ const fetchCategories = (pageSize: number, pageNumber: number): void => {
       data.value = [];
       total.value = 0;
     } else {
-      showErrorNotification('Fetch category!', error.response?.data.message);
+      showErrorNotification('Fetch category!', error.response?.data.messages);
     }
   });
 };
@@ -146,11 +146,11 @@ const submitForm = async (): Promise<void> => {
 
         mutationCategoryPromise
           .then((response) => {
-            showSuccessNotification(title, response.data.message);
+            showSuccessNotification(title, response.data.messages);
             categoryTableRef.value!.refresh();
           })
           .catch((error: AxiosError<MessageResponseType>) => {
-            showErrorNotification(title, error.response!.data.message);
+            showErrorNotification(title, error.response!.data.messages);
           })
           .finally(resetForm);
       }
@@ -175,10 +175,10 @@ const getCategoryDetail = (id: string): void => {
 
 const deleteCategory = (id: string): void => {
   CategoryService.delete(`delete/${id}`).then((response: AxiosResponse) => {
-    showSuccessNotification('Delete category!', response.data.message);
+    showSuccessNotification('Delete category!', response.data.messages);
     categoryTableRef.value!.refresh();
   }).catch((error: AxiosError<MessageResponseType>) => {
-    showErrorNotification('Delete category!', error.response!.data.message);
+    showErrorNotification('Delete category!', error.response!.data.messages);
   });
 };
 

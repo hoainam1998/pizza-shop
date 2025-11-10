@@ -2,7 +2,7 @@
   <el-breadcrumb :separator-icon="separatorIcon" class="breadcrumb ps-py-5 ps-px-5 ps-bg-f39c12">
     <template v-for="(match, index) in matched" :key="index">
       <el-breadcrumb-item
-        v-if="shouldShowBreadcrumbItem(match.name)"
+        v-if="shouldShowBreadcrumbItem(match)"
         class="breadcrumb-item ps-text-transform-capitalize"
         :to="{ path: match.path }"
         @click="push(match.path)">
@@ -26,7 +26,12 @@ const route = useRoute();
 const matched = ref(route.matched);
 
 const shouldShowBreadcrumbItem =
-  (matchName: RouteLocationMatched['name']) => ((matchName || '') as string).trim() && matchName !== '_';
+  (match: RouteLocationMatched) => {
+    if (!(match.props.default as any).notShowBreadcrumb) {
+      return ((match.name || '') as string).trim();
+    }
+    return false;
+  };
 
 const { lastName } = defineProps<{
   lastName: string,

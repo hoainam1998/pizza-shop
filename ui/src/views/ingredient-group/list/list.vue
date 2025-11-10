@@ -28,8 +28,7 @@
           size="small"
           class="ps-fw-bold"
           type="danger"
-          :disabled="props.row.disabled"
-          @click="deleteIngredient(props.row.ingredientId)">
+          @click="deleteIngredient(props.row)">
             Delete
         </el-button>
       </div>
@@ -38,16 +37,16 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount, ref, useTemplateRef, type Ref } from 'vue';
+import { onBeforeMount, ref, useTemplateRef, type Ref, defineOptions } from 'vue';
 import type { AxiosResponse } from 'axios';
 import Table from '@/components/table.vue';
 import SearchBox from '@/components/search-box.vue';
-import type { TableFieldType } from '@/interfaces';
+import type { IngredientType, TableFieldType } from '@/interfaces';
 import constants from '@/constants';
 import paths from '@/router/paths';
 import { IngredientService } from '@/services';
 import useWrapperRouter from '@/composables/use-router';
-import { confirmDeleteMessageBox } from '@/utils';
+import { confirmDeleteMessageBox, showErrorNotification, showSuccessNotification } from '@/utils';
 
 const showDeleteDialog = confirmDeleteMessageBox(
   'Delete ingredient!',
@@ -59,6 +58,10 @@ const ingredientTableRef = useTemplateRef('ingredientTable');
 const PAGE_SIZE = constants.PAGINATION.PAGE_SIZE;
 const PAGE_NUMBER = constants.PAGINATION.PAGE_NUMBER;
 const keyword: Ref<string> = ref('');
+
+defineOptions({
+  inheritAttrs: false
+});
 
 const fields: TableFieldType[] = [
   {
@@ -96,7 +99,7 @@ const fields: TableFieldType[] = [
   }
 ];
 
-const data: Ref<any[]> = ref([]);
+const data: Ref<IngredientType[]> = ref([]);
 const total: Ref<number> = ref(0);
 
 const navigateToDetail = (productId?: string): void => {
@@ -111,14 +114,24 @@ const search = (): void => {
   fetchIngredients(ingredientTableRef.value?.pageSize || PAGE_SIZE, PAGE_NUMBER);
 };
 
-const deleteIngredient = (productId: string): void => {
+const deleteIngredient = (ingredient: IngredientType): void => {
+  const { ingredientId, disabled } = ingredient;
   const deleteIngredientService = (): Promise<AxiosResponse> => {
-    return IngredientService.delete(`delete/${productId}`).then((response) => {
+    return IngredientService.delete(`delete/${ingredientId}`).then((response) => {
       ingredientTableRef.value?.refresh();
+      showSuccessNotification('Delete ingredient!', response.data.messages);
       return response;
+    }).catch((error) => {
+      showErrorNotification('Delete ingredient!', error.response.data.messages);
+      throw error;
     });
   };
-  showDeleteDialog(deleteIngredientService);
+
+  if (disabled) {
+    showDeleteDialog(deleteIngredientService);
+  } else {
+    deleteIngredientService();
+  }
 };
 
 const fetchIngredients = (pageSize: number, pageNumber: number): void => {

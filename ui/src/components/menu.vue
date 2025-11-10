@@ -1,26 +1,34 @@
 <template>
   <div class="menu-wrapper ps-display-flex ps-flex-direction-column ps-justify-content-space-between ps-bg-f39c12">
     <div class="ps-mt-10 ps-text-align-center">
-      <RouterLink :to="paths.BASE">
+      <RouterLink :to="paths.BASE.Path">
         <img src="@/assets/images/logo.png" height="40" width="40" />
       </RouterLink>
-      <el-menu default-active="1" :router="true" :background-color="primaryColor"
-        :active-text-color="menuItemActiveColor" :text-color="whiteColor">
-        <el-menu-item index="1" :route="paths.CATEGORY">
+      <el-menu
+        ref="menuRef"
+        :default-active="`${paths.HOME}/${paths.HOME.CATEGORY}`"
+        :router="true"
+        :background-color="primaryColor"
+        :active-text-color="primaryColor"
+        :active-background-color="whiteColor"
+        :text-color="whiteColor">
+        <el-menu-item
+          @click="menuItemClick"
+          :index="`${paths.HOME}/${paths.HOME.CATEGORY}`" class="ps-h-40px">
           <el-icon><icon-menu /></el-icon>
           <template #title><span style="font-weight: bold">Category</span></template>
         </el-menu-item>
-        <el-menu-item index="2">
-          <el-icon>
-            <document />
-          </el-icon>
-          <template #title>Navigator Three</template>
+        <el-menu-item
+          @click="menuItemClick"
+          :index="`${paths.HOME}/${paths.HOME.INGREDIENT}`" class="ps-h-40px">
+          <el-icon><document /></el-icon>
+          <template #title><span style="font-weight: bold">Ingredient</span></template>
         </el-menu-item>
-        <el-menu-item index="3">
-          <el-icon>
-            <setting />
-          </el-icon>
-          <template #title>Navigator Four</template>
+        <el-menu-item
+          @click="menuItemClick"
+          :index="`${paths.HOME}/${paths.HOME.PRODUCT}`" class="ps-h-40px">
+          <el-icon><setting /></el-icon>
+          <template #title><span style="font-weight: bold">Product</span></template>
         </el-menu-item>
       </el-menu>
     </div>
@@ -40,16 +48,38 @@
 </template>
 
 <script lang="ts" setup>
-import { RouterLink } from 'vue-router';
-import { primaryColor, whiteColor, menuItemActiveColor } from '@/assets/scss/variables.module.scss';
+import { onMounted, useTemplateRef } from 'vue';
+import { RouterLink, onBeforeRouteUpdate, useRoute } from 'vue-router';
+import { primaryColor, whiteColor } from '@/assets/scss/variables.module.scss';
 import { Document, Menu as IconMenu, Setting } from '@element-plus/icons-vue';
 import paths from '@/router/paths';
+import useWrapperRouter from '@/composables/use-router';
+
+const menuRef = useTemplateRef('menuRef');
+const { push } = useWrapperRouter();
 const url = 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg';
+const route = useRoute();
+
+const menuItemClick = (menuItemProps: any): void => {
+  push(menuItemProps.index);
+};
+
+onBeforeRouteUpdate((to) => {
+  menuRef.value.updateActiveIndex(to.path);
+});
+
+onMounted(() => {
+  menuRef.value.updateActiveIndex(route.path);
+});
 </script>
 
 <style lang="scss" scoped>
 .menu-wrapper {
   height: 100vh;
   max-width: 200px;
+
+  .is-active {
+    background-color: v-bind(whiteColor);
+  }
 }
 </style>

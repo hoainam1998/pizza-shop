@@ -9,7 +9,7 @@ import type { MessageResponseType } from '@/interfaces';
 */
 const showNotification = (params: NotificationParams | any): void => {
   if (params.message && params.title) {
-    params.messages = [params.message].flat().reduce((messages, message) => {
+    params.message = [params.message].flat().reduce((messages, message) => {
       messages += `${message}\n`;
       return messages;
     });
@@ -106,9 +106,9 @@ const confirmDeleteMessageBox = (
     )
       .then(() => {
         action()
-          .then((response) => showSuccessNotification(title, response.data.message))
+          .then((response) => showSuccessNotification(title, response.data.messages))
           .catch((error: AxiosError<MessageResponseType>) =>
-            showErrorNotification(title, error.response?.data.message),
+            showErrorNotification(title, error.response?.data.messages),
           );
       })
       .catch(() => showInfoNotification(title, rejectMessage));

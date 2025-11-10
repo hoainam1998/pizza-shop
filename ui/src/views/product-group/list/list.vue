@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount, ref, useTemplateRef, type Ref } from 'vue';
+import { onBeforeMount, ref, useTemplateRef, type Ref, defineOptions } from 'vue';
 import type { AxiosResponse } from 'axios';
 import Table from '@/components/table.vue';
 import SearchBox from '@/components/search-box.vue';
@@ -64,6 +64,10 @@ const productTableRef = useTemplateRef('productTable');
 const PAGE_SIZE = constants.PAGINATION.PAGE_SIZE;
 const PAGE_NUMBER = constants.PAGINATION.PAGE_NUMBER;
 const keyword: Ref<string> = ref('');
+
+defineOptions({
+  inheritAttrs: false
+});
 
 const fields: TableFieldType[] = [
   {
