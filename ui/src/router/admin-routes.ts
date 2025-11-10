@@ -37,7 +37,10 @@ const adminRoutes: RouterOptions['routes'] = [
         children: [
           {
             path: '',
-            name: '_',
+            name: 'product_list',
+            props: {
+              notShowBreadcrumb: true,
+            },
             component: ProductList,
           },
           {
@@ -58,7 +61,10 @@ const adminRoutes: RouterOptions['routes'] = [
         children: [
           {
             path: '',
-            name: '_',
+            name: 'ingredient_list',
+            props: {
+              notShowBreadcrumb: true,
+            },
             component: IngredientList,
           },
           // {

@@ -7,7 +7,7 @@ export type TableFieldType = {
 };
 
 export type MessageResponseType = {
-  message: string;
+  messages: string;
 };
 
 export type IngredientType = {
@@ -17,6 +17,10 @@ export type IngredientType = {
   amount?: number;
   unit?: string;
   units?: string[];
+  price?: number;
+  expiredTime?: string;
+  status: string;
+  disabled?: boolean;
 };
 
 export type OptionType = {

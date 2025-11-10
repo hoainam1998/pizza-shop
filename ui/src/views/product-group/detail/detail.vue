@@ -190,19 +190,19 @@ const onSubmit = async (): Promise<void> => {
         if (id) {
           ProductService.put('update', formData)
             .then((response) => {
-              showSuccessNotification('Update product!', response.data.message);
+              showSuccessNotification('Update product!', response.data.messages);
               resetForm();
               backToProducts();
             })
-            .catch((error) => showErrorNotification('Update product!', error.response.data.message));
+            .catch((error) => showErrorNotification('Update product!', error.response.data.messages));
         } else {
           ProductService.post('create', formData)
             .then((response) => {
-              showSuccessNotification('Create product!', response.data.message);
+              showSuccessNotification('Create product!', response.data.messages);
               resetForm();
               backToProducts();
             })
-            .catch((error) => showErrorNotification(error.response.data.message));
+            .catch((error) => showErrorNotification(error.response.data.messages));
         }
       }
     });

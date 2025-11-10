@@ -140,10 +140,10 @@ const onSubmit = async (): Promise<void> => {
       if (valid) {
         UserService.post('signup', signupFormModel)
           .then((response: AxiosResponse<MessageResponseType>) => {
-            showSuccessNotification('Signup success!', response.data.message);
+            showSuccessNotification('Signup success!', response.data.messages);
             router.push(`${paths.LOGIN}`);
           }).catch((error: AxiosError<MessageResponseType>) => {
-            showErrorNotification('Signup failed!', error.response!.data.message);
+            showErrorNotification('Signup failed!', error.response!.data.messages);
           }).finally(reset);
       }
     });
