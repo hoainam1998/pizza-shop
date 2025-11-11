@@ -7,4 +7,9 @@ export default Object.freeze({
     FEMALE: 1,
     MALE: 0,
   },
+  UNITS: {
+    KG: 'KG',
+    GRAM: 'GRAM',
+    CAN: 'CAN',
+  },
 });
