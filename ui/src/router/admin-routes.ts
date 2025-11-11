@@ -67,15 +67,6 @@ const adminRoutes: RouterOptions['routes'] = [
             },
             component: IngredientList,
           },
-          // {
-          //   path: `${paths.HOME.PRODUCT.NEW}`,
-          //   component: ProductDetail,
-          //   name: 'new',
-          // },
-          // {
-          //   path: `${paths.ID}`,
-          //   component: ProductDetail,
-          // },
         ],
       },
     ],

@@ -25,6 +25,7 @@
 import { ref, defineProps, nextTick, useTemplateRef, defineExpose, watch } from 'vue';
 import type { UploadFile, UploadRawFile, UploadRequestOptions } from 'element-plus';
 import defaultImageUploadPlaceholder from '@/assets/images/picture.png';
+import { dangerColor } from '@/assets/scss/variables.module.scss';
 
 type UploadBoxPropsType = {
   name: string;
@@ -71,16 +72,20 @@ defineExpose({
 </script>
 
 <style lang="scss">
-.upload-box {
-  .el-upload {
-    width: 100%;
-    height: 100%;
+  .upload-box {
+    .el-upload {
+      width: 100%;
+      height: 100%;
 
-    .el-upload-dragger {
-      border: none;
-      background-color: transparent;
-      padding: 7px;
+      .el-upload-dragger {
+        border: none;
+        background-color: transparent;
+        padding: 7px;
+      }
     }
   }
-}
+
+  .upload-box:has(+ .el-form-item__error) {
+    border-color: v-bind(dangerColor) !important;
+  }
 </style>

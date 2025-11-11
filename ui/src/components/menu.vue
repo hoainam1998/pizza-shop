@@ -12,28 +12,18 @@
         :active-text-color="primaryColor"
         :active-background-color="whiteColor"
         :text-color="whiteColor">
-        <el-menu-item
-          @click="menuItemClick"
-          :index="`${paths.HOME}/${paths.HOME.CATEGORY}`" class="ps-h-40px">
-          <el-icon><icon-menu /></el-icon>
-          <template #title><span style="font-weight: bold">Category</span></template>
-        </el-menu-item>
-        <el-menu-item
-          @click="menuItemClick"
-          :index="`${paths.HOME}/${paths.HOME.INGREDIENT}`" class="ps-h-40px">
-          <el-icon><document /></el-icon>
-          <template #title><span style="font-weight: bold">Ingredient</span></template>
-        </el-menu-item>
-        <el-menu-item
-          @click="menuItemClick"
-          :index="`${paths.HOME}/${paths.HOME.PRODUCT}`" class="ps-h-40px">
-          <el-icon><setting /></el-icon>
-          <template #title><span style="font-weight: bold">Product</span></template>
+        <el-menu-item v-for="(item, index) in menuItems"
+          :key="index"
+          :index="item.index"
+          class="ps-h-40px"
+          @click="menuItemClick">
+          <el-icon><component :is="item.icon"></component></el-icon>
+          <template #title><span class="ps-fw-bold ps-text-transform-capitalize">{{ item.title }}</span></template>
         </el-menu-item>
       </el-menu>
     </div>
     <div>
-      <el-image style="width: 70px; height: 70px" :src="url" fit="cover" class="ps-display-block ps-margin-auto" />
+      <el-image :src="url" fit="cover" class="ps-display-block ps-margin-auto ps-w-70px ps-h-70px" />
       <h5 class="ps-mt-5 ps-text-color-white ps-text-align-center ps-text-truncate-1 ps-px-7">
         Lorem ipsum dolor sit amet consectetur adipiscing elit. Dolor sit amet consectetur
         adipiscing elit quisque faucibus.
@@ -48,10 +38,10 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, useTemplateRef } from 'vue';
+import { onMounted, useTemplateRef, type Component } from 'vue';
 import { RouterLink, onBeforeRouteUpdate, useRoute } from 'vue-router';
 import { primaryColor, whiteColor } from '@/assets/scss/variables.module.scss';
-import { Document, Menu as IconMenu, Setting } from '@element-plus/icons-vue';
+import { Document, Menu as IconMenu, Burger } from '@element-plus/icons-vue';
 import paths from '@/router/paths';
 import useWrapperRouter from '@/composables/use-router';
 
@@ -59,6 +49,36 @@ const menuRef = useTemplateRef('menuRef');
 const { push } = useWrapperRouter();
 const url = 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg';
 const route = useRoute();
+
+type MenuItem = {
+  icon: Component,
+  title: string;
+  index: string;
+};
+
+const indexes = [
+  `${paths.HOME}/${paths.HOME.CATEGORY}`,
+  `${paths.HOME}/${paths.HOME.INGREDIENT}`,
+  `${paths.HOME}/${paths.HOME.PRODUCT}`,
+];
+
+const menuItems: MenuItem[] = [
+  {
+    title: 'category',
+    icon: IconMenu,
+    index: `${paths.HOME}/${paths.HOME.CATEGORY}`,
+  },
+  {
+    title: 'ingredient',
+    icon: Document,
+    index: `${paths.HOME}/${paths.HOME.INGREDIENT}`,
+  },
+  {
+    title: 'product',
+    icon: Burger,
+    index: `${paths.HOME}/${paths.HOME.PRODUCT}`,
+  }
+];
 
 const menuItemClick = (menuItemProps: any): void => {
   push(menuItemProps.index);
@@ -69,17 +89,20 @@ onBeforeRouteUpdate((to) => {
 });
 
 onMounted(() => {
-  menuRef.value.updateActiveIndex(route.path);
+  const routeItem = route.matched.find((match) => indexes.includes(match.path));
+  if (routeItem) {
+    menuRef.value.updateActiveIndex(routeItem.path);
+  }
 });
 </script>
 
 <style lang="scss" scoped>
-.menu-wrapper {
-  height: 100vh;
-  max-width: 200px;
+  .menu-wrapper {
+    height: 100vh;
+    max-width: 200px;
 
-  .is-active {
-    background-color: v-bind(whiteColor);
+    .is-active {
+      background-color: v-bind(whiteColor);
+    }
   }
-}
 </style>

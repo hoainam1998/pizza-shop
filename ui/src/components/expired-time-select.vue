@@ -80,7 +80,7 @@ const shortcuts: DatePickerShortcut[] = [
 ];
 </script>
 <style lang="scss">
-.expired-time-select {
-  flex-basis: 100%;
-}
+  .expired-time-select {
+    flex-basis: 100%;
+  }
 </style>

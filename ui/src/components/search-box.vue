@@ -19,7 +19,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { type ModelRef, type Ref, defineModel, defineEmits, ref, reactive, nextTick } from 'vue';
+import { type ModelRef, type Ref, defineModel, defineExpose, defineEmits, ref, reactive, nextTick } from 'vue';
 import { Search, Close } from '@element-plus/icons-vue';
 
 const keyword: ModelRef<string> = defineModel({ required: true });
@@ -56,4 +56,8 @@ const search = (): void => {
   resultObj.result = keyword.value;
   resultObj.showResult = true;
 };
+
+defineExpose({
+  reset,
+});
 </script>

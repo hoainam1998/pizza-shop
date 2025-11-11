@@ -69,7 +69,7 @@ import { useRoute } from 'vue-router';
 import type { AxiosResponse } from 'axios';
 import type { FormInstance, FormRules, UploadRawFile } from 'element-plus';
 import UploadBox from '@/components/upload-box.vue';
-import ExpiredDaySelect from './expired-time-select.vue';
+import ExpiredDaySelect from '@/components/expired-time-select.vue';
 import IngredientSelect from './ingredient-select.vue';
 import { CategoryService, ProductService } from '@/services';
 import { type CategoryType, type IngredientType, } from '@/interfaces';
@@ -247,9 +247,9 @@ onBeforeMount(() => {
 </script>
 
 <style lang="scss">
-.expired-time-select {
-  .el-input {
-    width: 100% !important;
+  .expired-time-select {
+    .el-input {
+      width: 100% !important;
+    }
   }
-}
 </style>

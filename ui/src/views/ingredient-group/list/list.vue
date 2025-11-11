@@ -1,7 +1,7 @@
 <template>
   <div class="ps-display-flex ps-flex-gap-5 ps-mt-5 ps-mb-5">
-    <el-button class="ps-bg-2ecc71 ps-text-color-white" @click="navigateToDetail()">New</el-button>
-    <SearchBox v-model="keyword" @search="search" />
+    <el-button class="ps-bg-2ecc71 ps-text-color-white" @click="showIngredientFormDialog">New</el-button>
+    <SearchBox ref="searchBox" v-model="keyword" @search="search" />
   </div>
   <Table
     ref="ingredientTable"
@@ -34,6 +34,7 @@
       </div>
     </template>
   </Table>
+  <IngredientDetail ref="ingredientDetailRef" @onComplete="onComplete" />
 </template>
 
 <script setup lang="ts">
@@ -41,6 +42,7 @@ import { onBeforeMount, ref, useTemplateRef, type Ref, defineOptions } from 'vue
 import type { AxiosResponse } from 'axios';
 import Table from '@/components/table.vue';
 import SearchBox from '@/components/search-box.vue';
+import IngredientDetail from '@/views/ingredient-group/detail/detail.vue';
 import type { IngredientType, TableFieldType } from '@/interfaces';
 import constants from '@/constants';
 import paths from '@/router/paths';
@@ -54,6 +56,8 @@ const showDeleteDialog = confirmDeleteMessageBox(
   'Delete ingredient request was cancel!');
 
 const { push } = useWrapperRouter();
+const searchBoxRef = useTemplateRef('searchBox');
+const ingredientDetailRef = useTemplateRef('ingredientDetailRef');
 const ingredientTableRef = useTemplateRef('ingredientTable');
 const PAGE_SIZE = constants.PAGINATION.PAGE_SIZE;
 const PAGE_NUMBER = constants.PAGINATION.PAGE_NUMBER;
@@ -85,6 +89,11 @@ const fields: TableFieldType[] = [
     width: 200,
   },
   {
+    label: 'Unit',
+    key: 'unit',
+    width: 150,
+  },
+  {
     label: 'Expired time',
     key: 'expiredTime',
     width: 220,
@@ -114,6 +123,10 @@ const search = (): void => {
   fetchIngredients(ingredientTableRef.value?.pageSize || PAGE_SIZE, PAGE_NUMBER);
 };
 
+const onComplete = (): void => {
+  searchBoxRef.value?.reset();
+};
+
 const deleteIngredient = (ingredient: IngredientType): void => {
   const { ingredientId, disabled } = ingredient;
   const deleteIngredientService = (): Promise<AxiosResponse> => {
@@ -134,6 +147,10 @@ const deleteIngredient = (ingredient: IngredientType): void => {
   }
 };
 
+const showIngredientFormDialog = (): void => {
+  ingredientDetailRef.value!.showDialog();
+};
+
 const fetchIngredients = (pageSize: number, pageNumber: number): void => {
   IngredientService.post('pagination', {
     pageSize,
@@ -146,6 +163,7 @@ const fetchIngredients = (pageSize: number, pageNumber: number): void => {
       price: true,
       status: true,
       expiredTime: true,
+      unit: true,
       disabled: true,
     }
   }, { allowNotFound: true }).then((response) => {
