@@ -20,6 +20,7 @@ export const computeProductPricePattern = createMicroserviceEvent('compute_produ
 export const getAllIngredientsPattern = createMicroserviceEvent('get_all_ingredients');
 export const deleteIngredientPattern = createMicroserviceEvent('delete_ingredient_pattern');
 export const updateIngredientPattern = createMicroserviceEvent('update_ingredient');
+export const getIngredientDetailPattern = createMicroserviceEvent('get_ingredient_detail');
 
 // product
 export const createProductPattern = createMicroserviceEvent('create_product');

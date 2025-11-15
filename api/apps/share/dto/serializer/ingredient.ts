@@ -13,7 +13,7 @@ import { ingredient, Status, Unit } from 'generated/prisma';
 import Validator from './validator';
 import type { IngredientPaginationResponse, IngredientPrismaOmitType } from '@share/interfaces';
 
-export class Ingredient implements ingredient {
+export class Ingredient extends Validator implements ingredient {
   @Exclude({ toPlainOnly: true })
   @IsNumberString()
   ingredient_id: string;
@@ -51,7 +51,9 @@ export class Ingredient implements ingredient {
   @IsOptional()
   @Expose({ toPlainOnly: true, groups: ['units'] })
   get units() {
-    return this.unit === Unit.KG ? [Unit.KG, Unit.GRAM] : [Unit.CAN];
+    if (this.unit !== undefined) {
+      return this.unit === Unit.KG ? [Unit.KG, Unit.GRAM] : [Unit.CAN];
+    }
   }
 
   @Expose()
@@ -76,6 +78,7 @@ export class Ingredient implements ingredient {
   }
 
   constructor(ingredient: IngredientPrismaOmitType) {
+    super();
     Object.assign(this, ingredient);
   }
 }

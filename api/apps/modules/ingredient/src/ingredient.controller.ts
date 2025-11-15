@@ -9,8 +9,9 @@ import {
   deleteIngredientPattern,
   paginationPattern,
   updateIngredientPattern,
+  getIngredientDetailPattern,
 } from '@share/pattern';
-import { ComputeProductPrice, IngredientPaginationSelect } from '@share/dto/validators/ingredient.dto';
+import { ComputeProductPrice, GetIngredient, IngredientPaginationSelect } from '@share/dto/validators/ingredient.dto';
 import { checkArrayHaveValues } from '@share/utils';
 import LoggingService from '@share/libs/logging/logging.service';
 import { HandleServiceError } from '@share/decorators';
@@ -45,6 +46,12 @@ export default class IngredientController {
       }
       return ingredients;
     });
+  }
+
+  @MessagePattern(getIngredientDetailPattern)
+  @HandleServiceError
+  getIngredient(select: GetIngredient): Promise<ingredient> {
+    return this.ingredientService.getIngredient(select);
   }
 
   @MessagePattern(paginationPattern)

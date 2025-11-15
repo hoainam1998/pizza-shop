@@ -9,6 +9,7 @@ import {
   deleteIngredientPattern,
   paginationPattern,
   updateIngredientPattern,
+  getIngredientDetailPattern,
 } from '@share/pattern';
 import { INGREDIENT_SERVICE } from '@share/di-token';
 import { ComputeProductPrice } from '@share/dto/validators/ingredient.dto';
@@ -40,5 +41,9 @@ export default class IngredientService {
 
   updateIngredient(ingredient: Record<string, any>): Observable<ingredient> {
     return this.ingredient.send<ingredient>(updateIngredientPattern, ingredient);
+  }
+
+  getIngredient(select: Record<string, any>): Observable<ingredient> {
+    return this.ingredient.send<ingredient>(getIngredientDetailPattern, select);
   }
 }

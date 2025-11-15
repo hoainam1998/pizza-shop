@@ -170,3 +170,13 @@ export class IngredientPaginationSelect extends Pagination {
   @IsString()
   search: string;
 }
+
+export class GetIngredient {
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => IngredientSelect)
+  query: IngredientSelect;
+
+  @IsNumberString()
+  ingredientId: string;
+}
