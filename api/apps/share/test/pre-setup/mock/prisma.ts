@@ -22,6 +22,7 @@ export default {
     findMany: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),
+    findUniqueOrThrow: jest.fn(),
   },
   product_ingredient: {
     deleteMany: jest.fn(),

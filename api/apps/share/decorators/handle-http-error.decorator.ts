@@ -1,7 +1,8 @@
 import { BadRequestException, HttpStatus, NotFoundException } from '@nestjs/common';
+import { catchError } from 'rxjs';
 import { MicroservicesErrorResponse } from '@share/interfaces';
 import { createMessage } from '@share/utils';
-import { catchError } from 'rxjs';
+import messages from '@share/constants/messages';
 
 export default function (target: any, propertyName: string, descriptor: TypedPropertyDescriptor<any>) {
   const originMethod = descriptor.value!;
@@ -16,6 +17,8 @@ export default function (target: any, propertyName: string, descriptor: TypedPro
           default:
             if (error instanceof BadRequestException) {
               throw error;
+            } else if (error.code === 'ECONNREFUSED') {
+              throw new BadRequestException(createMessage(messages.COMMON.MODULE_DISCONNECT));
             }
             throw new BadRequestException(createMessage(error.message));
         }

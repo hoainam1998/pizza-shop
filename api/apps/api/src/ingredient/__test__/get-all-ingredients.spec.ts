@@ -1,6 +1,8 @@
 import { BadRequestException, HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { of, throwError } from 'rxjs';
 import { expect } from '@jest/globals';
+import { ValidationError } from 'class-validator';
+import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { ClientProxy } from '@nestjs/microservices';
 import TestAgent from 'supertest/lib/agent';
 import startUp from './pre-setup';
@@ -10,14 +12,12 @@ import { getAllIngredientsPattern } from '@share/pattern';
 import { createIngredients } from '@share/test/pre-setup/mock/data/ingredient';
 import { createDescribeTest, createTestName } from '@share/test/helpers';
 import IngredientService from '../ingredient.service';
+import IngredientController from '../ingredient.controller';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { createMessages } from '@share/utils';
-import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { IngredientSelect } from '@share/dto/validators/ingredient.dto';
 import { Ingredient, IngredientList } from '@share/dto/serializer/ingredient';
-import { ValidationError } from 'class-validator';
-import IngredientController from '../ingredient.controller';
 const getAllIngredientsUrl: string = '/ingredient/all';
 
 const getAllIngredientsRequestBody = {
@@ -64,7 +64,34 @@ afterEach(async () => {
 });
 
 describe(createDescribeTest(HTTP_METHOD.POST, getAllIngredientsUrl), () => {
-  it(createTestName('get all ingredients success with attach unit field', HttpStatus.OK), async () => {
+  it(createTestName('get ingredient success without attach unit and units field', HttpStatus.OK), async () => {
+    expect.hasAssertions();
+    const select = {
+      name: true,
+      avatar: true,
+      count: true,
+      expiredTime: true,
+      status: true,
+      price: true,
+      disabled: true,
+    };
+    const ingredientListResponse = getIngredientsResponse([]);
+    const plainSelect = instanceToPlain(plainToInstance(IngredientSelect, select));
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(ingredients));
+    const getAllIngredients = jest.spyOn(ingredientService, 'getAllIngredients');
+    await api
+      .post(getAllIngredientsUrl)
+      .send(select)
+      .expect(HttpStatus.OK)
+      .expect('Content-Type', /application\/json/)
+      .expect(ingredientListResponse);
+    expect(getAllIngredients).toHaveBeenCalledTimes(1);
+    expect(getAllIngredients).toHaveBeenCalledWith(plainSelect);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledWith(getAllIngredientsPattern, plainSelect);
+  });
+
+  it(createTestName('get ingredient success with attach unit field', HttpStatus.OK), async () => {
     expect.hasAssertions();
     const select = {
       unit: true,

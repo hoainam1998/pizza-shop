@@ -9,10 +9,10 @@ import {
   IngredientPaginationPrismaResponseType,
 } from '@share/interfaces';
 import IngredientCachingService from '@share/libs/caching/ingredient/ingredient.service';
+import { GetIngredient, IngredientPaginationSelect } from '@share/dto/validators/ingredient.dto';
 import { HandlePrismaError } from '@share/decorators';
 import { calcSkip, selectFields } from '@share/utils';
 import messages from '@share/constants/messages';
-import { IngredientPaginationSelect } from '@share/dto/validators/ingredient.dto';
 
 @Injectable()
 export default class IngredientService {
@@ -25,41 +25,20 @@ export default class IngredientService {
   ) {}
 
   private delete(ingredientId: string): Promise<prisma.ingredient> {
-    return this.prismaClient.product_ingredient
-      .findMany({
-        where: {
-          ingredient_id: ingredientId,
-        },
-        select: {
-          product_id: true,
-        },
-      })
-      .then((products) => {
-        const productIds = products.map((p) => p.product_id);
-        return this.prismaClient
-          .$transaction([
-            this.prismaClient.product_ingredient.deleteMany({
-              where: {
-                product_id: {
-                  in: productIds,
-                },
-              },
-            }),
-            this.prismaClient.ingredient.delete({
-              where: {
-                ingredient_id: ingredientId,
-              },
-            }),
-            this.prismaClient.product.deleteMany({
-              where: {
-                product_id: {
-                  in: productIds,
-                },
-              },
-            }),
-          ])
-          .then((results) => results[1]);
-      });
+    return this.prismaClient
+      .$transaction([
+        this.prismaClient.product_ingredient.deleteMany({
+          where: {
+            ingredient_id: ingredientId,
+          },
+        }),
+        this.prismaClient.ingredient.delete({
+          where: {
+            ingredient_id: ingredientId,
+          },
+        }),
+      ])
+      .then((results) => results[1]);
   }
 
   private deleteIngredientExpired(ingredient: prisma.ingredient, actionName: string): void {
@@ -205,6 +184,16 @@ export default class IngredientService {
       ingredients = await this.storeCacheIngredients();
     }
     return selectFields<IngredientSelectType, prisma.ingredient>(select, ingredients);
+  }
+
+  @HandlePrismaError(messages.INGREDIENT)
+  getIngredient(select: GetIngredient): Promise<prisma.ingredient> {
+    return this.prismaClient.ingredient.findUniqueOrThrow({
+      where: {
+        ingredient_id: select.ingredientId,
+      },
+      select: select.query,
+    });
   }
 
   @HandlePrismaError(messages.INGREDIENT)

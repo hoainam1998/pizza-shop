@@ -24,6 +24,7 @@ import {
   IngredientSelect,
   IngredientPaginationSelect,
   IngredientUpdate,
+  GetIngredient,
 } from '@share/dto/validators/ingredient.dto';
 import { IngredientList, Ingredient, PaginationIngredientSerializer } from '@share/dto/serializer/ingredient';
 import { MessageSerializer } from '@share/dto/serializer/common';
@@ -92,18 +93,42 @@ export default class IngredientController extends BaseController {
         const ingredientList = new IngredientList(ingredients);
         return ingredientList.validate().then((errors) => {
           if (!errors.length) {
-            let groups = ['units', 'unit'].reduce<string[]>((groups, key: keyof typeof select) => {
+            const groups = ['units', 'unit'].reduce<string[]>((groups, key: keyof typeof select) => {
               if (select[key]) {
                 groups.push(key);
               }
               return groups;
             }, []);
-            groups = groups.length ? groups : ['units', 'unit'];
             return instanceToPlain(plainToInstance(Ingredient, ingredientList.List, { groups: ['unit'] }), { groups });
           } else {
             this.logError(errors, this.getAllIngredients.name);
             throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
           }
+        });
+      }),
+    );
+  }
+
+  @Post('detail')
+  @HttpCode(HttpStatus.OK)
+  @HandleHttpError
+  getIngredient(@Body() select: GetIngredient): any {
+    const query = instanceToPlain(plainToInstance(IngredientSelect, IngredientSelect.plain(select.query)));
+    return this.ingredientService.getIngredient({ ...select, query }).pipe(
+      map(async (ingredient) => {
+        const ingredientInstance = new Ingredient(ingredient);
+        return ingredientInstance.validate().then((errors) => {
+          if (errors.length) {
+            this.logError(errors, this.getIngredient.name);
+            throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
+          }
+          const groups = ['units', 'unit'].reduce<string[]>((groups, key: keyof typeof select.query) => {
+            if (select.query[key]) {
+              groups.push(key);
+            }
+            return groups;
+          }, []);
+          return instanceToPlain(plainToInstance(Ingredient, ingredient, { groups: ['unit'] }), { groups });
         });
       }),
     );
@@ -122,13 +147,12 @@ export default class IngredientController extends BaseController {
             this.logError(errors, this.pagination.name);
             throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
           }
-          let groups = ['units', 'unit'].reduce<string[]>((groups, key: keyof typeof select.query) => {
+          const groups = ['units', 'unit'].reduce<string[]>((groups, key: keyof typeof select.query) => {
             if (select.query[key]) {
               groups.push(key);
             }
             return groups;
           }, []);
-          groups = groups.length ? groups : ['units', 'unit'];
           return {
             total: response.total,
             list: instanceToPlain(response.list, {

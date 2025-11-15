@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { BadRequestException, HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { of, throwError } from 'rxjs';
 import { expect } from '@jest/globals';
+import { ValidationError } from 'class-validator';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { ClientProxy } from '@nestjs/microservices';
 import TestAgent from 'supertest/lib/agent';
@@ -14,7 +16,6 @@ import IngredientController from '../ingredient.controller';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { createMessages } from '@share/utils';
-import { ValidationError } from 'class-validator';
 import { createIngredients, ingredient } from '@share/test/pre-setup/mock/data/ingredient';
 import { IngredientSelect } from '@share/dto/validators/ingredient.dto';
 import { PaginationIngredientSerializer } from '@share/dto/serializer/ingredient';
@@ -71,6 +72,112 @@ afterEach(async () => {
 });
 
 describe(createDescribeTest(HTTP_METHOD.POST, paginationIngredientUrl), () => {
+  it(createTestName('pagination ingredient success without attach unit and units fields', HttpStatus.OK), async () => {
+    expect.hasAssertions();
+    const query: any = {
+      name: true,
+      avatar: true,
+      count: true,
+      expiredTime: true,
+      status: true,
+      price: true,
+      disabled: true,
+    };
+
+    const queries = instanceToPlain(plainToInstance(IngredientSelect, IngredientSelect.plain(query)));
+    const selects = { ...paginationBody, query: queries };
+    const logError = jest.spyOn(ingredientController as any, 'logError');
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(responseData));
+    const paginationService = jest.spyOn(ingredientService, 'pagination');
+    await api
+      .post(paginationIngredientUrl)
+      .send({
+        ...paginationBody,
+        query,
+      })
+      .expect(HttpStatus.OK)
+      .expect('Content-Type', /application\/json/)
+      .expect({
+        total: response.total,
+        list: getResponseList([]),
+      });
+    expect(paginationService).toHaveBeenCalledTimes(1);
+    expect(paginationService).toHaveBeenCalledWith(selects);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledWith(paginationPattern, selects);
+    expect(logError).not.toHaveBeenCalled();
+  });
+
+  it(createTestName('pagination ingredient success with attach unit field', HttpStatus.OK), async () => {
+    expect.hasAssertions();
+    const queries = instanceToPlain(
+      plainToInstance(
+        IngredientSelect,
+        IngredientSelect.plain({
+          unit: true,
+        } as any),
+      ),
+    );
+    const selects = { ...paginationBody, query: queries };
+    const logError = jest.spyOn(ingredientController as any, 'logError');
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(responseData));
+    const paginationService = jest.spyOn(ingredientService, 'pagination');
+    await api
+      .post(paginationIngredientUrl)
+      .send({
+        ...paginationBody,
+        query: {
+          unit: true,
+        },
+      })
+      .expect(HttpStatus.OK)
+      .expect('Content-Type', /application\/json/)
+      .expect({
+        total: response.total,
+        list: getResponseList(['unit']),
+      });
+    expect(paginationService).toHaveBeenCalledTimes(1);
+    expect(paginationService).toHaveBeenCalledWith(selects);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledWith(paginationPattern, selects);
+    expect(logError).not.toHaveBeenCalled();
+  });
+
+  it(createTestName('pagination ingredient success with attach units field', HttpStatus.OK), async () => {
+    expect.hasAssertions();
+    const queries = instanceToPlain(
+      plainToInstance(
+        IngredientSelect,
+        IngredientSelect.plain({
+          units: true,
+        } as any),
+      ),
+    );
+    const selects = { ...paginationBody, query: queries };
+    const logError = jest.spyOn(ingredientController as any, 'logError');
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(responseData));
+    const paginationService = jest.spyOn(ingredientService, 'pagination');
+    await api
+      .post(paginationIngredientUrl)
+      .send({
+        ...paginationBody,
+        query: {
+          units: true,
+        },
+      })
+      .expect(HttpStatus.OK)
+      .expect('Content-Type', /application\/json/)
+      .expect({
+        total: response.total,
+        list: getResponseList(['units']),
+      });
+    expect(paginationService).toHaveBeenCalledTimes(1);
+    expect(paginationService).toHaveBeenCalledWith(selects);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledWith(paginationPattern, selects);
+    expect(logError).not.toHaveBeenCalled();
+  });
+
   it(createTestName('pagination ingredient success', HttpStatus.OK), async () => {
     expect.hasAssertions();
     const logError = jest.spyOn(ingredientController as any, 'logError');

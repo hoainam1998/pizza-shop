@@ -33,6 +33,7 @@ export type MicroservicesErrorResponse = {
   status: HttpStatus;
   response?: any;
   message?: string;
+  code: string;
 } & Error;
 
 export type MessageResponseType = {
