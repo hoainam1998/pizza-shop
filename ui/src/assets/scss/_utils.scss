@@ -125,3 +125,7 @@ $size-name: (
     opacity: #{'0.'+#{$i}} !important;
   }
 }
+
+.ps-margin-auto {
+  margin: auto;
+}
