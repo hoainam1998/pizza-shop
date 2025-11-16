@@ -203,6 +203,5 @@ const assignForm = async (ingredient: IngredientType): Promise<void> => {
 
 defineExpose({
   assignForm,
-  resetForm,
 });
 </script>
