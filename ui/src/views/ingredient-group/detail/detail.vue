@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="dialogVisible" width="35%" align-center @close="resetForm">
+  <el-dialog v-model="dialogVisible" ref="dialogRef" width="35%" align-center @close="resetForm">
     <section class="ingredient-detail">
       <el-form :id="FORM_ID" ref="ingredientFormRef" :model="form" :rules="rules" label-position="top">
         <el-row :gutter="15" justify="space-between">
@@ -54,7 +54,7 @@
           <el-button class="ps-fw-bold ps-w-100px" type="primary" @click="onSubmit">
             Save
           </el-button>
-          <el-button class="ps-fw-bold ps-w-100px" type="warning" @click="showDialog(false)">
+          <el-button class="ps-fw-bold ps-w-100px" type="warning" @click="closeDialog">
             Close
           </el-button>
         </div>
@@ -64,7 +64,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, defineExpose, defineEmits, useTemplateRef } from 'vue';
+import { reactive, ref, defineExpose, defineModel, defineEmits, useTemplateRef, nextTick } from 'vue';
 import type { FormInstance, FormRules, UploadRawFile } from 'element-plus';
 import ExpiredDaySelect from '@/components/expired-time-select.vue';
 import UploadBox from '@/components/upload-box.vue';
@@ -93,9 +93,10 @@ const form = reactive<IngredientFormRule>({
   unit: '',
 });
 
+const dialogVisible = defineModel<boolean>('dialogVisible');
 const uploadImageRef = useTemplateRef('uploadImage');
+const dialogRef = useTemplateRef('dialogRef');
 const ingredientFormRef = ref<FormInstance>();
-const dialogVisible = ref(true);
 const units: OptionType[] = Object.values(constants.UNITS).map((unit) => ({ label: unit, value: unit }));
 
 const emit = defineEmits<{
@@ -141,6 +142,15 @@ const rules = reactive<FormRules<IngredientFormRule>>({
   ],
 });
 
+const closeDialog = (): void => {
+  dialogRef.value.handleClose();
+};
+
+const handleAfterSaved = (): void => {
+  emit('onComplete');
+  closeDialog();
+};
+
 const onSubmit = async (): Promise<void> => {
   if (ingredientFormRef.value) {
     await ingredientFormRef.value.validate((valid) => {
@@ -155,13 +165,21 @@ const onSubmit = async (): Promise<void> => {
           }
         }
 
-        IngredientService.post('create', formData).then((response) => {
-          emit('onComplete');
-          showDialog(false);
-          showSuccessNotification('Create ingredient!', response.data.messages);
-        }).catch((error) => {
-          showErrorNotification('Create ingredient!', error.response.data.messages);
-        });
+        if (form.ingredientId) {
+          IngredientService.put('update', formData).then((response) => {
+            showSuccessNotification('Update ingredient!', response.data.messages);
+            handleAfterSaved();
+          }).catch((error) => {
+            showErrorNotification('Update ingredient!', error.response.data.messages);
+          });
+        } else {
+          IngredientService.post('create', formData).then((response) => {
+            showSuccessNotification('Create ingredient!', response.data.messages);
+            handleAfterSaved();
+          }).catch((error) => {
+            showErrorNotification('Create ingredient!', error.response.data.messages);
+          });
+        }
       }
     });
   }
@@ -172,24 +190,19 @@ const resetForm = (): void => {
   uploadImageRef.value?.reset();
 };
 
-const assignForm = (ingredient: IngredientType): void => {
+const assignForm = async (ingredient: IngredientType): Promise<void> => {
   form.ingredientId = ingredient.ingredientId;
   form.name = ingredient.name!;
   form.price = ingredient.price!;
-  form.count = ingredient.amount!;
+  form.count = +ingredient.count!;
   form.unit = ingredient.unit!;
   form.expiredTime = +ingredient.expiredTime!;
-  convertBase64ToSingleFile(ingredient.avatar!, ingredient.name!).then((file) => {
-    form.avatar = [file];
-  });
-};
-
-const showDialog = (visible = true): void => {
-  dialogVisible.value = visible;
+  convertBase64ToSingleFile(ingredient.avatar!, ingredient.name!)
+    .then((file) => nextTick(() => form.avatar = [file]));
 };
 
 defineExpose({
-  showDialog,
   assignForm,
+  resetForm,
 });
 </script>

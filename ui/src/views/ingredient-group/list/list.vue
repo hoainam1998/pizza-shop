@@ -1,14 +1,9 @@
 <template>
   <div class="ps-display-flex ps-flex-gap-5 ps-mt-5 ps-mb-5">
-    <el-button class="ps-bg-2ecc71 ps-text-color-white" @click="showIngredientFormDialog">New</el-button>
+    <el-button class="ps-bg-2ecc71 ps-text-color-white" @click="showDialog">New</el-button>
     <SearchBox ref="searchBox" v-model="keyword" @search="search" />
   </div>
-  <Table
-    ref="ingredientTable"
-    :fields="fields"
-    :data="data"
-    :total="total"
-    emptyText="Ingredients are empty!"
+  <Table ref="ingredientTable" :fields="fields" :data="data" :total="total" emptyText="Ingredients are empty!"
     @pagination="fetchIngredients">
     <template #avatar="props">
       <img :src="props.row.avatar" height="50" width="50" :alt="props.row.name" />
@@ -21,33 +16,30 @@
     </template>
     <template #operation="props">
       <div class="ps-text-align-center">
-        <el-button size="small" class="ps-fw-bold" type="success" @click="navigateToDetail(props.row.ingredientId)">
+        <el-button size="small" class="ps-fw-bold" type="success" @click="getIngredient(props.row.ingredientId)">
           Update
         </el-button>
-        <el-button
-          size="small"
-          class="ps-fw-bold"
-          type="danger"
-          @click="deleteIngredient(props.row)">
-            Delete
+        <el-button size="small" class="ps-fw-bold" type="danger" @click="deleteIngredient(props.row)">
+          Delete
         </el-button>
       </div>
     </template>
   </Table>
-  <IngredientDetail ref="ingredientDetailRef" @onComplete="onComplete" />
+  <IngredientDetail
+    v-model="dialogVisible"
+    ref="ingredientDetailRef"
+    @onComplete="onComplete"/>
 </template>
 
 <script setup lang="ts">
 import { onBeforeMount, ref, useTemplateRef, type Ref, defineOptions } from 'vue';
-import type { AxiosResponse } from 'axios';
+import type { AxiosError, AxiosResponse } from 'axios';
 import Table from '@/components/table.vue';
 import SearchBox from '@/components/search-box.vue';
 import IngredientDetail from '@/views/ingredient-group/detail/detail.vue';
 import type { IngredientType, TableFieldType } from '@/interfaces';
 import constants from '@/constants';
-import paths from '@/router/paths';
 import { IngredientService } from '@/services';
-import useWrapperRouter from '@/composables/use-router';
 import { confirmDeleteMessageBox, showErrorNotification, showSuccessNotification } from '@/utils';
 
 const showDeleteDialog = confirmDeleteMessageBox(
@@ -55,7 +47,6 @@ const showDeleteDialog = confirmDeleteMessageBox(
   'This ingredient and all information about it will be delete! Are you sure to be continue?',
   'Delete ingredient request was cancel!');
 
-const { push } = useWrapperRouter();
 const searchBoxRef = useTemplateRef('searchBox');
 const ingredientDetailRef = useTemplateRef('ingredientDetailRef');
 const ingredientTableRef = useTemplateRef('ingredientTable');
@@ -108,16 +99,9 @@ const fields: TableFieldType[] = [
   }
 ];
 
+const dialogVisible = ref(false);
 const data: Ref<IngredientType[]> = ref([]);
 const total: Ref<number> = ref(0);
-
-const navigateToDetail = (productId?: string): void => {
-  if (productId) {
-    push(`${paths.HOME.PRODUCT}/${productId}`);
-  } else {
-    push(`${paths.HOME.INGREDIENT}/${paths.HOME.INGREDIENT.NEW}`);
-  }
-};
 
 const search = (): void => {
   fetchIngredients(ingredientTableRef.value?.pageSize || PAGE_SIZE, PAGE_NUMBER);
@@ -125,6 +109,24 @@ const search = (): void => {
 
 const onComplete = (): void => {
   searchBoxRef.value?.reset();
+};
+
+const getIngredient = (ingredientId: string): void => {
+  IngredientService.post('detail', {
+    ingredientId,
+    query: {
+      name: true,
+      avatar: true,
+      price: true,
+      count: true,
+      unit: true,
+      expiredTime: true,
+    },
+  }).then((response: AxiosResponse) => {
+    ingredientDetailRef.value!.assignForm(response.data).then(() => showDialog());
+  }).catch((error: AxiosError<any>) => {
+    showErrorNotification('Get ingredient!', error.response!.data.messages);
+  });
 };
 
 const deleteIngredient = (ingredient: IngredientType): void => {
@@ -147,8 +149,8 @@ const deleteIngredient = (ingredient: IngredientType): void => {
   }
 };
 
-const showIngredientFormDialog = (): void => {
-  ingredientDetailRef.value!.showDialog();
+const showDialog = (visible = true): void => {
+  dialogVisible.value = visible;
 };
 
 const fetchIngredients = (pageSize: number, pageNumber: number): void => {

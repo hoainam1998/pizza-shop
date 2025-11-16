@@ -18,6 +18,7 @@ export type IngredientType = {
   unit?: string;
   units?: string[];
   price?: number;
+  count?: number;
   expiredTime?: string;
   status: string;
   disabled?: boolean;
