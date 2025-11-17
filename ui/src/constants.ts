@@ -12,4 +12,5 @@ export default Object.freeze({
     GRAM: 'GRAM',
     CAN: 'CAN',
   },
+  PASSWORD_PATTERN: /[A-Za-z0-9@$#%!^&*()]{8}/,
 });

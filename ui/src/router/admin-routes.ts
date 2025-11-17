@@ -4,6 +4,7 @@ import paths from './paths';
 import Category from '@/views/category.vue';
 import Home from '@/views/home.vue';
 import Signup from '@/views/login-group/signup.vue';
+import ResetPassword from '@/views/login-group/reset-password.vue';
 import Login from '@/views/login-group/login.vue';
 import ProductDetail from '@/views/product-group/detail/detail.vue';
 import ProductList from '@/views/product-group/list/list.vue';
@@ -75,6 +76,11 @@ const adminRoutes: RouterOptions['routes'] = [
     path: `${paths.SIGNUP}`,
     name: 'signup',
     component: Signup,
+  },
+  {
+    path: `${paths.RESET_PASSWORD}`,
+    name: 'reset_password',
+    component: ResetPassword,
   },
 ];
 
