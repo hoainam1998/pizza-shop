@@ -32,9 +32,10 @@ import { createMessage } from '@share/utils';
 import { category } from 'generated/prisma';
 import BaseController from '../controller';
 import LoggingService from '@share/libs/logging/logging.service';
+import { CategoryRouter } from '@share/router';
 
 @UseInterceptors(ClassSerializerInterceptor)
-@Controller('category')
+@Controller(CategoryRouter.BaseUrl)
 export default class CategoryController extends BaseController {
   constructor(
     private readonly categoryService: CategoryService,
@@ -43,7 +44,7 @@ export default class CategoryController extends BaseController {
     super(loggingService, 'category');
   }
 
-  @Post('create')
+  @Post(CategoryRouter.relative.create)
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('avatar'))
   @HandleHttpError
@@ -58,7 +59,7 @@ export default class CategoryController extends BaseController {
       .pipe(map(() => MessageSerializer.create(messages.CATEGORY.ADD_CATEGORY_SUCCESS)));
   }
 
-  @Post('all')
+  @Post(CategoryRouter.relative.all)
   @HttpCode(HttpStatus.OK)
   @SerializeOptions({ type: CategoryDetailSerializer })
   @HandleHttpError
@@ -78,7 +79,7 @@ export default class CategoryController extends BaseController {
     );
   }
 
-  @Post('pagination')
+  @Post(CategoryRouter.relative.pagination)
   @HttpCode(HttpStatus.OK)
   @SerializeOptions({ type: CategoryPaginationFormatter })
   @HandleHttpError
@@ -98,7 +99,7 @@ export default class CategoryController extends BaseController {
     );
   }
 
-  @Post('detail')
+  @Post(CategoryRouter.relative.detail)
   @HttpCode(HttpStatus.OK)
   @SerializeOptions({ type: CategoryDetailSerializer })
   @HandleHttpError
@@ -116,7 +117,7 @@ export default class CategoryController extends BaseController {
     );
   }
 
-  @Put('update')
+  @Put(CategoryRouter.relative.update)
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('avatar'))
   @HandleHttpError
@@ -131,7 +132,7 @@ export default class CategoryController extends BaseController {
       .pipe(map(() => MessageSerializer.create(messages.CATEGORY.UPDATE_CATEGORY_SUCCESS)));
   }
 
-  @Delete('delete/:id')
+  @Delete(CategoryRouter.relative.delete)
   @HttpCode(HttpStatus.OK)
   @HandleHttpError
   delete(@Param('id', new IdValidationPipe()) id: string): Observable<MessageSerializer> {

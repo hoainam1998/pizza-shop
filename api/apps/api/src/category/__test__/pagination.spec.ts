@@ -2,6 +2,7 @@ import { BadRequestException, HttpStatus, InternalServerErrorException, NotFound
 import { of, throwError } from 'rxjs';
 import { expect } from '@jest/globals';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
+import { ValidationError } from 'class-validator';
 import { ClientProxy } from '@nestjs/microservices';
 import TestAgent from 'supertest/lib/agent';
 import startUp from './pre-setup';
@@ -11,13 +12,13 @@ import { paginationPattern } from '@share/pattern';
 import { createCategoryList } from '@share/test/pre-setup/mock/data/category';
 import { createDescribeTest, createTestName } from '@share/test/helpers';
 import CategoryService from '../category.service';
+import CategoryController from '../category.controller';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { CategoryPaginationFormatter } from '@share/dto/serializer/category';
 import { createMessages } from '@share/utils';
-import { ValidationError } from 'class-validator';
-import CategoryController from '../category.controller';
-const paginationCategoryUrl: string = '/category/pagination';
+import { CategoryRouter } from '@share/router';
+const paginationCategoryUrl: string = CategoryRouter.absolute.pagination;
 
 const paginationBody = {
   pageSize: 10,

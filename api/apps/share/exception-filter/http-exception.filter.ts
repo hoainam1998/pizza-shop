@@ -2,7 +2,9 @@ import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from
 import { Response } from 'express';
 import messages from '@share/constants/messages';
 
-const createMessages = (messages: string | string[]): { messages: string[] } => {
+type MessagesResponse = { messages: string[] };
+
+const createMessages = (messages: string | string[]): MessagesResponse => {
   return { messages: Array.isArray(messages) ? messages : [messages] };
 };
 
@@ -16,9 +18,19 @@ export default class HttpExceptionFilter implements ExceptionFilter {
     const exceptionResponse = exception.getResponse() as any;
 
     if (status === HttpStatus.NOT_FOUND) {
-      const responseData = Object.hasOwn(exceptionResponse.response, 'message')
-        ? exceptionResponse.response.message
-        : exceptionResponse.response;
+      let responseData;
+      if (Object.hasOwn(exceptionResponse, 'response')) {
+        if (Object.hasOwn(exceptionResponse.response, 'message')) {
+          responseData = exceptionResponse.response.message;
+        } else {
+          responseData = exceptionResponse.response;
+        }
+      } else if (Object.hasOwn(exceptionResponse || {}, 'message')) {
+        responseData = exceptionResponse.message;
+      } else {
+        responseData = 'Unknown error!';
+      }
+
       if (typeof responseData === 'string') {
         return response.status(status).json(createMessages(responseData));
       }

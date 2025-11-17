@@ -7,12 +7,10 @@ import {
   HttpStatus,
   Post,
   Req,
-  UsePipes,
-  ValidationPipe,
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import { catchError, map, Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { validate } from 'class-validator';
 import UserService from './user.service';
 import { CanSignupSerializer } from '@share/dto/serializer/user';
@@ -22,11 +20,13 @@ import messages from '@share/constants/messages';
 import { instanceToPlain } from 'class-transformer';
 import { user } from 'generated/prisma';
 import SendEmailService from '@share/libs/mailer/mailer.service';
-import { MicroservicesErrorResponse, type UserCreatedType } from '@share/interfaces';
+import { type UserCreatedType } from '@share/interfaces';
 import { MessageSerializer } from '@share/dto/serializer/common';
 import ErrorCode from '@share/error-code';
+import { UserRouter } from '@share/router';
+import { HandleHttpError } from '@share/decorators';
 
-@Controller('user')
+@Controller(UserRouter.BaseUrl)
 export default class UserController {
   constructor(
     private readonly userService: UserService,
@@ -34,7 +34,8 @@ export default class UserController {
   ) {}
 
   @HttpCode(HttpStatus.OK)
-  @Get('can-signup')
+  @Get(UserRouter.relative.canSignup)
+  @HandleHttpError
   canSignup(@Req() req: Express.Request): Observable<Promise<CanSignupSerializer>> {
     return this.userService.canSignup().pipe(
       map((response) => {
@@ -47,15 +48,12 @@ export default class UserController {
           throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
         });
       }),
-      catchError((error: MicroservicesErrorResponse) => {
-        throw new BadRequestException(createMessage(error.message!));
-      }),
     );
   }
 
   @HttpCode(HttpStatus.CREATED)
-  @Post('signup')
-  @UsePipes(new ValidationPipe({ transform: true }))
+  @Post(UserRouter.relative.signup)
+  @HandleHttpError
   signup(@Req() req: Express.Request, @Body() user: SignupDTO) {
     if (!req.session.user?.canSignup) {
       throw new UnauthorizedException(createMessage(messages.USER.CAN_NOT_SIGNUP, ErrorCode.CAN_NOT_SIGNUP));
@@ -70,12 +68,6 @@ export default class UserController {
             Logger.error('Signup', error);
             MessageSerializer.create(messages.USER.SIGNUP_FAILED);
           });
-      }),
-      catchError((error: MicroservicesErrorResponse) => {
-        if (error.status === HttpStatus.UNAUTHORIZED) {
-          throw new UnauthorizedException(createMessage(error.message!, ErrorCode.EMAIL_REGIS_ALREADY_EXIST));
-        }
-        throw new BadRequestException(createMessage(error.message!));
       }),
     );
   }

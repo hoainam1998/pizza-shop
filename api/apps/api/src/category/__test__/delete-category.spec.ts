@@ -12,7 +12,8 @@ import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { createMessages } from '@share/utils';
-const deleteCategoryBaseUrl = '/category/delete';
+import { CategoryRouter } from '@share/router';
+const deleteCategoryBaseUrl = CategoryRouter.absolute.delete;
 const categoryId: string = Date.now().toString();
 const deleteCategoryUrl: string = `${deleteCategoryBaseUrl}/${categoryId}`;
 

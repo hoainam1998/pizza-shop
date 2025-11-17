@@ -31,7 +31,9 @@ const ingredientRequestBody = {
   expiredTime: ingredient.expired_time,
 };
 
-const ingredientBody = instanceToPlain(plainToInstance(IngredientUpdate, ingredientRequestBody));
+const ingredientBody = instanceToPlain(plainToInstance(IngredientUpdate, ingredientRequestBody), {
+  groups: ['update'],
+});
 
 beforeEach(async () => {
   const requestTest = await startUp();

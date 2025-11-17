@@ -16,8 +16,9 @@ import { HTTP_METHOD } from '@share/enums';
 import { createMessage, createMessages } from '@share/utils';
 import { ProductSerializer } from '@share/dto/serializer/product';
 import { GetProduct, ProductQuery } from '@share/dto/validators/product.dto';
+import { ProductRouter } from '@share/router';
 delete product.ingredients;
-const getProductUrl: string = '/product/detail';
+const getProductUrl: string = ProductRouter.absolute.detail;
 
 const getProductRequestBody = {
   productId: Date.now().toString(),

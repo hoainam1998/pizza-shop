@@ -32,9 +32,10 @@ import messages from '@share/constants/messages';
 import { createMessage } from '@share/utils';
 import LoggingService from '@share/libs/logging/logging.service';
 import BaseController from '../controller';
+import { IngredientRouter } from '@share/router';
 
 @UseInterceptors(ClassSerializerInterceptor)
-@Controller('ingredient')
+@Controller(IngredientRouter.BaseUrl)
 export default class IngredientController extends BaseController {
   constructor(
     private readonly ingredientService: IngredientService,
@@ -43,7 +44,7 @@ export default class IngredientController extends BaseController {
     super(loggingService, 'ingredient');
   }
 
-  @Post('create')
+  @Post(IngredientRouter.relative.create)
   @UseInterceptors(FileInterceptor('avatar'))
   @HttpCode(HttpStatus.CREATED)
   @HandleHttpError
@@ -58,7 +59,7 @@ export default class IngredientController extends BaseController {
       .pipe(map(() => MessageSerializer.create(messages.INGREDIENT.CREATE_INGREDIENT_SUCCESS)));
   }
 
-  @Post('compute-product-price')
+  @Post(IngredientRouter.relative.computedProductPrice)
   @HttpCode(HttpStatus.OK)
   @HandleHttpError
   computeProductPrice(@Body() productIngredient: ComputeProductPrice): Observable<number> {
@@ -74,7 +75,7 @@ export default class IngredientController extends BaseController {
     );
   }
 
-  @Delete('delete/:id')
+  @Delete(IngredientRouter.relative.delete)
   @HttpCode(HttpStatus.OK)
   @HandleHttpError
   deleteIngredient(@Param('id', new IdValidationPipe()) id: string): Observable<MessageSerializer> {
@@ -83,7 +84,7 @@ export default class IngredientController extends BaseController {
       .pipe(map(() => MessageSerializer.create(messages.INGREDIENT.DELETE_INGREDIENT_SUCCESS)));
   }
 
-  @Post('all')
+  @Post(IngredientRouter.relative.all)
   @HttpCode(HttpStatus.OK)
   @HandleHttpError
   getAllIngredients(@Body() select: IngredientSelect): Observable<Promise<Record<keyof typeof Ingredient, any>>> {
@@ -109,7 +110,7 @@ export default class IngredientController extends BaseController {
     );
   }
 
-  @Post('detail')
+  @Post(IngredientRouter.relative.detail)
   @HttpCode(HttpStatus.OK)
   @HandleHttpError
   getIngredient(@Body() select: GetIngredient): any {
@@ -134,7 +135,7 @@ export default class IngredientController extends BaseController {
     );
   }
 
-  @Post('pagination')
+  @Post(IngredientRouter.relative.pagination)
   @HttpCode(HttpStatus.OK)
   @HandleHttpError
   pagination(@Body() select: IngredientPaginationSelect): Observable<any> {
@@ -173,7 +174,7 @@ export default class IngredientController extends BaseController {
     @UploadImage('avatar', ImageTransformPipe) file: string,
   ): Observable<MessageSerializer> {
     ingredient.avatar = file;
-    const ingredientPlain = instanceToPlain(ingredient);
+    const ingredientPlain = instanceToPlain(ingredient, { groups: ['update'] });
     return this.ingredientService
       .updateIngredient(ingredientPlain)
       .pipe(map(() => MessageSerializer.create(messages.INGREDIENT.UPDATE_INGREDIENT_SUCCESS)));

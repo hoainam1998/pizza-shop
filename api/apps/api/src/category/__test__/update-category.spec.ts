@@ -13,7 +13,8 @@ import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { createMessages } from '@share/utils';
-const updateCategoryUrl = '/category/update';
+import { CategoryRouter } from '@share/router';
+const updateCategoryUrl = CategoryRouter.absolute.update;
 
 const categoryResponse = {
   category_id: Date.now().toString(),

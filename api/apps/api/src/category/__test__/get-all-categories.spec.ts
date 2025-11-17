@@ -1,5 +1,7 @@
 import { BadRequestException, HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { of, throwError } from 'rxjs';
+import { instanceToPlain, plainToInstance } from 'class-transformer';
+import { ValidationError } from 'class-validator';
 import { expect } from '@jest/globals';
 import { ClientProxy } from '@nestjs/microservices';
 import TestAgent from 'supertest/lib/agent';
@@ -15,9 +17,8 @@ import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { Categories, CategoryDetailSerializer } from '@share/dto/serializer/category';
 import { createMessages } from '@share/utils';
-import { instanceToPlain, plainToInstance } from 'class-transformer';
-import { ValidationError } from 'class-validator';
-const getAllCategoriesUrl: string = '/category/all';
+import { CategoryRouter } from '@share/router';
+const getAllCategoriesUrl: string = CategoryRouter.absolute.all;
 
 const getAllCategoriesRequestBody = {
   name: true,

@@ -12,8 +12,9 @@ import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import messages from '@share/constants/messages';
 import { createMessages } from '@share/utils';
+import { IngredientRouter } from '@share/router';
 
-const computeProductPriceUrl = '/ingredient/compute-product-price';
+const computeProductPriceUrl = IngredientRouter.absolute.computedProductPrice;
 const price = 20000;
 const requestBody = {
   temporaryProductId: '1234567890',

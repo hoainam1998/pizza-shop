@@ -18,7 +18,8 @@ import { HTTP_METHOD } from '@share/enums';
 import { createMessages } from '@share/utils';
 import { IngredientSelect } from '@share/dto/validators/ingredient.dto';
 import { Ingredient, IngredientList } from '@share/dto/serializer/ingredient';
-const getAllIngredientsUrl: string = '/ingredient/all';
+import { IngredientRouter } from '@share/router';
+const getAllIngredientsUrl: string = IngredientRouter.absolute.all;
 
 const getAllIngredientsRequestBody = {
   name: true,
