@@ -13,7 +13,8 @@ import { BadRequestException, HttpStatus, InternalServerErrorException } from '@
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
-const createCategoryUrl = '/category/create';
+import { CategoryRouter } from '@share/router';
+const createCategoryUrl = CategoryRouter.absolute.create;
 
 const categoryBody = {
   name: category.name,

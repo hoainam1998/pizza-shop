@@ -29,8 +29,9 @@ import messages from '@share/constants/messages';
 import { PaginationProductSerializer, ProductSerializer } from '@share/dto/serializer/product';
 import LoggingService from '@share/libs/logging/logging.service';
 import BaseController from '../controller';
+import { ProductRouter } from '@share/router';
 
-@Controller('product')
+@Controller(ProductRouter.BaseUrl)
 export default class ProductController extends BaseController {
   constructor(
     private readonly productService: ProductService,
@@ -39,7 +40,7 @@ export default class ProductController extends BaseController {
     super(loggingService, 'product');
   }
 
-  @Post('create')
+  @Post(ProductRouter.relative.create)
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('avatar'))
   @HandleHttpError
@@ -54,7 +55,7 @@ export default class ProductController extends BaseController {
       .pipe(map(() => MessageSerializer.create(messages.PRODUCT.CREATE_PRODUCT_SUCCESS)));
   }
 
-  @Post('pagination')
+  @Post(ProductRouter.relative.pagination)
   @HttpCode(HttpStatus.OK)
   @HandleHttpError
   pagination(@Body() select: ProductSelect): Observable<Promise<Record<string, any>>> {
@@ -73,7 +74,7 @@ export default class ProductController extends BaseController {
     );
   }
 
-  @Post('detail')
+  @Post(ProductRouter.relative.detail)
   @HttpCode(HttpStatus.OK)
   @HandleHttpError
   getProduct(@Body() select: GetProduct): Observable<Promise<Record<string, any>>> {
@@ -90,7 +91,7 @@ export default class ProductController extends BaseController {
     );
   }
 
-  @Put('update')
+  @Put(ProductRouter.relative.update)
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('avatar'))
   @HandleHttpError
@@ -105,7 +106,7 @@ export default class ProductController extends BaseController {
       .pipe(map(() => MessageSerializer.create(messages.PRODUCT.UPDATE_PRODUCT_SUCCESS)));
   }
 
-  @Delete('delete/:id')
+  @Delete(ProductRouter.relative.delete)
   @HttpCode(HttpStatus.OK)
   @HandleHttpError
   deleteProduct(@Param('id', new IdValidationPipe()) productId: string): Observable<MessageSerializer> {

@@ -15,8 +15,9 @@ import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { CategoryDetailSerializer } from '@share/dto/serializer/category';
 import { createMessage, createMessages } from '@share/utils';
+import { CategoryRouter } from '@share/router';
 delete category._count;
-const getCategoryDetailUrl: string = '/category/detail';
+const getCategoryDetailUrl: string = CategoryRouter.absolute.detail;
 
 const getCategoryRequestBody = {
   categoryId: Date.now().toString(),

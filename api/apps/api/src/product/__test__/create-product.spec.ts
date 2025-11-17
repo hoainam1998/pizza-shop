@@ -15,7 +15,8 @@ import { HTTP_METHOD } from '@share/enums';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { ProductCreate, ProductCreateTransform } from '@share/dto/validators/product.dto';
 import { createMessages } from '@share/utils';
-const createProductUrl = '/product/create';
+import { ProductRouter } from '@share/router';
+const createProductUrl = ProductRouter.absolute.create;
 
 const productRequestBody = {
   productId: product.product_id,

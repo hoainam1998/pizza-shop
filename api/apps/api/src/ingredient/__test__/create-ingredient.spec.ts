@@ -15,8 +15,9 @@ import messages from '@share/constants/messages';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { IngredientCreate } from '@share/dto/validators/ingredient.dto';
 import { createMessage, createMessages } from '@share/utils';
+import { IngredientRouter } from '@share/router';
 
-const createIngredientUrl = '/ingredient/create';
+const createIngredientUrl = IngredientRouter.absolute.create;
 let api: TestAgent;
 let clientProxy: ClientProxy;
 let close: () => Promise<void>;

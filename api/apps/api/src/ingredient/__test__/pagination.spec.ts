@@ -19,7 +19,8 @@ import { createMessages } from '@share/utils';
 import { createIngredients, ingredient } from '@share/test/pre-setup/mock/data/ingredient';
 import { IngredientSelect } from '@share/dto/validators/ingredient.dto';
 import { PaginationIngredientSerializer } from '@share/dto/serializer/ingredient';
-const paginationIngredientUrl: string = '/ingredient/pagination';
+import { IngredientRouter } from '@share/router';
+const paginationIngredientUrl: string = IngredientRouter.absolute.pagination;
 
 const paginationBody: any = {
   pageSize: 10,

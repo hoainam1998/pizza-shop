@@ -13,8 +13,9 @@ import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import messages from '@share/constants/messages';
 import { createMessage, createMessages } from '@share/utils';
+import { IngredientRouter } from '@share/router';
 const ingredientId = ingredient.ingredient_id;
-const baseUrl = '/ingredient/delete';
+const baseUrl = IngredientRouter.absolute.delete;
 const deleteIngredientUrl = `${baseUrl}/${ingredientId}`;
 
 let api: TestAgent;

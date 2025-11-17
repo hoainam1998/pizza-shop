@@ -12,7 +12,8 @@ import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { createMessages } from '@share/utils';
-const deleteProductBaseUrl = '/product/delete';
+import { ProductRouter } from '@share/router';
+const deleteProductBaseUrl = ProductRouter.absolute.delete;
 const productId: string = Date.now().toString();
 const deleteProductUrl: string = `${deleteProductBaseUrl}/${productId}`;
 

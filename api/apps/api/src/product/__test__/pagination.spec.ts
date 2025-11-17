@@ -18,7 +18,8 @@ import { ProductQueryTransform, ProductSelect } from '@share/dto/validators/prod
 import { createMessages } from '@share/utils';
 import { ValidationError } from 'class-validator';
 import ProductController from '../product.controller';
-const productPaginationUrl = '/product/pagination';
+import { ProductRouter } from '@share/router';
+const productPaginationUrl = ProductRouter.absolute.pagination;
 
 const paginationBody = {
   pageSize: 10,
