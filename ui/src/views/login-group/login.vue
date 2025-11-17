@@ -24,7 +24,7 @@
 import { reactive, ref } from 'vue';
 import { onBeforeRouteLeave } from 'vue-router';
 import type { FormInstance, FormRules } from 'element-plus';
-import LoginFrame from './login-frame.vue';
+import LoginFrame from './common/login-frame.vue';
 import constants from '@/constants';
 
 type LoginFormType = {

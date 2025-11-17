@@ -21,8 +21,9 @@
 </template>
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
+import { onBeforeRouteLeave } from 'vue-router';
 import type { FormInstance, FormRules } from 'element-plus';
-import LoginFrame from './login-frame.vue';
+import LoginFrame from './common/login-frame.vue';
 import constants from '@/constants';
 
 type ResetPasswordType = {
@@ -108,6 +109,10 @@ const rules = reactive<FormRules<ResetPasswordType>>({
   ]
 });
 
+const resetForm = (): void => {
+  resetPasswordFormRef.value?.resetFields();
+};
+
 const onSubmit = async (): Promise<void> => {
   if (resetPasswordFormRef.value) {
     await resetPasswordFormRef.value.validate((valid) => {
@@ -117,4 +122,6 @@ const onSubmit = async (): Promise<void> => {
     });
   }
 };
+
+onBeforeRouteLeave(resetForm);
 </script>
