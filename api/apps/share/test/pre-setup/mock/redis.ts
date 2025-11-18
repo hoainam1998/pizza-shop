@@ -10,6 +10,7 @@ jest.mock('redis', () => {
       hmGet: jest.fn(),
       exists: jest.fn(),
       del: jest.fn(),
+      set: jest.fn(),
     })),
   };
 });

@@ -2,9 +2,10 @@ import { Module } from '@nestjs/common';
 import { ClientProvider, ClientsModule, Transport } from '@nestjs/microservices';
 import UserController from './user.controller';
 import UserService from './user.service';
-import { USER_SERVICE } from 'apps/share/di-token';
+import { USER_SERVICE } from '@share/di-token';
 import ShareModule from '@share/module';
 import { ConfigService } from '@nestjs/config';
+import LoggingModule from '@share/libs/logging/logging.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ConfigService } from '@nestjs/config';
       },
     ]),
     ShareModule,
+    LoggingModule,
   ],
   controllers: [UserController],
   providers: [UserService],

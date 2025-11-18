@@ -7,13 +7,13 @@ import { canSignupPattern, signupPattern } from '@share/pattern';
 
 @Injectable()
 export default class UserService {
-  constructor(@Inject(USER_SERVICE) private user: ClientProxy) {}
+  constructor(@Inject(USER_SERVICE) private readonly user: ClientProxy) {}
 
   canSignup(): Observable<number> {
     return this.user.send<number>(canSignupPattern, {});
   }
 
-  signup(user: user, canSignup: boolean): Observable<user> {
-    return this.user.send<user>(signupPattern, Object.assign({ user }, { canSignup }));
+  signup(user: user): Observable<user> {
+    return this.user.send<user>(signupPattern, user);
   }
 }

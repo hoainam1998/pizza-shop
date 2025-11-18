@@ -1,5 +1,6 @@
 import { Exclude, Expose } from 'class-transformer';
 import { IsEmail, IsInt, IsPhoneNumber, IsString } from 'class-validator';
+import constants from '@share/constants';
 
 export class SignupDTO {
   @Exclude({ toPlainOnly: true })
@@ -18,6 +19,9 @@ export class SignupDTO {
 
   @IsInt()
   sex: number;
+
+  @Expose({ toPlainOnly: true })
+  power = constants.POWER_NUMERIC.SUPER_ADMIN;
 
   @Expose()
   get first_name() {

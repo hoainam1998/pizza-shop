@@ -2,6 +2,7 @@ import { BadRequestException, HttpStatus, InternalServerErrorException, NotFound
 import { of, throwError } from 'rxjs';
 import { expect } from '@jest/globals';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
+import { ValidationError } from 'class-validator';
 import { ClientProxy } from '@nestjs/microservices';
 import TestAgent from 'supertest/lib/agent';
 import startUp from './pre-setup';
@@ -11,6 +12,7 @@ import { getProductPattern } from '@share/pattern';
 import { product } from '@share/test/pre-setup/mock/data/product';
 import { createDescribeTest, createTestName } from '@share/test/helpers';
 import ProductService from '../product.service';
+import ProductController from '../product.controller';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { createMessage, createMessages } from '@share/utils';
@@ -41,26 +43,28 @@ const select = {
   query: query,
 };
 
+let api: TestAgent;
+let clientProxy: ClientProxy;
+let close: () => Promise<void>;
+let productService: ProductService;
+let productController: ProductController;
+
+beforeEach(async () => {
+  const requestTest = await startUp();
+  api = requestTest.api;
+  clientProxy = requestTest.clientProxy;
+  close = () => requestTest.app.close();
+  productService = requestTest.app.get(ProductService);
+  productController = requestTest.app.get(ProductController);
+});
+
+afterEach(async () => {
+  if (close) {
+    await close();
+  }
+});
+
 describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
-  let api: TestAgent;
-  let clientProxy: ClientProxy;
-  let close: () => Promise<void>;
-  let productService: ProductService;
-
-  beforeEach(async () => {
-    const requestTest = await startUp();
-    api = requestTest.api;
-    clientProxy = requestTest.clientProxy;
-    close = () => requestTest.app.close();
-    productService = requestTest.app.get(ProductService);
-  });
-
-  afterEach(async () => {
-    if (close) {
-      await close();
-    }
-  });
-
   it(createTestName('get product detail success', HttpStatus.OK), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
@@ -79,9 +83,10 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
 
   it(createTestName('get product detail failed with output validate', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
-    const send = jest
-      .spyOn(clientProxy, 'send')
-      .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE))));
+    const validatorErrors = [new ValidationError()];
+    const logError = jest.spyOn(productController as any, 'logError').mockImplementation(() => jest.fn());
+    jest.spyOn(ProductSerializer.prototype, 'validate').mockResolvedValue(validatorErrors);
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
     const getProductService = jest.spyOn(productService, 'getProduct');
     await api
       .post(getProductUrl)
@@ -93,6 +98,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
     expect(getProductService).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(getProductPattern, select);
+    expect(logError).toHaveBeenCalledTimes(1);
+    expect(logError).toHaveBeenCalledWith(validatorErrors, expect.any(String));
   });
 
   it(createTestName('get category detail failed with not found error', HttpStatus.NOT_FOUND), async () => {

@@ -61,7 +61,7 @@ describe('delete product', () => {
     );
     expect(deleteProductControllerMethod).toHaveBeenCalledTimes(1);
     expect(deleteProductControllerMethod).toHaveBeenCalledWith(product.product_id);
-    expect(logMethod).toHaveBeenCalled();
+    expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(messages.PRODUCT.NOT_FOUND, expect.any(String));
     expect(deleteMethodService).toHaveBeenCalledTimes(1);
     expect(deleteMethodService).toHaveBeenCalledWith(product.product_id);
@@ -82,7 +82,7 @@ describe('delete product', () => {
     );
     expect(deleteProductControllerMethod).toHaveBeenCalledTimes(1);
     expect(deleteProductControllerMethod).toHaveBeenCalledWith(product.product_id);
-    expect(logMethod).toHaveBeenCalled();
+    expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
     expect(deleteMethodService).toHaveBeenCalledTimes(1);
     expect(deleteMethodService).toHaveBeenCalledWith(product.product_id);
@@ -103,7 +103,7 @@ describe('delete product', () => {
     );
     expect(deleteProductControllerMethod).toHaveBeenCalledTimes(1);
     expect(deleteProductControllerMethod).toHaveBeenCalledWith(product.product_id);
-    expect(logMethod).toHaveBeenCalled();
+    expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(PrismaDisconnectError.message, expect.any(String));
     expect(deleteMethodService).toHaveBeenCalledTimes(1);
     expect(deleteMethodService).toHaveBeenCalledWith(product.product_id);
