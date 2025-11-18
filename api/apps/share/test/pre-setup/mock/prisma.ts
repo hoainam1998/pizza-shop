@@ -28,5 +28,8 @@ export default {
     deleteMany: jest.fn(),
     findMany: jest.fn(),
   },
+  user: {
+    count: jest.fn(),
+  },
   $transaction: jest.fn().mockResolvedValue({}),
 };

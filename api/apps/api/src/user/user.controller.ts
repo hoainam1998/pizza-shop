@@ -11,27 +11,31 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
-import { validate } from 'class-validator';
+import { instanceToPlain } from 'class-transformer';
 import UserService from './user.service';
 import { CanSignupSerializer } from '@share/dto/serializer/user';
 import { SignupDTO } from '@share/dto/validators/user.dto';
 import { createMessage, getAdminResetPasswordLink } from '@share/utils';
 import messages from '@share/constants/messages';
-import { instanceToPlain } from 'class-transformer';
 import { user } from 'generated/prisma';
 import SendEmailService from '@share/libs/mailer/mailer.service';
 import { type UserCreatedType } from '@share/interfaces';
 import { MessageSerializer } from '@share/dto/serializer/common';
+import LoggingService from '@share/libs/logging/logging.service';
 import ErrorCode from '@share/error-code';
 import { UserRouter } from '@share/router';
 import { HandleHttpError } from '@share/decorators';
+import BaseController from '../controller';
 
 @Controller(UserRouter.BaseUrl)
-export default class UserController {
+export default class UserController extends BaseController {
   constructor(
     private readonly userService: UserService,
     private readonly sendEmailService: SendEmailService,
-  ) {}
+    private readonly loggingService: LoggingService,
+  ) {
+    super(loggingService, 'user');
+  }
 
   @HttpCode(HttpStatus.OK)
   @Get(UserRouter.relative.canSignup)
@@ -40,11 +44,12 @@ export default class UserController {
     return this.userService.canSignup().pipe(
       map((response) => {
         const canSignupSerializer = new CanSignupSerializer(response);
-        return validate(canSignupSerializer).then((result) => {
-          if (result) {
+        return canSignupSerializer.validate().then((errors) => {
+          if (errors.length === 0) {
             req.session.user = canSignupSerializer;
             return canSignupSerializer;
           }
+          this.logError(errors, this.canSignup.name);
           throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
         });
       }),
@@ -58,14 +63,14 @@ export default class UserController {
     if (!req.session.user?.canSignup) {
       throw new UnauthorizedException(createMessage(messages.USER.CAN_NOT_SIGNUP, ErrorCode.CAN_NOT_SIGNUP));
     }
-    return this.userService.signup(instanceToPlain(user) as user, true).pipe(
+    return this.userService.signup(instanceToPlain(user) as user).pipe(
       map((user: UserCreatedType) => {
         const link = getAdminResetPasswordLink(user.reset_password_token!);
         return this.sendEmailService
           .sendPassword(user.email, link, user.plain_password)
           .then(() => MessageSerializer.create(messages.USER.SIGNUP_SUCCESS))
           .catch((error) => {
-            Logger.error('Signup', error);
+            Logger.error(this.signup.name, error);
             MessageSerializer.create(messages.USER.SIGNUP_FAILED);
           });
       }),

@@ -83,6 +83,7 @@ export default class ProductController extends BaseController {
       map((product) => {
         return new ProductSerializer(product).validate().then((errors) => {
           if (errors.length) {
+            this.logError(errors, this.getProduct.name);
             throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
           }
           return instanceToPlain(plainToInstance(ProductSerializer, product));

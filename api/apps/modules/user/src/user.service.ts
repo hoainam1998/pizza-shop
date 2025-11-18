@@ -1,18 +1,20 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { PrismaClient, user } from 'generated/prisma';
+import { PrismaClient, type user } from 'generated/prisma';
 import { PRISMA_CLIENT } from '@share/di-token';
-import constants from '@share/constants';
+import messages from '@share/constants/messages';
+import { HandlePrismaError } from '@share/decorators';
 
 @Injectable()
-export default class UsersService {
+export default class UserService {
   constructor(@Inject(PRISMA_CLIENT) private readonly prismaClient: PrismaClient) {}
 
+  @HandlePrismaError(messages.USER)
   canSignup(): Promise<number> {
     return this.prismaClient.user.count();
   }
 
-  signup(user: user, canSignup: boolean): Promise<user> {
-    user = canSignup ? { ...user, power: constants.POWER_NUMERIC.SUPER_ADMIN } : user;
+  @HandlePrismaError(messages.USER)
+  signup(user: user): Promise<user> {
     return this.prismaClient.user.create({
       data: user,
     });

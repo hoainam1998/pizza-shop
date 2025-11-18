@@ -1,32 +1,28 @@
-import { BadRequestException, Controller, Logger } from '@nestjs/common';
-import { Prisma, type user } from 'generated/prisma';
-import { MessagePattern, RpcException } from '@nestjs/microservices';
+import { Controller } from '@nestjs/common';
+import { type user } from 'generated/prisma';
+import { MessagePattern } from '@nestjs/microservices';
 import UsersService from './user.service';
+import LoggingService from '@share/libs/logging/logging.service';
+import { HandleServiceError } from '@share/decorators';
 import { canSignupPattern, signupPattern } from '@share/pattern';
 import { type SignupUserPayloadType } from '@share/interfaces';
-import { createMessage } from '@share/utils';
-import messages from '@share/constants/messages';
 
 @Controller('user')
-export default class UsersController {
+export default class UserController {
   constructor(
     private readonly userService: UsersService,
-    private readonly logger: Logger,
+    private readonly logger: LoggingService,
   ) {}
 
   @MessagePattern(canSignupPattern)
+  @HandleServiceError
   canSignup(): Promise<number> {
     return this.userService.canSignup();
   }
 
   @MessagePattern(signupPattern)
+  @HandleServiceError
   signup(signupUser: SignupUserPayloadType): Promise<user> {
-    return this.userService.signup(signupUser.user, signupUser.canSignup).catch((error: Error) => {
-      this.logger.error('Signup', error.message);
-      if (error instanceof Prisma.PrismaClientValidationError) {
-        throw new RpcException(new BadRequestException(createMessage(messages.COMMON.MUTATING_DATABASE_ERROR)));
-      }
-      throw new RpcException(new BadRequestException(error));
-    });
+    return this.userService.signup(signupUser.user);
   }
 }

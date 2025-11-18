@@ -7,7 +7,7 @@ import RouterBase from '../base';
  * @class
  */
 export default class UserRouter extends RouterBase {
-  protected static readonly baseUrl = 'product';
+  protected static readonly baseUrl = 'user';
   static relative: Record<string, string> = {};
   static absolute: Record<string, string> = {};
 
