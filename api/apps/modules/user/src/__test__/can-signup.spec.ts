@@ -1,12 +1,12 @@
+import { RpcException } from '@nestjs/microservices';
+import { BadRequestException } from '@nestjs/common';
+import { PrismaClient } from 'generated/prisma';
 import LoggingService from '@share/libs/logging/logging.service';
 import startUp from './pre-setup';
 import { PRISMA_CLIENT } from '@share/di-token';
-import { PrismaClient } from 'generated/prisma';
 import UserController from '../user.controller';
 import UserService from '../user.service';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
-import { RpcException } from '@nestjs/microservices';
-import { BadRequestException } from '@nestjs/common';
 import { createMessage } from '@share/utils';
 import messages from '@share/constants/messages';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
