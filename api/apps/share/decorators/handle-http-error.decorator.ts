@@ -12,6 +12,7 @@ export default function (target: any, propertyName: string, descriptor: TypedPro
         switch (error.status) {
           case HttpStatus.NOT_FOUND:
             throw new NotFoundException(error);
+          case HttpStatus.UNAUTHORIZED:
           case HttpStatus.INTERNAL_SERVER_ERROR:
             throw error;
           default:

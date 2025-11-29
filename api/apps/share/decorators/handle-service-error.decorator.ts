@@ -1,4 +1,4 @@
-import { BadRequestException, HttpStatus } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import messages from '@share/constants/messages';
 import { createMessage } from '@share/utils';
@@ -14,6 +14,8 @@ export default function (target: any, propertyName: string, descriptor: TypedPro
       this.logger.error(error.message, propertyName);
       if (error instanceof RpcException) {
         throw error;
+      } else if (error instanceof HttpException) {
+        throw new RpcException(error);
       }
       throw new RpcException(new BadRequestException(createMessage(messages.COMMON.COMMON_ERROR)));
     });
