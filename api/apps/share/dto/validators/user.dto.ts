@@ -1,6 +1,7 @@
 import { Exclude, Expose } from 'class-transformer';
 import { IsEmail, IsInt, IsPhoneNumber, IsString } from 'class-validator';
 import constants from '@share/constants';
+import { UserRequestType } from '@share/interfaces';
 
 export class SignupDTO {
   @Exclude({ toPlainOnly: true })
@@ -21,15 +22,21 @@ export class SignupDTO {
   sex: number;
 
   @Expose({ toPlainOnly: true })
-  power = constants.POWER_NUMERIC.SUPER_ADMIN;
+  get power() {
+    return constants.POWER_NUMERIC.SUPER_ADMIN;
+  }
 
-  @Expose()
+  @Expose({ toPlainOnly: true })
   get first_name() {
     return this.firstName;
   }
 
-  @Expose()
+  @Expose({ toPlainOnly: true })
   get last_name() {
     return this.lastName;
+  }
+
+  constructor(target: UserRequestType) {
+    Object.assign(this, target);
   }
 }

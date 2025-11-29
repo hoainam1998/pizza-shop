@@ -59,7 +59,7 @@ export default class UserController extends BaseController {
   @HttpCode(HttpStatus.CREATED)
   @Post(UserRouter.relative.signup)
   @HandleHttpError
-  signup(@Req() req: Express.Request, @Body() user: SignupDTO) {
+  signup(@Req() req: Express.Request, @Body() user: SignupDTO): Observable<Promise<MessageSerializer>> {
     if (!req.session.user?.canSignup) {
       throw new UnauthorizedException(createMessage(messages.USER.CAN_NOT_SIGNUP, ErrorCode.CAN_NOT_SIGNUP));
     }
@@ -71,7 +71,7 @@ export default class UserController extends BaseController {
           .then(() => MessageSerializer.create(messages.USER.SIGNUP_SUCCESS))
           .catch((error) => {
             Logger.error(this.signup.name, error);
-            MessageSerializer.create(messages.USER.SIGNUP_FAILED);
+            throw new BadRequestException(MessageSerializer.create(messages.USER.SIGNUP_FAILED));
           });
       }),
     );

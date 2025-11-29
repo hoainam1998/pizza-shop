@@ -5,7 +5,7 @@ import UsersService from './user.service';
 import LoggingService from '@share/libs/logging/logging.service';
 import { HandleServiceError } from '@share/decorators';
 import { canSignupPattern, signupPattern } from '@share/pattern';
-import { type SignupUserPayloadType } from '@share/interfaces';
+import type { UserCreateType } from '@share/interfaces';
 
 @Controller('user')
 export default class UserController {
@@ -22,7 +22,7 @@ export default class UserController {
 
   @MessagePattern(signupPattern)
   @HandleServiceError
-  signup(signupUser: SignupUserPayloadType): Promise<user> {
-    return this.userService.signup(signupUser.user);
+  signup(user: UserCreateType): Promise<user> {
+    return this.userService.signup(user);
   }
 }

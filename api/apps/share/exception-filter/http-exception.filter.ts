@@ -1,12 +1,7 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import messages from '@share/constants/messages';
-
-type MessagesResponse = { messages: string[] };
-
-const createMessages = (messages: string | string[]): MessagesResponse => {
-  return { messages: Array.isArray(messages) ? messages : [messages] };
-};
+import { createMessages } from '@share/utils';
 
 @Catch(HttpException)
 export default class HttpExceptionFilter implements ExceptionFilter {
@@ -38,13 +33,20 @@ export default class HttpExceptionFilter implements ExceptionFilter {
     }
 
     if (Object.hasOwn(exceptionResponse, 'messages')) {
+      if (Object.keys(exceptionResponse).length > 1) {
+        return response.status(status).json(exceptionResponse);
+      }
       return response.status(status).json(createMessages(exceptionResponse.messages));
     } else {
       if (exceptionResponse.message.includes("Can't reach database server")) {
         return response.status(HttpStatus.BAD_REQUEST).json(createMessages(messages.COMMON.DATABASE_DISCONNECT));
-      }
-
-      if ([exceptionResponse.message].flat().length) {
+      } else if (Object.keys(exceptionResponse).length > 1) {
+        const messages = [exceptionResponse.message];
+        delete exceptionResponse.message;
+        delete exceptionResponse.statusCode;
+        delete exceptionResponse.error;
+        return response.status(status).json({ messages, ...exceptionResponse });
+      } else if ([exceptionResponse.message].flat().length) {
         return response.status(status).json(createMessages([exceptionResponse.message].flat()));
       } else {
         return next();

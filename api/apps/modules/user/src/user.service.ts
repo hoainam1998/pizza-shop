@@ -3,6 +3,7 @@ import { PrismaClient, type user } from 'generated/prisma';
 import { PRISMA_CLIENT } from '@share/di-token';
 import messages from '@share/constants/messages';
 import { HandlePrismaError } from '@share/decorators';
+import type { UserCreateType } from '@share/interfaces';
 
 @Injectable()
 export default class UserService {
@@ -14,9 +15,9 @@ export default class UserService {
   }
 
   @HandlePrismaError(messages.USER)
-  signup(user: user): Promise<user> {
+  signup(user: UserCreateType): Promise<user> {
     return this.prismaClient.user.create({
-      data: user,
+      data: user as any,
     });
   }
 }

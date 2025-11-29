@@ -74,3 +74,14 @@ export type ValidationCustomErrorType = {
 export type MessagesType = {
   messages: string[];
 };
+
+export type UserRequestType = user & {
+  plain_password: string;
+};
+
+export type UserCreateType = Pick<user, 'first_name' | 'last_name' | 'email' | 'phone' | 'sex'>;
+
+export type MessageResponseTestingType = {
+  messages: string[];
+  errorCode?: string;
+};

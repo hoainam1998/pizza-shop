@@ -1,5 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 import path from 'path';
+import { MessageResponseTestingType } from '@share/interfaces';
 
 /**
  * Get test static file.
@@ -28,3 +29,16 @@ export const createDescribeTest = (method: string, url: string): string => `${me
  * @returns {string} - The final test name.
  */
 export const createTestName = (name: string, status: HttpStatus): string => `${name} - ${status}`;
+
+/**
+ * Create message response for testing.
+ *
+ * @param {string} message - The message.
+ * @returns {{
+ * messages: string[]
+ * errorCode: string
+ * }} - The message object.
+ */
+export const createMessagesTesting = (message: string, errorCode?: string): MessageResponseTestingType => {
+  return Object.assign({ messages: [message] }, errorCode ? { errorCode } : {});
+};

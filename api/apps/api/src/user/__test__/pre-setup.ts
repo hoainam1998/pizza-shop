@@ -10,9 +10,9 @@ import { HttpExceptionFilter } from '@share/exception-filter';
 import { GlobalValidatePipe } from '@share/pipes';
 import sessionConfig from '../../session-config';
 
-const startUp = async () => {
+const startUp = async (module = UserModule) => {
   const moduleFixture: TestingModule = await Test.createTestingModule({
-    imports: [UserModule],
+    imports: [module],
   })
     .overrideProvider(USER_SERVICE)
     .useValue({

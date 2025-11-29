@@ -1,0 +1,17 @@
+import constants from '@share/constants';
+import { UserRequestType } from '@share/interfaces';
+import { autoGeneratePassword, signingAdminResetPasswordToken } from '@share/utils';
+
+export const user: UserRequestType = {
+  user_id: Date.now().toString(),
+  first_name: 'first name',
+  last_name: 'last name',
+  email: 'myemail@gmail.com',
+  phone: '0987654321',
+  avatar: 'avatar',
+  password: '1234@xxx',
+  sex: constants.SEX.FEMALE,
+  power: constants.POWER_NUMERIC.SUPER_ADMIN,
+  plain_password: autoGeneratePassword(),
+  reset_password_token: signingAdminResetPasswordToken('myemail@gmail.com'),
+};
