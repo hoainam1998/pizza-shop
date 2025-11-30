@@ -43,6 +43,18 @@ export default (prisma: PrismaClient) => ({
       }
     }
 
+    if (Object.hasOwn(args.data, 'phone')) {
+      const count = await prisma.user.count({
+        where: {
+          phone: args.data.phone,
+        },
+      });
+
+      if (count > 0) {
+        throw new UnauthorizedException(createMessage(USER.PHONE_ALREADY_EXIST));
+      }
+    }
+
     const password = await passwordHashing(firstTimePassword);
 
     args.data = {

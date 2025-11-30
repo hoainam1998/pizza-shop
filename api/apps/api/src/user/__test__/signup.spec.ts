@@ -269,4 +269,25 @@ describe(createDescribeTest(HTTP_METHOD.POST, signupUrl), () => {
     expect(send).toHaveBeenCalledWith(signupPattern, signupUser);
     expect(sendPassword).not.toHaveBeenCalled();
   });
+
+  it(createTestName('signup failed with phone was already exist', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const sendPassword = jest.spyOn(sendEmailService, 'sendPassword');
+    const signupService = jest.spyOn(userService, 'signup');
+    const send = jest
+      .spyOn(clientProxy, 'send')
+      .mockReturnValue(throwError(() => new UnauthorizedException(createMessage(messages.USER.PHONE_ALREADY_EXIST))));
+    await api
+      .post(signupUrl)
+      .set('mock-session', JSON.stringify({ canSignup: true }))
+      .send(requestBody)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.PHONE_ALREADY_EXIST));
+    expect(signupService).toHaveBeenCalledTimes(1);
+    expect(signupService).toHaveBeenCalledWith(signupUser);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledWith(signupPattern, signupUser);
+    expect(sendPassword).not.toHaveBeenCalled();
+  });
 });

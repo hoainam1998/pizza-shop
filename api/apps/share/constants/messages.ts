@@ -23,6 +23,7 @@ export default Object.freeze({
     SIGNUP_FAILED: 'Signup user was failed!',
     SIGNUP_SUCCESS: 'Signup user was success!. Please check your email!',
     EMAIL_REGIS_ALREADY_EXIST: 'Your email was already regis!',
+    PHONE_ALREADY_EXIST: 'Your phone was already regis!',
     CAN_NOT_SIGNUP: 'Already has a super admin. You can not signup!',
     NOT_FOUND: 'The user requirement is not found!',
   },

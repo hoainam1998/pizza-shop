@@ -152,4 +152,23 @@ describe('signup', () => {
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(messages.USER.EMAIL_REGIS_ALREADY_EXIST, expect.any(String));
   });
+
+  it('signup failed with phone was already exist', async () => {
+    expect.hasAssertions();
+    const phoneExistException = new UnauthorizedException(createMessage(messages.USER.PHONE_ALREADY_EXIST));
+    const logMethod = jest.spyOn(loggerService, 'error');
+    const create = jest.spyOn(prismaService.user, 'create').mockRejectedValue(phoneExistException);
+    const signupService = jest.spyOn(userService, 'signup');
+    const signupController = jest.spyOn(userController, 'signup');
+    await expect(userController.signup(userInput)).rejects.toThrow(new RpcException(phoneExistException));
+    expect(signupController).toHaveBeenCalledTimes(1);
+    expect(signupService).toHaveBeenCalledTimes(1);
+    expect(signupService).toHaveBeenCalledWith(userInput);
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(create).toHaveBeenCalledWith({
+      data: userInput,
+    });
+    expect(logMethod).toHaveBeenCalledTimes(1);
+    expect(logMethod).toHaveBeenCalledWith(messages.USER.PHONE_ALREADY_EXIST, expect.any(String));
+  });
 });
