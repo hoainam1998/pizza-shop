@@ -19,3 +19,8 @@ export const emailConfig = registerAs('mail', () => ({
   SMPT_MAIL: process.env.SMPT_MAIL,
   SMPT_APP_PASS: process.env.SMPT_APP_PASS,
 }));
+
+export const throttleConfig = registerAs('throttle', () => ({
+  THROTTLE_TTL: process.env.THROTTLE_TTL,
+  THROTTLE_LIMIT: process.env.THROTTLE_LIMIT,
+}));

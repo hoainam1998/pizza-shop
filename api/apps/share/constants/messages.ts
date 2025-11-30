@@ -9,6 +9,7 @@ export default Object.freeze({
     FILE_TYPE_INVALID: 'File type is invalid!',
     VALIDATE_ID_FAIL: 'An id must be a string number and contains 13 character!',
     MODULE_DISCONNECT: 'The module require is disconnect!',
+    THROTTLER_ERROR: 'Too many requests in a second!',
   },
   CATEGORY: {
     NOT_FOUND: 'The category item requirement is not found!',

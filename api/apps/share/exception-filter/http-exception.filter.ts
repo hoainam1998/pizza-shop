@@ -12,6 +12,10 @@ export default class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
     const exceptionResponse = exception.getResponse() as any;
 
+    if (exceptionResponse.includes('ThrottlerException')) {
+      return response.status(HttpStatus.BAD_REQUEST).json(createMessages(messages.COMMON.THROTTLER_ERROR));
+    }
+
     if (status === HttpStatus.NOT_FOUND) {
       let responseData;
       if (Object.hasOwn(exceptionResponse, 'response')) {
