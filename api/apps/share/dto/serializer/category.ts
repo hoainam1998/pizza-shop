@@ -11,53 +11,7 @@ import {
 import { Exclude, Expose, Type } from 'class-transformer';
 import Validator from './validator';
 
-export class CategoryFormatter {
-  @IsOptional()
-  @Exclude({ toPlainOnly: true })
-  _count: any = {};
-
-  @IsOptional()
-  @Exclude({ toPlainOnly: true })
-  category_id: string;
-
-  @Expose()
-  @IsOptional()
-  get categoryId() {
-    return this.category_id;
-  }
-
-  @Expose()
-  @IsOptional()
-  get disabled() {
-    return Object.hasOwn(this._count, 'product') ? this._count.product > 0 : undefined;
-  }
-
-  constructor(target: any) {
-    Object.assign(this, target);
-  }
-}
-
-export class CategoryPaginationFormatter extends Validator {
-  @IsArray()
-  @ArrayNotEmpty()
-  @ValidateNested({ each: true })
-  @Type(() => CategoryFormatter)
-  list: CategoryFormatter[];
-
-  @IsNumber()
-  @IsPositive()
-  total: number;
-
-  constructor(target: CategoryPaginationFormatter) {
-    super();
-    if (target) {
-      target.list = target.list.map((category) => new CategoryFormatter(category));
-    }
-    Object.assign(this, target);
-  }
-}
-
-export class CategoryDetailSerializer extends Validator {
+export class CategoryDetail extends Validator {
   @Exclude({ toPlainOnly: true })
   @IsNumberString()
   category_id: string;
@@ -74,7 +28,46 @@ export class CategoryDetailSerializer extends Validator {
   get categoryId() {
     return this.category_id;
   }
+}
 
+export class CategoryFormatter extends CategoryDetail {
+  @IsOptional()
+  @Exclude({ toPlainOnly: true })
+  _count: any = {};
+
+  @Expose()
+  @IsOptional()
+  get disabled() {
+    return Object.hasOwn(this._count, 'product') ? this._count.product > 0 : undefined;
+  }
+
+  constructor(target: any) {
+    super();
+    Object.assign(this, target);
+  }
+}
+
+export class CategoryPaginationSerializer extends Validator {
+  @IsArray()
+  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => CategoryFormatter)
+  list: CategoryFormatter[];
+
+  @IsNumber()
+  @IsPositive()
+  total: number;
+
+  constructor(target: CategoryPaginationSerializer) {
+    super();
+    if (target) {
+      target.list = target.list.map((category) => new CategoryFormatter(category));
+    }
+    Object.assign(this, target);
+  }
+}
+
+export class CategoryDetailSerializer extends CategoryDetail {
   constructor(target: Omit<CategoryDetailSerializer, 'categoryId' | 'validate'>) {
     super();
     Object.assign(this, target);

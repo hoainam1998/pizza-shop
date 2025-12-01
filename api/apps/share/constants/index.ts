@@ -13,4 +13,5 @@ export default Object.freeze({
     CATEGORIES: 'categories',
     INGREDIENTS: 'ingredients',
   },
+  PASSWORD_PATTERN: /[A-Za-z0-9@$#%!^&*()]{8}/,
 });

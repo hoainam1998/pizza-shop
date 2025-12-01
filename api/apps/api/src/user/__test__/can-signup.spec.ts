@@ -36,7 +36,7 @@ afterEach(async () => {
   }
 });
 
-describe(createDescribeTest(HTTP_METHOD.DELETE, canSignupUrl), () => {
+describe(createDescribeTest(HTTP_METHOD.GET, canSignupUrl), () => {
   it(createTestName('can signup success', HttpStatus.OK), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(countResult));

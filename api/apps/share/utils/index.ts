@@ -5,6 +5,7 @@ import {
   autoGeneratePassword,
   signingAdminResetPasswordToken,
   getAdminResetPasswordLink,
+  comparePassword,
 } from './auth';
 import { createMessage, createMessages } from './message';
 
@@ -98,6 +99,22 @@ const selectFields = <T extends object, R extends object>(select: T, list: R[]):
 };
 
 /**
+ * Omit fields for target object.
+ *
+ * @param {string[]} fields - The omit fields.
+ * @param {object} target - The target object.
+ * @returns {unknown} - A dest object.
+ */
+const omitFields = (fields: string[], target: object): unknown => {
+  return Object.entries(target).reduce((dest, [key, value]: [string, any]) => {
+    if (!fields.includes(key)) {
+      Object.assign(dest, { [key]: value });
+    }
+    return dest;
+  }, {});
+};
+
+/**
  * Get exception messages.
  *
  * @param {ValidationError[]} errors - The errors
@@ -106,7 +123,9 @@ const selectFields = <T extends object, R extends object>(select: T, list: R[]):
 const getExceptionMessages = (errors: ValidationError[]): string => {
   return handleValidateException(errors)
     .reduce((messages, message, index) => {
-      messages += `${index + 1}: ${message} \n`;
+      if (!messages.includes(message)) {
+        messages += `${index + 1}: ${message} \n`;
+      }
       return messages;
     }, '')
     .trim();
@@ -138,10 +157,12 @@ export {
   autoGeneratePassword,
   signingAdminResetPasswordToken,
   getAdminResetPasswordLink,
+  comparePassword,
   calcSkip,
   handleValidateException,
   formatDateTime,
   selectFields,
+  omitFields,
   getExceptionMessages,
   getControllerContext,
 };

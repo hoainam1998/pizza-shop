@@ -67,8 +67,7 @@ describe('update category', () => {
     );
     expect(updateMethodController).toHaveBeenCalledTimes(1);
     expect(updateMethodController).toHaveBeenCalledWith(category);
-    expect(logMethod).toHaveBeenCalled();
-    expect(logMethod).toHaveBeenCalledWith(messages.CATEGORY.NOT_FOUND, expect.any(String));
+    expect(logMethod).not.toHaveBeenCalled();
     expect(updateMethodService).toHaveBeenCalledTimes(1);
     expect(updateMethodService).toHaveBeenCalledWith(category);
     expect(deleteCacheCategoriesMethod).not.toHaveBeenCalled();

@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { IsEmail, IsInt, IsPhoneNumber, IsString } from 'class-validator';
+import { IsEmail, IsInt, IsPhoneNumber, IsString, IsStrongPassword, Matches } from 'class-validator';
 import constants from '@share/constants';
 import { UserRequestType } from '@share/interfaces';
 
@@ -39,4 +39,13 @@ export class SignupDTO {
   constructor(target: UserRequestType) {
     Object.assign(this, target);
   }
+}
+
+export class LoginInfo {
+  @IsEmail()
+  email: string;
+
+  @IsStrongPassword({ minLength: 8, minSymbols: 1 })
+  @Matches(new RegExp(constants.PASSWORD_PATTERN))
+  password: string;
 }

@@ -1,9 +1,8 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
+import { Prisma } from 'generated/prisma';
 import messages from '@share/constants/messages';
 import { PRISMA_ERROR_CODE } from '@share/enums';
-import { createMessage } from '@share/utils';
-import { Prisma } from 'generated/prisma';
 
 export default (msgs: any) => (target: any, propertyName: string, descriptor: TypedPropertyDescriptor<any>) => {
   const originMethod = descriptor.value;
@@ -15,14 +14,14 @@ export default (msgs: any) => (target: any, propertyName: string, descriptor: Ty
             error.errorCode === PRISMA_ERROR_CODE.DATABASE_LOST_CONNECT ||
             error.message.includes("Can't reach database server")
           ) {
-            throw new RpcException(new BadRequestException(createMessage(error.message)));
+            throw new RpcException(new BadRequestException(error.message));
           }
           throw error;
         case error instanceof Prisma.PrismaClientValidationError:
-          throw new RpcException(new BadRequestException(createMessage(messages.COMMON.MUTATING_DATABASE_ERROR)));
+          throw new RpcException(new BadRequestException(messages.COMMON.MUTATING_DATABASE_ERROR));
         case error instanceof Prisma.PrismaClientKnownRequestError:
           if (error.code === PRISMA_ERROR_CODE.ALREADY_EXIST) {
-            throw new RpcException(new BadRequestException(createMessage(messages.COMMON.ALREADY_EXIST)));
+            throw new RpcException(new BadRequestException(messages.COMMON.ALREADY_EXIST));
           } else if (error.code === PRISMA_ERROR_CODE.NOT_FOUND) {
             throw new RpcException(new NotFoundException(msgs.NOT_FOUND));
           }

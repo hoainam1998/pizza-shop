@@ -15,6 +15,7 @@ export default class UserRouter extends RouterBase {
     super();
     UserRouter.createRouterPath('can-signup');
     UserRouter.createRouterPath('signup');
+    UserRouter.createRouterPath('login');
   }
 }
 

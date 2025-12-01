@@ -20,4 +20,13 @@ export default class UserService {
       data: user as any,
     });
   }
+
+  @HandlePrismaError(messages.USER)
+  login(email: string): Promise<user> {
+    return this.prismaClient.user.findFirstOrThrow({
+      where: {
+        email,
+      },
+    });
+  }
 }

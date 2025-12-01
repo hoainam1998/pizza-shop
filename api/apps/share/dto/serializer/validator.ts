@@ -1,4 +1,9 @@
-import { validate } from 'class-validator';
+import { validate, ValidatorOptions } from 'class-validator';
+
+const defaultValidateOption: ValidatorOptions = {
+  whitelist: true,
+  forbidNonWhitelisted: true,
+};
 
 /**
  * Validate output response.
@@ -6,7 +11,7 @@ import { validate } from 'class-validator';
  * @class
  */
 export default class {
-  validate() {
-    return validate(this);
+  validate(options: ValidatorOptions = defaultValidateOption) {
+    return validate(this, options);
   }
 }

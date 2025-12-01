@@ -1,11 +1,14 @@
-import { Controller } from '@nestjs/common';
+import { BadRequestException, Controller } from '@nestjs/common';
 import { type user } from 'generated/prisma';
 import { MessagePattern } from '@nestjs/microservices';
 import UsersService from './user.service';
 import LoggingService from '@share/libs/logging/logging.service';
 import { HandleServiceError } from '@share/decorators';
-import { canSignupPattern, signupPattern } from '@share/pattern';
+import { canSignupPattern, signupPattern, loginPattern } from '@share/pattern';
 import type { UserCreateType } from '@share/interfaces';
+import { LoginInfo } from '@share/dto/validators/user.dto';
+import { comparePassword, createMessage, omitFields } from '@share/utils';
+import messages from '@share/constants/messages';
 
 @Controller('user')
 export default class UserController {
@@ -24,5 +27,16 @@ export default class UserController {
   @HandleServiceError
   signup(user: UserCreateType): Promise<user> {
     return this.userService.signup(user);
+  }
+
+  @MessagePattern(loginPattern)
+  @HandleServiceError
+  login(loginInfo: LoginInfo): Promise<Omit<user, 'password'>> {
+    return this.userService.login(loginInfo.email).then((user) => {
+      if (comparePassword(loginInfo.password, user.password)) {
+        return omitFields(['password'], user) as Omit<user, 'password'>;
+      }
+      throw new BadRequestException(createMessage(messages.USER.PASSWORD_NOT_MATCH));
+    });
   }
 }
