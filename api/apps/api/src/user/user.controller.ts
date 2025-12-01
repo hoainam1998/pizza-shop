@@ -13,8 +13,8 @@ import {
 import { map, Observable } from 'rxjs';
 import { instanceToPlain } from 'class-transformer';
 import UserService from './user.service';
-import { CanSignupSerializer } from '@share/dto/serializer/user';
-import { SignupDTO } from '@share/dto/validators/user.dto';
+import { CanSignupSerializer, LoginSerializer } from '@share/dto/serializer/user';
+import { LoginInfo, SignupDTO } from '@share/dto/validators/user.dto';
 import { createMessage, getAdminResetPasswordLink } from '@share/utils';
 import messages from '@share/constants/messages';
 import { user } from 'generated/prisma';
@@ -73,6 +73,25 @@ export default class UserController extends BaseController {
             Logger.error(this.signup.name, error);
             throw new BadRequestException(MessageSerializer.create(messages.USER.SIGNUP_FAILED));
           });
+      }),
+    );
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post(UserRouter.relative.login)
+  @HandleHttpError
+  login(@Body() loginInfo: LoginInfo): Observable<Promise<Record<string, any>>> {
+    return this.userService.login(loginInfo).pipe(
+      map((user) => {
+        const loginResult = new LoginSerializer(user);
+        return loginResult.validate().then((errors) => {
+          if (errors.length) {
+            this.logError(errors, this.canSignup.name);
+            throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
+          } else {
+            return instanceToPlain(loginResult);
+          }
+        });
       }),
     );
   }

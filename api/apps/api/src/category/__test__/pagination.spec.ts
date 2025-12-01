@@ -15,7 +15,7 @@ import CategoryService from '../category.service';
 import CategoryController from '../category.controller';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
-import { CategoryPaginationFormatter } from '@share/dto/serializer/category';
+import { CategoryPaginationSerializer } from '@share/dto/serializer/category';
 import { createMessages } from '@share/utils';
 import { CategoryRouter } from '@share/router';
 const paginationCategoryUrl: string = CategoryRouter.absolute.pagination;
@@ -82,7 +82,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, paginationCategoryUrl), () => {
       .send(paginationBody)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
-      .expect(instanceToPlain(plainToInstance(CategoryPaginationFormatter, responseData)));
+      .expect(instanceToPlain(plainToInstance(CategoryPaginationSerializer, responseData)));
     expect(paginationService).toHaveBeenCalledTimes(1);
     expect(paginationService).toHaveBeenCalledWith(paginationBodyWidthId);
     expect(send).toHaveBeenCalledTimes(1);
@@ -94,7 +94,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, paginationCategoryUrl), () => {
     expect.hasAssertions();
     const validateErrors = [new ValidationError()];
     const logError = jest.spyOn(categoryController as any, 'logError');
-    jest.spyOn(CategoryPaginationFormatter.prototype, 'validate').mockResolvedValue(validateErrors);
+    jest.spyOn(CategoryPaginationSerializer.prototype, 'validate').mockResolvedValue(validateErrors);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(responseData));
     const paginationService = jest.spyOn(categoryService, 'pagination');
     await api
@@ -261,7 +261,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, paginationCategoryUrl), () => {
       .send(paginationEmptyQueryRequestBody)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
-      .expect(instanceToPlain(plainToInstance(CategoryPaginationFormatter, responseData)));
+      .expect(instanceToPlain(plainToInstance(CategoryPaginationSerializer, responseData)));
     expect(paginationService).toHaveBeenCalledTimes(1);
     expect(paginationService).toHaveBeenCalledWith(finalPaginationRequestBody);
     expect(send).toHaveBeenCalledTimes(1);

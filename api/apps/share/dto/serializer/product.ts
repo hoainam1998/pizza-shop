@@ -25,6 +25,10 @@ export class ProductSerializer extends Validator {
 
   @IsOptional()
   @IsInt()
+  price: number;
+
+  @IsOptional()
+  @IsInt()
   @Exclude({ toPlainOnly: true })
   original_price: number;
 
@@ -69,6 +73,8 @@ export class ProductSerializer extends Validator {
     return this.product_id;
   }
 
+  @IsOptional()
+  @IsObject()
   @Expose()
   @Transform(
     ({ value }) => (value ? { name: value.name, categoryId: value.category_id, avatar: value.avatar } : undefined),

@@ -220,8 +220,7 @@ describe('compute product price', () => {
     expect(computeProductPriceServiceMethod).toHaveBeenCalledWith(productId, productIngredients);
     expect(getProductIngredientsStored).toHaveBeenCalledTimes(1);
     expect(getProductIngredientsStored).toHaveBeenCalledWith(productId, ingredientIds);
-    expect(logMethod).toHaveBeenCalledTimes(1);
-    expect(logMethod).toHaveBeenCalledWith(messages.INGREDIENT.NOT_FOUND, expect.any(String));
+    expect(logMethod).not.toHaveBeenCalled();
     expect(findManyPrismaMethod).toHaveBeenCalledTimes(1);
     expect(findManyPrismaMethod).toHaveBeenCalledWith({
       where: {

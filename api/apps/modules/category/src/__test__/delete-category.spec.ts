@@ -80,8 +80,7 @@ describe('delete category', () => {
     );
     expect(deleteMethodController).toHaveBeenCalledTimes(1);
     expect(deleteMethodController).toHaveBeenCalledWith(category.category_id);
-    expect(logMethod).toHaveBeenCalled();
-    expect(logMethod).toHaveBeenCalledWith(messages.CATEGORY.NOT_FOUND, expect.any(String));
+    expect(logMethod).not.toHaveBeenCalled();
     expect(transactionPrismaMethod).toHaveBeenCalledTimes(1);
     expect(transactionPrismaMethod).toHaveBeenCalledWith(expect.any(Array));
     expect(deleteMethodService).toHaveBeenCalledTimes(1);

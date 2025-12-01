@@ -3,7 +3,8 @@ import { ClientProxy } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 import { user } from 'generated/prisma';
 import { USER_SERVICE } from '@share/di-token';
-import { canSignupPattern, signupPattern } from '@share/pattern';
+import { canSignupPattern, signupPattern, loginPattern } from '@share/pattern';
+import { UserRequestType } from '@share/interfaces';
 
 @Injectable()
 export default class UserService {
@@ -15,5 +16,9 @@ export default class UserService {
 
   signup(user: user): Observable<user> {
     return this.user.send<user>(signupPattern, user);
+  }
+
+  login(loginInfo: any): Observable<UserRequestType> {
+    return this.user.send<UserRequestType>(loginPattern, loginInfo);
   }
 }

@@ -13,6 +13,7 @@ export const getAllCategoriesPattern = createMicroserviceEvent('all');
 // user
 export const canSignupPattern = createMicroserviceEvent('can_signup');
 export const signupPattern = createMicroserviceEvent('signup');
+export const loginPattern = createMicroserviceEvent('login');
 
 // ingredient
 export const createIngredientPattern = createMicroserviceEvent('create_ingredient');

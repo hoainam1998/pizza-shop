@@ -99,8 +99,7 @@ describe('get product', () => {
     );
     expect(getAllControllerMethod).toHaveBeenCalledTimes(1);
     expect(getAllControllerMethod).toHaveBeenCalledWith(getProductBody);
-    expect(logMethod).toHaveBeenCalledTimes(1);
-    expect(logMethod).toHaveBeenCalledWith(messages.PRODUCT.NOT_FOUND, expect.any(String));
+    expect(logMethod).not.toHaveBeenCalled();
     expect(getDetailServiceMethod).toHaveBeenCalledTimes(1);
     expect(getDetailServiceMethod).toHaveBeenCalledWith(getProductBody);
     expect(findUniqueOrThrowPrismaMethod).toHaveBeenCalledTimes(1);

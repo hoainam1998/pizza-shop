@@ -26,6 +26,7 @@ export default Object.freeze({
     PHONE_ALREADY_EXIST: 'Your phone was already regis!',
     CAN_NOT_SIGNUP: 'Already has a super admin. You can not signup!',
     NOT_FOUND: 'The user requirement is not found!',
+    PASSWORD_NOT_MATCH: 'Your password are not match!',
   },
   INGREDIENT: {
     CREATE_INGREDIENT_SUCCESS: 'Create ingredient was success!',

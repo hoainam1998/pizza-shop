@@ -26,7 +26,7 @@ import {
   GetCategory,
   PaginationCategory,
 } from '@share/dto/validators/category.dto';
-import { CategoryPaginationFormatter, CategoryDetailSerializer, Categories } from '@share/dto/serializer/category';
+import { CategoryPaginationSerializer, CategoryDetailSerializer, Categories } from '@share/dto/serializer/category';
 import messages from '@share/constants/messages';
 import { createMessage } from '@share/utils';
 import { category } from 'generated/prisma';
@@ -81,13 +81,13 @@ export default class CategoryController extends BaseController {
 
   @Post(CategoryRouter.relative.pagination)
   @HttpCode(HttpStatus.OK)
-  @SerializeOptions({ type: CategoryPaginationFormatter })
+  @SerializeOptions({ type: CategoryPaginationSerializer })
   @HandleHttpError
-  pagination(@Body() select: PaginationCategory): Observable<Promise<CategoryPaginationFormatter>> {
+  pagination(@Body() select: PaginationCategory): Observable<Promise<CategoryPaginationSerializer>> {
     select.query = CategoryQuery.plainWithIncludeId(select.query) as any;
     return this.categoryService.pagination(select).pipe(
-      map((response: CategoryPaginationFormatter) => {
-        const paginationResult = new CategoryPaginationFormatter(response);
+      map((response: CategoryPaginationSerializer) => {
+        const paginationResult = new CategoryPaginationSerializer(response);
         return paginationResult.validate().then((errors) => {
           if (errors.length) {
             this.logError(errors, this.pagination.name);

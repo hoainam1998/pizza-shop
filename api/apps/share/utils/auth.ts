@@ -1,5 +1,5 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
-import { genSalt, hash } from 'bcrypt';
+import bcrypt from 'bcrypt';
 const RESET_PASSWORD_URL = '{origin}/reset-password?token={token}';
 
 /**
@@ -84,8 +84,19 @@ const verifyLoginToken = (loginToken: string): jwt.JwtPayload =>
  * @return {Promise<string>} -The password decoded.
  */
 const passwordHashing = async (password: string): Promise<string> => {
-  const saltRound = await genSalt(10);
-  return await hash(password, saltRound);
+  const saltRound = await bcrypt.genSalt(10);
+  return await bcrypt.hash(password, saltRound);
+};
+
+/**
+ * Compare password
+ *
+ * @param {string} password - The password.
+ * @param {string} passwordCompare - The password compare.
+ * @return {boolean} -The compare result.
+ */
+const comparePassword = (password: string, passwordCompare: string): boolean => {
+  return bcrypt.compareSync(password, passwordCompare);
 };
 
 /**
@@ -134,5 +145,6 @@ export {
   verifyLoginToken,
   verifyClientLoginToken,
   getAdminResetPasswordLink,
+  comparePassword,
   // getClientResetPasswordLink,
 };

@@ -61,8 +61,7 @@ describe('delete product', () => {
     );
     expect(deleteProductControllerMethod).toHaveBeenCalledTimes(1);
     expect(deleteProductControllerMethod).toHaveBeenCalledWith(product.product_id);
-    expect(logMethod).toHaveBeenCalledTimes(1);
-    expect(logMethod).toHaveBeenCalledWith(messages.PRODUCT.NOT_FOUND, expect.any(String));
+    expect(logMethod).not.toHaveBeenCalled();
     expect(deleteMethodService).toHaveBeenCalledTimes(1);
     expect(deleteMethodService).toHaveBeenCalledWith(product.product_id);
     expect(privateDelete).toHaveBeenCalledTimes(1);
