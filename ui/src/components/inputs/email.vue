@@ -1,5 +1,5 @@
 <template>
-  <el-input v-model="model" type="mail" autocomplete="off" @blur="onCompleteInput">
+  <el-input v-model="model" v-bind="attrs" @blur="onCompleteInput">
     <template #append>
       <el-select
         v-model="select"
@@ -13,12 +13,18 @@
   </el-input>
 </template>
 <script setup lang="ts">
-import { defineModel, ref } from 'vue';
+import { defineModel, ref, useAttrs } from 'vue';
 import { EMAIL_DOMAIN } from '@/enums';
 
+defineOptions({
+  inheritAttrs: false,
+});
 const emailDomains = Object.entries(EMAIL_DOMAIN);
 const model = defineModel<string>({ default: '' });
 const select = ref<string>(EMAIL_DOMAIN.GMAIL);
+
+const attrsFallThrough = useAttrs();
+const attrs = Object.assign({ ...attrsFallThrough }, { type: 'email', autocomplete: 'off' });
 
 const onCompleteInput = (): void => {
   const pattern = /@(\w|\.)+/;
