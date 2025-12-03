@@ -1,5 +1,4 @@
 import axios, { AxiosError, HttpStatusCode } from 'axios';
-import router from './router';
 import paths from './router/paths';
 import { showErrorNotification } from './utils';
 import loadingStore from './composables/store/loading';
@@ -8,7 +7,7 @@ import loadingStore from './composables/store/loading';
  * Force logout.
  */
 const forceLogout = (): void => {
-  router.push(`${paths.LOGIN}`);
+  globalThis.router.push(`${paths.LOGIN}`);
 };
 
 /**
@@ -21,6 +20,7 @@ const handleRequestError = (error: AxiosError<any, any>): void=> {
     case AxiosError.ERR_BAD_REQUEST:
       switch (error.request.status) {
         case HttpStatusCode.Unauthorized: {
+          forceLogout();
         };
         break;
         default: break;
@@ -40,6 +40,8 @@ const handleRequestError = (error: AxiosError<any, any>): void=> {
 
 const axiosInstance = axios.create({
   baseURL: process.env.BASE_URL,
+  timeout: 5000,
+  withCredentials: true,
 });
 
 axiosInstance.interceptors.request.use(

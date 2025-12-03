@@ -2,16 +2,16 @@
   <LoginFrame title="reset password" class="reset-password">
     <el-form :id="FORM_ID" ref="resetPasswordFormRef" :model="form" :rules="rules" label-position="top">
       <el-form-item label="Email" prop="email" class="ps-mb-12">
-        <el-input v-model="form.email" type="mail" name="email" autocomplete="off" />
+        <ps-email-input v-model="form.email" name="email" />
       </el-form-item>
       <el-form-item label="Old password" prop="oldPassword" class="ps-mb-12">
-        <el-input v-model="form.oldPassword" name="oldPassword" autocomplete="off" />
+        <ps-password-input v-model="form.oldPassword" name="oldPassword" />
       </el-form-item>
       <el-form-item label="Password" prop="password" class="ps-mb-12">
-        <el-input v-model="form.password" name="password" autocomplete="off" />
+        <ps-password-input v-model="form.password" name="password" />
       </el-form-item>
       <el-form-item label="Confirm password" prop="confirmPassword">
-        <el-input v-model="form.confirmPassword" name="confirmPassword" autocomplete="off" />
+        <ps-password-input v-model="form.confirmPassword" name="confirmPassword" />
       </el-form-item>
       <el-button class="ps-display-block ps-margin-auto ps-fw-bold ps-w-150px" type="primary" @click="onSubmit">
         Save
@@ -24,6 +24,8 @@ import { reactive, ref } from 'vue';
 import { onBeforeRouteLeave } from 'vue-router';
 import type { FormInstance, FormRules } from 'element-plus';
 import LoginFrame from './common/login-frame.vue';
+import PsPasswordInput from '@/components/inputs/password.vue';
+import PsEmailInput from '@/components/inputs/email.vue';
 import constants from '@/constants';
 
 type ResetPasswordType = {
@@ -32,6 +34,8 @@ type ResetPasswordType = {
   password: string;
   confirmPassword: string;
 };
+
+const token: string | null = new URL(window.location.href).searchParams.get('token');
 
 const resetPasswordFormRef = ref<FormInstance>();
 
@@ -117,6 +121,7 @@ const onSubmit = async (): Promise<void> => {
   if (resetPasswordFormRef.value) {
     await resetPasswordFormRef.value.validate((valid) => {
       if (valid) {
+        Object.assign(form, { token });
         // TODO
       }
     });

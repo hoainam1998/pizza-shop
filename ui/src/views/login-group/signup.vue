@@ -12,15 +12,15 @@
           <el-input v-model="signupFormModel.lastName" name="lastName" />
         </el-form-item>
         <el-form-item label="Email" prop="email">
-          <el-input v-model="signupFormModel.email" name="email" />
+          <ps-email-input v-model="signupFormModel.email" name="email" />
         </el-form-item>
         <el-form-item label="Phone" prop="phone">
           <el-input v-model="signupFormModel.phone" name="phone" />
         </el-form-item>
         <el-form-item label="Sex" prop="sex">
           <el-radio-group v-model="signupFormModel.sex" name="sex">
-            <el-radio :value="0">Male</el-radio>
-            <el-radio :value="1">Female</el-radio>
+            <el-radio label="Male" :value="0" />
+            <el-radio label="Female" :value="1" />
           </el-radio-group>
         </el-form-item>
         <el-button class="ps-margin-auto ps-display-flex ps-w-150px" type="primary" @click="onSubmit">
@@ -32,13 +32,15 @@
 
 <script lang="ts" setup>
 import { reactive, ref } from 'vue';
-import { useRouter, onBeforeRouteLeave } from 'vue-router';
+import { onBeforeRouteLeave } from 'vue-router';
 import type { AxiosResponse, AxiosError } from 'axios';
 import type { FormInstance, FormRules } from 'element-plus';
 import LoginFrame from './common/login-frame.vue';
+import PsEmailInput from '@/components/inputs/email.vue';
 import paths from '@/router/paths';
 import constants from '@/constants';
 import { UserService } from '@/services';
+import useWrapperRouter from '@/composables/use-router';
 import { showErrorNotification, showSuccessNotification } from '@/utils';
 import type { MessageResponseType } from '@/interfaces';
 
@@ -50,7 +52,7 @@ type SignupModelType = {
   sex: number;
 };
 
-const router = useRouter();
+const { push } = useWrapperRouter();
 
 const signupFormModel = reactive<SignupModelType>({
   firstName: '',
@@ -63,7 +65,7 @@ const signupFormModel = reactive<SignupModelType>({
 const signupFormRef = ref<FormInstance>();
 
 const checkPhoneNumber = (rule: any, value: string, callback: any): any | void => {
-  if (/^0([1-9]{10})$/m.test(value) === false) {
+  if (/^0([1-9]{9})$/m.test(value) === false) {
     return callback(new Error('Phone number must be a number and have 11 character!'));
   }
   callback();
@@ -85,7 +87,7 @@ const rules = reactive<FormRules<SignupModelType>>({
       required: true, message: 'Email is required!', trigger: 'change'
     },
     {
-      type: 'email', required: true, message: 'Please input correct email address', trigger: 'change'
+      type: 'email', required: true, message: 'Please input correct email address', trigger: 'blur'
     }
   ],
   phone: [
@@ -117,7 +119,7 @@ const onSubmit = async (): Promise<void> => {
         UserService.post('signup', signupFormModel)
           .then((response: AxiosResponse<MessageResponseType>) => {
             showSuccessNotification('Signup success!', response.data.messages);
-            router.push(`${paths.LOGIN}`);
+            push(paths.LOGIN);
           }).catch((error: AxiosError<MessageResponseType>) => {
             showErrorNotification('Signup failed!', error.response!.data.messages);
           });

@@ -4,6 +4,9 @@ import {
   showInfoNotification,
   confirmDeleteMessageBox,
 } from './show-notification';
+import {
+  generateResetPasswordLink
+} from './auth';
 
 /**
  * Return promise of file from base64 string.
@@ -75,4 +78,5 @@ export {
   formatDateSlash,
   formatVNDCurrency,
   confirmDeleteMessageBox,
+  generateResetPasswordLink,
 };

@@ -39,3 +39,16 @@ export type ExtraConfigs = AxiosRequestConfig & {
   allowNotFound?: boolean;
   showSpinner?: boolean;
 };
+
+export type LoginResponseType = {
+  lastName: string;
+  firstName: string;
+  avatar?: string;
+  email: string;
+  phone: string;
+  resetPasswordToken: string;
+  isFirstTime: boolean;
+  userId: string;
+  power: number;
+  sex: number;
+};
