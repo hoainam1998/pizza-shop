@@ -7,11 +7,18 @@
         height="100px" />
       <el-form :id="FORM_ID" ref="loginFormRef" :model="form" :rules="rules" label-position="top">
         <el-form-item label="Email" prop="email">
-          <el-input v-model="form.email" type="mail" name="email" autocomplete="off" />
+          <ps-email-input v-model="form.email" name="email" />
         </el-form-item>
         <el-form-item label="Password" prop="password">
-          <el-input v-model="form.password" name="password" autocomplete="off" />
+          <ps-password-input v-model="form.password" name="password" />
         </el-form-item>
+        <div class="ps-text-align-end">
+          <RouterLink v-if="canSignup"
+            class="ps-fs-14 ps-text-decorator-none ps-text-color-00a8ff"
+            :to="paths.SIGNUP.Path">
+              Signup
+          </RouterLink>
+        </div>
         <el-button class="ps-display-block ps-margin-auto ps-fw-bold ps-w-150px" type="primary" @click="onSubmit">
           Save
         </el-button>
@@ -21,19 +28,29 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
-import { onBeforeRouteLeave } from 'vue-router';
+import { reactive, ref, onBeforeMount } from 'vue';
+import { onBeforeRouteLeave, RouterLink } from 'vue-router';
+import type { AxiosError, AxiosResponse } from 'axios';
 import type { FormInstance, FormRules } from 'element-plus';
 import LoginFrame from './common/login-frame.vue';
+import PsPasswordInput from '@/components/inputs/password.vue';
+import PsEmailInput from '@/components/inputs/email.vue';
 import constants from '@/constants';
+import paths from '@/router/paths';
+import useWrapperRouter from '@/composables/use-router';
+import { UserService } from '@/services';
+import { generateResetPasswordLink, showErrorNotification } from '@/utils';
+import type { LoginResponseType, MessageResponseType } from '@/interfaces';
 
 type LoginFormType = {
   email: string;
   password: string;
 };
 
+const { push } = useWrapperRouter();
 const FORM_ID = 'loginForm';
 const loginFormRef = ref<FormInstance>();
+const canSignup = ref<boolean>();
 
 const rules = reactive<FormRules<LoginFormType>>({
   email: [
@@ -41,7 +58,7 @@ const rules = reactive<FormRules<LoginFormType>>({
       required: true, message: 'Email is required!', trigger: 'change',
     },
     {
-      type: 'email', message: 'Email is invalid!', trigger: 'change',
+      type: 'email', message: 'Email is invalid!', trigger: 'blur',
     }
   ],
   password: [
@@ -63,7 +80,16 @@ const onSubmit = async (): Promise<void> => {
   if (loginFormRef.value) {
     await loginFormRef.value.validate((valid) => {
       if (valid) {
-        // TODO
+        UserService.post('login', form)
+          .then((response: AxiosResponse<LoginResponseType>) => {
+            if (response.data.isFirstTime) {
+              push(generateResetPasswordLink(response.data.resetPasswordToken));
+            } else {
+              push(`${paths.HOME}`);
+            }
+          }).catch((error: AxiosError<MessageResponseType>) => {
+            showErrorNotification('Admin login!', error.response?.data.messages);
+          });
       }
     });
   }
@@ -72,6 +98,14 @@ const onSubmit = async (): Promise<void> => {
 const resetForm = (): void => {
   loginFormRef.value?.resetFields();
 };
+
+onBeforeMount(() => {
+  UserService.get('can-signup').then((response) => {
+    canSignup.value = response.data.canSignup;
+  }).catch(() => {
+    canSignup.value = false;
+  });
+});
 
 onBeforeRouteLeave(resetForm);
 </script>

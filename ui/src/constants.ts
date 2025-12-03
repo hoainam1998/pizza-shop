@@ -13,4 +13,5 @@ export default Object.freeze({
     CAN: 'CAN',
   },
   PASSWORD_PATTERN: /[A-Za-z0-9@$#%!^&*()]{8}/,
+  AXIOS_UNKNOWN_MESSAGE: 'Axios unknown error!',
 });

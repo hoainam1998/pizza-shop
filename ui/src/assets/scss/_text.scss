@@ -1,18 +1,14 @@
 @use './colors' as colors;
 
-.ps-text-color-white {
-  color: colors.$white-color !important;
+$text-colors: ("white": colors.$white-color, "606266": colors.$label-color, "00a8ff": colors.$menu-item-active-color);
 
-  &>* {
-    color: colors.$white-color !important;
-  }
-}
+@each $name, $color in $text-colors {
+  .ps-text-color-#{$name} {
+    color: $color !important;
 
-.ps-text-color-606266 {
-  color: colors.$label-color !important;
-
-  &>* {
-    color: colors.$label-color !important;
+    &>* {
+      color: $color !important;
+    }
   }
 }
 
@@ -52,4 +48,8 @@
 
 .ps-text-transform-lowercase {
   text-transform: lowercase !important;
+}
+
+.ps-text-decorator-none {
+  text-decoration: none !important;
 }

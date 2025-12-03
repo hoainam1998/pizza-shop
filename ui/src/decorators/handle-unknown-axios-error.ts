@@ -1,14 +1,15 @@
-import { HttpStatusCode, type AxiosError } from 'axios';
+import { type AxiosError } from 'axios';
+import constants from '@/constants';
 
 /**
- * Handle axios not found error if allowed.
+ * Handle axios unknown error.
  *
  * @param {*} target - The decorator target.
  * @param {string} propertyName - The decorator property name.
  * @param {TypedPropertyDescriptor<any>} descriptor - The decorator descriptor.
  * @returns {TypedPropertyDescriptor<any>} - The descriptor.
  */
-export default function HandleNotFoundError(
+export default function HandleUnknownAxiosError(
   target: any,
   propertyName: string,
   descriptor: TypedPropertyDescriptor<any>):
@@ -16,10 +17,16 @@ export default function HandleNotFoundError(
   const originMethod = descriptor.value!;
 
   descriptor.value = function (...args: any[]) {
-    const allowNotFound = args[2]?.allowNotFound;
     return originMethod.apply(this, args).catch((error: AxiosError) => {
-      if (error.status === HttpStatusCode.NotFound && allowNotFound) {
-        return error.response!;
+      if (!error.response) {
+        throw {
+          ...error,
+          response: {
+            data: {
+              messages: [constants.AXIOS_UNKNOWN_MESSAGE]
+            }
+          }
+        };
       }
       throw error;
     });

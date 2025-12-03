@@ -2,6 +2,7 @@ import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import api from '@/axios';
 import { HandleNotFoundError } from '@/decorators';
 import type { ExtraConfigs } from '../interfaces';
+import HandleUnknownAxiosError from '@/decorators/handle-unknown-axios-error';
 
 type RequestBody = {
   [key: string]: any;
@@ -30,6 +31,7 @@ class Services {
    * @returns {Promise<AxiosResponse>} - The promise response.
    */
   @HandleNotFoundError
+  @HandleUnknownAxiosError
   get(subUrl: string, config?: ExtraConfigs): Promise<AxiosResponse> {
     return api.get(`${this._baseUrl}/${subUrl}`, config);
   }
@@ -43,6 +45,7 @@ class Services {
    * @returns {Promise<AxiosResponse>} - The promise response.
    */
   @HandleNotFoundError
+  @HandleUnknownAxiosError
   post(subUrl: string, body: RequestBody, config?: ExtraConfigs): Promise<AxiosResponse> {
     return api.post(`${this._baseUrl}/${subUrl}`, body, config);
   }
@@ -55,6 +58,7 @@ class Services {
    * @param {AxiosRequestConfig} - The axios config.
    * @returns {Promise<AxiosResponse>} - The promise response.
    */
+  @HandleUnknownAxiosError
   put(subUrl: string, body: RequestBody, config?: AxiosRequestConfig): Promise<AxiosResponse> {
     return api.put(`${this._baseUrl}/${subUrl}`, body, config);
   }
@@ -66,6 +70,7 @@ class Services {
    * @param {AxiosRequestConfig} - The axios config.
    * @returns {Promise<AxiosResponse>} - The promise response.
    */
+  @HandleUnknownAxiosError
   delete(subUrl: string, config?: AxiosRequestConfig): Promise<AxiosResponse> {
     return api.delete(`${this._baseUrl}/${subUrl}`, config);
   }

@@ -1,6 +1,7 @@
 /* eslint-disable no-var */
 
 import 'vue';
+import type { Router } from 'vue-router';
 declare module '*.vue' {
   import { DefineComponent } from 'vue';
   const component: DefineComponent<object, object, any>;
@@ -17,5 +18,6 @@ declare global {
   namespace globalThis {
     var isSale: boolean;
     var isAdmin: boolean;
+    var router: Router;
   }
 };
