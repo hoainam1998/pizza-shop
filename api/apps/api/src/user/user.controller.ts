@@ -12,12 +12,12 @@ import {
 } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
 import { instanceToPlain } from 'class-transformer';
+import { user } from 'generated/prisma';
 import UserService from './user.service';
 import { CanSignupSerializer, LoginSerializer } from '@share/dto/serializer/user';
-import { LoginInfo, SignupDTO } from '@share/dto/validators/user.dto';
+import { LoginInfo, SignupDTO, ResetPassword } from '@share/dto/validators/user.dto';
 import { createMessage, getAdminResetPasswordLink } from '@share/utils';
 import messages from '@share/constants/messages';
-import { user } from 'generated/prisma';
 import SendEmailService from '@share/libs/mailer/mailer.service';
 import { type UserCreatedType } from '@share/interfaces';
 import { MessageSerializer } from '@share/dto/serializer/common';
@@ -94,5 +94,14 @@ export default class UserController extends BaseController {
         });
       }),
     );
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post(UserRouter.relative.resetPassword)
+  @HandleHttpError
+  resetPassword(@Body() resetPasswordBody: ResetPassword): Observable<MessageSerializer> {
+    return this.userService
+      .resetPassword(resetPasswordBody)
+      .pipe(map(() => MessageSerializer.create(messages.USER.RESET_PASSWORD_SUCCESS)));
   }
 }

@@ -99,16 +99,16 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
     expect(send).toHaveBeenCalledWith(loginPattern, loginInfo);
   });
 
-  it(createTestName('login failed with unknown error', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('login failed with unknown error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
     const loginService = jest.spyOn(userService, 'login');
     await api
       .post(loginUrl)
       .send(loginInfo)
-      .expect(HttpStatus.BAD_REQUEST)
+      .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect(createMessages(UnknownError.message));
+      .expect(createMessages(new InternalServerErrorException().message));
     expect(loginService).toHaveBeenCalledTimes(1);
     expect(loginService).toHaveBeenCalledWith(loginInfo);
     expect(send).toHaveBeenCalledTimes(1);

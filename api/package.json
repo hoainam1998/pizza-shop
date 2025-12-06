@@ -49,6 +49,7 @@
     "test:ut:user.can-signup": "jest --watch --testPathPatterns=apps/modules/user/src/__test__/can-signup.spec.ts",
     "test:ut:user.signup": "jest --watch --testPathPatterns=apps/modules/user/src/__test__/signup.spec.ts",
     "test:ut:user.login": "jest --watch --testPathPatterns=apps/modules/user/src/__test__/login.spec.ts",
+    "test:ut:user.reset-password": "jest --watch --testPathPatterns=apps/modules/user/src/__test__/reset-password.spec.ts",
     "test:ut:caching.ingredient.delete-all-ingredients": "jest --watch apps/share/libs/caching/ingredient/__test__/delete-all-ingredients.spec.ts",
     "test:ut:caching.ingredient.delete-all-product-ingredients": "jest --watch apps/share/libs/caching/ingredient/__test__/delete-all-product-ingredients.spec.ts",
     "test:ut:caching.ingredient.get-product-ingredients-stored": "jest --watch apps/share/libs/caching/ingredient/__test__/get-product-ingredients-stored.spec.ts",
@@ -80,6 +81,7 @@
     "test:e2e:user.can-signup": "jest --watch apps/api/src/user/__test__/can-signup.spec.ts",
     "test:e2e:user.signup": "jest --watch apps/api/src/user/__test__/signup.spec.ts",
     "test:e2e:user.login": "jest --watch apps/api/src/user/__test__/login.spec.ts",
+    "test:e2e:user.reset-password": "jest --watch apps/api/src/user/__test__/reset-password.spec.ts",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/api/apps/users/api/apps/modules/users/api/test/jest-e2e.json"

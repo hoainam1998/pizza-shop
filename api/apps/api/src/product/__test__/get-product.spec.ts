@@ -120,16 +120,16 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
     expect(send).toHaveBeenCalledWith(getProductPattern, select);
   });
 
-  it(createTestName('get product detail failed with unknown error', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('get product detail failed with unknown error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
     const getProductService = jest.spyOn(productService, 'getProduct');
     await api
       .post(getProductUrl)
       .send(getProductRequestBody)
-      .expect(HttpStatus.BAD_REQUEST)
+      .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect(createMessages(UnknownError.message));
+      .expect(createMessages(new InternalServerErrorException().message));
     expect(getProductService).toHaveBeenCalledTimes(1);
     expect(getProductService).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);

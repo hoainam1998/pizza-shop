@@ -101,9 +101,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
     expect(send).not.toHaveBeenCalled();
   });
 
-  it(createTestName('create product failed with unknown error', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('create product failed with unknown error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
-    const send = jest.spyOn(clientProxy, 'send').mockImplementation(() => throwError(() => UnknownError));
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
     const createProduct = jest.spyOn(productService, 'createProduct');
     await api
       .post(createProductUrl)
@@ -116,9 +116,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
       .field('category', product.category_id)
       .field('ingredients', product.ingredients)
       .attach('avatar', getStaticFile('test-image.png'))
-      .expect(HttpStatus.BAD_REQUEST)
+      .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect(createMessages(UnknownError.message));
+      .expect(createMessages(new InternalServerErrorException().message));
     expect(createProduct).toHaveBeenCalledTimes(1);
     expect(createProduct).toHaveBeenCalledWith(productCreate);
     expect(send).toHaveBeenCalledTimes(1);

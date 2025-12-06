@@ -75,7 +75,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
     expect(send).not.toHaveBeenCalled();
   });
 
-  it(createTestName('create category failed with unknown error', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('create category failed with unknown error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockImplementation(() => {
       return throwError(() => UnknownError);
@@ -85,9 +85,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
       .post(createCategoryUrl)
       .field('name', category.name)
       .attach('avatar', getStaticFile('test-image.png'))
-      .expect(HttpStatus.BAD_REQUEST)
+      .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect(createMessages(UnknownError.message));
+      .expect(createMessages(new InternalServerErrorException().message));
     expect(createCategory).toHaveBeenCalledTimes(1);
     expect(createCategory).toHaveBeenCalledWith(categoryBody);
     expect(send).toHaveBeenCalledTimes(1);

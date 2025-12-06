@@ -61,7 +61,7 @@ export default (prisma: PrismaClient) => ({
       user_id: Date.now().toString(),
       ...args.data,
       password,
-      reset_password_token: signingAdminResetPasswordToken(args.data.email),
+      reset_password_token: signingAdminResetPasswordToken({ email: args.data.email, password: firstTimePassword }),
     };
 
     const user = await query(args);
@@ -70,5 +70,58 @@ export default (prisma: PrismaClient) => ({
       ...user,
       plain_password: firstTimePassword,
     };
+  },
+  update: async ({ args, query }: PrismaUserCreateParameter): Promise<UserCreatedType> => {
+    if (Object.hasOwn(args.data, 'sex')) {
+      if (!SEX_VALID.includes(args.data.sex!)) {
+        throw new BadRequestException(createMessage(USER.YOUR_GENDER_INVALID));
+      }
+    }
+
+    if (Object.hasOwn(args.data, 'power')) {
+      if (!POWER_VALID.includes(args.data.power!)) {
+        throw new BadRequestException(createMessage(USER.YOUR_POWER_INVALID));
+      }
+    }
+
+    if (Object.hasOwn(args.data, 'email')) {
+      const count = await prisma.user.count({
+        where: {
+          email: args.data.email,
+        },
+      });
+
+      if (count > 0) {
+        throw new UnauthorizedException(createMessage(USER.EMAIL_REGIS_ALREADY_EXIST));
+      }
+    }
+
+    if (Object.hasOwn(args.data, 'phone')) {
+      const count = await prisma.user.count({
+        where: {
+          phone: args.data.phone,
+        },
+      });
+
+      if (count > 0) {
+        throw new UnauthorizedException(createMessage(USER.PHONE_ALREADY_EXIST));
+      }
+    }
+
+    let password = '';
+    if (args.data.password) {
+      password = await passwordHashing(args.data.password);
+    }
+
+    if (password) {
+      args.data = {
+        ...args.data,
+        password,
+      };
+    }
+
+    const user = await query(args);
+
+    return user;
   },
 });

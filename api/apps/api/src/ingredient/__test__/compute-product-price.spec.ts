@@ -1,6 +1,6 @@
 import TestAgent from 'supertest/lib/agent';
 import { of, throwError } from 'rxjs';
-import { HttpStatus, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, HttpStatus, InternalServerErrorException } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Unit } from 'generated/prisma';
 import { createDescribeTest, createTestName } from '@share/test/helpers';
@@ -103,16 +103,16 @@ describe(createDescribeTest(HTTP_METHOD.POST, computeProductPriceUrl), () => {
     expect(send).not.toHaveBeenCalled();
   });
 
-  it(createTestName('compute product price failed with unknown error', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('compute product price failed with unknown error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
     const computeProductPrice = jest.spyOn(ingredientService, 'computeProductPrice');
     await api
       .post(computeProductPriceUrl)
       .send(requestBody)
-      .expect(HttpStatus.BAD_REQUEST)
+      .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect(createMessages(UnknownError.message));
+      .expect(createMessages(new InternalServerErrorException().message));
     expect(computeProductPrice).toHaveBeenCalledTimes(1);
     expect(computeProductPrice).toHaveBeenCalledWith(requestBody);
     expect(send).toHaveBeenCalledTimes(1);
@@ -140,7 +140,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, computeProductPriceUrl), () => {
     createTestName('compute product price failed with database disconnect error', HttpStatus.BAD_REQUEST),
     async () => {
       expect.hasAssertions();
-      const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => PrismaDisconnectError));
+      const send = jest
+        .spyOn(clientProxy, 'send')
+        .mockReturnValue(throwError(() => new BadRequestException(PrismaDisconnectError.message)));
       const computeProductPrice = jest.spyOn(ingredientService, 'computeProductPrice');
       await api
         .post(computeProductPriceUrl)

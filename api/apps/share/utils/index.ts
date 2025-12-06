@@ -4,6 +4,7 @@ import {
   passwordHashing,
   autoGeneratePassword,
   signingAdminResetPasswordToken,
+  verifyAdminResetPasswordToken,
   getAdminResetPasswordLink,
   comparePassword,
 } from './auth';
@@ -33,7 +34,7 @@ const convertFileToBase64 = (file: Express.Multer.File): string =>
  * @param {*[]} array - An array checking.
  * @returns {boolean} - The checking result.
  */
-const checkArrayHaveValues = (array: any[]) => Array.isArray(array) && array.length > 0;
+const checkArrayHaveValues = (array: any[]): boolean => Array.isArray(array) && array.length > 0;
 
 /**
  * Return a skip property.
@@ -42,7 +43,7 @@ const checkArrayHaveValues = (array: any[]) => Array.isArray(array) && array.len
  * @param {number} pageNumber - Page number.
  * @returns {number} - A skip property.
  */
-const calcSkip = (pageSize: number, pageNumber: number) => (pageNumber - 1) * pageSize;
+const calcSkip = (pageSize: number, pageNumber: number): number => (pageNumber - 1) * pageSize;
 
 /**
  * Get all errors message.
@@ -156,6 +157,7 @@ export {
   passwordHashing,
   autoGeneratePassword,
   signingAdminResetPasswordToken,
+  verifyAdminResetPasswordToken,
   getAdminResetPasswordLink,
   comparePassword,
   calcSkip,

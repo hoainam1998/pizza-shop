@@ -55,6 +55,9 @@ describe('login', () => {
       where: {
         email: loginInfo.email,
       },
+      omit: {
+        phone: true,
+      },
     });
     expect(comparePassword).toHaveBeenCalledTimes(1);
     expect(comparePassword).toHaveBeenCalledWith(loginInfo.password, user.password);
@@ -77,6 +80,9 @@ describe('login', () => {
     expect(findFirstOrThrow).toHaveBeenCalledWith({
       where: {
         email: loginInfo.email,
+      },
+      omit: {
+        phone: true,
       },
     });
     expect(comparePassword).not.toHaveBeenCalled();
@@ -102,6 +108,9 @@ describe('login', () => {
       where: {
         email: loginInfo.email,
       },
+      omit: {
+        phone: true,
+      },
     });
     expect(comparePassword).not.toHaveBeenCalled();
     expect(logMethod).not.toHaveBeenCalled();
@@ -124,6 +133,9 @@ describe('login', () => {
     expect(findFirstOrThrow).toHaveBeenCalledWith({
       where: {
         email: loginInfo.email,
+      },
+      omit: {
+        phone: true,
       },
     });
     expect(comparePassword).toHaveBeenCalledTimes(1);
@@ -151,6 +163,9 @@ describe('login', () => {
     expect(findFirstOrThrow).toHaveBeenCalledWith({
       where: {
         email: loginInfo.email,
+      },
+      omit: {
+        phone: true,
       },
     });
     expect(comparePassword).not.toHaveBeenCalled();

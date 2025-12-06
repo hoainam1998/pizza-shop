@@ -47,6 +47,7 @@ const requestBody = {
   sex: user.sex,
 };
 const signupUser = instanceToPlain(plainToInstance(SignupDTO, requestBody));
+
 beforeEach(async () => {
   const requestTest = await startUp(MockUserModule);
   api = requestTest.api;
@@ -124,7 +125,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, signupUrl), () => {
     expect(sendPassword).not.toHaveBeenCalled();
   });
 
-  it(createTestName('signup failed with unknown error', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('signup failed with unknown error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
     const sendPassword = jest.spyOn(sendEmailService, 'sendPassword');
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
@@ -133,9 +134,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, signupUrl), () => {
       .post(signupUrl)
       .set('mock-session', JSON.stringify({ canSignup: true }))
       .send(requestBody)
-      .expect(HttpStatus.BAD_REQUEST)
+      .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect(createMessages(UnknownError.message));
+      .expect(createMessages(new InternalServerErrorException().message));
     expect(signupService).toHaveBeenCalledTimes(1);
     expect(signupService).toHaveBeenCalledWith(signupUser);
     expect(send).toHaveBeenCalledTimes(1);
