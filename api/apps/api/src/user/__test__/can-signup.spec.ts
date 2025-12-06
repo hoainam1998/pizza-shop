@@ -53,15 +53,15 @@ describe(createDescribeTest(HTTP_METHOD.GET, canSignupUrl), () => {
     expect(send).toHaveBeenCalledWith(canSignupPattern, {});
   });
 
-  it(createTestName('can signup failed with unknown error', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('can signup failed with unknown error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
     const canSignupService = jest.spyOn(userService, 'canSignup');
     await api
       .get(canSignupUrl)
-      .expect(HttpStatus.BAD_REQUEST)
+      .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect(createMessages(UnknownError.message));
+      .expect(createMessages(new InternalServerErrorException().message));
     expect(canSignupService).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(canSignupPattern, {});

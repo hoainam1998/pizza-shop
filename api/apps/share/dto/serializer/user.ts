@@ -29,10 +29,11 @@ export class LoginSerializer extends Validator {
   @IsString()
   email: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   avatar: string;
 
+  @IsOptional()
   @IsPhoneNumber('VN')
   phone: string;
 
@@ -43,6 +44,7 @@ export class LoginSerializer extends Validator {
   power: number;
 
   @Exclude({ toPlainOnly: true })
+  @IsOptional()
   @IsString()
   reset_password_token: string;
 
@@ -61,6 +63,7 @@ export class LoginSerializer extends Validator {
     return this.last_name;
   }
 
+  @IsOptional()
   @Expose({ toPlainOnly: true })
   get resetPasswordToken() {
     return this.reset_password_token;

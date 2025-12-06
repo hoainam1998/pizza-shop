@@ -81,11 +81,11 @@ model user {
   first_name           String  @db.VarChar(200)
   last_name            String  @db.VarChar(20)
   avatar               String? @db.Text
-  password             String  @db.VarChar(10)
+  password             String  @unique     @db.VarChar(100)
   sex                  Int     @default(0) @db.UnsignedTinyInt
   power                Int     @default(0) @db.UnsignedTinyInt
-  phone                String  @db.VarChar(11)
-  email                String  @db.VarChar(100)
+  phone                String  @unique     @db.VarChar(11)
+  email                String  @unique     @db.VarChar(100)
   reset_password_token String? @db.Text
   bill                 bill[]
 

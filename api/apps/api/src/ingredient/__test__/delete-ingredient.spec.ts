@@ -96,14 +96,14 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, baseUrl), () => {
     expect(send).toHaveBeenCalledWith(deleteIngredientPattern, ingredientId);
   });
 
-  it(createTestName('delete ingredient failed with unknown error', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('delete ingredient failed with unknown error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
     const deleteIngredient = jest.spyOn(ingredientService, 'deleteIngredient');
     await api
       .delete(deleteIngredientUrl)
-      .expect(HttpStatus.BAD_REQUEST)
+      .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect(createMessages(UnknownError.message));
+      .expect(createMessages(new InternalServerErrorException().message));
     expect(deleteIngredient).toHaveBeenCalledTimes(1);
     expect(deleteIngredient).toHaveBeenCalledWith(ingredientId);
     expect(send).toHaveBeenCalledTimes(1);

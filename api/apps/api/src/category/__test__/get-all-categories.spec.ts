@@ -107,7 +107,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
     expect(logError).not.toHaveBeenCalled();
   });
 
-  it(createTestName('get all categories failed with unknown error', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('get all categories failed with unknown error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
     const logError = jest.spyOn(categoryController as any, 'logError');
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
@@ -115,9 +115,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
     await api
       .post(getAllCategoriesUrl)
       .send(getAllCategoriesRequestBody)
-      .expect(HttpStatus.BAD_REQUEST)
+      .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect(createMessages(UnknownError.message));
+      .expect(createMessages(new InternalServerErrorException().message));
     expect(getAllCategories).toHaveBeenCalledTimes(1);
     expect(getAllCategories).toHaveBeenCalledWith(getAllCategoriesRequestBody);
     expect(send).toHaveBeenCalledTimes(1);

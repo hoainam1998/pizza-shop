@@ -220,7 +220,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getIngredientUrl), () => {
     expect(logError).not.toHaveBeenCalled();
   });
 
-  it(createTestName('get ingredient failed with unknown error', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('get ingredient failed with unknown error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
     const logError = jest.spyOn(ingredientController as any, 'logError').mockImplementation(() => jest.fn());
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
@@ -228,9 +228,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, getIngredientUrl), () => {
     await api
       .post(getIngredientUrl)
       .send(getIngredientRequestBody)
-      .expect(HttpStatus.BAD_REQUEST)
+      .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect(createMessages(UnknownError.message));
+      .expect(createMessages(new InternalServerErrorException().message));
     expect(getIngredient).toHaveBeenCalledTimes(1);
     expect(getIngredient).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);

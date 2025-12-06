@@ -45,7 +45,23 @@ export class LoginInfo {
   @IsEmail()
   email: string;
 
-  @IsStrongPassword({ minLength: 8, minSymbols: 1 })
+  @IsStrongPassword({ minLength: 8, minUppercase: 0, minNumbers: 0, minSymbols: 1 })
   @Matches(new RegExp(constants.PASSWORD_PATTERN))
   password: string;
+}
+
+export class ResetPassword {
+  @IsEmail()
+  email: string;
+
+  @IsStrongPassword({ minLength: 8, minUppercase: 0, minNumbers: 0, minSymbols: 0 })
+  @Matches(new RegExp(constants.PASSWORD_PATTERN))
+  password: string;
+
+  @IsStrongPassword({ minLength: 8, minUppercase: 0, minNumbers: 0, minSymbols: 0 })
+  @Matches(new RegExp(constants.PASSWORD_PATTERN))
+  oldPassword: string;
+
+  @IsString()
+  token: string;
 }

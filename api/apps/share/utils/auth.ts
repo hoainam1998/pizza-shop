@@ -1,25 +1,45 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { AdminResetPasswordTokenPayload } from '@share/interfaces';
 const RESET_PASSWORD_URL = '{origin}/reset-password?token={token}';
 
 /**
- * Generate the new password.
+ * Verify async jwt token.
  *
- * @param {string} email - The register email.
- * @param {string} [expires='1h'] - The register email.
- * @return {string} - The reset password token.
+ * @param {string} token - The jwt reset password token.
+ * @param {string} secretKey - The secret key
+ * @returns {Promise<jwt.JwtPayload>} - The payload result.
  */
-const signingAdminResetPasswordToken = (email: string, expires: string | number = '1h'): string =>
-  jwt.sign({ email }, process.env.ADMIN_RESET_PASSWORD_SECRET_KEY!, { expiresIn: expires } as SignOptions);
+const verifyAsync = (token: string, secretKey: string): Promise<jwt.JwtPayload> => {
+  return new Promise((resolve, reject) => {
+    try {
+      resolve(jwt.verify(token, secretKey) as jwt.JwtPayload);
+    } catch (error) {
+      reject(error as Error);
+    }
+  });
+};
 
 /**
- * Verify reset password token.
+ * Signing admin reset password token.
+ *
+ * @param {AdminResetPasswordTokenPayload} payload - The register payload.
+ * @param {string} [expires='1h'] - The expired time.
+ * @return {string} - The reset password token.
+ */
+const signingAdminResetPasswordToken = (
+  payload: AdminResetPasswordTokenPayload,
+  expires: string | number = '1h',
+): string => jwt.sign(payload, process.env.ADMIN_RESET_PASSWORD_SECRET_KEY!, { expiresIn: expires } as SignOptions);
+
+/**
+ * Verify admin reset password token.
  *
  * @param {string} resetPasswordToken - The reset password token.
- * @return {object} - The verify result.
+ * @returns {Promise<jwt.JwtPayload>} - The verify result.
  */
-const verifyResetPasswordToken = (resetPasswordToken: string): jwt.JwtPayload =>
-  jwt.verify(resetPasswordToken, process.env.ADMIN_RESET_PASSWORD_SECRET_KEY!) as jwt.JwtPayload;
+const verifyAdminResetPasswordToken = (resetPasswordToken: string): Promise<jwt.JwtPayload> =>
+  verifyAsync(resetPasswordToken, process.env.ADMIN_RESET_PASSWORD_SECRET_KEY!);
 
 /**
  * Verify client reset password token.
@@ -139,7 +159,7 @@ export {
   signClientLoginToken,
   passwordHashing,
   autoGeneratePassword,
-  verifyResetPasswordToken,
+  verifyAdminResetPasswordToken,
   verifyClientResetPasswordToken,
   signLoginToken,
   verifyLoginToken,

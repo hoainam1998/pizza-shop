@@ -132,7 +132,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
     expect(logError).not.toHaveBeenCalled();
   });
 
-  it(createTestName('pagination product failed with unknown error', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('pagination product failed with unknown error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
     const logError = jest.spyOn(productController as any, 'logError');
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
@@ -140,9 +140,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
     await api
       .post(productPaginationUrl)
       .send(paginationBody)
-      .expect(HttpStatus.BAD_REQUEST)
+      .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect(createMessages(UnknownError.message));
+      .expect(createMessages(new InternalServerErrorException().message));
     expect(pagination).toHaveBeenCalledTimes(1);
     expect(pagination).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);

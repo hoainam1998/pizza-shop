@@ -8,7 +8,7 @@ import { updateCategoryPattern } from '@share/pattern';
 import { category } from '@share/test/pre-setup/mock/data/category';
 import { getStaticFile, createDescribeTest, createTestName } from '@share/test/helpers';
 import CategoryService from '../category.service';
-import { HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
@@ -76,20 +76,18 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
     expect(send).not.toHaveBeenCalled();
   });
 
-  it(createTestName('update category failed with unknown error', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('update category failed with unknown error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
-    const send = jest.spyOn(clientProxy, 'send').mockImplementation(() => {
-      return throwError(() => UnknownError);
-    });
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
     const updateCategory = jest.spyOn(categoryService, 'updateCategory');
     await api
       .put(updateCategoryUrl)
       .field('categoryId', categoryResponse.category_id)
       .field('name', category.name)
       .attach('avatar', getStaticFile('test-image.png'))
-      .expect(HttpStatus.BAD_REQUEST)
+      .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
-      .expect(createMessages(UnknownError.message));
+      .expect(createMessages(new InternalServerErrorException().message));
     expect(updateCategory).toHaveBeenCalledTimes(1);
     expect(updateCategory).toHaveBeenCalledWith(categoryResponse);
     expect(send).toHaveBeenCalledTimes(1);
@@ -181,7 +179,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
 
   it(createTestName('update category failed with database disconnect', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
-    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => PrismaDisconnectError));
+    const send = jest
+      .spyOn(clientProxy, 'send')
+      .mockReturnValue(throwError(() => new BadRequestException(PrismaDisconnectError.message)));
     const updateCategory = jest.spyOn(categoryService, 'updateCategory');
     await api
       .put(updateCategoryUrl)

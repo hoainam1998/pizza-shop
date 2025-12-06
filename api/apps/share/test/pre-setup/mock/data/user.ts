@@ -1,6 +1,7 @@
 import constants from '@share/constants';
 import { UserRequestType } from '@share/interfaces';
 import { autoGeneratePassword, signingAdminResetPasswordToken } from '@share/utils';
+const plainPassword = autoGeneratePassword();
 
 export const user: Required<UserRequestType> = {
   user_id: Date.now().toString(),
@@ -12,6 +13,6 @@ export const user: Required<UserRequestType> = {
   password: '$2b$10$Cfc',
   sex: constants.SEX.FEMALE,
   power: constants.POWER_NUMERIC.SUPER_ADMIN,
-  plain_password: autoGeneratePassword(),
-  reset_password_token: signingAdminResetPasswordToken('myemail@gmail.com'),
+  plain_password: plainPassword,
+  reset_password_token: signingAdminResetPasswordToken({ email: 'myemail@gmail.com', password: plainPassword }),
 };

@@ -16,11 +16,11 @@ export const createMessage = (message: string, errorCode?: string): MessageRespo
 /**
  * Create messages response.
  *
- * @param {string | string[]} messages - The list messages.
+ * @param {*} messages - The list messages.
  * @returns {{
  * messages: string[]
  * }} - The messages object.
  */
-export const createMessages = (messages: string | string[]): MessagesType => {
+export const createMessages = (messages: any): MessagesType => {
   return { messages: Array.isArray(messages) ? messages : [messages] };
 };

@@ -27,6 +27,7 @@ export default Object.freeze({
     CAN_NOT_SIGNUP: 'Already has a super admin. You can not signup!',
     NOT_FOUND: 'The user requirement is not found!',
     PASSWORD_NOT_MATCH: 'Your password are not match!',
+    RESET_PASSWORD_SUCCESS: 'Reset password was success!',
   },
   INGREDIENT: {
     CREATE_INGREDIENT_SUCCESS: 'Create ingredient was success!',
@@ -43,5 +44,11 @@ export default Object.freeze({
     PRODUCT_DELETED: 'The product was deleted!',
     DELETE_PRODUCT_SUCCESS: 'Delete product was success!',
     SCHEDULE_DELETE_PRODUCT_FAILED: 'Date in past. Delete product will never be fired.',
+  },
+  JWT: {
+    MALFORMED: 'The jwt token malformed!',
+    EXPIRED: 'The jwt token has been expired!',
+    INVALID: 'Invalid jwt token!',
+    UNKNOWN: 'Jwt unknown error!',
   },
 });

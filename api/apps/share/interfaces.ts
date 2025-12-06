@@ -86,3 +86,8 @@ export type MessageResponseTestingType = {
   messages: string[];
   errorCode?: string;
 };
+
+export type AdminResetPasswordTokenPayload = {
+  email: string;
+  password: string;
+};
