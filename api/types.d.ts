@@ -5,6 +5,9 @@ declare module 'express-session' {
   export interface SessionData {
     user?: {
       canSignup: boolean;
+      email?: string;
+      power?: string;
+      userId?: string;
     };
   }
 }

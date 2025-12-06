@@ -12,7 +12,7 @@ import { user } from '@share/test/pre-setup/mock/data/user';
 import { HTTP_METHOD } from '@share/enums';
 import { createDescribeTest, createTestName } from '@share/test/helpers';
 import { loginPattern } from '@share/pattern';
-import { createMessage, createMessages } from '@share/utils';
+import { createMessage, createMessages, omitFields } from '@share/utils';
 import messages from '@share/constants/messages';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { LoginInfo } from '@share/dto/validators/user.dto';
@@ -23,6 +23,7 @@ let api: TestAgent;
 let clientProxy: ClientProxy;
 let close: () => Promise<void>;
 let userService: UserService;
+
 const loginInfo: LoginInfo = {
   email: user.email,
   password: user.password,
@@ -45,13 +46,11 @@ afterEach(async () => {
 describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
   it(createTestName('login success', HttpStatus.OK), async () => {
     expect.hasAssertions();
-    const userWithoutPassword: UserRequestType = { ...user };
-    delete userWithoutPassword.password;
-    delete userWithoutPassword.plain_password;
-    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(userWithoutPassword));
+    const userExpected = omitFields(['password', 'plain_password'], user) as UserRequestType;
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(userExpected));
     const loginService = jest.spyOn(userService, 'login');
-    const loginSerializer = new LoginSerializer(userWithoutPassword);
-    await api
+    const loginSerializer = new LoginSerializer(userExpected);
+    const response = await api
       .post(loginUrl)
       .send(loginInfo)
       .expect(HttpStatus.OK)
@@ -61,6 +60,26 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
     expect(loginService).toHaveBeenCalledWith(loginInfo);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(loginPattern, loginInfo);
+    expect(response.headers['set-cookie']).not.toBeDefined();
+  });
+
+  it(createTestName('login success with session regis', HttpStatus.OK), async () => {
+    expect.hasAssertions();
+    const userExpected = omitFields(['password', 'plain_password', 'reset_password_token'], user) as UserRequestType;
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(userExpected));
+    const loginService = jest.spyOn(userService, 'login');
+    const loginSerializer = new LoginSerializer(userExpected);
+    const response = await api
+      .post(loginUrl)
+      .send(loginInfo)
+      .expect(HttpStatus.OK)
+      .expect('Content-Type', /application\/json/)
+      .expect(instanceToPlain(loginSerializer, { exposeUnsetFields: false }));
+    expect(loginService).toHaveBeenCalledTimes(1);
+    expect(loginService).toHaveBeenCalledWith(loginInfo);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledWith(loginPattern, loginInfo);
+    expect(response.headers['set-cookie']).toEqual([expect.any(String)]);
   });
 
   it(createTestName('login failed with not found error', HttpStatus.NOT_FOUND), async () => {

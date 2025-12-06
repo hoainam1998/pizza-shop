@@ -75,9 +75,10 @@ export type MessagesType = {
   messages: string[];
 };
 
-export type UserRequestType = Omit<user, 'password'> & {
+export type UserRequestType = Omit<user, 'password' | 'reset_password_token'> & {
   plain_password?: string;
   password?: string;
+  reset_password_token?: string;
 };
 
 export type UserCreateType = Pick<user, 'first_name' | 'last_name' | 'email' | 'phone' | 'sex'>;

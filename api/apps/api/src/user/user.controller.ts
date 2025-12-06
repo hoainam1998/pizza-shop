@@ -80,7 +80,7 @@ export default class UserController extends BaseController {
   @HttpCode(HttpStatus.OK)
   @Post(UserRouter.relative.login)
   @HandleHttpError
-  login(@Body() loginInfo: LoginInfo): Observable<Promise<Record<string, any>>> {
+  login(@Req() req: Express.Request, @Body() loginInfo: LoginInfo): Observable<Promise<Record<string, any>>> {
     return this.userService.login(loginInfo).pipe(
       map((user) => {
         const loginResult = new LoginSerializer(user);
@@ -89,7 +89,16 @@ export default class UserController extends BaseController {
             this.logError(errors, this.canSignup.name);
             throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
           } else {
-            return instanceToPlain(loginResult);
+            const serializerResponse = instanceToPlain(loginResult);
+            if (!serializerResponse.resetPasswordToken) {
+              req.session.user = {
+                canSignup: false,
+                email: serializerResponse.email,
+                power: serializerResponse.power,
+                userId: serializerResponse.userId,
+              };
+            }
+            return serializerResponse;
           }
         });
       }),
