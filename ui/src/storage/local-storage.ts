@@ -20,4 +20,5 @@ class LocalStorage extends Storage {
   }
 }
 
-export const AuthStorage = new LocalStorage('apiKey');
+export const AlreadyLoginStorage = new LocalStorage('already-login');
+export const CurrentRouteStorage = new LocalStorage('current-route');

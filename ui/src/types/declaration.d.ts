@@ -21,3 +21,8 @@ declare global {
     var router: Router;
   }
 };
+declare module 'vue-router' {
+  interface RouteMeta {
+    requiresAuth: boolean
+  }
+}

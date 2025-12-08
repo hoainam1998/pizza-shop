@@ -1,6 +1,6 @@
 import { RouterView } from 'vue-router';
 import type { RouterOptions } from 'vue-router';
-import paths from './paths';
+import paths from '../paths';
 import Category from '@/views/category.vue';
 import Home from '@/views/home.vue';
 import Signup from '@/views/login-group/signup.vue';
@@ -25,6 +25,7 @@ const adminRoutes: RouterOptions['routes'] = [
     name: 'home',
     component: Home,
     redirect: 'category',
+    meta: { requiresAuth: true },
     children: [
       {
         path: `${paths.HOME.CATEGORY}`,
