@@ -74,25 +74,25 @@ const checkPhoneNumber = (rule: any, value: string, callback: any): any | void =
 const rules = reactive<FormRules<SignupModelType>>({
   firstName: [
     {
-      required: true, message: 'First name is required!', trigger: 'change'
+      required: true, message: 'First name is required!', trigger: 'change',
     }
   ],
   lastName: [
     {
-      required: true, message: 'Last name is required!', trigger: 'change'
+      required: true, message: 'Last name is required!', trigger: 'change',
     }
   ],
   email: [
     {
-      required: true, message: 'Email is required!', trigger: 'change'
+      required: true, message: 'Email is required!', trigger: 'change',
     },
     {
-      type: 'email', required: true, message: 'Please input correct email address', trigger: 'blur'
+      type: 'email', required: true, message: 'Please input correct email address', trigger: 'blur',
     }
   ],
   phone: [
     {
-      required: true, message: 'Phone is required!', trigger: 'change'
+      required: true, message: 'Phone is required!', trigger: 'change',
     },
     {
       validator: checkPhoneNumber,

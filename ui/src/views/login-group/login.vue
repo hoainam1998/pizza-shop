@@ -37,6 +37,7 @@ import PsPasswordInput from '@/components/inputs/password.vue';
 import PsEmailInput from '@/components/inputs/email.vue';
 import constants from '@/constants';
 import paths from '@/router/paths';
+import {auth as authStore } from '@/composables/store';
 import useWrapperRouter from '@/composables/use-router';
 import { UserService } from '@/services';
 import { generateResetPasswordLink, showErrorNotification } from '@/utils';
@@ -85,6 +86,7 @@ const onSubmit = async (): Promise<void> => {
             if (response.data.isFirstTime) {
               push(generateResetPasswordLink(response.data.resetPasswordToken));
             } else {
+              authStore.setAlreadyLogin(true);
               push(`${paths.HOME}`);
             }
           }).catch((error: AxiosError<MessageResponseType>) => {

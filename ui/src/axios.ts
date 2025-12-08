@@ -1,7 +1,7 @@
 import axios, { AxiosError, HttpStatusCode } from 'axios';
 import paths from './router/paths';
 import { showErrorNotification } from './utils';
-import loadingStore from './composables/store/loading';
+import { loading as loadingStore} from './composables/store';
 
 /**
  * Force logout.
