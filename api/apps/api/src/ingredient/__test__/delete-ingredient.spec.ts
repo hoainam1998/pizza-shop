@@ -1,14 +1,22 @@
 import TestAgent from 'supertest/lib/agent';
 import { expect } from '@jest/globals';
 import { of, throwError } from 'rxjs';
-import { BadRequestException, HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  InternalServerErrorException,
+  NotFoundException,
+  RequestMethod,
+} from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { createDescribeTest, createTestName } from '@share/test/helpers';
+import { createDescribeTest, createTestName, getMockModule } from '@share/test/helpers';
 import { HTTP_METHOD } from '@share/enums';
 import IngredientService from '../ingredient.service';
+import IngredientModule from '../ingredient.module';
 import { deleteIngredientPattern } from '@share/pattern';
 import startUp from './pre-setup';
 import { ingredient } from '@share/test/pre-setup/mock/data/ingredient';
+import { sessionPayload } from '@share/test/pre-setup/mock/data/user';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import messages from '@share/constants/messages';
@@ -18,13 +26,18 @@ const ingredientId = ingredient.ingredient_id;
 const baseUrl = IngredientRouter.absolute.delete;
 const deleteIngredientUrl = `${baseUrl}/${ingredientId}`;
 
+const MockIngredientModule = getMockModule(IngredientModule, {
+  path: `${baseUrl}/*`,
+  method: RequestMethod.DELETE,
+});
+
 let api: TestAgent;
 let clientProxy: ClientProxy;
 let close: () => Promise<void>;
 let ingredientService: IngredientService;
 
 beforeEach(async () => {
-  const requestTest = await startUp();
+  const requestTest = await startUp(MockIngredientModule);
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;
   close = () => requestTest.app.close();
@@ -43,6 +56,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, baseUrl), () => {
     const deleteIngredient = jest.spyOn(ingredientService, 'deleteIngredient');
     await api
       .delete(deleteIngredientUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.INGREDIENT.DELETE_INGREDIENT_SUCCESS));
@@ -52,11 +66,24 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, baseUrl), () => {
     expect(send).toHaveBeenCalledWith(deleteIngredientPattern, ingredientId);
   });
 
+  it(createTestName('delete ingredient failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(ingredient));
+    const deleteIngredient = jest.spyOn(ingredientService, 'deleteIngredient');
+    await api
+      .delete(deleteIngredientUrl)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.DID_NOT_LOGIN));
+    expect(deleteIngredient).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
   it(createTestName('delete ingredient failed with invalid id', HttpStatus.BAD_REQUEST), async () => {
     const send = jest.spyOn(clientProxy, 'send');
     const deleteIngredient = jest.spyOn(ingredientService, 'deleteIngredient');
     await api
       .delete(`${baseUrl}/xyz`)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.VALIDATE_ID_FAIL));
@@ -71,6 +98,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, baseUrl), () => {
     const deleteIngredient = jest.spyOn(ingredientService, 'deleteIngredient');
     await api
       .delete(deleteIngredientUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.INGREDIENT.NOT_FOUND));
@@ -87,6 +115,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, baseUrl), () => {
     const deleteIngredient = jest.spyOn(ingredientService, 'deleteIngredient');
     await api
       .delete(deleteIngredientUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.COMMON_ERROR));
@@ -101,6 +130,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, baseUrl), () => {
     const deleteIngredient = jest.spyOn(ingredientService, 'deleteIngredient');
     await api
       .delete(deleteIngredientUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(new InternalServerErrorException().message));
@@ -117,6 +147,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, baseUrl), () => {
     const deleteIngredient = jest.spyOn(ingredientService, 'deleteIngredient');
     await api
       .delete(deleteIngredientUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
@@ -132,6 +163,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, baseUrl), () => {
     const deleteIngredient = jest.spyOn(ingredientService, 'deleteIngredient');
     await api
       .delete(deleteIngredientUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(serverError.message));

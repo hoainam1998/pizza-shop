@@ -1,4 +1,10 @@
-import { BadRequestException, HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  InternalServerErrorException,
+  NotFoundException,
+  RequestMethod,
+} from '@nestjs/common';
 import { of, throwError } from 'rxjs';
 import TestAgent from 'supertest/lib/agent';
 import { expect } from '@jest/globals';
@@ -6,8 +12,10 @@ import { ClientProxy } from '@nestjs/microservices';
 import startUp from './pre-setup';
 import { deleteCategoryPattern } from '@share/pattern';
 import { category } from '@share/test/pre-setup/mock/data/category';
-import { createDescribeTest, createTestName } from '@share/test/helpers';
+import { sessionPayload } from '@share/test/pre-setup/mock/data/user';
+import { createDescribeTest, createTestName, getMockModule } from '@share/test/helpers';
 import CategoryService from '../category.service';
+import CategoryModule from '../category.module';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
@@ -17,13 +25,18 @@ const deleteCategoryBaseUrl = CategoryRouter.absolute.delete;
 const categoryId: string = Date.now().toString();
 const deleteCategoryUrl: string = `${deleteCategoryBaseUrl}/${categoryId}`;
 
+const MockCategoryModule = getMockModule(CategoryModule, {
+  path: `${deleteCategoryBaseUrl}/*`,
+  method: RequestMethod.DELETE,
+});
+
 let api: TestAgent;
 let clientProxy: ClientProxy;
 let close: () => Promise<void>;
 let categoryService: CategoryService;
 
 beforeEach(async () => {
-  const requestTest = await startUp();
+  const requestTest = await startUp(MockCategoryModule);
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;
   close = () => requestTest.app.close();
@@ -43,6 +56,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteCategoryBaseUrl), () => {
     const deleteCategory = jest.spyOn(categoryService, 'deleteCategory');
     await api
       .delete(deleteCategoryUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.CATEGORY.DELETE_CATEGORY_SUCCESS));
@@ -52,12 +66,26 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteCategoryBaseUrl), () => {
     expect(send).toHaveBeenCalledWith(deleteCategoryPattern, categoryId);
   });
 
+  it(createTestName('delete category failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(category));
+    const deleteCategory = jest.spyOn(categoryService, 'deleteCategory');
+    await api
+      .delete(deleteCategoryUrl)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.DID_NOT_LOGIN));
+    expect(deleteCategory).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
   it(createTestName('delete category failed with invalid id', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(category));
     const deleteCategory = jest.spyOn(categoryService, 'deleteCategory');
     await api
       .delete('/category/delete/xzy')
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.VALIDATE_ID_FAIL));
@@ -73,6 +101,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteCategoryBaseUrl), () => {
     const deleteCategory = jest.spyOn(categoryService, 'deleteCategory');
     await api
       .delete(deleteCategoryUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.COMMON_ERROR));
@@ -90,6 +119,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteCategoryBaseUrl), () => {
     const deleteCategory = jest.spyOn(categoryService, 'deleteCategory');
     await api
       .delete(deleteCategoryUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.PRODUCT.NOT_FOUND));
@@ -107,6 +137,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteCategoryBaseUrl), () => {
     const deleteCategory = jest.spyOn(categoryService, 'deleteCategory');
     await api
       .delete(deleteCategoryUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
@@ -123,6 +154,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteCategoryBaseUrl), () => {
     const deleteCategory = jest.spyOn(categoryService, 'deleteCategory');
     await api
       .delete(deleteCategoryUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(serverError.message));

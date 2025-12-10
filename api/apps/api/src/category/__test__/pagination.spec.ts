@@ -1,4 +1,10 @@
-import { BadRequestException, HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  InternalServerErrorException,
+  NotFoundException,
+  RequestMethod,
+} from '@nestjs/common';
 import { of, throwError } from 'rxjs';
 import { expect } from '@jest/globals';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
@@ -10,15 +16,22 @@ import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { paginationPattern } from '@share/pattern';
 import { createCategoryList } from '@share/test/pre-setup/mock/data/category';
-import { createDescribeTest, createTestName } from '@share/test/helpers';
+import { sessionPayload } from '@share/test/pre-setup/mock/data/user';
+import { createDescribeTest, createTestName, getMockModule } from '@share/test/helpers';
 import CategoryService from '../category.service';
 import CategoryController from '../category.controller';
+import CategoryModule from '../category.module';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { CategoryPaginationSerializer } from '@share/dto/serializer/category';
 import { createMessages } from '@share/utils';
 import { CategoryRouter } from '@share/router';
 const paginationCategoryUrl: string = CategoryRouter.absolute.pagination;
+
+const MockCategoryModule = getMockModule(CategoryModule, {
+  path: paginationCategoryUrl,
+  method: RequestMethod.POST,
+});
 
 const paginationBody = {
   pageSize: 10,
@@ -57,7 +70,7 @@ let categoryService: CategoryService;
 let categoryController: CategoryController;
 
 beforeEach(async () => {
-  const requestTest = await startUp();
+  const requestTest = await startUp(MockCategoryModule);
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;
   close = () => requestTest.app.close();
@@ -79,6 +92,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, paginationCategoryUrl), () => {
     const paginationService = jest.spyOn(categoryService, 'pagination');
     await api
       .post(paginationCategoryUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(paginationBody)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
@@ -87,6 +101,22 @@ describe(createDescribeTest(HTTP_METHOD.POST, paginationCategoryUrl), () => {
     expect(paginationService).toHaveBeenCalledWith(paginationBodyWidthId);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(paginationPattern, paginationBodyWidthId);
+    expect(logError).not.toHaveBeenCalled();
+  });
+
+  it(createTestName('pagination category failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const logError = jest.spyOn(categoryController as any, 'logError');
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(responseData));
+    const paginationService = jest.spyOn(categoryService, 'pagination');
+    await api
+      .post(paginationCategoryUrl)
+      .send(paginationBody)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.DID_NOT_LOGIN));
+    expect(paginationService).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
     expect(logError).not.toHaveBeenCalled();
   });
 
@@ -99,6 +129,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, paginationCategoryUrl), () => {
     const paginationService = jest.spyOn(categoryService, 'pagination');
     await api
       .post(paginationCategoryUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(paginationBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -124,6 +155,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, paginationCategoryUrl), () => {
     const paginationService = jest.spyOn(categoryService, 'pagination');
     await api
       .post(paginationCategoryUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(paginationBody)
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
@@ -142,6 +174,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, paginationCategoryUrl), () => {
     const paginationService = jest.spyOn(categoryService, 'pagination');
     await api
       .post(paginationCategoryUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(paginationBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
@@ -161,6 +194,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, paginationCategoryUrl), () => {
     const paginationService = jest.spyOn(categoryService, 'pagination');
     await api
       .post(paginationCategoryUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(paginationBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
@@ -183,6 +217,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, paginationCategoryUrl), () => {
     const paginationService = jest.spyOn(categoryService, 'pagination');
     const response = await api
       .post(paginationCategoryUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(missingQueryFieldBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
@@ -205,6 +240,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, paginationCategoryUrl), () => {
     const paginationService = jest.spyOn(categoryService, 'pagination');
     const response = await api
       .post(paginationCategoryUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(undefinedFieldRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
@@ -223,6 +259,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, paginationCategoryUrl), () => {
     const paginationService = jest.spyOn(categoryService, 'pagination');
     await api
       .post(paginationCategoryUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(paginationBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -258,6 +295,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, paginationCategoryUrl), () => {
     const paginationService = jest.spyOn(categoryService, 'pagination');
     await api
       .post(paginationCategoryUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(paginationEmptyQueryRequestBody)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)

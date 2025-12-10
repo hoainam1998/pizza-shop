@@ -1,4 +1,10 @@
-import { BadRequestException, HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  InternalServerErrorException,
+  NotFoundException,
+  RequestMethod,
+} from '@nestjs/common';
 import { of, throwError } from 'rxjs';
 import { expect } from '@jest/globals';
 import { ValidationError } from 'class-validator';
@@ -7,12 +13,14 @@ import { ClientProxy } from '@nestjs/microservices';
 import TestAgent from 'supertest/lib/agent';
 import startUp from './pre-setup';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
+import { sessionPayload } from '@share/test/pre-setup/mock/data/user';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { getAllIngredientsPattern } from '@share/pattern';
 import { createIngredients } from '@share/test/pre-setup/mock/data/ingredient';
-import { createDescribeTest, createTestName } from '@share/test/helpers';
+import { createDescribeTest, createTestName, getMockModule } from '@share/test/helpers';
 import IngredientService from '../ingredient.service';
 import IngredientController from '../ingredient.controller';
+import IngredientModule from '../ingredient.module';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { createMessages } from '@share/utils';
@@ -20,6 +28,11 @@ import { IngredientSelect } from '@share/dto/validators/ingredient.dto';
 import { Ingredient, IngredientList } from '@share/dto/serializer/ingredient';
 import { IngredientRouter } from '@share/router';
 const getAllIngredientsUrl: string = IngredientRouter.absolute.all;
+
+const MockIngredientModule = getMockModule(IngredientModule, {
+  path: getAllIngredientsUrl,
+  method: RequestMethod.POST,
+});
 
 const getAllIngredientsRequestBody = {
   name: true,
@@ -50,7 +63,7 @@ let ingredientService: IngredientService;
 let ingredientController: IngredientController;
 
 beforeEach(async () => {
-  const requestTest = await startUp();
+  const requestTest = await startUp(MockIngredientModule);
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;
   close = () => requestTest.app.close();
@@ -65,7 +78,7 @@ afterEach(async () => {
 });
 
 describe(createDescribeTest(HTTP_METHOD.POST, getAllIngredientsUrl), () => {
-  it(createTestName('get ingredient success without attach unit and units field', HttpStatus.OK), async () => {
+  it(createTestName('get all ingredient success without attach unit and units field', HttpStatus.OK), async () => {
     expect.hasAssertions();
     const select = {
       name: true,
@@ -82,6 +95,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllIngredientsUrl), () => {
     const getAllIngredients = jest.spyOn(ingredientService, 'getAllIngredients');
     await api
       .post(getAllIngredientsUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(select)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
@@ -92,7 +106,30 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllIngredientsUrl), () => {
     expect(send).toHaveBeenCalledWith(getAllIngredientsPattern, plainSelect);
   });
 
-  it(createTestName('get ingredient success with attach unit field', HttpStatus.OK), async () => {
+  it(createTestName('get all ingredient failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const select = {
+      name: true,
+      avatar: true,
+      count: true,
+      expiredTime: true,
+      status: true,
+      price: true,
+      disabled: true,
+    };
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(ingredients));
+    const getAllIngredients = jest.spyOn(ingredientService, 'getAllIngredients');
+    await api
+      .post(getAllIngredientsUrl)
+      .send(select)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.DID_NOT_LOGIN));
+    expect(getAllIngredients).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it(createTestName('get all ingredient success with attach unit field', HttpStatus.OK), async () => {
     expect.hasAssertions();
     const select = {
       unit: true,
@@ -103,6 +140,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllIngredientsUrl), () => {
     const getAllIngredients = jest.spyOn(ingredientService, 'getAllIngredients');
     await api
       .post(getAllIngredientsUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(select)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
@@ -124,6 +162,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllIngredientsUrl), () => {
     const getAllIngredients = jest.spyOn(ingredientService, 'getAllIngredients');
     await api
       .post(getAllIngredientsUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(select)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
@@ -141,6 +180,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllIngredientsUrl), () => {
     const getAllIngredients = jest.spyOn(ingredientService, 'getAllIngredients');
     await api
       .post(getAllIngredientsUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getAllIngredientsRequestBody)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
@@ -160,6 +200,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllIngredientsUrl), () => {
     const getAllIngredients = jest.spyOn(ingredientService, 'getAllIngredients');
     await api
       .post(getAllIngredientsUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getAllIngredientsRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -179,6 +220,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllIngredientsUrl), () => {
     const getAllIngredients = jest.spyOn(ingredientService, 'getAllIngredients');
     await api
       .post(getAllIngredientsUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getAllIngredientsRequestBody)
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
@@ -197,6 +239,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllIngredientsUrl), () => {
     const getAllIngredients = jest.spyOn(ingredientService, 'getAllIngredients');
     await api
       .post(getAllIngredientsUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getAllIngredientsRequestBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
@@ -215,6 +258,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllIngredientsUrl), () => {
     const getAllIngredients = jest.spyOn(ingredientService, 'getAllIngredients');
     await api
       .post(getAllIngredientsUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getAllIngredientsRequestBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
@@ -230,7 +274,12 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllIngredientsUrl), () => {
     const ingredientListResponse = getIngredientsResponse(['unit', 'units']);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(ingredients));
     const getAllIngredients = jest.spyOn(ingredientService, 'getAllIngredients');
-    await api.post(getAllIngredientsUrl).send({}).expect(HttpStatus.OK).expect(ingredientListResponse);
+    await api
+      .post(getAllIngredientsUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
+      .send({})
+      .expect(HttpStatus.OK)
+      .expect(ingredientListResponse);
     expect(getAllIngredients).toHaveBeenCalledTimes(1);
     expect(getAllIngredients).toHaveBeenCalledWith(plainSelect);
     expect(send).toHaveBeenCalledTimes(1);
@@ -247,6 +296,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllIngredientsUrl), () => {
     const getAllIngredients = jest.spyOn(ingredientService, 'getAllIngredients');
     const response = await api
       .post(getAllIngredientsUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(undefinedFieldRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
@@ -263,6 +313,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllIngredientsUrl), () => {
     const getAllIngredients = jest.spyOn(ingredientService, 'getAllIngredients');
     await api
       .post(getAllIngredientsUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getAllIngredientsRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)

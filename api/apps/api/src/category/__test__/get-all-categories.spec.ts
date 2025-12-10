@@ -1,4 +1,10 @@
-import { BadRequestException, HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  InternalServerErrorException,
+  NotFoundException,
+  RequestMethod,
+} from '@nestjs/common';
 import { of, throwError } from 'rxjs';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { ValidationError } from 'class-validator';
@@ -10,15 +16,22 @@ import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { getAllCategoriesPattern } from '@share/pattern';
 import { createCategoryList } from '@share/test/pre-setup/mock/data/category';
-import { createDescribeTest, createTestName } from '@share/test/helpers';
+import { sessionPayload } from '@share/test/pre-setup/mock/data/user';
+import { createDescribeTest, createTestName, getMockModule } from '@share/test/helpers';
 import CategoryService from '../category.service';
 import CategoryController from '../category.controller';
+import CategoryModule from '../category.module';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { Categories, CategoryDetailSerializer } from '@share/dto/serializer/category';
 import { createMessages } from '@share/utils';
 import { CategoryRouter } from '@share/router';
 const getAllCategoriesUrl: string = CategoryRouter.absolute.all;
+
+const MockCategoryModule = getMockModule(CategoryModule, {
+  path: getAllCategoriesUrl,
+  method: RequestMethod.POST,
+});
 
 const getAllCategoriesRequestBody = {
   name: true,
@@ -34,7 +47,7 @@ let categoryService: CategoryService;
 let categoryController: CategoryController;
 
 beforeEach(async () => {
-  const requestTest = await startUp();
+  const requestTest = await startUp(MockCategoryModule);
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;
   close = () => requestTest.app.close();
@@ -57,6 +70,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
     const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
     await api
       .post(getAllCategoriesUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getAllCategoriesRequestBody)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
@@ -65,6 +79,22 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
     expect(getAllCategories).toHaveBeenCalledWith(getAllCategoriesRequestBody);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(getAllCategoriesPattern, getAllCategoriesRequestBody);
+    expect(logError).not.toHaveBeenCalled();
+  });
+
+  it(createTestName('get all categories failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const logError = jest.spyOn(categoryController as any, 'logError');
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(categories));
+    const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
+    await api
+      .post(getAllCategoriesUrl)
+      .send(getAllCategoriesRequestBody)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.DID_NOT_LOGIN));
+    expect(getAllCategories).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
     expect(logError).not.toHaveBeenCalled();
   });
 
@@ -77,6 +107,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
     const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
     await api
       .post(getAllCategoriesUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getAllCategoriesRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -96,6 +127,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
     const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
     await api
       .post(getAllCategoriesUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getAllCategoriesRequestBody)
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
@@ -114,6 +146,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
     const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
     await api
       .post(getAllCategoriesUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getAllCategoriesRequestBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
@@ -133,6 +166,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
     const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
     await api
       .post(getAllCategoriesUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getAllCategoriesRequestBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
@@ -160,6 +194,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
     };
     await api
       .post(getAllCategoriesUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send({})
       .expect(HttpStatus.OK)
       .expect(instanceToPlain(plainToInstance(CategoryDetailSerializer, categoriesObj.List)));
@@ -181,6 +216,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
     const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
     const response = await api
       .post(getAllCategoriesUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(undefinedFieldRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
@@ -199,6 +235,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
     const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
     await api
       .post(getAllCategoriesUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getAllCategoriesRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
