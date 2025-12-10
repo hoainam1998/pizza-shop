@@ -2,14 +2,16 @@ import { of, throwError } from 'rxjs';
 import { expect } from '@jest/globals';
 import TestAgent from 'supertest/lib/agent';
 import { ClientProxy } from '@nestjs/microservices';
+import { BadRequestException, HttpStatus, InternalServerErrorException, RequestMethod } from '@nestjs/common';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import startUp from './pre-setup';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { createProductPattern } from '@share/pattern';
 import { product } from '@share/test/pre-setup/mock/data/product';
-import { getStaticFile, createDescribeTest, createTestName } from '@share/test/helpers';
+import { sessionPayload } from '@share/test/pre-setup/mock/data/user';
+import { getStaticFile, createDescribeTest, createTestName, getMockModule } from '@share/test/helpers';
 import ProductService from '../product.service';
-import { BadRequestException, HttpStatus, InternalServerErrorException } from '@nestjs/common';
+import ProductModule from '../product.module';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
@@ -17,6 +19,8 @@ import { ProductCreate, ProductCreateTransform } from '@share/dto/validators/pro
 import { createMessages } from '@share/utils';
 import { ProductRouter } from '@share/router';
 const createProductUrl = ProductRouter.absolute.create;
+
+const MockProductModule = getMockModule(ProductModule, { path: createProductUrl, method: RequestMethod.POST });
 
 const productRequestBody = {
   productId: product.product_id,
@@ -30,36 +34,37 @@ const productRequestBody = {
   ingredients: product.ingredients,
 };
 
+let api: TestAgent;
+let clientProxy: ClientProxy;
+let close: () => Promise<void>;
+let productService: ProductService;
+
+beforeEach(async () => {
+  const requestTest = await startUp(MockProductModule);
+  api = requestTest.api;
+  clientProxy = requestTest.clientProxy;
+  close = () => requestTest.app.close();
+  productService = requestTest.app.get(ProductService);
+});
+
+afterEach(async () => {
+  if (close) {
+    await close();
+  }
+});
+
+const productBody = instanceToPlain(plainToInstance(ProductCreate, productRequestBody));
+const productCreate: any = plainToInstance(ProductCreateTransform, productBody, { groups: ['create'] });
+productCreate.avatar = expect.toBeImageBase64();
+
 describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
-  let api: TestAgent;
-  let clientProxy: ClientProxy;
-  let close: () => Promise<void>;
-  let productService: ProductService;
-
-  beforeEach(async () => {
-    const requestTest = await startUp();
-    api = requestTest.api;
-    clientProxy = requestTest.clientProxy;
-    close = () => requestTest.app.close();
-    productService = requestTest.app.get(ProductService);
-  });
-
-  afterEach(async () => {
-    if (close) {
-      await close();
-    }
-  });
-
-  const productBody = instanceToPlain(plainToInstance(ProductCreate, productRequestBody));
-  const productCreate: any = plainToInstance(ProductCreateTransform, productBody, { groups: ['create'] });
-  productCreate.avatar = expect.toBeImageBase64();
-
   it(createTestName('create product success', HttpStatus.CREATED), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
     const createProduct = jest.spyOn(productService, 'createProduct');
     await api
       .post(createProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)
@@ -78,12 +83,36 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
     expect(send).toHaveBeenCalledWith(createProductPattern, productCreate);
   });
 
+  it(createTestName('create product failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
+    const createProduct = jest.spyOn(productService, 'createProduct');
+    await api
+      .post(createProductUrl)
+      .set('Connection', 'keep-alive')
+      .field('productId', product.product_id)
+      .field('name', product.name)
+      .field('count', product.count)
+      .field('price', product.price)
+      .field('originalPrice', product.original_price)
+      .field('expiredTime', product.expired_time)
+      .field('category', product.category_id)
+      .field('ingredients', product.ingredients)
+      .attach('avatar', getStaticFile('test-image.png'))
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.DID_NOT_LOGIN));
+    expect(createProduct).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
   it(createTestName('create product failed with undefined field', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
     const createProduct = jest.spyOn(productService, 'createProduct');
     const response = await api
       .post(createProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('categoryIds', Date.now().toString())
       .field('productId', product.product_id)
       .field('name', product.name)
@@ -107,6 +136,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
     const createProduct = jest.spyOn(productService, 'createProduct');
     await api
       .post(createProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)
@@ -131,6 +161,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
     const createProduct = jest.spyOn(productService, 'createProduct');
     const response = await api
       .post(createProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', 0)
@@ -153,6 +184,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
     const createProduct = jest.spyOn(productService, 'createProduct');
     const response = await api
       .post(createProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)
@@ -177,6 +209,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
       const createProduct = jest.spyOn(productService, 'createProduct');
       const response = await api
         .post(createProductUrl)
+        .set('mock-session', JSON.stringify(sessionPayload))
         .field('productId', product.product_id)
         .field('name', product.name)
         .field('count', product.count)
@@ -201,6 +234,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
     const createProduct = jest.spyOn(productService, 'createProduct');
     await api
       .post(createProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)
@@ -223,6 +257,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
     const createProduct = jest.spyOn(productService, 'createProduct');
     await api
       .post(createProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)
@@ -245,6 +280,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
     const createProduct = jest.spyOn(productService, 'createProduct');
     const response = await api
       .post(createProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)
@@ -266,6 +302,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
     const createProduct = jest.spyOn(productService, 'createProduct');
     const response = await api
       .post(createProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('name', product.name)
       .field('count', product.count)
       .field('price', product.price)
@@ -289,6 +326,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
     const createProduct = jest.spyOn(productService, 'createProduct');
     await api
       .post(createProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)
@@ -314,6 +352,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createProductUrl), () => {
     const createProduct = jest.spyOn(productService, 'createProduct');
     await api
       .post(createProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)

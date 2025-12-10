@@ -28,6 +28,7 @@ export default Object.freeze({
     NOT_FOUND: 'The user requirement is not found!',
     PASSWORD_NOT_MATCH: 'Your password are not match!',
     RESET_PASSWORD_SUCCESS: 'Reset password was success!',
+    DID_NOT_LOGIN: 'Your did not login yet!',
   },
   INGREDIENT: {
     CREATE_INGREDIENT_SUCCESS: 'Create ingredient was success!',

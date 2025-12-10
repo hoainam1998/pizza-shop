@@ -1,7 +1,8 @@
 import { Exclude, Expose } from 'class-transformer';
-import { IsEmail, IsInt, IsPhoneNumber, IsString, IsStrongPassword, Matches } from 'class-validator';
+import { IsBoolean, IsEmail, IsInt, IsPhoneNumber, IsString, IsStrongPassword, Matches } from 'class-validator';
 import constants from '@share/constants';
 import { UserRequestType } from '@share/interfaces';
+import Validator from '../serializer/validator';
 
 export class SignupDTO {
   @Exclude({ toPlainOnly: true })
@@ -64,4 +65,23 @@ export class ResetPassword {
 
   @IsString()
   token: string;
+}
+
+export class LoginSessionPayload extends Validator {
+  @IsEmail()
+  email: string;
+
+  @IsBoolean()
+  canSignup: boolean;
+
+  @IsString()
+  userId: string;
+
+  @IsInt()
+  power: number;
+
+  constructor(target: LoginSessionPayload) {
+    super();
+    Object.assign(this, target);
+  }
 }

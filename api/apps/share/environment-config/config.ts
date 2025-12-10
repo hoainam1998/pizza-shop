@@ -24,3 +24,7 @@ export const throttleConfig = registerAs('throttle', () => ({
   THROTTLE_TTL: process.env.THROTTLE_TTL,
   THROTTLE_LIMIT: process.env.THROTTLE_LIMIT,
 }));
+
+export const sessionConfig = registerAs('session', () => ({
+  SESSION_EXPIRES: process.env.SESSION_EXPIRES,
+}));

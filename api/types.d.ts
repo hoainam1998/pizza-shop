@@ -6,7 +6,7 @@ declare module 'express-session' {
     user?: {
       canSignup: boolean;
       email?: string;
-      power?: string;
+      power?: number;
       userId?: string;
     };
   }

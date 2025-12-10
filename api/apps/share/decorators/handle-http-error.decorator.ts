@@ -21,10 +21,12 @@ export default function (target: any, propertyName: string, descriptor: TypedPro
           case HttpStatus.UNAUTHORIZED:
             throw new UnauthorizedException(createMessage(error.message));
           case HttpStatus.BAD_REQUEST: {
-            const errorMessage = error.code === 'ECONNREFUSED' ? messages.COMMON.MODULE_DISCONNECT : error.message;
-            throw new BadRequestException(createMessage(errorMessage));
+            throw new BadRequestException(createMessage(error.message));
           }
           default:
+            if (error.code === 'ECONNREFUSED') {
+              throw new BadRequestException(createMessage(messages.COMMON.MODULE_DISCONNECT));
+            }
             throw new InternalServerErrorException();
         }
       }),

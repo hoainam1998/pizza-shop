@@ -66,7 +66,7 @@ afterEach(async () => {
 describe(createDescribeTest(HTTP_METHOD.POST, signupUrl), () => {
   it(createTestName('signup success', HttpStatus.OK), async () => {
     expect.hasAssertions();
-    const link = getAdminResetPasswordLink(user.reset_password_token!);
+    const link = getAdminResetPasswordLink(user.reset_password_token);
     const sendPassword = jest.spyOn(sendEmailService, 'sendPassword').mockResolvedValue({});
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const signupService = jest.spyOn(userService, 'signup');
@@ -76,9 +76,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, signupUrl), () => {
       .send(requestBody)
       .expect(HttpStatus.CREATED)
       .expect('Content-Type', /application\/json/)
-      .expect({
-        messages: [messages.USER.SIGNUP_SUCCESS],
-      });
+      .expect(createMessages(messages.USER.SIGNUP_SUCCESS));
     expect(signupService).toHaveBeenCalledTimes(1);
     expect(signupService).toHaveBeenCalledWith(signupUser);
     expect(send).toHaveBeenCalledTimes(1);
@@ -146,7 +144,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, signupUrl), () => {
 
   it(createTestName('signup failed when sendPassword failed', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
-    const link = getAdminResetPasswordLink(user.reset_password_token!);
+    const link = getAdminResetPasswordLink(user.reset_password_token);
     const sendPassword = jest.spyOn(sendEmailService, 'sendPassword').mockRejectedValue(UnknownError);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const signupService = jest.spyOn(userService, 'signup');
