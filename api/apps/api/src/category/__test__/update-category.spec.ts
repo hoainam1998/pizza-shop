@@ -1,20 +1,30 @@
 import { of, throwError } from 'rxjs';
 import { expect } from '@jest/globals';
+import {
+  BadRequestException,
+  HttpStatus,
+  InternalServerErrorException,
+  NotFoundException,
+  RequestMethod,
+} from '@nestjs/common';
 import TestAgent from 'supertest/lib/agent';
 import { ClientProxy } from '@nestjs/microservices';
 import startUp from './pre-setup';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { updateCategoryPattern } from '@share/pattern';
 import { category } from '@share/test/pre-setup/mock/data/category';
-import { getStaticFile, createDescribeTest, createTestName } from '@share/test/helpers';
+import { sessionPayload } from '@share/test/pre-setup/mock/data/user';
+import { getStaticFile, createDescribeTest, createTestName, getMockModule } from '@share/test/helpers';
 import CategoryService from '../category.service';
-import { BadRequestException, HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import CategoryModule from '../category.module';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { createMessages } from '@share/utils';
 import { CategoryRouter } from '@share/router';
 const updateCategoryUrl = CategoryRouter.absolute.update;
+
+const MockCategoryModule = getMockModule(CategoryModule, { path: updateCategoryUrl, method: RequestMethod.PUT });
 
 const categoryResponse = {
   category_id: Date.now().toString(),
@@ -28,7 +38,7 @@ let close: () => Promise<void>;
 let categoryService: CategoryService;
 
 beforeEach(async () => {
-  const requestTest = await startUp();
+  const requestTest = await startUp(MockCategoryModule);
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;
   close = () => requestTest.app.close();
@@ -48,6 +58,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
     const updateCategory = jest.spyOn(categoryService, 'updateCategory');
     await api
       .put(updateCategoryUrl)
+      .set('Connection', 'keep-alive')
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('categoryId', categoryResponse.category_id)
       .field('name', category.name)
       .attach('avatar', getStaticFile('test-image.png'))
@@ -60,12 +72,31 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
     expect(send).toHaveBeenCalledWith(updateCategoryPattern, categoryResponse);
   });
 
+  it(createTestName('update category failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(category));
+    const updateCategory = jest.spyOn(categoryService, 'updateCategory');
+    await api
+      .put(updateCategoryUrl)
+      .set('Connection', 'keep-alive')
+      .field('categoryId', categoryResponse.category_id)
+      .field('name', category.name)
+      .attach('avatar', getStaticFile('test-image.png'))
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.DID_NOT_LOGIN));
+    expect(updateCategory).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
   it(createTestName('update category failed with undefined field', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(category));
     const updateCategory = jest.spyOn(categoryService, 'updateCategory');
     const response = await api
       .put(updateCategoryUrl)
+      .set('Connection', 'keep-alive')
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('categoryIds', Date.now().toString())
       .field('name', category.name)
       .attach('avatar', getStaticFile('test-image.png'))
@@ -82,6 +113,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
     const updateCategory = jest.spyOn(categoryService, 'updateCategory');
     await api
       .put(updateCategoryUrl)
+      .set('Connection', 'keep-alive')
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('categoryId', categoryResponse.category_id)
       .field('name', category.name)
       .attach('avatar', getStaticFile('test-image.png'))
@@ -102,6 +135,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
     const updateCategory = jest.spyOn(categoryService, 'updateCategory');
     await api
       .put(updateCategoryUrl)
+      .set('Connection', 'keep-alive')
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('categoryId', categoryResponse.category_id)
       .field('name', category.name)
       .attach('avatar', getStaticFile('test-image.png'))
@@ -121,6 +156,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
     const createCategory = jest.spyOn(categoryService, 'updateCategory');
     await api
       .put(updateCategoryUrl)
+      .set('Connection', 'keep-alive')
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('categoryId', categoryResponse.category_id)
       .field('name', category.name)
       .attach('avatar', getStaticFile('empty.png'))
@@ -137,6 +174,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
     const updateCategory = jest.spyOn(categoryService, 'updateCategory');
     await api
       .put(updateCategoryUrl)
+      .set('Connection', 'keep-alive')
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('categoryId', categoryResponse.category_id)
       .field('name', category.name)
       .attach('avatar', getStaticFile('favicon.ico'))
@@ -153,6 +192,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
     const updateCategory = jest.spyOn(categoryService, 'updateCategory');
     const response = await api
       .put(updateCategoryUrl)
+      .set('Connection', 'keep-alive')
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('categoryId', categoryResponse.category_id)
       .field('name', category.name)
       .expect(HttpStatus.BAD_REQUEST)
@@ -168,6 +209,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
     const updateCategory = jest.spyOn(categoryService, 'updateCategory');
     const response = await api
       .put(updateCategoryUrl)
+      .set('Connection', 'keep-alive')
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('categoryId', categoryResponse.category_id)
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.BAD_REQUEST)
@@ -185,6 +228,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
     const updateCategory = jest.spyOn(categoryService, 'updateCategory');
     await api
       .put(updateCategoryUrl)
+      .set('Connection', 'keep-alive')
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('categoryId', categoryResponse.category_id)
       .attach('avatar', getStaticFile('test-image.png'))
       .field('name', category.name)
@@ -204,6 +249,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, updateCategoryUrl), () => {
     const updateCategory = jest.spyOn(categoryService, 'updateCategory');
     await api
       .put(updateCategoryUrl)
+      .set('Connection', 'keep-alive')
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('categoryId', categoryResponse.category_id)
       .field('name', category.name)
       .attach('avatar', getStaticFile('test-image.png'))
