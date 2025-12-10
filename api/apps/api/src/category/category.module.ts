@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 import { ClientProvider, ClientsModule, Transport } from '@nestjs/microservices';
+import { ConfigService } from '@nestjs/config';
 import multer from 'multer';
 import CategoryController from './category.controller';
 import CategoryService from './category.service';
 import { CATEGORY_SERVICE } from '@share/di-token';
-import { ConfigService } from '@nestjs/config';
 import LoggingModule from '@share/libs/logging/logging.module';
 
 @Module({
