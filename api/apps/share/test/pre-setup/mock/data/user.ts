@@ -1,3 +1,4 @@
+import { SessionData } from 'express-session';
 import constants from '@share/constants';
 import { UserRequestType } from '@share/interfaces';
 import { autoGeneratePassword, signingAdminResetPasswordToken } from '@share/utils';
@@ -15,4 +16,11 @@ export const user: Required<UserRequestType> = {
   power: constants.POWER_NUMERIC.SUPER_ADMIN,
   plain_password: plainPassword,
   reset_password_token: signingAdminResetPasswordToken({ email: 'myemail@gmail.com', password: plainPassword }),
+};
+
+export const sessionPayload: SessionData['user'] = {
+  email: user.email,
+  power: user.power,
+  userId: user.user_id,
+  canSignup: false,
 };

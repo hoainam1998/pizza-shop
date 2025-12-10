@@ -2,24 +2,34 @@ import { of, throwError } from 'rxjs';
 import { expect } from '@jest/globals';
 import TestAgent from 'supertest/lib/agent';
 import { ClientProxy } from '@nestjs/microservices';
+import {
+  BadRequestException,
+  HttpStatus,
+  InternalServerErrorException,
+  NotFoundException,
+  RequestMethod,
+} from '@nestjs/common';
+import { ValidationError } from 'class-validator';
+import { instanceToPlain, plainToInstance } from 'class-transformer';
 import startUp from './pre-setup';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { paginationPattern } from '@share/pattern';
 import { createProductList } from '@share/test/pre-setup/mock/data/product';
-import { createDescribeTest, createTestName } from '@share/test/helpers';
+import { sessionPayload } from '@share/test/pre-setup/mock/data/user';
+import { createDescribeTest, createTestName, getMockModule } from '@share/test/helpers';
 import ProductService from '../product.service';
-import { BadRequestException, HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import ProductModule from '../product.module';
+import ProductController from '../product.controller';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
-import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { PaginationProductSerializer } from '@share/dto/serializer/product';
 import { ProductQueryTransform, ProductSelect } from '@share/dto/validators/product.dto';
 import { createMessages } from '@share/utils';
-import { ValidationError } from 'class-validator';
-import ProductController from '../product.controller';
 import { ProductRouter } from '@share/router';
 const productPaginationUrl = ProductRouter.absolute.pagination;
+
+const MockProductModule = getMockModule(ProductModule, { path: productPaginationUrl, method: RequestMethod.POST });
 
 const paginationBody = {
   pageSize: 10,
@@ -53,7 +63,7 @@ let productService: ProductService;
 let productController: ProductController;
 
 beforeEach(async () => {
-  const requestTest = await startUp();
+  const requestTest = await startUp(MockProductModule);
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;
   close = () => requestTest.app.close();
@@ -76,6 +86,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
     const pagination = jest.spyOn(productService, 'pagination');
     await api
       .post(productPaginationUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(paginationBody)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
@@ -84,6 +95,22 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
     expect(pagination).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(paginationPattern, select);
+    expect(logError).not.toHaveBeenCalled();
+  });
+
+  it(createTestName('pagination product failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const logError = jest.spyOn(productController as any, 'logError');
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(paginationResponse));
+    const pagination = jest.spyOn(productService, 'pagination');
+    await api
+      .post(productPaginationUrl)
+      .send(paginationBody)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.DID_NOT_LOGIN));
+    expect(pagination).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
     expect(logError).not.toHaveBeenCalled();
   });
 
@@ -96,6 +123,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
     const pagination = jest.spyOn(productService, 'pagination');
     await api
       .post(productPaginationUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(paginationBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -121,6 +149,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
     const pagination = jest.spyOn(productService, 'pagination');
     await api
       .post(productPaginationUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(paginationBody)
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
@@ -139,6 +168,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
     const pagination = jest.spyOn(productService, 'pagination');
     await api
       .post(productPaginationUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(paginationBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
@@ -158,6 +188,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
     const pagination = jest.spyOn(productService, 'pagination');
     await api
       .post(productPaginationUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(paginationBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
@@ -180,6 +211,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
     const pagination = jest.spyOn(productService, 'pagination');
     const response = await api
       .post(productPaginationUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(missingQueryFieldBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
@@ -202,6 +234,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
     const pagination = jest.spyOn(productService, 'pagination');
     const response = await api
       .post(productPaginationUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(undefinedFieldRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
@@ -220,6 +253,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
     const pagination = jest.spyOn(productService, 'pagination');
     await api
       .post(productPaginationUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(paginationBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -262,6 +296,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
     const paginationResult = plainToInstance(PaginationProductSerializer, paginationResponse);
     await api
       .post(productPaginationUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(paginationEmptyQueryRequestBody)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)

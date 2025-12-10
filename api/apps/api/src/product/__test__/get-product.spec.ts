@@ -1,4 +1,10 @@
-import { BadRequestException, HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  InternalServerErrorException,
+  NotFoundException,
+  RequestMethod,
+} from '@nestjs/common';
 import { of, throwError } from 'rxjs';
 import { expect } from '@jest/globals';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
@@ -10,9 +16,11 @@ import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { getProductPattern } from '@share/pattern';
 import { product } from '@share/test/pre-setup/mock/data/product';
-import { createDescribeTest, createTestName } from '@share/test/helpers';
+import { sessionPayload } from '@share/test/pre-setup/mock/data/user';
+import { createDescribeTest, createTestName, getMockModule } from '@share/test/helpers';
 import ProductService from '../product.service';
 import ProductController from '../product.controller';
+import ProductModule from '../product.module';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { createMessage, createMessages } from '@share/utils';
@@ -21,6 +29,8 @@ import { GetProduct, ProductQuery } from '@share/dto/validators/product.dto';
 import { ProductRouter } from '@share/router';
 delete product.ingredients;
 const getProductUrl: string = ProductRouter.absolute.detail;
+
+const MockProductModule = getMockModule(ProductModule, { path: getProductUrl, method: RequestMethod.POST });
 
 const getProductRequestBody = {
   productId: Date.now().toString(),
@@ -50,7 +60,7 @@ let productService: ProductService;
 let productController: ProductController;
 
 beforeEach(async () => {
-  const requestTest = await startUp();
+  const requestTest = await startUp(MockProductModule);
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;
   close = () => requestTest.app.close();
@@ -71,6 +81,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
     const getProductService = jest.spyOn(productService, 'getProduct');
     await api
       .post(getProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getProductRequestBody)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
@@ -79,6 +90,20 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
     expect(getProductService).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(getProductPattern, select);
+  });
+
+  it(createTestName('get product detail failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
+    const getProductService = jest.spyOn(productService, 'getProduct');
+    await api
+      .post(getProductUrl)
+      .send(getProductRequestBody)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.DID_NOT_LOGIN));
+    expect(getProductService).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
   });
 
   it(createTestName('get product detail failed with output validate', HttpStatus.BAD_REQUEST), async () => {
@@ -90,6 +115,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
     const getProductService = jest.spyOn(productService, 'getProduct');
     await api
       .post(getProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getProductRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -110,6 +136,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
     const getProductService = jest.spyOn(productService, 'getProduct');
     await api
       .post(getProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getProductRequestBody)
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
@@ -126,6 +153,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
     const getProductService = jest.spyOn(productService, 'getProduct');
     await api
       .post(getProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getProductRequestBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
@@ -143,6 +171,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
     const getProductService = jest.spyOn(productService, 'getProduct');
     await api
       .post(getProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getProductRequestBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
@@ -162,6 +191,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
     const getProductService = jest.spyOn(productService, 'getProduct');
     const response = await api
       .post(getProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(missingQueryFieldBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
@@ -180,6 +210,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
     const getProductService = jest.spyOn(productService, 'getProduct');
     const response = await api
       .post(getProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(undefinedFieldBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
@@ -204,6 +235,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
     const getProductService = jest.spyOn(productService, 'getProduct');
     await api
       .post(getProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(queryFieldEmptyBody)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/);
@@ -223,6 +255,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
     const getProductService = jest.spyOn(productService, 'pagination');
     const response = await api
       .post(getProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(undefinedFieldBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
@@ -239,6 +272,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
     const getProductService = jest.spyOn(productService, 'getProduct');
     await api
       .post(getProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getProductRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)

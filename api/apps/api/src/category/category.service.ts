@@ -12,7 +12,7 @@ import {
   getAllCategoriesPattern,
 } from '@share/pattern';
 import { CategoryDto, CategoryQuery, GetCategory, PaginationCategory } from '@share/dto/validators/category.dto';
-import { CategoryPaginationFormatter } from '@share/dto/serializer/category';
+import { CategoryPaginationSerializer } from '@share/dto/serializer/category';
 
 @Injectable()
 export default class CategoryService {
@@ -30,8 +30,8 @@ export default class CategoryService {
     return this.category.send<category[]>(getAllCategoriesPattern, select);
   }
 
-  pagination(select: PaginationCategory): Observable<CategoryPaginationFormatter> {
-    return this.category.send<CategoryPaginationFormatter>(paginationPattern, select);
+  pagination(select: PaginationCategory): Observable<CategoryPaginationSerializer> {
+    return this.category.send<CategoryPaginationSerializer>(paginationPattern, select);
   }
 
   updateCategory(category: Record<string, any>): Observable<category> {

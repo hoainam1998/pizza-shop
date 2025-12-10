@@ -9,4 +9,4 @@ import LoggingModule from '@share/libs/logging/logging.module';
   controllers: [UserController],
   providers: [UserService],
 })
-export default class UsersModule {}
+export default class UserModule {}

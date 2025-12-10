@@ -1,6 +1,7 @@
+import { Logger } from '@nestjs/common';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { NestFactory } from '@nestjs/core';
 import ProductModule from './product.module';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const service = await NestFactory.createMicroservice<MicroserviceOptions>(ProductModule, {
@@ -9,6 +10,10 @@ async function bootstrap() {
       port: parseInt(process.env.PRODUCT_MICROSERVICE_TCP_PORT!),
     },
   });
-  await service.listen();
+  await service
+    .listen()
+    .then(() =>
+      Logger.log(`Product module started at port: ${process.env.PRODUCT_MICROSERVICE_TCP_PORT}`, ProductModule.name),
+    );
 }
 bootstrap();

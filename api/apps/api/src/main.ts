@@ -6,7 +6,7 @@ import session from 'express-session';
 import AppModule from './app.module';
 import { HttpExceptionFilter } from '@share/exception-filter';
 import corsConfig from './cors-config';
-import sessionConfig from './session-config';
+import sessionConfig from '@share/session-config';
 import { REDIS_CLIENT } from '@share/di-token';
 import RedisClient from '@share/libs/redis-client/redis';
 import { GlobalValidatePipe } from '@share/pipes';

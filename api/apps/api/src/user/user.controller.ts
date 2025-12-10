@@ -25,6 +25,7 @@ import LoggingService from '@share/libs/logging/logging.service';
 import ErrorCode from '@share/error-code';
 import { UserRouter } from '@share/router';
 import { HandleHttpError } from '@share/decorators';
+import { Public } from '@share/decorators/auths';
 import BaseController from '../controller';
 
 @Controller(UserRouter.BaseUrl)
@@ -37,6 +38,7 @@ export default class UserController extends BaseController {
     super(loggingService, 'user');
   }
 
+  @Public()
   @HttpCode(HttpStatus.OK)
   @Get(UserRouter.relative.canSignup)
   @HandleHttpError
@@ -56,6 +58,7 @@ export default class UserController extends BaseController {
     );
   }
 
+  @Public()
   @HttpCode(HttpStatus.CREATED)
   @Post(UserRouter.relative.signup)
   @HandleHttpError
@@ -77,6 +80,7 @@ export default class UserController extends BaseController {
     );
   }
 
+  @Public()
   @HttpCode(HttpStatus.OK)
   @Post(UserRouter.relative.login)
   @HandleHttpError
@@ -105,6 +109,7 @@ export default class UserController extends BaseController {
     );
   }
 
+  @Public()
   @HttpCode(HttpStatus.OK)
   @Post(UserRouter.relative.resetPassword)
   @HandleHttpError

@@ -4,9 +4,10 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import ProductModule from './product/product.module';
 import IngredientModule from './ingredient/ingredient.module';
-import ShareModule from 'apps/share/module';
+import ShareModule from '@share/module';
 import CategoryModule from './category/category.module';
 import UserModule from './user/user.module';
+import AuthGuard from '@share/guards/auth.service';
 
 @Module({
   imports: [
@@ -19,8 +20,8 @@ import UserModule from './user/user.module';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => [
         {
-          ttl: config.get('throttle.THROTTLE_TTL')!,
-          limit: config.get('throttle.THROTTLE_LIMIT')!,
+          ttl: +config.get('throttle.THROTTLE_TTL')!,
+          limit: +config.get('throttle.THROTTLE_LIMIT')!,
         },
       ],
     }),
@@ -30,6 +31,10 @@ import UserModule from './user/user.module';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
     },
   ],
 })

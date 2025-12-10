@@ -7,9 +7,17 @@ import startUp from './pre-setup';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { updateProductPattern } from '@share/pattern';
 import { product } from '@share/test/pre-setup/mock/data/product';
-import { getStaticFile, createDescribeTest, createTestName } from '@share/test/helpers';
+import { sessionPayload } from '@share/test/pre-setup/mock/data/user';
+import { getStaticFile, createDescribeTest, createTestName, getMockModule } from '@share/test/helpers';
 import ProductService from '../product.service';
-import { BadRequestException, HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import ProductModule from '../product.module';
+import {
+  BadRequestException,
+  HttpStatus,
+  InternalServerErrorException,
+  NotFoundException,
+  RequestMethod,
+} from '@nestjs/common';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
@@ -17,6 +25,8 @@ import { ProductCreate, ProductCreateTransform } from '@share/dto/validators/pro
 import { createMessages } from '@share/utils';
 import { ProductRouter } from '@share/router';
 const updateProductUrl = ProductRouter.absolute.update;
+
+const MockProductModule = getMockModule(ProductModule, { path: updateProductUrl, method: RequestMethod.PUT });
 
 const productRequestBody = {
   productId: product.product_id,
@@ -42,7 +52,7 @@ let close: () => Promise<void>;
 let productService: ProductService;
 
 beforeEach(async () => {
-  const requestTest = await startUp();
+  const requestTest = await startUp(MockProductModule);
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;
   close = () => requestTest.app.close();
@@ -62,6 +72,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     const updateProduct = jest.spyOn(productService, 'updateProduct');
     await api
       .put(updateProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)
@@ -80,12 +91,36 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     expect(send).toHaveBeenCalledWith(updateProductPattern, productUpdate);
   });
 
+  it(createTestName('update product failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
+    const updateProduct = jest.spyOn(productService, 'updateProduct');
+    await api
+      .put(updateProductUrl)
+      .set('Connection', 'keep-alive')
+      .field('productId', product.product_id)
+      .field('name', product.name)
+      .field('count', product.count)
+      .field('price', product.price)
+      .field('originalPrice', product.original_price)
+      .field('expiredTime', product.expired_time)
+      .field('category', product.category_id)
+      .field('ingredients', product.ingredients)
+      .attach('avatar', getStaticFile('test-image.png'))
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.DID_NOT_LOGIN));
+    expect(updateProduct).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
   it(createTestName('update product failed with undefined field', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
     const updateProduct = jest.spyOn(productService, 'updateProduct');
     const response = await api
       .put(updateProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('categoryIds', Date.now().toString())
       .field('productId', product.product_id)
       .field('name', product.name)
@@ -109,6 +144,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     const updateProduct = jest.spyOn(productService, 'updateProduct');
     const response = await api
       .put(updateProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', 0)
@@ -131,6 +167,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     const updateProduct = jest.spyOn(productService, 'updateProduct');
     const response = await api
       .put(updateProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)
@@ -155,6 +192,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
       const updateProduct = jest.spyOn(productService, 'updateProduct');
       const response = await api
         .put(updateProductUrl)
+        .set('mock-session', JSON.stringify(sessionPayload))
         .field('productId', product.product_id)
         .field('name', product.name)
         .field('count', product.count)
@@ -178,6 +216,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     const updateProduct = jest.spyOn(productService, 'updateProduct');
     await api
       .put(updateProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)
@@ -204,6 +243,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     const updateProduct = jest.spyOn(productService, 'updateProduct');
     await api
       .put(updateProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)
@@ -229,6 +269,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     const updateProduct = jest.spyOn(productService, 'updateProduct');
     await api
       .put(updateProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)
@@ -251,6 +292,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     const updateProduct = jest.spyOn(productService, 'updateProduct');
     await api
       .put(updateProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)
@@ -273,6 +315,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     const updateProduct = jest.spyOn(productService, 'updateProduct');
     const response = await api
       .put(updateProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)
@@ -294,6 +337,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     const updateProduct = jest.spyOn(productService, 'updateProduct');
     const response = await api
       .put(updateProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('name', product.name)
       .field('count', product.count)
       .field('price', product.price)
@@ -317,6 +361,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     const updateProduct = jest.spyOn(productService, 'updateProduct');
     await api
       .put(updateProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)
@@ -342,6 +387,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     const updateProduct = jest.spyOn(productService, 'updateProduct');
     await api
       .put(updateProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('productId', product.product_id)
       .field('name', product.name)
       .field('count', product.count)

@@ -1,6 +1,8 @@
 import { HttpStatus } from '@nestjs/common';
 import path from 'path';
 import { MessageResponseTestingType } from '@share/interfaces';
+import { MiddlewareConsumer, RouteInfo } from '@nestjs/common/interfaces';
+import { signupSession } from '@share/middleware';
 
 /**
  * Get test static file.
@@ -41,4 +43,19 @@ export const createTestName = (name: string, status: HttpStatus): string => `${n
  */
 export const createMessagesTesting = (message: string, errorCode?: string): MessageResponseTestingType => {
   return Object.assign({ messages: [message] }, errorCode ? { errorCode } : {});
+};
+
+/**
+ * Get microservice module.
+ *
+ * @param {*} module - The module.
+ * @param {RouteInfo} route - The RouteInfo.
+ * @returns {class} - The module class.
+ */
+export const getMockModule = (module: any, route: RouteInfo) => {
+  return class extends module {
+    configure(consumer: MiddlewareConsumer) {
+      consumer.apply(signupSession).forRoutes(route);
+    }
+  };
 };

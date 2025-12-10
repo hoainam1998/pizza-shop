@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { SkipThrottle } from '@nestjs/throttler';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { isPositive, isInt } from 'class-validator';
 import IngredientService from './ingredient.service';
@@ -59,6 +60,7 @@ export default class IngredientController extends BaseController {
       .pipe(map(() => MessageSerializer.create(messages.INGREDIENT.CREATE_INGREDIENT_SUCCESS)));
   }
 
+  @SkipThrottle()
   @Post(IngredientRouter.relative.computedProductPrice)
   @HttpCode(HttpStatus.OK)
   @HandleHttpError

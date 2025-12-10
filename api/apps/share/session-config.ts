@@ -12,4 +12,5 @@ export default (redisClient: RedisClientType) =>
     secret: process.env.SESSION_ID_TOKEN!,
     resave: false,
     saveUninitialized: false,
+    cookie: { maxAge: +process.env.SESSION_EXPIRES! },
   }) satisfies session.SessionOptions;

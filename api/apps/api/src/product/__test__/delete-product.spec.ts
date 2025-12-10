@@ -1,4 +1,10 @@
-import { BadRequestException, HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  InternalServerErrorException,
+  NotFoundException,
+  RequestMethod,
+} from '@nestjs/common';
 import { of, throwError } from 'rxjs';
 import TestAgent from 'supertest/lib/agent';
 import { expect } from '@jest/globals';
@@ -6,8 +12,10 @@ import { ClientProxy } from '@nestjs/microservices';
 import startUp from './pre-setup';
 import { deleteProductPattern } from '@share/pattern';
 import { product } from '@share/test/pre-setup/mock/data/product';
-import { createDescribeTest, createTestName } from '@share/test/helpers';
+import { sessionPayload } from '@share/test/pre-setup/mock/data/user';
+import { createDescribeTest, createTestName, getMockModule } from '@share/test/helpers';
 import ProductService from '../product.service';
+import ProductModule from '../product.module';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
@@ -17,32 +25,37 @@ const deleteProductBaseUrl = ProductRouter.absolute.delete;
 const productId: string = Date.now().toString();
 const deleteProductUrl: string = `${deleteProductBaseUrl}/${productId}`;
 
+const MockProductModule = getMockModule(ProductModule, {
+  path: `${deleteProductBaseUrl}/*`,
+  method: RequestMethod.DELETE,
+});
+let api: TestAgent;
+let clientProxy: ClientProxy;
+let close: () => Promise<void>;
+let productService: ProductService;
+
+beforeEach(async () => {
+  const requestTest = await startUp(MockProductModule);
+  api = requestTest.api;
+  clientProxy = requestTest.clientProxy;
+  close = () => requestTest.app.close();
+  productService = requestTest.app.get(ProductService);
+});
+
+afterEach(async () => {
+  if (close) {
+    await close();
+  }
+});
+
 describe(createDescribeTest(HTTP_METHOD.DELETE, deleteProductBaseUrl), () => {
-  let api: TestAgent;
-  let clientProxy: ClientProxy;
-  let close: () => Promise<void>;
-  let productService: ProductService;
-
-  beforeEach(async () => {
-    const requestTest = await startUp();
-    api = requestTest.api;
-    clientProxy = requestTest.clientProxy;
-    close = () => requestTest.app.close();
-    productService = requestTest.app.get(ProductService);
-  });
-
-  afterEach(async () => {
-    if (close) {
-      await close();
-    }
-  });
-
   it(createTestName('delete product success', HttpStatus.OK), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
     const deleteProduct = jest.spyOn(productService, 'deleteProduct');
     await api
       .delete(deleteProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.PRODUCT.DELETE_PRODUCT_SUCCESS));
@@ -52,12 +65,26 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteProductBaseUrl), () => {
     expect(send).toHaveBeenCalledWith(deleteProductPattern, productId);
   });
 
+  it(createTestName('delete product failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
+    const deleteProduct = jest.spyOn(productService, 'deleteProduct');
+    await api
+      .delete(deleteProductUrl)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.DID_NOT_LOGIN));
+    expect(deleteProduct).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
   it(createTestName('delete product failed with invalid id', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
     const deleteProduct = jest.spyOn(productService, 'deleteProduct');
     await api
       .delete('/product/delete/xzy')
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.VALIDATE_ID_FAIL));
@@ -73,6 +100,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteProductBaseUrl), () => {
     const deleteProduct = jest.spyOn(productService, 'deleteProduct');
     await api
       .delete(deleteProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.COMMON_ERROR));
@@ -90,6 +118,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteProductBaseUrl), () => {
     const deleteProduct = jest.spyOn(productService, 'deleteProduct');
     await api
       .delete(deleteProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.PRODUCT.NOT_FOUND));
@@ -107,6 +136,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteProductBaseUrl), () => {
     const deleteProduct = jest.spyOn(productService, 'deleteProduct');
     await api
       .delete(deleteProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
@@ -123,6 +153,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteProductBaseUrl), () => {
     const deleteProduct = jest.spyOn(productService, 'deleteProduct');
     await api
       .delete(deleteProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(serverError.message));
