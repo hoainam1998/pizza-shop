@@ -6,7 +6,6 @@ import ElementPlus from 'element-plus';
 import plugin from './plugin';
 import 'element-plus/dist/index.css';
 
-globalThis.isSale = process.env.APP_NAME === 'sale';
 globalThis.router = router;
 
 const app = createApp(App);

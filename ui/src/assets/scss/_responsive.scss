@@ -1,0 +1,21 @@
+$mobile: getResponsiveBreakpoint(MOBILE);
+$tablet: getResponsiveBreakpoint(TABLET);
+$desktop: getResponsiveBreakpoint(DESKTOP);
+
+@mixin mobile {
+  @media screen and (min-width: $mobile) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media screen and (min-width: $tablet) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media screen and (min-width: $desktop) {
+    @content;
+  }
+}

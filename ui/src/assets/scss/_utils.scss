@@ -1,4 +1,6 @@
 @use 'sass:map';
+@use './responsive' as responsive;
+
 $space-name: (
   'p': 'padding',
   'm': 'margin',
@@ -70,6 +72,18 @@ $size-name: (
   .ps-display-#{$value} {
     display: #{$value} !important;
   }
+
+  @include responsive.mobile {
+    .ps-display-mobile-#{$value} {
+      display: #{$value} !important;
+    }
+  }
+
+  @include responsive.tablet {
+    .ps-display-tablet-#{$value} {
+      display: #{$value} !important;
+    }
+  }
 }
 
 @each $name, $_ in $space-name {
@@ -112,7 +126,7 @@ $size-name: (
   }
 
   @for $i from 20 through 500 {
-    @include sizing($key, $value, $i, 'px')
+    @include sizing($key, $value, $i, 'px');
   }
 }
 
@@ -127,5 +141,5 @@ $size-name: (
 }
 
 .ps-margin-auto {
-  margin: auto;
+  margin: auto !important;
 }

@@ -2,7 +2,7 @@ import { RouterView } from 'vue-router';
 import type { RouterOptions } from 'vue-router';
 import paths from '../paths';
 import Category from '@/views/category.vue';
-import Home from '@/views/home.vue';
+import Home from '@/views/home/admin-home.vue';
 import Signup from '@/views/login-group/signup.vue';
 import ResetPassword from '@/views/login-group/reset-password.vue';
 import Login from '@/views/login-group/login.vue';
