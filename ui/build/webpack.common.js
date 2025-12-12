@@ -2,12 +2,14 @@
 const svgToMiniDataURI = require('mini-svg-data-uri');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { DefinePlugin } = require('webpack');
+const sass = require('sass');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
 const { VueLoaderPlugin } = require('vue-loader');
 const { getResolvePath, getAssetPath } = require('./utils');
 const { dev } = require('../config');
 const { OUTPUT_DIR, PUBLIC_PATH, PUBLIC, SRC } = require('./config');
+const breakPoints = require('../src/assets/js/break-points.js');
 
 const getEnv = (env) => {
   return {
@@ -15,6 +17,7 @@ const getEnv = (env) => {
     __VUE_OPTIONS_API__: JSON.stringify(true),
     __VUE_PROD_DEVTOOLS__: JSON.stringify(false),
     __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: JSON.stringify(false),
+    isSale: env.APP_NAME === 'sale',
   };
 };
 
@@ -78,6 +81,14 @@ module.exports = (envArgs) => ({
             options: {
               sourceMap: true,
               api: 'modern-compiler',
+              sassOptions: {
+                functions: {
+                  'getResponsiveBreakpoint($key)': function (args) {
+                    const point = args[0];
+                    return new sass.types.String(`${breakPoints[point] || 0}px`).dartValue;
+                  },
+                },
+              },
             },
           },
         ],

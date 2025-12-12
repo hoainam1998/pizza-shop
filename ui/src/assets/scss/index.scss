@@ -4,6 +4,7 @@
 @use '@/assets/scss/_border.scss';
 @use '@/assets/scss/_flex.scss';
 @use '@/assets/scss/_float.scss';
+@use '@/assets/scss/_responsive.scss';
 @use './colors' as colors;
 @import url(./_fonts.scss);
 
@@ -14,10 +15,6 @@
   box-sizing: border-box;
   margin: 0;
   font-weight: normal;
-}
-
-.ps-margin-auto {
-  margin: auto !important;
 }
 
 .ps-list-style-none {

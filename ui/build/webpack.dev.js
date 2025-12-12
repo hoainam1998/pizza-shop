@@ -15,7 +15,7 @@ const devConfig = (env) =>
       static: OUTPUT_DIR,
       open: true,
       hot: true,
-      port: dev.ADMIN_PORT,
+      port: env.APP_NAME === 'sale' ? dev.SALE_PORT : dev.ADMIN_PORT,
       historyApiFallback: true,
       client: {
         overlay: {
