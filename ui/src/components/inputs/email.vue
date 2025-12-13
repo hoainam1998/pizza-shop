@@ -13,7 +13,7 @@
   </el-input>
 </template>
 <script setup lang="ts">
-import { defineModel, ref, useAttrs } from 'vue';
+import { ref, useAttrs } from 'vue';
 import { EMAIL_DOMAIN } from '@/enums';
 
 defineOptions({

@@ -97,12 +97,12 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-  .menu-wrapper {
-    height: 100vh;
-    max-width: 200px;
+.menu-wrapper {
+  height: 100vh;
+  max-width: 200px;
 
-    .is-active {
-      background-color: v-bind(whiteColor);
-    }
+  .is-active {
+    background-color: v-bind(whiteColor);
   }
+}
 </style>

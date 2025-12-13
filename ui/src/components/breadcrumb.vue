@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, h, defineProps } from 'vue';
+import { ref, watch, h } from 'vue';
 import { ArrowRightBold } from '@element-plus/icons-vue';
 import { whiteColor } from '@/assets/scss/variables.module.scss';
 import { useRoute, type RouteLocationMatched } from 'vue-router';

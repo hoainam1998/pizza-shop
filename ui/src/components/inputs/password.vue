@@ -2,7 +2,7 @@
   <el-input v-model="model" v-bind="attrs" />
 </template>
 <script setup lang="ts">
-import { defineModel, useAttrs } from 'vue';
+import { useAttrs } from 'vue';
 
 defineOptions({
   inheritAttrs: false,

@@ -28,12 +28,22 @@ $size-name: (
       #{$propertyName}-left: #{$i}px !important;
       #{$propertyName}-right: #{$i}px !important;
     }
+
+    .ps-#{$property}#{$direction}-pc-#{$i} {
+      #{$propertyName}-left: #{$i}+'%' !important;
+      #{$propertyName}-right: #{$i}+'%' !important;
+    }
   }
 
   @else if $directionName == 'vertical' {
     .ps-#{$property}#{$direction}-#{$i} {
       #{$propertyName}-top: #{$i}px !important;
       #{$propertyName}-bottom: #{$i}px !important;
+    }
+
+    .ps-#{$property}#{$direction}-pc-#{$i} {
+      #{$propertyName}-top: #{$i}+'%' !important;
+      #{$propertyName}-bottom: #{$i}+'%' !important;
     }
   }
 

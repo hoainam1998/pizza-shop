@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, defineProps, nextTick, useTemplateRef, defineExpose, watch } from 'vue';
+import { ref, nextTick, useTemplateRef, watch } from 'vue';
 import type { UploadFile, UploadRawFile, UploadRequestOptions } from 'element-plus';
 import defaultImageUploadPlaceholder from '@/assets/images/picture.png';
 import { dangerColor } from '@/assets/scss/variables.module.scss';

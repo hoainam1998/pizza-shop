@@ -15,4 +15,5 @@ export default Object.freeze({
     CATEGORY: new RouterPath('category'),
   }),
   ID: new RouterPath(':id'),
+  CART: new RouterPath('/cart'),
 });
