@@ -7,9 +7,15 @@ $border-style: 'dashed', 'solid';
   }
 }
 
-@for $i from 3 through 10 {
+@for $i from 3 through 50 {
   .ps-border-radius-#{$i} {
     border-radius: #{$i}px !important;
+  }
+}
+
+@for $i from 1 through 100 {
+  .ps-border-radius-pc-#{$i} {
+    border-radius: #{$i}+'%' !important;
   }
 }
 
@@ -25,4 +31,12 @@ $border-style: 'dashed', 'solid';
   .ps-border-style-#{$value} {
     border-style: #{$value} !important;
   }
+}
+
+.ps-border-none {
+  border: none !important;
+}
+
+.ps-outline-none {
+  outline: none !important;
 }

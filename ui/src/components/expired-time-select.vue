@@ -13,7 +13,6 @@
 </template>
 
 <script lang="ts" setup>
-import { defineModel, defineProps } from 'vue';
 type ExpiredDaySelectProps = {
   name: string;
 };

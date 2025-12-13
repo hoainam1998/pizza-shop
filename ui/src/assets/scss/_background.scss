@@ -1,5 +1,20 @@
 @use './colors' as colors;
 
+$background-color: (
+  'f39c12': colors.$primary-color,
+  '2ecc71': colors.$green-color,
+  'white': colors.$white-color,
+  'black': colors.$black-color,
+  'eb2f06': colors.$primary-sale-color,
+  'ecf0f1': colors.$layout-color,
+);
+
+@each $name, $color in $background-color {
+  .ps-bg-#{$name} {
+    background-color: $color !important;
+  }
+}
+
 .ps-bg-no-repeat {
   background-repeat: no-repeat !important;
 }
@@ -10,16 +25,4 @@
 
 .ps-bg-size-cover {
   background-size: cover !important;
-}
-
-.ps-bg-f39c12 {
-  background-color: colors.$primary-color !important;
-}
-
-.ps-bg-2ecc71 {
-  background-color: colors.$green-color !important;
-}
-
-.ps-bg-white {
-  background-color: colors.$white-color !important;
 }

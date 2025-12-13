@@ -1,0 +1,34 @@
+$directions: top, left, right, bottom;
+$positions: absolute, relative, sticky, fixed;
+
+@each $position in $positions {
+  .ps-position-#{$position} {
+    position: $position !important;
+  }
+}
+
+.ps-z-index-minus {
+  z-index: -1 !important;
+}
+
+.ps-z-index-plus {
+  z-index: 999 !important;
+}
+
+.ps-absolute-center {
+  left: 50%;
+  right: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@for $p from 0 through 100 {
+  @each $direction in $directions {
+    .ps-#{$direction}-#{$p} {
+      #{$direction}: #{$p}+'%' !important;
+    }
+
+    .ps-#{$direction}-minus-#{$p} {
+      #{$direction}: -#{$p}+'%' !important;
+    }
+  }
+}
