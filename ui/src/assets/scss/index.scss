@@ -5,6 +5,7 @@
 @use '@/assets/scss/_flex.scss';
 @use '@/assets/scss/_float.scss';
 @use '@/assets/scss/_position.scss';
+@use '@/assets/scss/_box-shadow.scss';
 @use './colors' as colors;
 @import url(./_fonts.scss);
 
@@ -32,4 +33,12 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.ps-hover-scale {
+  transition: .2s !important;
+
+  &:hover {
+    scale: 1.1 !important;
+  }
 }

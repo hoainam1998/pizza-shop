@@ -1,6 +1,12 @@
 @use './colors' as colors;
+@use './responsive' as responsive;
 
-$text-colors: ("white": colors.$white-color, "606266": colors.$label-color, "00a8ff": colors.$menu-item-active-color);
+$text-colors: (
+  'white': colors.$white-color,
+  'black': colors.$black-color,
+  '606266': colors.$label-color,
+  '00a8ff': colors.$menu-item-active-color,
+);
 
 @each $name, $color in $text-colors {
   .ps-text-color-#{$name} {
@@ -35,6 +41,18 @@ $text-colors: ("white": colors.$white-color, "606266": colors.$label-color, "00a
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+}
+
+@for $i from 9 through 40 {
+  .ps-fs-#{$i} {
+    font-size: #{$i}px !important;
+  }
+
+  @include responsive.mobile {
+    .ps-fs-mobile-#{$i} {
+      font-size: #{$i}px !important;
+    }
   }
 }
 
