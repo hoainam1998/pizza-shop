@@ -1,5 +1,10 @@
 @use './colors' as colors;
 $border-style: 'dashed', 'solid';
+$border-colors: (
+  'gray': colors.$gray-color,
+  'f39c12': colors.$primary-color,
+  '00a8ff': colors.$menu-item-active-color,
+);
 
 @for $i from 1 through 5 {
   .ps-border-width-#{$i} {
@@ -19,17 +24,19 @@ $border-style: 'dashed', 'solid';
   }
 }
 
-.ps-border-color-gray {
-  border-color: colors.$gray-color !important;
-}
-
-.ps-border-color-hover-00a8ff:hover {
-  border-color: colors.$menu-item-active-color !important;
-}
-
 @each $value in $border-style {
   .ps-border-style-#{$value} {
     border-style: #{$value} !important;
+  }
+}
+
+@each $name, $color in $border-colors {
+  .ps-border-color-#{$name} {
+    border-color: $color !important;
+  }
+
+  .ps-border-color-hover-#{$name}:hover {
+    border-color: $color !important;
   }
 }
 

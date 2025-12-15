@@ -1,5 +1,6 @@
 module.exports = {
-  MOBILE: 480,
+  MOBILE: 390,
   TABLET: 768,
-  DESKTOP: 1024,
+  LARGE_TABLET: 1024,
+  DESKTOP: 1440,
 };

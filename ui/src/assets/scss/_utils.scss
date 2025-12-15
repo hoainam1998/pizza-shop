@@ -23,7 +23,55 @@ $size-name: (
   $propertyName: map.get($space-name, $property);
   $directionName: map.get($direction-name, $direction);
 
-  @if $directionName == 'horizontal' {
+  @if $directionName =='horizontal' {
+    @include responsive.mobile {
+      .ps-#{$property}#{$direction}-mobile-#{$i} {
+        #{$propertyName}-left: #{$i}px !important;
+        #{$propertyName}-right: #{$i}px !important;
+      }
+
+      .ps-#{$property}#{$direction}-mobile-pc-#{$i} {
+        #{$propertyName}-left: #{$i}+'%' !important;
+        #{$propertyName}-right: #{$i}+'%' !important;
+      }
+    }
+
+    @include responsive.tablet {
+      .ps-#{$property}#{$direction}-tablet-#{$i} {
+        #{$propertyName}-left: #{$i}px !important;
+        #{$propertyName}-right: #{$i}px !important;
+      }
+
+      .ps-#{$property}#{$direction}-tablet-pc-#{$i} {
+        #{$propertyName}-left: #{$i}+'%' !important;
+        #{$propertyName}-right: #{$i}+'%' !important;
+      }
+    }
+
+    @include responsive.large-tablet {
+      .ps-#{$property}#{$direction}-large-tablet-#{$i} {
+        #{$propertyName}-left: #{$i}px !important;
+        #{$propertyName}-right: #{$i}px !important;
+      }
+
+      .ps-#{$property}#{$direction}-large-tablet-pc-#{$i} {
+        #{$propertyName}-left: #{$i}+'%' !important;
+        #{$propertyName}-right: #{$i}+'%' !important;
+      }
+    }
+
+    @include responsive.desktop {
+      .ps-#{$property}#{$direction}-desktop-#{$i} {
+        #{$propertyName}-left: #{$i}px !important;
+        #{$propertyName}-right: #{$i}px !important;
+      }
+
+      .ps-#{$property}#{$direction}-desktop-pc-#{$i} {
+        #{$propertyName}-left: #{$i}+'%' !important;
+        #{$propertyName}-right: #{$i}+'%' !important;
+      }
+    }
+
     .ps-#{$property}#{$direction}-#{$i} {
       #{$propertyName}-left: #{$i}px !important;
       #{$propertyName}-right: #{$i}px !important;
@@ -35,7 +83,55 @@ $size-name: (
     }
   }
 
-  @else if $directionName == 'vertical' {
+  @else if $directionName =='vertical' {
+    @include responsive.mobile {
+      .ps-#{$property}#{$direction}-mobile-#{$i} {
+        #{$propertyName}-top: #{$i}px !important;
+        #{$propertyName}-bottom: #{$i}px !important;
+      }
+
+      .ps-#{$property}#{$direction}-mobile-pc-#{$i} {
+        #{$propertyName}-top: #{$i}+'%' !important;
+        #{$propertyName}-bottom: #{$i}+'%' !important;
+      }
+    }
+
+    @include responsive.tablet {
+      .ps-#{$property}#{$direction}-tablet-#{$i} {
+        #{$propertyName}-top: #{$i}px !important;
+        #{$propertyName}-bottom: #{$i}px !important;
+      }
+
+      .ps-#{$property}#{$direction}-tablet-pc-#{$i} {
+        #{$propertyName}-top: #{$i}+'%' !important;
+        #{$propertyName}-bottom: #{$i}+'%' !important;
+      }
+    }
+
+    @include responsive.large-tablet {
+      .ps-#{$property}#{$direction}-large-tablet-#{$i} {
+        #{$propertyName}-top: #{$i}px !important;
+        #{$propertyName}-bottom: #{$i}px !important;
+      }
+
+      .ps-#{$property}#{$direction}-large-tablet-pc-#{$i} {
+        #{$propertyName}-top: #{$i}+'%' !important;
+        #{$propertyName}-bottom: #{$i}+'%' !important;
+      }
+    }
+
+    @include responsive.desktop {
+      .ps-#{$property}#{$direction}-desktop-#{$i} {
+        #{$propertyName}-top: #{$i}px !important;
+        #{$propertyName}-bottom: #{$i}px !important;
+      }
+
+      .ps-#{$property}#{$direction}-desktop-pc-#{$i} {
+        #{$propertyName}-top: #{$i}+'%' !important;
+        #{$propertyName}-bottom: #{$i}+'%' !important;
+      }
+    }
+
     .ps-#{$property}#{$direction}-#{$i} {
       #{$propertyName}-top: #{$i}px !important;
       #{$propertyName}-bottom: #{$i}px !important;
@@ -55,7 +151,51 @@ $size-name: (
 }
 
 @mixin sizing($shortName, $propertyName, $value, $unit: '%') {
-  @if $unit == '%' {
+  @if $unit =='%' {
+    @include responsive.mobile {
+      .ps-#{$shortName}-mobile-#{$value} {
+        #{$propertyName}: #{$value}+#{$unit} !important;
+        max-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
+
+      .ps-min-#{$shortName}-mobile-#{$value} {
+        min-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
+    }
+
+    @include responsive.tablet {
+      .ps-#{$shortName}-tablet-#{$value} {
+        #{$propertyName}: #{$value}+#{$unit} !important;
+        max-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
+
+      .ps-min-#{$shortName}-tablet-#{$value} {
+        min-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
+    }
+
+    @include responsive.large-tablet {
+      .ps-#{$shortName}-large-tablet-#{$value} {
+        #{$propertyName}: #{$value}+#{$unit} !important;
+        max-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
+
+      .ps-min-#{$shortName}-large-tablet-#{$value} {
+        min-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
+    }
+
+    @include responsive.desktop {
+      .ps-#{$shortName}-desktop-#{$value} {
+        #{$propertyName}: #{$value}+#{$unit} !important;
+        max-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
+
+      .ps-min-#{$shortName}-desktop-#{$value} {
+        min-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
+    }
+
     .ps-#{$shortName}-#{$value} {
       #{$propertyName}: #{$value}+#{$unit} !important;
       max-#{$propertyName}: #{$value}+#{$unit} !important;
@@ -67,6 +207,50 @@ $size-name: (
   }
 
   @else {
+    @include responsive.mobile {
+      .ps-#{$shortName}-mobile-#{$value}#{$unit} {
+        #{$propertyName}: #{$value}+#{$unit} !important;
+        max-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
+
+      .ps-min-#{$shortName}-mobile-#{$value}#{$unit} {
+        min-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
+    }
+
+    @include responsive.tablet {
+      .ps-#{$shortName}-tablet-#{$value}#{$unit} {
+        #{$propertyName}: #{$value}+#{$unit} !important;
+        max-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
+
+      .ps-min-#{$shortName}-tablet-#{$value}#{$unit} {
+        min-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
+    }
+
+    @include responsive.large-tablet {
+      .ps-#{$shortName}-large-tablet-#{$value}#{$unit} {
+        #{$propertyName}: #{$value}+#{$unit} !important;
+        max-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
+
+      .ps-min-#{$shortName}-large-tablet-#{$value}#{$unit} {
+        min-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
+    }
+
+    @include responsive.desktop {
+      .ps-#{$shortName}-desktop-#{$value}#{$unit} {
+        #{$propertyName}: #{$value}+#{$unit} !important;
+        max-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
+
+      .ps-min-#{$shortName}-desktop-#{$value}#{$unit} {
+        min-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
+    }
+
     .ps-#{$shortName}-#{$value}#{$unit} {
       #{$propertyName}: #{$value}+#{$unit} !important;
       max-#{$propertyName}: #{$value}+#{$unit} !important;
@@ -108,11 +292,6 @@ $size-name: (
   @include display($name);
 }
 
-@for $i from 9 through 40 {
-  .ps-fs-#{$i} {
-    font-size: #{$i}px !important;
-  }
-}
 
 @for $i from 1 through 50 {
   .ps-flex-gap-#{$i} {
@@ -127,10 +306,12 @@ $size-name: (
 @each $key, $value in $size-name {
   @for $i from 1 through 500 {
     @include sizing($key, $value, $i);
-    @if $value == 'height' {
+
+    @if $value =='height' {
       @include sizing($key, $value, $i, 'vh');
     }
-    @else if $value == 'width' {
+
+    @else if $value =='width' {
       @include sizing($key, $value, $i, 'vw');
     }
   }
