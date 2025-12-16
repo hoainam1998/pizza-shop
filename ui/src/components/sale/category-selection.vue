@@ -6,7 +6,7 @@
         v-for="(category, index) in categories" :key="index" :data-id="category.categoryId">
         <router-link :to="category.to" class="ps-text-decorator-none">
           <img src="@/assets/images/logo.png"
-            class="ps-display-block ps-margin-auto ps-w-mobile-30px ps-h-mobile-30px" />
+            class="ps-display-block ps-margin-auto ps-w-30px ps-h-30px" />
           <span class="ps-fw-bold ps-fs-mobile-14 ps-text-color-black">{{ category.name }}</span>
         </router-link>
       </li>

@@ -1,3 +1,35 @@
+@use './responsive' as responsive;
+
+@include responsive.mobile {
+  .ps-flex-direction-mobile-column {
+    flex-direction: column !important;
+  }
+
+  .ps-flex-direction-mobile-row {
+    flex-direction: row !important;
+  }
+}
+
+@include responsive.tablet {
+  .ps-flex-direction-tablet-column {
+    flex-direction: column !important;
+  }
+
+  .ps-flex-direction-tablet-row {
+    flex-direction: row !important;
+  }
+}
+
+@include responsive.desktop {
+  .ps-flex-direction-desktop-column {
+    flex-direction: column !important;
+  }
+
+  .ps-flex-direction-desktop-row {
+    flex-direction: row !important;
+  }
+}
+
 .ps-flex-direction-column {
   flex-direction: column !important;
 }

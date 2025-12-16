@@ -161,6 +161,10 @@ $size-name: (
       .ps-min-#{$shortName}-mobile-#{$value} {
         min-#{$propertyName}: #{$value}+#{$unit} !important;
       }
+
+      .ps-max-#{$shortName}-mobile-#{$value} {
+        max-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
     }
 
     @include responsive.tablet {
@@ -171,6 +175,10 @@ $size-name: (
 
       .ps-min-#{$shortName}-tablet-#{$value} {
         min-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
+
+      .ps-max-#{$shortName}-tablet-#{$value} {
+        max-#{$propertyName}: #{$value}+#{$unit} !important;
       }
     }
 
@@ -183,6 +191,10 @@ $size-name: (
       .ps-min-#{$shortName}-large-tablet-#{$value} {
         min-#{$propertyName}: #{$value}+#{$unit} !important;
       }
+
+      .ps-max-#{$shortName}-large-tablet-#{$value} {
+        max-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
     }
 
     @include responsive.desktop {
@@ -194,6 +206,10 @@ $size-name: (
       .ps-min-#{$shortName}-desktop-#{$value} {
         min-#{$propertyName}: #{$value}+#{$unit} !important;
       }
+
+      .ps-max-#{$shortName}-desktop-#{$value} {
+        max-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
     }
 
     .ps-#{$shortName}-#{$value} {
@@ -203,6 +219,10 @@ $size-name: (
 
     .ps-min-#{$shortName}-#{$value} {
       min-#{$propertyName}: #{$value}+#{$unit} !important;
+    }
+
+    .ps-max-#{$shortName}-#{$value} {
+      max-#{$propertyName}: #{$value}+#{$unit} !important;
     }
   }
 
@@ -216,6 +236,10 @@ $size-name: (
       .ps-min-#{$shortName}-mobile-#{$value}#{$unit} {
         min-#{$propertyName}: #{$value}+#{$unit} !important;
       }
+
+      .ps-max-#{$shortName}-mobile-#{$value}#{$unit} {
+        max-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
     }
 
     @include responsive.tablet {
@@ -226,6 +250,10 @@ $size-name: (
 
       .ps-min-#{$shortName}-tablet-#{$value}#{$unit} {
         min-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
+
+      .ps-max-#{$shortName}-tablet-#{$value}#{$unit} {
+        max-#{$propertyName}: #{$value}+#{$unit} !important;
       }
     }
 
@@ -238,6 +266,10 @@ $size-name: (
       .ps-min-#{$shortName}-large-tablet-#{$value}#{$unit} {
         min-#{$propertyName}: #{$value}+#{$unit} !important;
       }
+
+      .ps-max-#{$shortName}-large-tablet-#{$value}#{$unit} {
+        max-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
     }
 
     @include responsive.desktop {
@@ -249,6 +281,10 @@ $size-name: (
       .ps-min-#{$shortName}-desktop-#{$value}#{$unit} {
         min-#{$propertyName}: #{$value}+#{$unit} !important;
       }
+
+      .ps-max-#{$shortName}-desktop-#{$value}#{$unit} {
+        max-#{$propertyName}: #{$value}+#{$unit} !important;
+      }
     }
 
     .ps-#{$shortName}-#{$value}#{$unit} {
@@ -258,6 +294,10 @@ $size-name: (
 
     .ps-min-#{$shortName}-#{$value}#{$unit} {
       min-#{$propertyName}: #{$value}+#{$unit} !important;
+    }
+
+    .ps-max-#{$shortName}-#{$value}#{$unit} {
+      max-#{$propertyName}: #{$value}+#{$unit} !important;
     }
   }
 }

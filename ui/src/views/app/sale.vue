@@ -1,5 +1,5 @@
 <template>
-  <section class="ps-bg-ecf0f1 ps-h-100vh">
+  <section class="ps-bg-ecf0f1 ps-min-h-100vh">
     <div class="content ps-box-shadow-2 ps-mx-desktop-pc-15 ps-mx-large-tablet-pc-8 ps-mx-mobile-0">
       <Header />
       <router-view />
