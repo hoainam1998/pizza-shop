@@ -6,6 +6,7 @@ $text-colors: (
   'black': colors.$black-color,
   '606266': colors.$label-color,
   '00a8ff': colors.$menu-item-active-color,
+  'f56c6c': colors.$danger-color,
 );
 
 @each $name, $color in $text-colors {
@@ -70,4 +71,8 @@ $text-colors: (
 
 .ps-text-decorator-none {
   text-decoration: none !important;
+}
+
+.ps-text-style-italic {
+  font-style: italic !important;
 }

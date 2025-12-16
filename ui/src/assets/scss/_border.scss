@@ -1,14 +1,22 @@
 @use './colors' as colors;
 $border-style: 'dashed', 'solid';
+$directions: top, right, left, bottom;
 $border-colors: (
   'gray': colors.$gray-color,
   'f39c12': colors.$primary-color,
   '00a8ff': colors.$menu-item-active-color,
+  'black': colors.$black-color,
 );
 
 @for $i from 1 through 5 {
   .ps-border-width-#{$i} {
     border-width: #{$i}px !important;
+  }
+
+  @each $direction in $directions {
+    .ps-border-width-#{$direction}-#{$i}{
+      border-#{$direction}-width: #{$i}px !important;
+    }
   }
 }
 
@@ -28,6 +36,12 @@ $border-colors: (
   .ps-border-style-#{$value} {
     border-style: #{$value} !important;
   }
+
+  @each $direction in $directions {
+    .ps-border-style-#{$direction}-#{$value} {
+      border-#{$direction}-style: #{$value} !important;
+    }
+  }
 }
 
 @each $name, $color in $border-colors {
@@ -37,6 +51,12 @@ $border-colors: (
 
   .ps-border-color-hover-#{$name}:hover {
     border-color: $color !important;
+  }
+
+  @each $direction in $directions {
+    .ps-border-color-#{$direction}-#{$name} {
+      border-#{$direction}-color: #{$color} !important;
+    }
   }
 }
 

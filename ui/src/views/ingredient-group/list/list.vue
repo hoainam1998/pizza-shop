@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount, ref, useTemplateRef, type Ref, defineOptions } from 'vue';
+import { onBeforeMount, ref, useTemplateRef, type Ref } from 'vue';
 import type { AxiosError, AxiosResponse } from 'axios';
 import Table from '@/components/table.vue';
 import SearchBox from '@/components/search-box.vue';

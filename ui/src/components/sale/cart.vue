@@ -19,7 +19,7 @@
         ps-top-minus-15
         ps-right-5
         ps-fs-12">
-          {{amountText}}
+          {{ amountText }}
       </span>
   </div>
 </template>
@@ -38,5 +38,4 @@ const amountText = computed(() => {
   const value = amount.value.toString();
   return value.length > 3 ? `${value.slice(0, 3)}+` : value;
 });
-
 </script>

@@ -4,7 +4,7 @@ $large-tablet: getResponsiveBreakpoint(LARGE_TABLET);
 $desktop: getResponsiveBreakpoint(DESKTOP);
 
 @mixin mobile {
-  @media screen and (min-width: $mobile) {
+  @media screen and (min-width: $mobile) and (max-width: $tablet) {
     @content;
   }
 }
@@ -16,7 +16,7 @@ $desktop: getResponsiveBreakpoint(DESKTOP);
 }
 
 @mixin large-tablet {
-  @media screen and (min-width: $large-tablet) {
+  @media screen and (min-width: $large-tablet) and (max-width: $desktop) {
     @content;
   }
 }
