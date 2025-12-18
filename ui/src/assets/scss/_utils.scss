@@ -13,7 +13,7 @@ $direction-name: (
   'x': 'horizontal',
   'y': 'vertical',
 );
-$display-name: 'flex', 'inline', 'block', 'inline-block', 'none';
+$display-name: 'flex', 'inline', 'block', 'inline-block', 'none', 'grid';
 $size-name: (
   'w': 'width',
   'h': 'height'
@@ -368,6 +368,30 @@ $size-name: (
 
   .ps-opacity-#{$i} {
     opacity: #{'0.'+#{$i}} !important;
+  }
+}
+
+@include responsive.mobile {
+  .ps-margin-mobile-auto {
+    margin: auto !important;
+  }
+}
+
+@include responsive.tablet {
+  .ps-margin-tablet-auto {
+    margin: auto !important;
+  }
+}
+
+@include responsive.large-tablet {
+  .ps-margin-large-tablet-auto {
+    margin: auto !important;
+  }
+}
+
+@include responsive.desktop {
+  .ps-margin-desktop-auto {
+    margin: auto !important;
   }
 }
 

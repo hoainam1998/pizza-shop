@@ -69,6 +69,14 @@ const formatDateSlash = formatDate;
 const formatVNDCurrency = (value: number | string) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(+value);
 
+/**
+ * Replace thousand by k
+ *
+ * @param {number|string} value - The input value.
+ * @returns {string} - The value after replace.
+ */
+const replaceThousand = (value: number | string) => value.toString().replace(/0{3}$/, 'k');
+
 export {
   showSuccessNotification,
   showErrorNotification,
@@ -79,4 +87,5 @@ export {
   formatVNDCurrency,
   confirmDeleteMessageBox,
   generateResetPasswordLink,
+  replaceThousand,
 };

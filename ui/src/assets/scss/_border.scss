@@ -17,6 +17,10 @@ $border-colors: (
     .ps-border-width-#{$direction}-#{$i}{
       border-#{$direction}-width: #{$i}px !important;
     }
+
+    .ps-border-#{$direction}-none {
+      border-#{$direction}: none !important;
+    }
   }
 }
 

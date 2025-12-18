@@ -1,0 +1,14 @@
+$attribute-values: auto, scroll, hidden;
+$directions: x, y;
+
+@each $value in $attribute-values {
+  .ps-overflow-#{$value} {
+    overflow: $value !important;
+  }
+
+  @each $direction in $directions {
+    .ps-overflow-#{$direction}-#{$value} {
+      overflow-#{$direction}: $value !important;
+    }
+  }
+}

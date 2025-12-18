@@ -34,9 +34,9 @@
 <script setup lang="ts">
 import { onBeforeMount, ref, useTemplateRef, type Ref } from 'vue';
 import type { AxiosError, AxiosResponse } from 'axios';
-import Table from '@/components/table.vue';
-import SearchBox from '@/components/search-box.vue';
-import IngredientDetail from '@/views/ingredient-group/detail/detail.vue';
+import Table from '@/components/common/table.vue';
+import SearchBox from '@/components/admin/search-box.vue';
+import IngredientDetail from '@/views/admin/ingredient-group/detail/detail.vue';
 import type { IngredientType, TableFieldType } from '@/interfaces';
 import constants from '@/constants';
 import { IngredientService } from '@/services';

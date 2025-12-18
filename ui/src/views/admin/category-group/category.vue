@@ -45,8 +45,8 @@
 import { reactive, ref, onBeforeMount, useTemplateRef, computed } from 'vue';
 import type { FormInstance, FormRules, UploadRawFile } from 'element-plus';
 import { type AxiosResponse, type AxiosError, HttpStatusCode } from 'axios';
-import UploadBox from '@/components/upload-box.vue';
-import Table from '@/components/table.vue';
+import UploadBox from '@/components/common/upload-box.vue';
+import Table from '@/components/common/table.vue';
 import { CategoryService } from '@/services';
 import { showErrorNotification, showSuccessNotification, convertBase64ToSingleFile } from '@/utils';
 import constants from '@/constants';

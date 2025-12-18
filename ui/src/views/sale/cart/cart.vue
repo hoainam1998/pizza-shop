@@ -2,7 +2,7 @@
   <section class="ps-py-10 ps-py-10 ps-px-10 ps-bg-transparent">
     <div class="ps-bg-white ps-border-radius-5 ps-py-10 ps-px-10">
       <div class="ps-display-flex ps-flex-gap-10 ps-flex-direction-mobile-column ps-flex-direction-desktop-row">
-        <ul class="ps-w-mobile-100 ps-w-desktop-60 ps-list-style-none ps-pl-0 ps-max-h-88vh ps-overflow-auto">
+        <ul class="ps-w-mobile-100 ps-w-desktop-60 ps-list-style-none ps-pl-0 ps-max-h-88vh ps-overflow-y-auto">
           <List :items="carts" keyField="productId">
             <template #default="{ item }">
               <li class="ps-display-flex
@@ -24,12 +24,10 @@
         <div class="ps-w-mobile-100 ps-w-desktop-40 ps-px-desktop-10 ps-px-mobile-0">
           <h2 class="ps-fw-bold ps-text-transform-capitalize">Bills</h2>
           <hr />
-          <ul class="ps-list-style-none ps-max-h-80vh ps-overflow-auto ps-pl-0">
+          <ul class="ps-list-style-none ps-max-h-80vh ps-overflow-y-auto ps-pl-0">
             <List :items="carts" keyField="productId">
               <template #default="{ item }">
-                <li class="ps-px-10">
-                  <BillItem :cart="item" />
-                </li>
+                <li class="ps-px-10"><BillItem :cart="item" /></li>
               </template>
             </List>
           </ul>
@@ -51,7 +49,7 @@
 import { reactive, useId, computed } from 'vue';
 import CartItem from '@/components/sale/cart/cart-item.vue';
 import BillItem from '@/components/sale/cart/bill-item.vue';
-import List from '@/components/list.vue';
+import List from '@/components/common/list.vue';
 import avatar from '@/assets/images/logo.png';
 
 const total = computed(() => {

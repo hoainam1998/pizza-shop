@@ -9,6 +9,6 @@
 </template>
 <script setup lang="ts">
 import paths from '@/router/paths';
-import Cart from '@/components/sale/cart.vue';
+import Cart from '@/components/sale/cart/cart.vue';
 import SearchBox from '@/components/sale/search-box.vue';
 </script>
