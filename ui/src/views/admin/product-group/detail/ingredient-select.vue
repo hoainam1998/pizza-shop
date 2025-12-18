@@ -29,7 +29,6 @@ import {
   type Ref,
   watch,
   onBeforeMount,
-  defineModel,
   computed,
   watchEffect,
 } from 'vue';

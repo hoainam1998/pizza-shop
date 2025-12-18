@@ -6,6 +6,7 @@
 @use '@/assets/scss/_float.scss';
 @use '@/assets/scss/_position.scss';
 @use '@/assets/scss/_box-shadow.scss';
+@use '@/assets/scss/_overflow.scss';
 @use './colors' as colors;
 @import url(./_fonts.scss);
 
@@ -41,8 +42,4 @@
   &:hover {
     scale: 1.1 !important;
   }
-}
-
-.ps-overflow-auto {
-  overflow-y: auto !important;
 }

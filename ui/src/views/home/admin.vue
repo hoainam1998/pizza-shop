@@ -11,8 +11,8 @@
 <script setup lang="ts">
 import { reactive, provide } from 'vue';
 import { RouterView, onBeforeRouteUpdate, onBeforeRouteLeave } from 'vue-router';
-import Menu from '@/components/menu.vue';
-import Breadcrumb from '@/components/breadcrumb.vue';
+import Menu from '@/components/admin/menu.vue';
+import Breadcrumb from '@/components/admin/breadcrumb.vue';
 import { ROUTE_NAME } from '@/di-token';
 
 const routerName = reactive({

@@ -1,14 +1,14 @@
 import { RouterView } from 'vue-router';
 import type { RouterOptions } from 'vue-router';
 import paths from '../paths';
-import Category from '@/views/category.vue';
+import Category from '@/views/admin/category-group/category.vue';
 import Home from '@/views/home/admin.vue';
 import Signup from '@/views/login-group/signup.vue';
 import ResetPassword from '@/views/login-group/reset-password.vue';
 import Login from '@/views/login-group/login.vue';
-import ProductDetail from '@/views/product-group/detail/detail.vue';
-import ProductList from '@/views/product-group/list/list.vue';
-import IngredientList from '@/views/ingredient-group/list/list.vue';
+import ProductDetail from '@/views/admin/product-group/detail/detail.vue';
+import ProductList from '@/views/admin/product-group/list/list.vue';
+import IngredientList from '@/views/admin/ingredient-group/list/list.vue';
 
 const adminRoutes: RouterOptions['routes'] = [
   {

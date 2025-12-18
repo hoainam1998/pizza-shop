@@ -81,6 +81,7 @@ module.exports = (envArgs) => ({
             options: {
               sourceMap: true,
               api: 'modern-compiler',
+              additionalData: '@use "@/assets/scss/_responsive.scss";',
               sassOptions: {
                 functions: {
                   'getResponsiveBreakpoint($key)': function (args) {

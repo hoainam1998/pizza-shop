@@ -64,10 +64,10 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, defineExpose, defineModel, defineEmits, useTemplateRef, nextTick } from 'vue';
+import { reactive, ref, useTemplateRef, nextTick } from 'vue';
 import type { FormInstance, FormRules, UploadRawFile } from 'element-plus';
-import ExpiredDaySelect from '@/components/expired-time-select.vue';
-import UploadBox from '@/components/upload-box.vue';
+import ExpiredDaySelect from '@/components/admin/expired-time-select.vue';
+import UploadBox from '@/components/common/upload-box.vue';
 import { IngredientService } from '@/services';
 import type { IngredientType, OptionType } from '@/interfaces';
 import constants from '@/constants';

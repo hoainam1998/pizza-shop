@@ -6,7 +6,8 @@
   </template>
   <template v-else>
     <template v-for="item in list" :key="item.id">
-      <slot :item="item" />
+      <slot v-if="item.data" :item="item.data" />
+      <slot v-else :item="item" />
     </template>
   </template>
 </template>
@@ -18,6 +19,11 @@ const { items, keyField } = defineProps<{
 }>();
 
 const list = computed(() => {
-  return keyField ? items : items.map((item) => ({ ...item, id: useId() }));
+  return keyField ? items : items.map((item) => {
+    if (typeof item === 'object' && Object.keys(item).length) {
+      return { ...item, id: useId() };
+    }
+    return { data: item, id: useId() };
+  });
 });
 </script>

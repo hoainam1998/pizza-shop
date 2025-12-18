@@ -1,11 +1,12 @@
-import { formatDateSlash, formatDateHyphen, formatVNDCurrency } from '@/utils';
+import { formatDateSlash, formatDateHyphen, formatVNDCurrency, replaceThousand } from '@/utils';
 
 export default {
   install: (app: any) => {
     app.config.globalProperties = {
       $formatDateSlash: formatDateSlash,
       $formatDateHyphen: formatDateHyphen,
-      $formatVNDCurrency: formatVNDCurrency
+      $formatVNDCurrency: formatVNDCurrency,
+      $replaceThousand: replaceThousand,
     };
   }
 };

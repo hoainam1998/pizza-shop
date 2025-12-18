@@ -1,6 +1,6 @@
 import type { RouterOptions } from 'vue-router';
 import SaleHome from '@/views/home/sale.vue';
-import Cart from '@/views/sale/cart.vue';
+import Cart from '@/views/sale/cart/cart.vue';
 import paths from '../paths';
 
 const saleRoutes: RouterOptions['routes'] = [

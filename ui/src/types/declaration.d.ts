@@ -12,6 +12,7 @@ declare module '@vue/runtime-core' {
     $formatDateHyphen(timestamp: string | number): string;
     $formatDateSlash(timestamp: string | number): string;
     $formatVNDCurrency(value: string | number): string;
+    $replaceThousand(value: number | string): string;
   }
 };
 declare global {
