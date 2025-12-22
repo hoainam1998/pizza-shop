@@ -8,6 +8,14 @@
   .ps-flex-direction-mobile-row {
     flex-direction: row !important;
   }
+
+  .ps-justify-content-mobile-space-between {
+    justify-content: space-between !important;
+  }
+
+  .ps-align-items-mobile-center {
+    align-items: center !important;
+  }
 }
 
 @include responsive.tablet {
@@ -17,6 +25,14 @@
 
   .ps-flex-direction-tablet-row {
     flex-direction: row !important;
+  }
+
+  .ps-justify-content-tablet-space-between {
+    justify-content: space-between !important;
+  }
+
+  .ps-align-items-tablet-center {
+    align-items: center !important;
   }
 }
 
@@ -28,6 +44,14 @@
   .ps-flex-direction-large-tablet-row {
     flex-direction: row !important;
   }
+
+  .ps-justify-content-large-tablet-space-between {
+    justify-content: space-between !important;
+  }
+
+  .ps-align-items-large-tablet-center {
+    align-items: center !important;
+  }
 }
 
 @include responsive.desktop {
@@ -38,6 +62,14 @@
   .ps-flex-direction-desktop-row {
     flex-direction: row !important;
   }
+
+  .ps-justify-content-desktop-space-between {
+    justify-content: space-between !important;
+  }
+
+  .ps-align-items-desktop-center {
+    align-items: center !important;
+  }
 }
 
 .ps-flex-direction-column {
@@ -46,30 +78,6 @@
 
 .ps-flex-direction-row {
   flex-direction: row !important;
-}
-
-@include responsive.mobile {
-  .ps-justify-content-mobile-space-between {
-    justify-content: space-between !important;
-  }
-}
-
-@include responsive.large-tablet {
-  .ps-justify-content-large-tablet-space-between {
-    justify-content: space-between !important;
-  }
-}
-
-@include responsive.tablet {
-  .ps-justify-content-tablet-space-between {
-    justify-content: space-between !important;
-  }
-}
-
-@include responsive.desktop {
-  .ps-justify-content-desktop-space-between {
-    justify-content: space-between !important;
-  }
 }
 
 .ps-justify-content-space-between {

@@ -3,7 +3,7 @@
  *
  * @param {HTMLElement} target - The directive binding element.
  */
-export default (target: HTMLElement) => {
+export default (target: HTMLElement): void => {
   for (const el of target.children) {
     const element = el as HTMLElement;
     const currentOffsetTop = element.offsetTop;

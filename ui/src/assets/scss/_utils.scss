@@ -313,8 +313,20 @@ $size-name: (
     }
   }
 
+    @include responsive.large-tablet {
+    .ps-display-large-tablet-#{$value} {
+      display: #{$value} !important;
+    }
+  }
+
   @include responsive.tablet {
     .ps-display-tablet-#{$value} {
+      display: #{$value} !important;
+    }
+  }
+
+  @include responsive.desktop {
+    .ps-display-desktop-#{$value} {
       display: #{$value} !important;
     }
   }
@@ -331,7 +343,6 @@ $size-name: (
 @each $name in $display-name {
   @include display($name);
 }
-
 
 @for $i from 1 through 50 {
   .ps-flex-gap-#{$i} {

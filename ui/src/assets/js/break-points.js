@@ -3,4 +3,5 @@ module.exports = {
   TABLET: 768,
   LARGE_TABLET: 1024,
   DESKTOP: 1440,
+  EXTRA_DESKTOP: 1560,
 };
