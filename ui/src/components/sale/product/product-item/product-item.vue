@@ -1,5 +1,5 @@
 <template>
-  <div class="ps-px-10 ps-py-10">
+  <div class="product-item ps-px-10 ps-py-10">
     <div class="
       ps-mb-10
       ps-display-flex
@@ -39,7 +39,7 @@
       ps-fw-bold
       ps-display-block
       ps-margin-auto
-      ps-w-30
+      ps-w-100px
       ps-line-height-10">
         Add
     </el-button>

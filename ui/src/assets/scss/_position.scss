@@ -30,5 +30,9 @@ $positions: absolute, relative, sticky, fixed;
     .ps-#{$direction}-minus-#{$p} {
       #{$direction}: -#{$p}+'%' !important;
     }
+
+    .ps-#{$direction}-#{$p}px {
+      #{$direction}: #{$p}px !important;
+    }
   }
 }

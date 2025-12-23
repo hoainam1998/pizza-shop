@@ -3,7 +3,8 @@
  *
  * @param {HTMLElement} target - The directive binding element.
  */
-export default (target: HTMLElement) => {
+export default (target: HTMLElement): void => {
+  const paddingX = 20;
   for (const el of target.children) {
     const element = el as HTMLElement;
     const currentOffsetTop = element.offsetTop;
@@ -11,7 +12,7 @@ export default (target: HTMLElement) => {
     const elementWidth = element.offsetWidth;
     const parentHeight = target.offsetHeight || 0;
     const parentWidth =  target.offsetWidth || 0;
-    const currentOffsetLeft = element.offsetLeft;
+    const currentOffsetLeft = element.offsetLeft + paddingX;
 
     if (parentWidth - currentOffsetLeft < elementWidth) {
       element.classList.remove('ps-border-color-right-black', 'ps-border-style-right-dashed');

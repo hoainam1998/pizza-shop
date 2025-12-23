@@ -7,6 +7,7 @@ import {
 import {
   generateResetPasswordLink
 } from './auth';
+import setTimeout from './set-timeout';
 
 /**
  * Return promise of file from base64 string.
@@ -88,4 +89,5 @@ export {
   confirmDeleteMessageBox,
   generateResetPasswordLink,
   replaceThousand,
+  setTimeout,
 };

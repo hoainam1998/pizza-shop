@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts" setup generic="T">
-import { useSlots, ref, defineProps, defineEmits, defineExpose } from 'vue';
+import { useSlots, ref } from 'vue';
 import type { TableFieldType } from '@/interfaces';
 import constants from '@/constants';
 

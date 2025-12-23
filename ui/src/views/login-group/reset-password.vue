@@ -26,6 +26,7 @@ import type { FormInstance, FormRules } from 'element-plus';
 import LoginFrame from './common/login-frame.vue';
 import PsPasswordInput from '@/components/inputs/password.vue';
 import PsEmailInput from '@/components/inputs/email.vue';
+import SearchParams from '@/services/search-params';
 import constants from '@/constants';
 
 type ResetPasswordType = {
@@ -35,7 +36,7 @@ type ResetPasswordType = {
   confirmPassword: string;
 };
 
-const token: string | null = new URL(window.location.href).searchParams.get('token');
+const token: string | null = SearchParams.get('token');
 
 const resetPasswordFormRef = ref<FormInstance>();
 
