@@ -16,7 +16,14 @@ const { total } = defineProps(propsValidator);
 const showResultFor = (route: ReturnType<typeof useRoute>): string => {
   const search = route.query.search;
   const category = route.query.categoryName;
-  return search ? `Result for: ${search}` : `Category: ${category}`;
+
+  if (search) {
+    return `Result for: ${search}`;
+  } else if (category) {
+    return `Category: ${category}`;
+  } else {
+    return 'All';
+  }
 };
 
 const route = useRoute();

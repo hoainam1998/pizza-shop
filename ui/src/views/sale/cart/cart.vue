@@ -2,44 +2,56 @@
   <section class="ps-py-10 ps-py-10 ps-px-10 ps-bg-transparent">
     <div class="ps-bg-white ps-border-radius-5 ps-py-10 ps-px-10">
       <div class="ps-display-flex ps-flex-gap-10 ps-flex-direction-mobile-column ps-flex-direction-desktop-row">
-        <ul class="ps-w-mobile-100 ps-w-desktop-60 ps-list-style-none ps-pl-0 ps-max-h-88vh ps-overflow-y-auto">
-          <List :items="carts" keyField="productId">
-            <template #default="{ item }">
-              <li class="ps-display-flex
-                ps-mb-10
-                ps-px-7
-                ps-py-7
-                ps-border-width-1
-                ps-border-radius-5
-                ps-border-color-black
-                ps-border-style-dashed">
-                  <CartItem
-                    :cart="item"
-                    @delete="item.delete"
-                    @calcTotal="item.calcTotal"/>
-              </li>
-            </template>
-          </List>
-        </ul>
-        <div class="ps-w-mobile-100 ps-w-desktop-40 ps-px-desktop-10 ps-px-mobile-0">
-          <h2 class="ps-fw-bold ps-text-transform-capitalize">Bills</h2>
-          <hr />
-          <ul class="ps-list-style-none ps-max-h-80vh ps-overflow-y-auto ps-pl-0">
+        <ul class="ps-w-mobile-100
+          ps-w-large-tablet-60
+          ps-w-tablet-50
+          ps-w-desktop-60
+          ps-list-style-none
+          ps-pl-0
+          ps-max-h-88vh
+          ps-overflow-y-auto">
             <List :items="carts" keyField="productId">
               <template #default="{ item }">
-                <li class="ps-px-10"><BillItem :cart="item" /></li>
+                <li class="ps-display-flex
+                  ps-mb-10
+                  ps-px-7
+                  ps-py-7
+                  ps-border-width-1
+                  ps-border-radius-5
+                  ps-border-color-black
+                  ps-border-style-dashed">
+                    <CartItem
+                      :cart="item"
+                      @delete="item.delete"
+                      @calcTotal="item.calcTotal"/>
+                </li>
               </template>
             </List>
-          </ul>
-          <div class="ps-display-flex ps-mt-10 ps-justify-content-space-between ps-align-items-center">
-            <span>
-              <span class="ps-fw-bold">Total:&nbsp;</span>
-              <span class="ps-text-style-italic">{{ $formatVNDCurrency(total) }}</span>
-            </span>
-            <el-button type="primary" class="ps-w-mobile-100px">
-              Payment
-            </el-button>
-          </div>
+        </ul>
+        <div class="ps-w-mobile-100
+          ps-w-tablet-50
+          ps-w-large-tablet-40
+          ps-w-desktop-40
+          ps-px-desktop-10
+          ps-px-mobile-0">
+            <h2 class="ps-fw-bold ps-text-transform-capitalize">Bills</h2>
+            <hr />
+            <ul class="ps-list-style-none ps-max-h-80vh ps-overflow-y-auto ps-pl-0">
+              <List :items="carts" keyField="productId">
+                <template #default="{ item }">
+                  <li class="ps-px-10"><BillItem :cart="item" /></li>
+                </template>
+              </List>
+            </ul>
+            <div class="ps-display-flex ps-mt-10 ps-justify-content-space-between ps-align-items-center">
+              <span>
+                <span class="ps-fw-bold">Total:&nbsp;</span>
+                <span class="ps-text-style-italic">{{ $formatVNDCurrency(total) }}</span>
+              </span>
+              <el-button type="primary" class="ps-w-mobile-100px">
+                Payment
+              </el-button>
+            </div>
         </div>
       </div>
     </div>

@@ -344,16 +344,6 @@ $size-name: (
   @include display($name);
 }
 
-@for $i from 1 through 50 {
-  .ps-flex-gap-#{$i} {
-    gap: #{$i}px !important;
-  }
-
-  .ps-flex-basic-#{$i} {
-    flex-basis: #{$i}+'%' !important;
-  }
-}
-
 @each $key, $value in $size-name {
   @for $i from 1 through 500 {
     @include sizing($key, $value, $i);

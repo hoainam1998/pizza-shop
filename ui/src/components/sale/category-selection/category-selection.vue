@@ -1,6 +1,5 @@
 <template>
   <section
-    v-scroll
     class="category-selection
     ps-w-large-tablet-100
     ps-w-tablet-100
@@ -10,8 +9,7 @@
     ps-top-53px
     ps-z-index-plus
     ps-py-10
-    ps-px-10
-    ps-bg-white">
+    ps-px-10">
     <ul v-select="selectedId"
       class="ps-display-flex ps-flex-nowrap ps-justify-content-center ps-flex-gap-10 ps-list-style-none ps-px-0">
         <li class="ps-hover-scale ps-cursor-pointer ps-box-shadow-2 ps-py-5 ps-px-5 ps-border-radius-5 ps-bg-white"
@@ -37,7 +35,8 @@ import { ref, onMounted, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import paths from '@/router/paths';
 import breakPoint from '@/assets/js/break-points.js';
-import { vSelect, vScroll } from './directives';
+import { vSelect } from './directives';
+import { setTimeout } from '@/utils';
 
 const currentRoute = useRoute();
 
@@ -119,6 +118,6 @@ const responsiveCategorySelect = (): void => {
 
 onMounted(() => {
   responsiveCategorySelect();
-  window.addEventListener('resize', responsiveCategorySelect);
+  window.addEventListener('resize', setTimeout(responsiveCategorySelect));
 });
 </script>

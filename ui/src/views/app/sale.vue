@@ -1,5 +1,5 @@
 <template>
-  <section class="ps-bg-ecf0f1 ps-position-absolute ps-min-h-100vh">
+  <section class="ps-bg-ecf0f1 ps-min-h-100vh">
     <div class="content
       ps-position-relative
       ps-box-shadow-2

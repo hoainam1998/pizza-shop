@@ -15,5 +15,5 @@ export default abstract class {
   /**
    * Directive object.
    */
-  abstract readonly dir: Directive;
+  abstract readonly directive: Directive;
 }

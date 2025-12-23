@@ -1,5 +1,5 @@
 <template>
-  <header class="sale-header
+  <header v-scroll class="sale-header
   ps-position-sticky
   ps-top-0
   ps-z-index-plus

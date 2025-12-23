@@ -100,14 +100,16 @@
   flex-wrap: nowrap !important;
 }
 
-@for $gap from 1 through 10 {
-  .ps-flex-gap-#{$gap} {
-    gap: #{$gap}px !important
+@for $i from 1 through 50 {
+  .ps-flex-gap-#{$i} {
+    gap: #{$i}px !important;
   }
-}
 
-@for $grow from 0 through 10 {
-  .ps-flex-grow-#{$grow} {
-    flex-grow: #{$grow} !important;
+  .ps-flex-basic-#{$i} {
+    flex-basis: #{$i}+'%' !important;
+  }
+
+  .ps-flex-grow-#{$i} {
+    flex-grow: #{$i} !important;
   }
 }
