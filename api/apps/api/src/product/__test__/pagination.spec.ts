@@ -14,7 +14,7 @@ import { instanceToPlain, plainToInstance } from 'class-transformer';
 import startUp from './pre-setup';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { paginationPattern } from '@share/pattern';
-import { createProductList } from '@share/test/pre-setup/mock/data/product';
+import { createProductList, product } from '@share/test/pre-setup/mock/data/product';
 import { sessionPayload } from '@share/test/pre-setup/mock/data/user';
 import { createDescribeTest, createTestName, getMockModule } from '@share/test/helpers';
 import ProductService from '../product.service';
@@ -90,7 +90,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
       .send(paginationBody)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
-      .expect(instanceToPlain(paginationResult, { exposeUnsetFields: false }));
+      .expect(instanceToPlain(paginationResult, { exposeUnsetFields: false, groups: ['disabled'] }));
     expect(pagination).toHaveBeenCalledTimes(1);
     expect(pagination).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
@@ -228,7 +228,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
       pageSize: paginationBody.pageSize,
       pageNumber: paginationBody.pageNumber,
       query: paginationBody.query,
+      search: product.name,
       categoryId: Date.now().toString(),
+      unknown: Date.now().toString(),
     };
     const send = jest.spyOn(clientProxy, 'send');
     const pagination = jest.spyOn(productService, 'pagination');
@@ -300,7 +302,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, productPaginationUrl), () => {
       .send(paginationEmptyQueryRequestBody)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
-      .expect(instanceToPlain(paginationResult, { exposeUnsetFields: false }));
+      .expect(instanceToPlain(paginationResult, { exposeUnsetFields: false, groups: ['disabled', 'bought'] }));
     expect(pagination).toHaveBeenCalledTimes(1);
     expect(pagination).toHaveBeenCalledWith(finalPaginationRequestBody);
     expect(send).toHaveBeenCalledTimes(1);
