@@ -52,6 +52,12 @@ export default class ProductService {
         }
       : {};
 
+    if (select.categoryId) {
+      Object.assign(condition, {
+        category_id: select.categoryId,
+      });
+    }
+
     return this.prismaClient.$transaction([
       this.prismaClient.product.findMany({
         take: select.pageSize,

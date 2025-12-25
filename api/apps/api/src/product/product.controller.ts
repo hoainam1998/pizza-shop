@@ -59,8 +59,8 @@ export default class ProductController extends BaseController {
   @HttpCode(HttpStatus.OK)
   @HandleHttpError
   pagination(@Body() select: ProductSelect): Observable<Promise<Record<string, any>>> {
-    select.query = ProductQuery.plain(select.query) as any;
-    return this.productService.pagination(select).pipe(
+    const query = ProductQuery.plain(select.query) as any;
+    return this.productService.pagination({ ...select, query }).pipe(
       map((results) => {
         return new PaginationProductSerializer(results).validate().then((errors) => {
           if (errors.length) {
@@ -68,7 +68,13 @@ export default class ProductController extends BaseController {
             throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
           }
           const paginationResultSerializer = plainToInstance(PaginationProductSerializer, results);
-          return instanceToPlain(paginationResultSerializer);
+          const groups = ['bought', 'disabled'].reduce((groups: string[], key: keyof typeof select.query) => {
+            if (select.query[key]) {
+              groups.push(key);
+            }
+            return groups;
+          }, []);
+          return instanceToPlain(paginationResultSerializer, { groups });
         });
       }),
     );

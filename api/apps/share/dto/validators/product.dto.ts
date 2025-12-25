@@ -8,6 +8,7 @@ import {
   IsOptional,
   IsDefined,
   IsPositive,
+  ValidateNested,
 } from 'class-validator';
 import { OmitType } from '@nestjs/mapped-types';
 import { Status } from 'generated/prisma';
@@ -159,6 +160,10 @@ export class ProductQuery {
   @IsBoolean()
   disabled: boolean;
 
+  @IsOptional()
+  @IsBoolean()
+  bought: boolean;
+
   @Expose()
   get product_ingredient() {
     if (this.ingredients) {
@@ -180,7 +185,7 @@ export class ProductQuery {
 
   @Expose()
   get _count() {
-    if (this.disabled) {
+    if (this.disabled || this.bought) {
       return {
         select: {
           bill_detail: true,
@@ -228,6 +233,7 @@ export class ProductQuery {
       target.category = true;
       target.categoryId = true;
       target.disabled = true;
+      target.bought = true;
     }
     const query = instanceToPlain(plainToInstance(ProductQuery, target));
     return instanceToPlain(plainToInstance(ProductQueryTransform, query), {
@@ -243,12 +249,16 @@ export class ProductQueryTransform extends OmitType(ProductQuery, [
   'expiredTime',
   'categoryId',
   'disabled',
+  'bought',
 ]) {
   @Exclude()
   ingredients: boolean;
 
   @Exclude()
   disabled: boolean;
+
+  @Exclude()
+  bought: boolean;
 
   @Expose()
   category: boolean;
@@ -269,16 +279,22 @@ export class ProductQueryTransform extends OmitType(ProductQuery, [
 export class ProductSelect extends Pagination {
   @IsDefined()
   @Type(() => ProductQuery)
+  @ValidateNested({ each: true })
   query: ProductQuery;
 
   @IsOptional()
   @IsString()
   search: string;
+
+  @IsOptional()
+  @IsNumberString()
+  categoryId: string;
 }
 
 export class GetProduct {
   @IsDefined()
   @Type(() => ProductQuery)
+  @ValidateNested({ each: true })
   query: ProductQuery;
 
   @IsDefined()

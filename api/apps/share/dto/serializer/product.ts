@@ -53,7 +53,9 @@ export class ProductSerializer extends Validator {
   @IsOptional()
   @IsObject()
   @Exclude({ toPlainOnly: true })
-  _count: object;
+  _count: {
+    bill_detail: number;
+  };
 
   @Expose({ toPlainOnly: true })
   get ingredients() {
@@ -99,10 +101,18 @@ export class ProductSerializer extends Validator {
     return this.category_id;
   }
 
+  @Expose({ groups: ['disabled'] })
   @Expose()
   get disabled() {
     if (this._count) {
       return Object.values(this._count).some((v) => v > 0);
+    }
+  }
+
+  @Expose({ groups: ['bought'] })
+  get bought() {
+    if (this._count) {
+      return this._count.bill_detail;
     }
   }
 

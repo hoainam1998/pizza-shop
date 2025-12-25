@@ -130,6 +130,88 @@ describe('product pagination', () => {
     expect(countPrismaMethod).toHaveBeenCalledTimes(1);
   });
 
+  it('product pagination was success with categoryId', async () => {
+    expect.hasAssertions();
+    const paginationBodyWithCategoryId = {
+      ...paginationBody,
+      categoryId: product.category_id,
+    };
+    const skip = calcSkip(paginationBody.pageSize, paginationBody.pageNumber);
+    const productList = createProductList(length);
+    const transactionResults = [productList, length];
+    const findManyPrismaMethod = jest.spyOn(prismaService.product, 'findMany');
+    const countPrismaMethod = jest.spyOn(prismaService.product, 'count');
+    const transactionPrismaMethod = jest.spyOn(prismaService, '$transaction').mockResolvedValue(transactionResults);
+    const paginationServiceMethod = jest.spyOn(productService, 'pagination');
+    const paginationControllerMethod = jest.spyOn(productController, 'pagination');
+    await expect(productController.pagination(paginationBodyWithCategoryId)).resolves.toEqual({
+      list: transactionResults[0],
+      total: transactionResults[1],
+    });
+    expect(paginationControllerMethod).toHaveBeenCalledTimes(1);
+    expect(paginationControllerMethod).toHaveBeenCalledWith(paginationBodyWithCategoryId);
+    expect(paginationServiceMethod).toHaveBeenCalledTimes(1);
+    expect(paginationServiceMethod).toHaveBeenCalledWith(paginationBodyWithCategoryId);
+    expect(transactionPrismaMethod).toHaveBeenCalledTimes(1);
+    expect(transactionPrismaMethod).toHaveBeenCalledWith(expect.any(Array));
+    expect(findManyPrismaMethod).toHaveBeenCalledTimes(1);
+    expect(findManyPrismaMethod).toHaveBeenLastCalledWith({
+      select: paginationBodyWithCategoryId.query,
+      take: paginationBodyWithCategoryId.pageSize,
+      skip,
+      where: {
+        category_id: paginationBodyWithCategoryId.categoryId,
+      },
+      orderBy: {
+        product_id: 'desc',
+      },
+    });
+    expect(countPrismaMethod).toHaveBeenCalledTimes(1);
+  });
+
+  it('product pagination was success with a both categoryId and keyword', async () => {
+    expect.hasAssertions();
+    const paginationBodyWithAllCondition = {
+      ...paginationBody,
+      categoryId: product.category_id,
+      search: product.name,
+    };
+    const skip = calcSkip(paginationBody.pageSize, paginationBody.pageNumber);
+    const productList = createProductList(length);
+    const transactionResults = [productList, length];
+    const findManyPrismaMethod = jest.spyOn(prismaService.product, 'findMany');
+    const countPrismaMethod = jest.spyOn(prismaService.product, 'count');
+    const transactionPrismaMethod = jest.spyOn(prismaService, '$transaction').mockResolvedValue(transactionResults);
+    const paginationServiceMethod = jest.spyOn(productService, 'pagination');
+    const paginationControllerMethod = jest.spyOn(productController, 'pagination');
+    await expect(productController.pagination(paginationBodyWithAllCondition)).resolves.toEqual({
+      list: transactionResults[0],
+      total: transactionResults[1],
+    });
+    expect(paginationControllerMethod).toHaveBeenCalledTimes(1);
+    expect(paginationControllerMethod).toHaveBeenCalledWith(paginationBodyWithAllCondition);
+    expect(paginationServiceMethod).toHaveBeenCalledTimes(1);
+    expect(paginationServiceMethod).toHaveBeenCalledWith(paginationBodyWithAllCondition);
+    expect(transactionPrismaMethod).toHaveBeenCalledTimes(1);
+    expect(transactionPrismaMethod).toHaveBeenCalledWith(expect.any(Array));
+    expect(findManyPrismaMethod).toHaveBeenCalledTimes(1);
+    expect(findManyPrismaMethod).toHaveBeenLastCalledWith({
+      select: paginationBodyWithAllCondition.query,
+      take: paginationBodyWithAllCondition.pageSize,
+      skip,
+      where: {
+        category_id: paginationBodyWithAllCondition.categoryId,
+        name: {
+          contains: paginationBodyWithAllCondition.search,
+        },
+      },
+      orderBy: {
+        product_id: 'desc',
+      },
+    });
+    expect(countPrismaMethod).toHaveBeenCalledTimes(1);
+  });
+
   it('product pagination failed with not found error', async () => {
     expect.hasAssertions();
     const skip = calcSkip(paginationBody.pageSize, paginationBody.pageNumber);
