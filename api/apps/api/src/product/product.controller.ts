@@ -9,6 +9,7 @@ import {
   Put,
   Delete,
   Param,
+  Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { map, Observable } from 'rxjs';
@@ -20,7 +21,8 @@ import {
   ProductCreate,
   ProductCreateTransform,
   ProductQuery,
-  ProductSelect,
+  ProductPagination,
+  ProductPaginationForSale,
 } from '@share/dto/validators/product.dto';
 import { IdValidationPipe, ImageTransformPipe } from '@share/pipes';
 import ProductService from './product.service';
@@ -30,12 +32,17 @@ import { PaginationProductSerializer, ProductSerializer } from '@share/dto/seria
 import LoggingService from '@share/libs/logging/logging.service';
 import BaseController from '../controller';
 import { ProductRouter } from '@share/router';
+import { ProductPaginationResponse } from '@share/interfaces';
+import { EventsGateway } from '@share/libs/socket/event-socket.gateway';
+import ProductCachingService from '@share/libs/caching/product/product.service';
 
 @Controller(ProductRouter.BaseUrl)
 export default class ProductController extends BaseController {
   constructor(
     private readonly productService: ProductService,
     private readonly loggingService: LoggingService,
+    private readonly socketEventGateway: EventsGateway,
+    private readonly productCachingService: ProductCachingService,
   ) {
     super(loggingService, 'product');
   }
@@ -55,12 +62,11 @@ export default class ProductController extends BaseController {
       .pipe(map(() => MessageSerializer.create(messages.PRODUCT.CREATE_PRODUCT_SUCCESS)));
   }
 
-  @Post(ProductRouter.relative.pagination)
-  @HttpCode(HttpStatus.OK)
-  @HandleHttpError
-  pagination(@Body() select: ProductSelect): Observable<Promise<Record<string, any>>> {
-    const query = ProductQuery.plain(select.query) as any;
-    return this.productService.pagination({ ...select, query }).pipe(
+  private handlePaginationObservable(
+    observable: Observable<ProductPaginationResponse>,
+    select: ProductPagination | ProductPaginationForSale,
+  ): Observable<Promise<Record<string, any>>> {
+    return observable.pipe(
       map((results) => {
         return new PaginationProductSerializer(results).validate().then((errors) => {
           if (errors.length) {
@@ -78,6 +84,38 @@ export default class ProductController extends BaseController {
         });
       }),
     );
+  }
+
+  @Post(ProductRouter.relative.pagination)
+  @HttpCode(HttpStatus.OK)
+  @HandleHttpError
+  pagination(@Body() select: ProductPagination): Observable<Promise<Record<string, any>>> {
+    const query = ProductQuery.plain(select.query) as any;
+    return this.handlePaginationObservable(this.productService.pagination({ ...select, query }), select);
+  }
+
+  @Post(ProductRouter.relative.paginationForSale)
+  @HttpCode(HttpStatus.OK)
+  @HandleHttpError
+  paginationForSale(
+    @Req() req: Express.Request,
+    @Body() select: ProductPaginationForSale,
+  ): Observable<Promise<Record<string, any>>> {
+    const query = ProductQuery.plain(select.query) as any;
+    return this.handlePaginationObservable(
+      this.productService.paginationForSale(req.session.user?.userId || '', {
+        ...instanceToPlain(select, { exposeUnsetFields: true }),
+        query,
+      }),
+      select,
+    );
+  }
+
+  @Post(ProductRouter.relative.productsInCart)
+  @HttpCode(HttpStatus.OK)
+  @HandleHttpError
+  getProductsInCart(@Req() req: Express.Request): Observable<product[]> {
+    return this.productService.getProductsInCart(req.session.user?.userId || '');
   }
 
   @Post(ProductRouter.relative.detail)

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import ProductService from './product.service';
 import ProductController from './product.controller';
 import ShareModule from '@share/module';
+import EventsModule from '@share/libs/socket/event-socket.module';
 import { ClientProvider, ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 import { PRODUCT_SERVICE } from '@share/di-token';
@@ -24,6 +25,7 @@ import LoggingModule from '@share/libs/logging/logging.module';
       },
     ]),
     ShareModule,
+    EventsModule,
     LoggingModule,
   ],
   providers: [ProductService],

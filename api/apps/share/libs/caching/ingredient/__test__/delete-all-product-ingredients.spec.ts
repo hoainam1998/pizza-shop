@@ -5,7 +5,7 @@ import RedisClient from '@share/libs/redis-client/redis';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { product } from '@share/test/pre-setup/mock/data/product';
 import { ingredientName } from '../ingredient.service';
-const productId = product.productId;
+const productId: string = product.productId;
 
 let ingredientCachingService: IngredientCachingService;
 let redisClient: RedisClient;

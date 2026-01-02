@@ -1,3 +1,3 @@
-import { IsMulterFile } from './multer-file-validator.decorator';
+import IsMulterFile from './multer-file-validator.decorator';
 
 export { IsMulterFile };

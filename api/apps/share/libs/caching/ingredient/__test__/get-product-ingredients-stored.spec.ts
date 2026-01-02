@@ -6,7 +6,7 @@ import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { product } from '@share/test/pre-setup/mock/data/product';
 import { ingredientName } from '../ingredient.service';
 import { createIngredients, createIngredientsJson } from '@share/test/pre-setup/mock/data/ingredient';
-const productId = product.productId;
+const productId: string = product.productId;
 const ingredientJson = createIngredientsJson(2);
 const ingredientIds = createIngredients(2).map((ingredient) => ingredient.ingredient_id);
 

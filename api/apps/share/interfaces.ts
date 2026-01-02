@@ -1,5 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 import { user, category, product, ingredient } from 'generated/prisma';
+import { ProductPagination } from './dto/validators/product.dto';
 
 export type CategoryBodyType = category & {
   disabled?: boolean;
@@ -91,4 +92,9 @@ export type MessageResponseTestingType = {
 export type AdminResetPasswordTokenPayload = {
   email: string;
   password: string;
+};
+
+export type ProductSelectForSaleType = {
+  select: ProductPagination;
+  userId: string;
 };

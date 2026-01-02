@@ -40,7 +40,12 @@ const getProductRequestBody = {
     price: true,
     status: true,
     categoryId: true,
-    ingredients: true,
+    ingredients: {
+      unit: true,
+      count: true,
+      name: true,
+      avatar: true,
+    },
     avatar: true,
     originalPrice: true,
     expiredTime: true,
@@ -128,7 +133,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
     expect(logError).toHaveBeenCalledWith(validatorErrors, expect.any(String));
   });
 
-  it(createTestName('get category detail failed with not found error', HttpStatus.NOT_FOUND), async () => {
+  it(createTestName('get product detail failed with not found error', HttpStatus.NOT_FOUND), async () => {
     expect.hasAssertions();
     const send = jest
       .spyOn(clientProxy, 'send')

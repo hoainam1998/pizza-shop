@@ -62,10 +62,10 @@ export class ProductSerializer extends Validator {
     if (this.product_ingredient) {
       return this.product_ingredient.map((ingredient) => ({
         ingredientId: ingredient.ingredient_id,
-        amount: ingredient.count,
+        count: ingredient.count,
         unit: ingredient.unit,
-        avatar: ingredient.ingredient.avatar,
-        name: ingredient.ingredient.name,
+        avatar: (ingredient.ingredient || {}).avatar,
+        name: (ingredient.ingredient || {}).name,
       }));
     }
   }

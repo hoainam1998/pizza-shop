@@ -3,10 +3,10 @@ import CategoryCachingService from './category.service';
 
 @Module({})
 export default class CategoryCachingModule {
-  static register(prismaProvider: Provider): DynamicModule {
+  static register(redisClient: Provider): DynamicModule {
     return {
       module: CategoryCachingModule,
-      providers: [prismaProvider, CategoryCachingService],
+      providers: [redisClient, CategoryCachingService],
       exports: [CategoryCachingService],
     };
   }

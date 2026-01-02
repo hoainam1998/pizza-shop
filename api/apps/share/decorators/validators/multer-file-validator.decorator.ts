@@ -1,6 +1,6 @@
 import { registerDecorator, ValidationOptions } from 'class-validator';
 
-export function IsMulterFile(validationOptions?: ValidationOptions) {
+export default function IsMulterFile(validationOptions?: ValidationOptions) {
   const generateOptions = (propertyName: string) => {
     if (validationOptions) {
       if (!validationOptions.message) {
