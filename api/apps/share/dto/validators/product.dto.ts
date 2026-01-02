@@ -9,10 +9,29 @@ import {
   IsDefined,
   IsPositive,
   ValidateNested,
+  IsNumber,
 } from 'class-validator';
 import { OmitType } from '@nestjs/mapped-types';
 import { Status } from 'generated/prisma';
 import { Pagination } from './common.dto';
+
+class IngredientSelect {
+  @IsOptional()
+  @IsBoolean()
+  count: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  unit: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  name: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  avatar: boolean;
+}
 
 export class ProductCreate {
   @IsDefined()
@@ -153,8 +172,9 @@ export class ProductQuery {
   categoryId: boolean;
 
   @IsOptional()
-  @IsBoolean()
-  ingredients: boolean;
+  @Type(() => IngredientSelect)
+  @ValidateNested({ each: true })
+  ingredients: IngredientSelect;
 
   @IsOptional()
   @IsBoolean()
@@ -166,20 +186,41 @@ export class ProductQuery {
 
   @Expose()
   get product_ingredient() {
+    type ProductIngredientPrismaSelect = {
+      select: {
+        ingredient_id: true;
+        ingredient?: {
+          select: Record<string, boolean>;
+        };
+      };
+    };
     if (this.ingredients) {
-      return {
-        select: {
-          ingredient_id: true,
-          count: true,
-          unit: true,
-          ingredient: {
-            select: {
-              name: true,
-              avatar: true,
+      return Object.entries(this.ingredients).reduce<ProductIngredientPrismaSelect>(
+        (select, [key, value], index, arr) => {
+          if (value !== undefined) {
+            if (['name', 'avatar'].includes(key)) {
+              Object.assign(select.select.ingredient!.select, { [key]: value });
+            } else {
+              Object.assign(select.select, { [key]: value });
+            }
+          }
+
+          if (arr.length - 1 === index) {
+            if (Object.keys(select.select.ingredient!.select).length === 0) {
+              delete select.select.ingredient;
+            }
+          }
+          return select;
+        },
+        {
+          select: {
+            ingredient_id: true,
+            ingredient: {
+              select: {},
             },
           },
         },
-      };
+      );
     }
   }
 
@@ -216,7 +257,7 @@ export class ProductQuery {
 
   static plain(target: any): Record<string, any> {
     if (
-      Object.entries(target).every(([key, value]) => {
+      Object.entries(target as object).every(([key, value]) => {
         if (key === 'product_id') {
           return true;
         } else {
@@ -276,11 +317,30 @@ export class ProductQueryTransform extends OmitType(ProductQuery, [
   categoryId: boolean;
 }
 
-export class ProductSelect extends Pagination {
+export class ProductPagination extends Pagination {
+  @IsOptional()
+  @IsString()
+  search: string;
+
+  @IsOptional()
+  @IsNumberString()
+  categoryId: string;
+
   @IsDefined()
   @Type(() => ProductQuery)
   @ValidateNested({ each: true })
   query: ProductQuery;
+}
+
+export class ProductPaginationForSale {
+  @Expose({ toPlainOnly: true })
+  get pageSize() {
+    return 10;
+  }
+
+  @IsNumber()
+  @IsPositive()
+  pageNumber: number;
 
   @IsOptional()
   @IsString()
@@ -289,6 +349,11 @@ export class ProductSelect extends Pagination {
   @IsOptional()
   @IsNumberString()
   categoryId: string;
+
+  @IsDefined()
+  @Type(() => ProductQuery)
+  @ValidateNested({ each: true })
+  query: ProductQuery;
 }
 
 export class GetProduct {

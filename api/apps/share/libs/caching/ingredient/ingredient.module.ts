@@ -3,10 +3,10 @@ import IngredientCachingService from './ingredient.service';
 
 @Module({})
 export default class IngredientCachingModule {
-  static register(prismaProvider: Provider): DynamicModule {
+  static register(redisClient: Provider): DynamicModule {
     return {
       module: IngredientCachingModule,
-      providers: [prismaProvider, IngredientCachingService],
+      providers: [redisClient, IngredientCachingService],
       exports: [IngredientCachingService],
     };
   }

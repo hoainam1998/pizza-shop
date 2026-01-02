@@ -1,20 +1,17 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { PrismaClient } from 'generated/prisma';
 import startUp from './pre-setup';
 import ProductController from '../product.controller';
 import ProductService from '../product.service';
 import { product, createProductList } from '@share/test/pre-setup/mock/data/product';
-import { PRISMA_CLIENT } from '@share/di-token';
 import LoggingService from '@share/libs/logging/logging.service';
-import { calcSkip, createMessage } from '@share/utils';
+import { createMessage } from '@share/utils';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import messages from '@share/constants/messages';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 
 let productController: ProductController;
 let productService: ProductService;
-let prismaService: PrismaClient;
 let loggerService: LoggingService;
 
 const query = {
@@ -39,6 +36,8 @@ const paginationBody: any = {
   pageNumber: 1,
   query,
 };
+const productList = createProductList(length);
+const transactionResults = [productList, length];
 
 beforeEach(async () => {
   const moduleRef = await startUp();
@@ -46,24 +45,14 @@ beforeEach(async () => {
   productService = moduleRef.get(ProductService);
   productController = moduleRef.get(ProductController);
   loggerService = moduleRef.get(LoggingService);
-  prismaService = moduleRef.get(PRISMA_CLIENT);
-});
-
-afterEach((done) => {
-  jest.restoreAllMocks();
-  jest.resetAllMocks();
-  done();
 });
 
 describe('product pagination', () => {
   it('product pagination was success', async () => {
     expect.hasAssertions();
-    const skip = calcSkip(paginationBody.pageSize, paginationBody.pageNumber);
-    const productList = createProductList(length);
-    const transactionResults = [productList, length];
-    const findManyPrismaMethod = jest.spyOn(prismaService.product, 'findMany');
-    const countPrismaMethod = jest.spyOn(prismaService.product, 'count');
-    const transactionPrismaMethod = jest.spyOn(prismaService, '$transaction').mockResolvedValue(transactionResults);
+    const handlePagination = jest
+      .spyOn(productService as any, 'handlePagination')
+      .mockResolvedValue(transactionResults);
     const paginationServiceMethod = jest.spyOn(productService, 'pagination');
     const paginationControllerMethod = jest.spyOn(productController, 'pagination');
     await expect(productController.pagination(paginationBody)).resolves.toEqual({
@@ -74,19 +63,8 @@ describe('product pagination', () => {
     expect(paginationControllerMethod).toHaveBeenCalledWith(paginationBody);
     expect(paginationServiceMethod).toHaveBeenCalledTimes(1);
     expect(paginationServiceMethod).toHaveBeenCalledWith(paginationBody);
-    expect(transactionPrismaMethod).toHaveBeenCalledTimes(1);
-    expect(transactionPrismaMethod).toHaveBeenCalledWith(expect.any(Array));
-    expect(findManyPrismaMethod).toHaveBeenCalledTimes(1);
-    expect(findManyPrismaMethod).toHaveBeenLastCalledWith({
-      select: paginationBody.query,
-      take: paginationBody.pageSize,
-      skip,
-      where: {},
-      orderBy: {
-        product_id: 'desc',
-      },
-    });
-    expect(countPrismaMethod).toHaveBeenCalledTimes(1);
+    expect(handlePagination).toHaveBeenCalledTimes(1);
+    expect(handlePagination).toHaveBeenCalledWith(paginationBody);
   });
 
   it('product pagination was success with key word', async () => {
@@ -95,12 +73,9 @@ describe('product pagination', () => {
       ...paginationBody,
       search: product.name,
     };
-    const skip = calcSkip(paginationBody.pageSize, paginationBody.pageNumber);
-    const productList = createProductList(length);
-    const transactionResults = [productList, length];
-    const findManyPrismaMethod = jest.spyOn(prismaService.product, 'findMany');
-    const countPrismaMethod = jest.spyOn(prismaService.product, 'count');
-    const transactionPrismaMethod = jest.spyOn(prismaService, '$transaction').mockResolvedValue(transactionResults);
+    const handlePagination = jest
+      .spyOn(productService as any, 'handlePagination')
+      .mockResolvedValue(transactionResults);
     const paginationServiceMethod = jest.spyOn(productService, 'pagination');
     const paginationControllerMethod = jest.spyOn(productController, 'pagination');
     await expect(productController.pagination(paginationBodyWithKeyword)).resolves.toEqual({
@@ -111,23 +86,8 @@ describe('product pagination', () => {
     expect(paginationControllerMethod).toHaveBeenCalledWith(paginationBodyWithKeyword);
     expect(paginationServiceMethod).toHaveBeenCalledTimes(1);
     expect(paginationServiceMethod).toHaveBeenCalledWith(paginationBodyWithKeyword);
-    expect(transactionPrismaMethod).toHaveBeenCalledTimes(1);
-    expect(transactionPrismaMethod).toHaveBeenCalledWith(expect.any(Array));
-    expect(findManyPrismaMethod).toHaveBeenCalledTimes(1);
-    expect(findManyPrismaMethod).toHaveBeenLastCalledWith({
-      select: paginationBodyWithKeyword.query,
-      take: paginationBodyWithKeyword.pageSize,
-      skip,
-      where: {
-        name: {
-          contains: paginationBodyWithKeyword.search,
-        },
-      },
-      orderBy: {
-        product_id: 'desc',
-      },
-    });
-    expect(countPrismaMethod).toHaveBeenCalledTimes(1);
+    expect(handlePagination).toHaveBeenCalledTimes(1);
+    expect(handlePagination).toHaveBeenCalledWith(paginationBodyWithKeyword);
   });
 
   it('product pagination was success with categoryId', async () => {
@@ -136,12 +96,9 @@ describe('product pagination', () => {
       ...paginationBody,
       categoryId: product.category_id,
     };
-    const skip = calcSkip(paginationBody.pageSize, paginationBody.pageNumber);
-    const productList = createProductList(length);
-    const transactionResults = [productList, length];
-    const findManyPrismaMethod = jest.spyOn(prismaService.product, 'findMany');
-    const countPrismaMethod = jest.spyOn(prismaService.product, 'count');
-    const transactionPrismaMethod = jest.spyOn(prismaService, '$transaction').mockResolvedValue(transactionResults);
+    const handlePagination = jest
+      .spyOn(productService as any, 'handlePagination')
+      .mockResolvedValue(transactionResults);
     const paginationServiceMethod = jest.spyOn(productService, 'pagination');
     const paginationControllerMethod = jest.spyOn(productController, 'pagination');
     await expect(productController.pagination(paginationBodyWithCategoryId)).resolves.toEqual({
@@ -152,21 +109,8 @@ describe('product pagination', () => {
     expect(paginationControllerMethod).toHaveBeenCalledWith(paginationBodyWithCategoryId);
     expect(paginationServiceMethod).toHaveBeenCalledTimes(1);
     expect(paginationServiceMethod).toHaveBeenCalledWith(paginationBodyWithCategoryId);
-    expect(transactionPrismaMethod).toHaveBeenCalledTimes(1);
-    expect(transactionPrismaMethod).toHaveBeenCalledWith(expect.any(Array));
-    expect(findManyPrismaMethod).toHaveBeenCalledTimes(1);
-    expect(findManyPrismaMethod).toHaveBeenLastCalledWith({
-      select: paginationBodyWithCategoryId.query,
-      take: paginationBodyWithCategoryId.pageSize,
-      skip,
-      where: {
-        category_id: paginationBodyWithCategoryId.categoryId,
-      },
-      orderBy: {
-        product_id: 'desc',
-      },
-    });
-    expect(countPrismaMethod).toHaveBeenCalledTimes(1);
+    expect(handlePagination).toHaveBeenCalledTimes(1);
+    expect(handlePagination).toHaveBeenCalledWith(paginationBodyWithCategoryId);
   });
 
   it('product pagination was success with a both categoryId and keyword', async () => {
@@ -176,12 +120,11 @@ describe('product pagination', () => {
       categoryId: product.category_id,
       search: product.name,
     };
-    const skip = calcSkip(paginationBody.pageSize, paginationBody.pageNumber);
     const productList = createProductList(length);
     const transactionResults = [productList, length];
-    const findManyPrismaMethod = jest.spyOn(prismaService.product, 'findMany');
-    const countPrismaMethod = jest.spyOn(prismaService.product, 'count');
-    const transactionPrismaMethod = jest.spyOn(prismaService, '$transaction').mockResolvedValue(transactionResults);
+    const handlePagination = jest
+      .spyOn(productService as any, 'handlePagination')
+      .mockResolvedValue(transactionResults);
     const paginationServiceMethod = jest.spyOn(productService, 'pagination');
     const paginationControllerMethod = jest.spyOn(productController, 'pagination');
     await expect(productController.pagination(paginationBodyWithAllCondition)).resolves.toEqual({
@@ -192,32 +135,13 @@ describe('product pagination', () => {
     expect(paginationControllerMethod).toHaveBeenCalledWith(paginationBodyWithAllCondition);
     expect(paginationServiceMethod).toHaveBeenCalledTimes(1);
     expect(paginationServiceMethod).toHaveBeenCalledWith(paginationBodyWithAllCondition);
-    expect(transactionPrismaMethod).toHaveBeenCalledTimes(1);
-    expect(transactionPrismaMethod).toHaveBeenCalledWith(expect.any(Array));
-    expect(findManyPrismaMethod).toHaveBeenCalledTimes(1);
-    expect(findManyPrismaMethod).toHaveBeenLastCalledWith({
-      select: paginationBodyWithAllCondition.query,
-      take: paginationBodyWithAllCondition.pageSize,
-      skip,
-      where: {
-        category_id: paginationBodyWithAllCondition.categoryId,
-        name: {
-          contains: paginationBodyWithAllCondition.search,
-        },
-      },
-      orderBy: {
-        product_id: 'desc',
-      },
-    });
-    expect(countPrismaMethod).toHaveBeenCalledTimes(1);
+    expect(handlePagination).toHaveBeenCalledTimes(1);
+    expect(handlePagination).toHaveBeenCalledWith(paginationBodyWithAllCondition);
   });
 
   it('product pagination failed with not found error', async () => {
     expect.hasAssertions();
-    const skip = calcSkip(paginationBody.pageSize, paginationBody.pageNumber);
-    const findManyPrismaMethod = jest.spyOn(prismaService.product, 'findMany');
-    const countPrismaMethod = jest.spyOn(prismaService.product, 'count');
-    const transactionPrismaMethod = jest.spyOn(prismaService, '$transaction').mockResolvedValue([[], 0]);
+    const handlePagination = jest.spyOn(productService as any, 'handlePagination').mockResolvedValue([[], 0]);
     const paginationServiceMethod = jest.spyOn(productService, 'pagination');
     const paginationControllerMethod = jest.spyOn(productController, 'pagination');
     await expect(productController.pagination(paginationBody)).rejects.toThrow(
@@ -232,28 +156,14 @@ describe('product pagination', () => {
     expect(paginationControllerMethod).toHaveBeenCalledWith(paginationBody);
     expect(paginationServiceMethod).toHaveBeenCalledTimes(1);
     expect(paginationServiceMethod).toHaveBeenCalledWith(paginationBody);
-    expect(transactionPrismaMethod).toHaveBeenCalledTimes(1);
-    expect(transactionPrismaMethod).toHaveBeenCalledWith(expect.any(Array));
-    expect(findManyPrismaMethod).toHaveBeenCalledTimes(1);
-    expect(findManyPrismaMethod).toHaveBeenLastCalledWith({
-      select: paginationBody.query,
-      take: paginationBody.pageSize,
-      skip,
-      where: {},
-      orderBy: {
-        product_id: 'desc',
-      },
-    });
-    expect(countPrismaMethod).toHaveBeenCalledTimes(1);
+    expect(handlePagination).toHaveBeenCalledTimes(1);
+    expect(handlePagination).toHaveBeenCalledWith(paginationBody);
   });
 
   it('product pagination failed with unknown error', async () => {
     expect.hasAssertions();
-    const skip = calcSkip(paginationBody.pageSize, paginationBody.pageNumber);
     const logMethod = jest.spyOn(loggerService, 'error');
-    const findManyPrismaMethod = jest.spyOn(prismaService.product, 'findMany');
-    const countPrismaMethod = jest.spyOn(prismaService.product, 'count');
-    const transactionPrismaMethod = jest.spyOn(prismaService, '$transaction').mockRejectedValue(UnknownError);
+    const handlePagination = jest.spyOn(productService as any, 'handlePagination').mockRejectedValue(UnknownError);
     const paginationServiceMethod = jest.spyOn(productService, 'pagination');
     const paginationControllerMethod = jest.spyOn(productController, 'pagination');
     await expect(productController.pagination(paginationBody)).rejects.toThrow(
@@ -265,28 +175,16 @@ describe('product pagination', () => {
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
     expect(paginationServiceMethod).toHaveBeenCalledTimes(1);
     expect(paginationServiceMethod).toHaveBeenCalledWith(paginationBody);
-    expect(transactionPrismaMethod).toHaveBeenCalledTimes(1);
-    expect(transactionPrismaMethod).toHaveBeenCalledWith(expect.any(Array));
-    expect(findManyPrismaMethod).toHaveBeenCalledTimes(1);
-    expect(findManyPrismaMethod).toHaveBeenLastCalledWith({
-      select: paginationBody.query,
-      take: paginationBody.pageSize,
-      skip,
-      where: {},
-      orderBy: {
-        product_id: 'desc',
-      },
-    });
-    expect(countPrismaMethod).toHaveBeenCalledTimes(1);
+    expect(handlePagination).toHaveBeenCalledTimes(1);
+    expect(handlePagination).toHaveBeenCalledWith(paginationBody);
   });
 
   it('product pagination failed with database disconnect error', async () => {
     expect.hasAssertions();
-    const skip = calcSkip(paginationBody.pageSize, paginationBody.pageNumber);
     const logMethod = jest.spyOn(loggerService, 'error');
-    const findManyPrismaMethod = jest.spyOn(prismaService.product, 'findMany');
-    const countPrismaMethod = jest.spyOn(prismaService.product, 'count');
-    const transactionPrismaMethod = jest.spyOn(prismaService, '$transaction').mockRejectedValue(PrismaDisconnectError);
+    const handlePagination = jest
+      .spyOn(productService as any, 'handlePagination')
+      .mockRejectedValue(PrismaDisconnectError);
     const paginationServiceMethod = jest.spyOn(productService, 'pagination');
     const paginationControllerMethod = jest.spyOn(productController, 'pagination');
     await expect(productController.pagination(paginationBody)).rejects.toThrow(
@@ -298,18 +196,7 @@ describe('product pagination', () => {
     expect(logMethod).toHaveBeenCalledWith(PrismaDisconnectError.message, expect.any(String));
     expect(paginationServiceMethod).toHaveBeenCalledTimes(1);
     expect(paginationServiceMethod).toHaveBeenCalledWith(paginationBody);
-    expect(transactionPrismaMethod).toHaveBeenCalledTimes(1);
-    expect(transactionPrismaMethod).toHaveBeenCalledWith(expect.any(Array));
-    expect(findManyPrismaMethod).toHaveBeenCalledTimes(1);
-    expect(findManyPrismaMethod).toHaveBeenLastCalledWith({
-      select: paginationBody.query,
-      take: paginationBody.pageSize,
-      skip,
-      where: {},
-      orderBy: {
-        product_id: 'desc',
-      },
-    });
-    expect(countPrismaMethod).toHaveBeenCalledTimes(1);
+    expect(handlePagination).toHaveBeenCalledTimes(1);
+    expect(handlePagination).toHaveBeenCalledWith(paginationBody);
   });
 });

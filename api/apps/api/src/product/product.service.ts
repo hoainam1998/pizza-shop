@@ -6,11 +6,13 @@ import {
   createProductPattern,
   getProductPattern,
   paginationPattern,
+  paginationForSalePattern,
+  getProductsInCartPattern,
   updateProductPattern,
   deleteProductPattern,
 } from '@share/pattern';
 import { PRODUCT_SERVICE } from '@share/di-token';
-import { GetProduct, ProductSelect } from '@share/dto/validators/product.dto';
+import { GetProduct, ProductPagination } from '@share/dto/validators/product.dto';
 import { ProductPaginationResponse } from '@share/interfaces';
 
 @Injectable()
@@ -21,8 +23,16 @@ export default class ProductService {
     return this.product.send<product>(createProductPattern, product);
   }
 
-  pagination(select: ProductSelect): Observable<ProductPaginationResponse> {
+  pagination(select: ProductPagination): Observable<ProductPaginationResponse> {
     return this.product.send<ProductPaginationResponse>(paginationPattern, select);
+  }
+
+  paginationForSale(userId: string, select: Record<string, any>): Observable<ProductPaginationResponse> {
+    return this.product.send<ProductPaginationResponse>(paginationForSalePattern, { userId, select });
+  }
+
+  getProductsInCart(userId: string): Observable<product[]> {
+    return this.product.send<product[]>(getProductsInCartPattern, userId);
   }
 
   getProduct(select: GetProduct): Observable<product> {

@@ -12,6 +12,8 @@ export default Object.freeze({
     SESSION_KEY: 'ps:',
     CATEGORIES: 'categories',
     INGREDIENTS: 'ingredients',
+    PRODUCT: 'product:',
+    USER_PRODUCT: 'user_product:',
   },
   PASSWORD_PATTERN: /[A-Za-z0-9@$#%!^&*()]{8}/,
 });

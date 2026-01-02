@@ -16,6 +16,8 @@ export default class ProductRouter extends RouterBase {
     ProductRouter.createRouterPath('create');
     ProductRouter.createRouterPath('update');
     ProductRouter.createRouterPath('pagination');
+    ProductRouter.createRouterPath('pagination-for-sale');
+    ProductRouter.createRouterPath('products-in-cart');
     ProductRouter.createRouterPath('detail');
     ProductRouter.createRouterPath('delete', ':id');
   }

@@ -3,14 +3,16 @@ import { MessagePattern } from '@nestjs/microservices';
 import {
   createProductPattern,
   paginationPattern,
+  paginationForSalePattern,
   getProductPattern,
+  getProductsInCartPattern,
   updateProductPattern,
   deleteProductPattern,
 } from '@share/pattern';
 import * as prisma from 'generated/prisma';
 import ProductService from './product.service';
-import { ProductCreate, ProductSelect } from '@share/dto/validators/product.dto';
-import { ProductPaginationResponse } from '@share/interfaces';
+import { ProductCreate, ProductPagination } from '@share/dto/validators/product.dto';
+import type { ProductPaginationResponse, ProductSelectForSaleType } from '@share/interfaces';
 import { checkArrayHaveValues } from '@share/utils';
 import LoggingService from '@share/libs/logging/logging.service';
 import { HandleServiceError } from '@share/decorators';
@@ -30,7 +32,7 @@ export default class ProductController {
 
   @MessagePattern(paginationPattern)
   @HandleServiceError
-  pagination(select: ProductSelect): Promise<ProductPaginationResponse> {
+  pagination(select: ProductPagination): Promise<ProductPaginationResponse> {
     return this.productService.pagination(select).then((results) => {
       const [list, total] = results;
       if (!checkArrayHaveValues(list as prisma.product[])) {
@@ -46,9 +48,39 @@ export default class ProductController {
     });
   }
 
+  @MessagePattern(paginationForSalePattern)
+  @HandleServiceError
+  paginationForSale(payload: ProductSelectForSaleType): Promise<ProductPaginationResponse> {
+    const { userId, select } = payload;
+    return this.productService.paginationForSale(userId, select).then((results) => {
+      const [list, total] = results;
+      if (!checkArrayHaveValues(list as prisma.product[])) {
+        throw new NotFoundException({
+          list: [],
+          total: 0,
+        });
+      }
+      return {
+        list,
+        total,
+      } as ProductPaginationResponse;
+    });
+  }
+
+  @MessagePattern(getProductsInCartPattern)
+  @HandleServiceError
+  getProductsInCart(userId: string): Promise<prisma.product[]> {
+    return this.productService.getProductsInCart(userId).then((products) => {
+      if (!checkArrayHaveValues(products)) {
+        throw new NotFoundException([]);
+      }
+      return products;
+    });
+  }
+
   @MessagePattern(getProductPattern)
   @HandleServiceError
-  getProduct(select: any): Promise<prisma.product> {
+  getProduct(select: Record<string, any>): Promise<prisma.product> {
     return this.productService.getProduct(select);
   }
 

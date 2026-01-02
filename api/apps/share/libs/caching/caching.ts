@@ -21,5 +21,5 @@ export default abstract class {
     return this.RedisClientInstance.json.get(key, { path: '$' }).then((results: any) => results[0]);
   }
 
-  abstract checkExists(): Promise<boolean>;
+  abstract checkExists(key?: string): Promise<boolean>;
 }

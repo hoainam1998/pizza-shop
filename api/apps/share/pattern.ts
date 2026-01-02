@@ -14,7 +14,7 @@ export const getAllCategoriesPattern = createMicroserviceEvent('all');
 export const canSignupPattern = createMicroserviceEvent('can_signup');
 export const signupPattern = createMicroserviceEvent('signup');
 export const loginPattern = createMicroserviceEvent('login');
-export const resetPasswordPattern = createMicroserviceEvent('reset-password');
+export const resetPasswordPattern = createMicroserviceEvent('reset_password');
 
 // ingredient
 export const createIngredientPattern = createMicroserviceEvent('create_ingredient');
@@ -29,3 +29,5 @@ export const createProductPattern = createMicroserviceEvent('create_product');
 export const getProductPattern = createMicroserviceEvent('get_product');
 export const updateProductPattern = createMicroserviceEvent('update_product');
 export const deleteProductPattern = createMicroserviceEvent('delete_product');
+export const paginationForSalePattern = createMicroserviceEvent('pagination_for_sale');
+export const getProductsInCartPattern = createMicroserviceEvent('get_products_in_cart');
