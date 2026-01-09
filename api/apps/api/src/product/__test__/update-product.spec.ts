@@ -42,7 +42,6 @@ const productRequestBody = {
 };
 
 const userIds = [user.user_id];
-
 const productBody = instanceToPlain(plainToInstance(ProductCreate, productRequestBody), {
   exposeUnsetFields: false,
 });

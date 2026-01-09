@@ -8,20 +8,20 @@ import IngredientCachingService from '@share/libs/caching/ingredient/ingredient.
 import ProductController from '../product.controller';
 import ProductService from '../product.service';
 import { product } from '@share/test/pre-setup/mock/data/product';
+import { user } from '@share/test/pre-setup/mock/data/user';
 import { PRISMA_CLIENT } from '@share/di-token';
 import LoggingService from '@share/libs/logging/logging.service';
 import { createMessage } from '@share/utils';
 import messages from '@share/constants/messages';
 import ProductCachingService from '@share/libs/caching/product/product.service';
-import { user } from '@share/test/pre-setup/mock/data/user';
 
+const userIds = [user.user_id];
 let productController: ProductController;
 let productService: ProductService;
 let prismaService: PrismaClient;
 let loggerService: LoggingService;
 let ingredientCachingService: IngredientCachingService;
 let productCachingService: ProductCachingService;
-const userIds = [user.user_id];
 
 beforeEach(async () => {
   const moduleRef = await startUp();
