@@ -34,6 +34,7 @@ const MockProductModule = getMockModule(ProductModule, {
   method: RequestMethod.POST,
 });
 
+delete product.ingredients;
 const paginationBody = {
   pageNumber: 1,
   query: {

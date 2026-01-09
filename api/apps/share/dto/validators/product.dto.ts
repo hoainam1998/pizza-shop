@@ -366,3 +366,14 @@ export class GetProduct {
   @IsNumberString()
   productId: string;
 }
+
+export class GetProductsInCart {
+  @IsDefined()
+  @Type(() => ProductQuery)
+  @ValidateNested({ each: true })
+  query: ProductQuery;
+
+  @IsDefined()
+  @IsArray()
+  productIds: string[];
+}

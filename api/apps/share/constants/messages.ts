@@ -45,6 +45,7 @@ export default Object.freeze({
     PRODUCT_DELETED: 'The product was deleted!',
     DELETE_PRODUCT_SUCCESS: 'Delete product was success!',
     SCHEDULE_DELETE_PRODUCT_FAILED: 'Date in past. Delete product will never be fired.',
+    PRODUCTS_DID_NOT_EXIST: 'Some products in cart did not exist!',
   },
   JWT: {
     MALFORMED: 'The jwt token malformed!',

@@ -56,6 +56,18 @@ export default class CategoryService {
   }
 
   @HandlePrismaError(messages.CATEGORY)
+  filterValidCategories(select: CategoryQuery): Promise<Partial<category>[]> {
+    return this.prismaClient.category.findMany({
+      select,
+      where: {
+        product: {
+          some: {},
+        },
+      },
+    });
+  }
+
+  @HandlePrismaError(messages.CATEGORY)
   pagination(select: PaginationCategory): Promise<CategoryPaginationPrismaResponse> {
     const skip = calcSkip(select.pageSize, select.pageNumber);
 

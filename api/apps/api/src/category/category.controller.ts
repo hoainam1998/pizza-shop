@@ -79,6 +79,24 @@ export default class CategoryController extends BaseController {
     );
   }
 
+  @Post(CategoryRouter.relative.filterValidCategories)
+  @HttpCode(HttpStatus.OK)
+  filterValidCategories(@Body() select: CategoryQuery): Observable<Promise<category[]>> {
+    select = CategoryQuery.plainWithIncludeId(select) as any;
+    return this.categoryService.filterValidCategories(select).pipe(
+      map((categories) => {
+        const categoriesObj = new Categories(categories);
+        return categoriesObj.validate().then((errors) => {
+          if (!errors.length) {
+            return plainToInstance(CategoryDetailSerializer, categoriesObj.List);
+          }
+          this.logError(errors, this.filterValidCategories.name);
+          throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
+        });
+      }),
+    );
+  }
+
   @Post(CategoryRouter.relative.pagination)
   @HttpCode(HttpStatus.OK)
   @SerializeOptions({ type: CategoryPaginationSerializer })

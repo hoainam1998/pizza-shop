@@ -1,6 +1,6 @@
 import { ProductPaginationResponse } from '@share/interfaces';
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
-import { IsArray, IsInt, IsNumberString, IsObject, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsInt, IsNumberString, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { product } from 'generated/prisma';
 import Validator from './validator';
 
@@ -128,13 +128,30 @@ export class PaginationProductSerializer extends Validator {
 
   @IsArray()
   @Type(() => ProductSerializer)
-  list: ProductPaginationResponse['list'];
+  @ValidateNested({ each: true })
+  list: ProductSerializer[];
 
   constructor(results: ProductPaginationResponse) {
     super();
     if (results) {
       this.total = results.total;
-      this.list = results.list;
+      this.list = results.list.map((product) => new ProductSerializer(product));
     }
+  }
+}
+
+export class Products extends Validator {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductSerializer)
+  _list: ProductSerializer[];
+
+  constructor(list: product[]) {
+    super();
+    Object.assign(this, { _list: list.map((product) => new ProductSerializer(product)) });
+  }
+
+  get List() {
+    return this._list;
   }
 }
