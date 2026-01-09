@@ -23,18 +23,20 @@ import {
   ProductQuery,
   ProductPagination,
   ProductPaginationForSale,
+  GetProductsInCart,
 } from '@share/dto/validators/product.dto';
 import { IdValidationPipe, ImageTransformPipe } from '@share/pipes';
 import ProductService from './product.service';
 import { MessageSerializer } from '@share/dto/serializer/common';
 import messages from '@share/constants/messages';
-import { PaginationProductSerializer, ProductSerializer } from '@share/dto/serializer/product';
+import { PaginationProductSerializer, Products, ProductSerializer } from '@share/dto/serializer/product';
 import LoggingService from '@share/libs/logging/logging.service';
 import BaseController from '../controller';
 import { ProductRouter } from '@share/router';
 import { ProductPaginationResponse } from '@share/interfaces';
 import { EventsGateway } from '@share/libs/socket/event-socket.gateway';
-import ProductCachingService from '@share/libs/caching/product/product.service';
+import { Throttle } from '@nestjs/throttler';
+import { createMessage } from '@share/utils';
 
 @Controller(ProductRouter.BaseUrl)
 export default class ProductController extends BaseController {
@@ -42,7 +44,6 @@ export default class ProductController extends BaseController {
     private readonly productService: ProductService,
     private readonly loggingService: LoggingService,
     private readonly socketEventGateway: EventsGateway,
-    private readonly productCachingService: ProductCachingService,
   ) {
     super(loggingService, 'product');
   }
@@ -94,6 +95,7 @@ export default class ProductController extends BaseController {
     return this.handlePaginationObservable(this.productService.pagination({ ...select, query }), select);
   }
 
+  @Throttle({ default: { ttl: 500 } })
   @Post(ProductRouter.relative.paginationForSale)
   @HttpCode(HttpStatus.OK)
   @HandleHttpError
@@ -114,8 +116,23 @@ export default class ProductController extends BaseController {
   @Post(ProductRouter.relative.productsInCart)
   @HttpCode(HttpStatus.OK)
   @HandleHttpError
-  getProductsInCart(@Req() req: Express.Request): Observable<product[]> {
-    return this.productService.getProductsInCart(req.session.user?.userId || '');
+  getProductsInCart(
+    @Req() req: Express.Request,
+    @Body() select: GetProductsInCart,
+  ): Observable<Promise<Record<string, any>>> {
+    select.query = ProductQuery.plain(select.query) as any;
+    return this.productService.getProductsInCart(req.session.user?.userId || '', select).pipe(
+      map((products) => {
+        const productsInstance = new Products(products);
+        return productsInstance.validate().then((errors) => {
+          if (!errors.length) {
+            return instanceToPlain(productsInstance.List);
+          }
+          this.logError(errors, this.getProductsInCart.name);
+          throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
+        });
+      }),
+    );
   }
 
   @Post(ProductRouter.relative.detail)
@@ -146,9 +163,14 @@ export default class ProductController extends BaseController {
   ): Observable<MessageSerializer> {
     product.avatar = avatar;
     const productUpdate = instanceToPlain(plainToInstance(ProductCreateTransform, product));
-    return this.productService
-      .updateProduct(productUpdate)
-      .pipe(map(() => MessageSerializer.create(messages.PRODUCT.UPDATE_PRODUCT_SUCCESS)));
+    return this.productService.updateProduct(productUpdate).pipe(
+      map((userIds) => {
+        userIds.forEach((userId) => {
+          this.socketEventGateway.refreshCurrentInfo(userId);
+        });
+        return MessageSerializer.create(messages.PRODUCT.UPDATE_PRODUCT_SUCCESS);
+      }),
+    );
   }
 
   @Delete(ProductRouter.relative.delete)

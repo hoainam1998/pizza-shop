@@ -1,7 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PRISMA_CLIENT } from '@share/di-token';
 import * as prisma from 'generated/prisma';
-import { ProductCreate, ProductPagination, ProductPaginationForSale } from '@share/dto/validators/product.dto';
+import {
+  GetProductsInCart,
+  ProductCreate,
+  ProductPagination,
+  ProductPaginationForSale,
+} from '@share/dto/validators/product.dto';
 import { HandlePrismaError } from '@share/decorators';
 import { ProductPaginationPrismaResponse } from '@share/interfaces';
 import { calcSkip } from '@share/utils';
@@ -131,22 +136,25 @@ export default class ProductService {
   }
 
   @HandlePrismaError(messages.PRODUCT)
-  getProductsInCart(userId: string) {
-    return this.prismaClient.product.findMany().then((products) => {
-      const promises = products.map((product) => {
-        return this.productCachingService.setVisitor(product.product_id, userId).then(() => product.product_id);
+  getProductsInCart(userId: string, select: GetProductsInCart): Promise<prisma.product[]> {
+    return this.prismaClient.product
+      .findMany({
+        select: select.query,
+        where: {
+          status: prisma.Status.IN_STOCK,
+          product_id: {
+            in: select.productIds,
+          },
+        },
+      })
+      .then((products) => {
+        const promises = products.map((product) => {
+          return this.productCachingService.setVisitor(product.product_id, userId).then(() => product.product_id);
+        });
+        return Promise.all(promises).then((productIds) => {
+          return this.productCachingService.setProductsAccessByVisitor(productIds, userId).then(() => products);
+        });
       });
-      void Promise.allSettled(promises).then((promiseResult) => {
-        const productIds = promiseResult.reduce<string[]>((ids, p) => {
-          if (p.status === 'fulfilled') {
-            ids.push(p.value);
-          }
-          return ids;
-        }, []);
-        void this.productCachingService.setProductsAccessByVisitor(productIds, userId);
-      });
-      return products;
-    });
   }
 
   @HandlePrismaError(messages.PRODUCT)
@@ -185,7 +193,7 @@ export default class ProductService {
   }
 
   @HandlePrismaError(messages.PRODUCT)
-  updateProduct(product: ProductCreate): Promise<prisma.product> {
+  updateProduct(product: ProductCreate): Promise<string[]> {
     return this.prismaClient
       .$transaction([
         this.prismaClient.product_ingredient.deleteMany({
@@ -213,7 +221,7 @@ export default class ProductService {
         const product = results[1];
         this.deleteProductWhenExpired(product, this.updateProduct.name);
         await this.ingredientCachingService.deleteAllProductIngredients(product.product_id);
-        return product;
+        return this.productCachingService.getVisitor(product.product_id);
       });
   }
 }

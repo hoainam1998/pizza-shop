@@ -18,6 +18,7 @@ export default class CategoryRouter extends RouterBase {
     CategoryRouter.createRouterPath('pagination');
     CategoryRouter.createRouterPath('detail');
     CategoryRouter.createRouterPath('all');
+    CategoryRouter.createRouterPath('filter-valid-categories');
     CategoryRouter.createRouterPath('delete', ':id');
   }
 }

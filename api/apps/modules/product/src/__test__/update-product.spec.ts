@@ -2,6 +2,7 @@ import { PrismaClient } from 'generated/prisma';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { PrismaDisconnectError, PrismaNotFoundError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { RpcException } from '@nestjs/microservices';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import startUp from './pre-setup';
 import IngredientCachingService from '@share/libs/caching/ingredient/ingredient.service';
 import ProductController from '../product.controller';
@@ -9,15 +10,18 @@ import ProductService from '../product.service';
 import { product } from '@share/test/pre-setup/mock/data/product';
 import { PRISMA_CLIENT } from '@share/di-token';
 import LoggingService from '@share/libs/logging/logging.service';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { createMessage } from '@share/utils';
 import messages from '@share/constants/messages';
+import ProductCachingService from '@share/libs/caching/product/product.service';
+import { user } from '@share/test/pre-setup/mock/data/user';
 
 let productController: ProductController;
 let productService: ProductService;
 let prismaService: PrismaClient;
 let loggerService: LoggingService;
 let ingredientCachingService: IngredientCachingService;
+let productCachingService: ProductCachingService;
+const userIds = [user.user_id];
 
 beforeEach(async () => {
   const moduleRef = await startUp();
@@ -27,6 +31,7 @@ beforeEach(async () => {
   loggerService = moduleRef.get(LoggingService);
   prismaService = moduleRef.get(PRISMA_CLIENT);
   ingredientCachingService = moduleRef.get(IngredientCachingService);
+  productCachingService = moduleRef.get(ProductCachingService);
 });
 
 afterEach((done) => {
@@ -41,6 +46,7 @@ describe('update product', () => {
     const deleteAllProductIngredients = jest
       .spyOn(ingredientCachingService, 'deleteAllProductIngredients')
       .mockResolvedValue(1);
+    const getVisitor = jest.spyOn(productCachingService, 'getVisitor').mockResolvedValue(userIds);
     const deleteProductWhenExpired = jest.spyOn(productService as any, 'deleteProductWhenExpired');
     const deleteIngredientPrismaMethod = jest.spyOn(prismaService.product_ingredient, 'deleteMany');
     const updatePrismaMethod = jest.spyOn(prismaService.product, 'update');
@@ -49,7 +55,7 @@ describe('update product', () => {
       .mockResolvedValue([product.product_ingredient, product]);
     const updateMethodService = jest.spyOn(productService, 'updateProduct');
     const updateMethodController = jest.spyOn(productController, 'updateProduct');
-    await expect(productController.updateProduct(product)).resolves.toBe(product);
+    await expect(productController.updateProduct(product)).resolves.toBe(userIds);
     expect(updateMethodController).toHaveBeenCalledTimes(1);
     expect(updateMethodController).toHaveBeenCalledWith(product);
     expect(updateMethodService).toHaveBeenCalledTimes(1);
@@ -81,10 +87,13 @@ describe('update product', () => {
     });
     expect(deleteAllProductIngredients).toHaveBeenCalledTimes(1);
     expect(deleteAllProductIngredients).toHaveBeenCalledWith(product.product_id);
+    expect(getVisitor).toHaveBeenCalledTimes(1);
+    expect(getVisitor).toHaveBeenCalledWith(product.product_id);
   });
 
   it('update product failed with not found error', async () => {
     expect.hasAssertions();
+    const getVisitor = jest.spyOn(productCachingService, 'getVisitor');
     const deleteAllProductIngredients = jest.spyOn(ingredientCachingService, 'deleteAllProductIngredients');
     const deleteProductWhenExpired = jest.spyOn(productService as any, 'deleteProductWhenExpired');
     const deleteIngredientPrismaMethod = jest.spyOn(prismaService.product_ingredient, 'deleteMany');
@@ -124,12 +133,14 @@ describe('update product', () => {
     });
     expect(deleteProductWhenExpired).not.toHaveBeenCalled();
     expect(deleteAllProductIngredients).not.toHaveBeenCalled();
+    expect(getVisitor).not.toHaveBeenCalled();
   });
 
   it('update product failed with unknown error', async () => {
     expect.hasAssertions();
     const logMethod = jest.spyOn(loggerService, 'error');
     const deleteAllProductIngredients = jest.spyOn(ingredientCachingService, 'deleteAllProductIngredients');
+    const getVisitor = jest.spyOn(productCachingService, 'getVisitor');
     const deleteProductWhenExpired = jest.spyOn(productService as any, 'deleteProductWhenExpired');
     const deleteIngredientPrismaMethod = jest.spyOn(prismaService.product_ingredient, 'deleteMany');
     const updatePrismaMethod = jest.spyOn(prismaService.product, 'update');
@@ -170,12 +181,14 @@ describe('update product', () => {
     expect(logMethod).toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
     expect(deleteAllProductIngredients).not.toHaveBeenCalled();
+    expect(getVisitor).not.toHaveBeenCalled();
   });
 
   it('update product failed with database disconnect error', async () => {
     expect.hasAssertions();
     const logMethod = jest.spyOn(loggerService, 'error');
     const deleteAllProductIngredients = jest.spyOn(ingredientCachingService, 'deleteAllProductIngredients');
+    const getVisitor = jest.spyOn(productCachingService, 'getVisitor');
     const deleteProductWhenExpired = jest.spyOn(productService as any, 'deleteProductWhenExpired');
     const deleteIngredientPrismaMethod = jest.spyOn(prismaService.product_ingredient, 'deleteMany');
     const updatePrismaMethod = jest.spyOn(prismaService.product, 'update');
@@ -214,6 +227,7 @@ describe('update product', () => {
     });
     expect(deleteProductWhenExpired).not.toHaveBeenCalled();
     expect(deleteAllProductIngredients).not.toHaveBeenCalled();
+    expect(getVisitor).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledWith(PrismaDisconnectError.message, expect.any(String));
   });

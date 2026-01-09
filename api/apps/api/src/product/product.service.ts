@@ -31,16 +31,16 @@ export default class ProductService {
     return this.product.send<ProductPaginationResponse>(paginationForSalePattern, { userId, select });
   }
 
-  getProductsInCart(userId: string): Observable<product[]> {
-    return this.product.send<product[]>(getProductsInCartPattern, userId);
+  getProductsInCart(userId: string, select: Record<string, any>): Observable<product[]> {
+    return this.product.send<product[]>(getProductsInCartPattern, { userId, select });
   }
 
   getProduct(select: GetProduct): Observable<product> {
     return this.product.send<product>(getProductPattern, select);
   }
 
-  updateProduct(product: Record<string, any>): Observable<product> {
-    return this.product.send<product>(updateProductPattern, product);
+  updateProduct(product: Record<string, any>): Observable<string[]> {
+    return this.product.send<string[]>(updateProductPattern, product);
   }
 
   deleteProduct(productId: string): Observable<product> {

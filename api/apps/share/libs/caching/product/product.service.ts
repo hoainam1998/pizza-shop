@@ -31,7 +31,10 @@ export default class ProductCachingService extends CachingService {
 
   setProductsAccessByVisitor(productIds: string[], userId: string): Promise<number> {
     const key = userProductKey(userId);
-    return this.RedisClientInstance.sAdd(key, productIds);
+    if (productIds.length) {
+      return this.RedisClientInstance.sAdd(key, productIds);
+    }
+    return Promise.resolve(0);
   }
 
   getVisitor(productId: string): Promise<string[]> {
