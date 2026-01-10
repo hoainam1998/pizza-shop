@@ -63,14 +63,14 @@ export default class CategoryController extends BaseController {
   @HttpCode(HttpStatus.OK)
   @SerializeOptions({ type: CategoryDetailSerializer })
   @HandleHttpError
-  getAllCategories(@Body() select: CategoryQuery): Observable<Promise<category[]>> {
+  getAllCategories(@Body() select: CategoryQuery): Observable<Promise<Record<string, any>>> {
     select = CategoryQuery.plainWithIncludeId(select) as any;
     return this.categoryService.getAllCategories(select).pipe(
       map((categories) => {
-        const categoriesObj = new Categories(categories);
-        return categoriesObj.validate().then((errors) => {
+        const categoriesInstance = new Categories(categories);
+        return categoriesInstance.validate().then((errors) => {
           if (!errors.length) {
-            return plainToInstance(CategoryDetailSerializer, categoriesObj.List);
+            return categoriesInstance.List;
           }
           this.logError(errors, this.getAllCategories.name);
           throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
@@ -81,6 +81,7 @@ export default class CategoryController extends BaseController {
 
   @Post(CategoryRouter.relative.filterValidCategories)
   @HttpCode(HttpStatus.OK)
+  @HandleHttpError
   filterValidCategories(@Body() select: CategoryQuery): Observable<Promise<category[]>> {
     select = CategoryQuery.plainWithIncludeId(select) as any;
     return this.categoryService.filterValidCategories(select).pipe(

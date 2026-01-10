@@ -6,7 +6,7 @@ import {
   RequestMethod,
 } from '@nestjs/common';
 import { of, throwError } from 'rxjs';
-import { instanceToPlain } from 'class-transformer';
+import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { ValidationError } from 'class-validator';
 import { expect } from '@jest/globals';
 import { ClientProxy } from '@nestjs/microservices';
@@ -14,7 +14,7 @@ import TestAgent from 'supertest/lib/agent';
 import startUp from './pre-setup';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
-import { getAllCategoriesPattern } from '@share/pattern';
+import { filterValidCategoriesPattern } from '@share/pattern';
 import { createCategoryList } from '@share/test/pre-setup/mock/data/category';
 import { sessionPayload } from '@share/test/pre-setup/mock/data/user';
 import { createDescribeTest, createTestName, getMockModule } from '@share/test/helpers';
@@ -23,17 +23,17 @@ import CategoryController from '../category.controller';
 import CategoryModule from '../category.module';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
-import { Categories } from '@share/dto/serializer/category';
-import { createMessages } from '@share/utils';
+import { Categories, CategoryDetailSerializer } from '@share/dto/serializer/category';
+import { createMessage, createMessages } from '@share/utils';
 import { CategoryRouter } from '@share/router';
-const getAllCategoriesUrl: string = CategoryRouter.absolute.all;
+const filterValidCategoriesUrl: string = CategoryRouter.absolute.filterValidCategories;
 
 const MockCategoryModule = getMockModule(CategoryModule, {
-  path: getAllCategoriesUrl,
+  path: filterValidCategoriesUrl,
   method: RequestMethod.POST,
 });
 
-const getAllCategoriesRequestBody = {
+const requestBody = {
   name: true,
   avatar: true,
   category_id: true,
@@ -42,7 +42,6 @@ const getAllCategoriesRequestBody = {
 const categories = createCategoryList(2, false);
 const categoriesObj = new Categories(categories);
 const result = instanceToPlain(categoriesObj.List);
-
 let api: TestAgent;
 let clientProxy: ClientProxy;
 let close: () => Promise<void>;
@@ -64,129 +63,153 @@ afterEach(async () => {
   }
 });
 
-describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
-  it(createTestName('get all categories success', HttpStatus.OK), async () => {
+describe(createDescribeTest(HTTP_METHOD.POST, filterValidCategoriesUrl), () => {
+  it(createTestName('filter valid categories success', HttpStatus.OK), async () => {
     expect.hasAssertions();
     const logError = jest.spyOn(categoryController as any, 'logError');
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(categories));
-    const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
+    const filterValidCategories = jest.spyOn(categoryService, 'filterValidCategories');
     await api
-      .post(getAllCategoriesUrl)
+      .post(filterValidCategoriesUrl)
       .set('mock-session', JSON.stringify(sessionPayload))
-      .send(getAllCategoriesRequestBody)
+      .send(requestBody)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
       .expect(result);
-    expect(getAllCategories).toHaveBeenCalledTimes(1);
-    expect(getAllCategories).toHaveBeenCalledWith(getAllCategoriesRequestBody);
+    expect(filterValidCategories).toHaveBeenCalledTimes(1);
+    expect(filterValidCategories).toHaveBeenCalledWith(requestBody);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(getAllCategoriesPattern, getAllCategoriesRequestBody);
+    expect(send).toHaveBeenCalledWith(filterValidCategoriesPattern, requestBody);
     expect(logError).not.toHaveBeenCalled();
   });
 
-  it(createTestName('get all categories failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
+  it(createTestName('filter valid categories failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
     const logError = jest.spyOn(categoryController as any, 'logError');
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(categories));
-    const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
+    const filterValidCategories = jest.spyOn(categoryService, 'filterValidCategories');
     await api
-      .post(getAllCategoriesUrl)
-      .send(getAllCategoriesRequestBody)
+      .post(filterValidCategoriesUrl)
+      .send(requestBody)
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.DID_NOT_LOGIN));
-    expect(getAllCategories).not.toHaveBeenCalled();
+    expect(filterValidCategories).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
     expect(logError).not.toHaveBeenCalled();
   });
 
-  it(createTestName('get all categories failed with output validate', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('filter valid categories failed with output validate', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const validateErrors = [new ValidationError()];
     jest.spyOn(Categories.prototype, 'validate').mockResolvedValue(validateErrors);
     const logError = jest.spyOn(categoryController as any, 'logError').mockImplementation(() => jest.fn());
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(categories));
-    const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
+    const filterValidCategories = jest.spyOn(categoryService, 'filterValidCategories');
     await api
-      .post(getAllCategoriesUrl)
+      .post(filterValidCategoriesUrl)
       .set('mock-session', JSON.stringify(sessionPayload))
-      .send(getAllCategoriesRequestBody)
+      .send(requestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.OUTPUT_VALIDATE));
-    expect(getAllCategories).toHaveBeenCalledTimes(1);
-    expect(getAllCategories).toHaveBeenCalledWith(getAllCategoriesRequestBody);
+    expect(filterValidCategories).toHaveBeenCalledTimes(1);
+    expect(filterValidCategories).toHaveBeenCalledWith(requestBody);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(getAllCategoriesPattern, getAllCategoriesRequestBody);
+    expect(send).toHaveBeenCalledWith(filterValidCategoriesPattern, requestBody);
     expect(logError).toHaveBeenCalledTimes(1);
     expect(logError).toHaveBeenCalledWith(validateErrors, expect.any(String));
   });
 
-  it(createTestName('get all categories failed with not found error', HttpStatus.NOT_FOUND), async () => {
+  it(createTestName('filter valid categories failed with not found error', HttpStatus.NOT_FOUND), async () => {
     expect.hasAssertions();
     const logError = jest.spyOn(categoryController as any, 'logError');
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => new NotFoundException([])));
-    const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
+    const filterValidCategories = jest.spyOn(categoryService, 'filterValidCategories');
     await api
-      .post(getAllCategoriesUrl)
+      .post(filterValidCategoriesUrl)
       .set('mock-session', JSON.stringify(sessionPayload))
-      .send(getAllCategoriesRequestBody)
+      .send(requestBody)
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
       .expect([]);
-    expect(getAllCategories).toHaveBeenCalledTimes(1);
-    expect(getAllCategories).toHaveBeenCalledWith(getAllCategoriesRequestBody);
+    expect(filterValidCategories).toHaveBeenCalledTimes(1);
+    expect(filterValidCategories).toHaveBeenCalledWith(requestBody);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(getAllCategoriesPattern, getAllCategoriesRequestBody);
+    expect(send).toHaveBeenCalledWith(filterValidCategoriesPattern, requestBody);
     expect(logError).not.toHaveBeenCalled();
   });
 
-  it(createTestName('get all categories failed with unknown error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
+  it(
+    createTestName('filter valid categories failed with unknown error', HttpStatus.INTERNAL_SERVER_ERROR),
+    async () => {
+      expect.hasAssertions();
+      const logError = jest.spyOn(categoryController as any, 'logError');
+      const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
+      const filterValidCategories = jest.spyOn(categoryService, 'filterValidCategories');
+      await api
+        .post(filterValidCategoriesUrl)
+        .set('mock-session', JSON.stringify(sessionPayload))
+        .send(requestBody)
+        .expect(HttpStatus.INTERNAL_SERVER_ERROR)
+        .expect('Content-Type', /application\/json/)
+        .expect(createMessages(new InternalServerErrorException().message));
+      expect(filterValidCategories).toHaveBeenCalledTimes(1);
+      expect(filterValidCategories).toHaveBeenCalledWith(requestBody);
+      expect(send).toHaveBeenCalledTimes(1);
+      expect(send).toHaveBeenCalledWith(filterValidCategoriesPattern, requestBody);
+      expect(logError).not.toHaveBeenCalled();
+    },
+  );
+
+  it(createTestName('filter valid categories failed with rpc unknown error', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const logError = jest.spyOn(categoryController as any, 'logError');
-    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
-    const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
+    const send = jest
+      .spyOn(clientProxy, 'send')
+      .mockReturnValue(throwError(() => new BadRequestException(messages.COMMON.COMMON_ERROR)));
+    const filterValidCategories = jest.spyOn(categoryService, 'filterValidCategories');
     await api
-      .post(getAllCategoriesUrl)
+      .post(filterValidCategoriesUrl)
       .set('mock-session', JSON.stringify(sessionPayload))
-      .send(getAllCategoriesRequestBody)
-      .expect(HttpStatus.INTERNAL_SERVER_ERROR)
+      .send(requestBody)
+      .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
-      .expect(createMessages(new InternalServerErrorException().message));
-    expect(getAllCategories).toHaveBeenCalledTimes(1);
-    expect(getAllCategories).toHaveBeenCalledWith(getAllCategoriesRequestBody);
+      .expect(createMessages(messages.COMMON.COMMON_ERROR));
+    expect(filterValidCategories).toHaveBeenCalledTimes(1);
+    expect(filterValidCategories).toHaveBeenCalledWith(requestBody);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(getAllCategoriesPattern, getAllCategoriesRequestBody);
+    expect(send).toHaveBeenCalledWith(filterValidCategoriesPattern, requestBody);
     expect(logError).not.toHaveBeenCalled();
   });
 
-  it(createTestName('get all categories failed with server error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
+  it(createTestName('filter valid categories failed with server error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
     const logError = jest.spyOn(categoryController as any, 'logError');
     const serverError = new InternalServerErrorException();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => serverError));
-    const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
+    const filterValidCategories = jest.spyOn(categoryService, 'filterValidCategories');
     await api
-      .post(getAllCategoriesUrl)
+      .post(filterValidCategoriesUrl)
       .set('mock-session', JSON.stringify(sessionPayload))
-      .send(getAllCategoriesRequestBody)
+      .send(requestBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(serverError.message));
-    expect(getAllCategories).toHaveBeenCalledTimes(1);
-    expect(getAllCategories).toHaveBeenCalledWith(getAllCategoriesRequestBody);
+    expect(filterValidCategories).toHaveBeenCalledTimes(1);
+    expect(filterValidCategories).toHaveBeenCalledWith(requestBody);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(getAllCategoriesPattern, getAllCategoriesRequestBody);
+    expect(send).toHaveBeenCalledWith(filterValidCategoriesPattern, requestBody);
     expect(logError).not.toHaveBeenCalled();
   });
 
-  it(createTestName('get all categories success with empty request body', HttpStatus.OK), async () => {
+  it(createTestName('filter valid categories success with empty request body', HttpStatus.OK), async () => {
     expect.hasAssertions();
     const logError = jest.spyOn(categoryController as any, 'logError');
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(categories));
-    const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
+    const filterValidCategories = jest.spyOn(categoryService, 'filterValidCategories');
     const query = {
-      ...getAllCategoriesRequestBody,
+      ...requestBody,
       _count: {
         select: {
           product: true,
@@ -194,15 +217,15 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
       },
     };
     await api
-      .post(getAllCategoriesUrl)
+      .post(filterValidCategoriesUrl)
       .set('mock-session', JSON.stringify(sessionPayload))
       .send({})
       .expect(HttpStatus.OK)
       .expect(result);
-    expect(getAllCategories).toHaveBeenCalledTimes(1);
-    expect(getAllCategories).toHaveBeenCalledWith(query);
+    expect(filterValidCategories).toHaveBeenCalledTimes(1);
+    expect(filterValidCategories).toHaveBeenCalledWith(query);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(getAllCategoriesPattern, query);
+    expect(send).toHaveBeenCalledWith(filterValidCategoriesPattern, query);
     expect(logError).not.toHaveBeenCalled();
   });
 
@@ -210,19 +233,19 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
     expect.hasAssertions();
     const logError = jest.spyOn(categoryController as any, 'logError');
     const undefinedFieldRequestBody = {
-      ...getAllCategoriesRequestBody,
+      ...requestBody,
       categoryId: Date.now().toString(),
     };
     const send = jest.spyOn(clientProxy, 'send');
-    const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
+    const filterValidCategories = jest.spyOn(categoryService, 'filterValidCategories');
     const response = await api
-      .post(getAllCategoriesUrl)
+      .post(filterValidCategoriesUrl)
       .set('mock-session', JSON.stringify(sessionPayload))
       .send(undefinedFieldRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
     expect(response.body).toEqual({ messages: expect.any(Array) });
-    expect(getAllCategories).not.toHaveBeenCalled();
+    expect(filterValidCategories).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
     expect(logError).not.toHaveBeenCalled();
   });
@@ -233,18 +256,18 @@ describe(createDescribeTest(HTTP_METHOD.POST, getAllCategoriesUrl), () => {
     const send = jest
       .spyOn(clientProxy, 'send')
       .mockReturnValue(throwError(() => new BadRequestException(PrismaDisconnectError.message)));
-    const getAllCategories = jest.spyOn(categoryService, 'getAllCategories');
+    const filterValidCategories = jest.spyOn(categoryService, 'filterValidCategories');
     await api
-      .post(getAllCategoriesUrl)
+      .post(filterValidCategoriesUrl)
       .set('mock-session', JSON.stringify(sessionPayload))
-      .send(getAllCategoriesRequestBody)
+      .send(requestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
-    expect(getAllCategories).toHaveBeenCalledTimes(1);
-    expect(getAllCategories).toHaveBeenCalledWith(getAllCategoriesRequestBody);
+    expect(filterValidCategories).toHaveBeenCalledTimes(1);
+    expect(filterValidCategories).toHaveBeenCalledWith(requestBody);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(getAllCategoriesPattern, getAllCategoriesRequestBody);
+    expect(send).toHaveBeenCalledWith(filterValidCategoriesPattern, requestBody);
     expect(logError).not.toHaveBeenCalled();
   });
 });
