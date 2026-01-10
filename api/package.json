@@ -22,6 +22,7 @@
     "test:ut:category.delete": "jest --watch apps/modules/category/src/__test__/delete-category.spec.ts",
     "test:ut:category.get-detail": "jest --watch apps/modules/category/src/__test__/get-category.spec.ts",
     "test:ut:category.pagination": "jest --watch apps/modules/category/src/__test__/pagination.spec.ts",
+    "test:ut:category.filter-valid-categories": "jest --watch --testPathPatterns=apps/modules/category/src/__test__/filter-valid-categories.spec.ts",
     "test:ut:category.caching": "jest --watch apps/modules/category/src/__test__/category-redis-caching.spec.ts",
     "test:ut:caching.category.delete-all": "jest --watch apps/share/libs/caching/category/__test__/delete-all-categories.spec.ts",
     "test:ut:caching.category.get-all": "jest --watch apps/share/libs/caching/category/__test__/get-all-categories.spec.ts",
@@ -85,6 +86,7 @@
     "test:e2e:category.get-detail": "jest --watch apps/api/src/category/__test__/get-detail.spec.ts",
     "test:e2e:category.update": "jest --watch apps/api/src/category/__test__/update-category.spec.ts",
     "test:e2e:category.get-all": "jest --watch apps/api/src/category/__test__/get-all-categories.spec.ts",
+    "test:e2e:category.filter-valid-categories": "jest --watch apps/api/src/category/__test__/filter-valid-categories.spec.ts",
     "test:e2e:category": "jest --watch apps/api/src/category/__test__",
     "test:e2e:ingredient.compute-product-price": "jest --watch apps/api/src/ingredient/__test__/compute-product-price.spec.ts",
     "test:e2e:ingredient.create": "jest --watch apps/api/src/ingredient/__test__/create-ingredient.spec.ts",
@@ -186,6 +188,7 @@
     "moduleNameMapper": {
       "^@share(|/.*)$": "<rootDir>/apps/share/$1",
       "generated/prisma": "<rootDir>/generated/prisma"
-    }
+    },
+    "testTimeout": 1000
   }
 }
