@@ -31,7 +31,7 @@ const resetPasswordBody: ResetPassword = {
   email: user.email,
   password: user.password,
   oldPassword,
-  token: user.reset_password_token!,
+  token: user.reset_password_token,
 };
 
 const jwtPayload: jwt.JwtPayload = {

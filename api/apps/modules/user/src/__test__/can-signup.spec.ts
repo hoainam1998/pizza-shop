@@ -26,12 +26,6 @@ beforeEach(async () => {
   prismaService = moduleRef.get(PRISMA_CLIENT);
 });
 
-afterEach((done) => {
-  jest.restoreAllMocks();
-  jest.resetAllMocks();
-  done();
-});
-
 describe('can signup', () => {
   it('can signup success', async () => {
     expect.hasAssertions();

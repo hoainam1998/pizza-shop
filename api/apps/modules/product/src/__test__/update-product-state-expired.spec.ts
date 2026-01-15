@@ -15,12 +15,6 @@ beforeEach(async () => {
   prismaService = moduleRef.get(PRISMA_CLIENT);
 });
 
-afterEach((done) => {
-  jest.restoreAllMocks();
-  jest.resetAllMocks();
-  done();
-});
-
 describe('update product state expired', () => {
   it('update product state expired success', async () => {
     expect.hasAssertions();

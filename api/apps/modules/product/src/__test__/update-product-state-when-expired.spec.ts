@@ -13,12 +13,6 @@ beforeEach(async () => {
   productService = moduleRef.get(ProductService);
 });
 
-afterEach((done) => {
-  jest.restoreAllMocks();
-  jest.resetAllMocks();
-  done();
-});
-
 describe('update product state when expired', () => {
   it('update product state when expired success', () => {
     expect.hasAssertions();

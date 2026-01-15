@@ -33,12 +33,6 @@ beforeEach(async () => {
   prismaService = moduleRef.get(PRISMA_CLIENT);
 });
 
-afterEach((done) => {
-  jest.restoreAllMocks();
-  jest.resetAllMocks();
-  done();
-});
-
 describe('login', () => {
   it('login success', async () => {
     expect.hasAssertions();

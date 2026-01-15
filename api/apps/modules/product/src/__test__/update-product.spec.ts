@@ -34,12 +34,6 @@ beforeEach(async () => {
   productCachingService = moduleRef.get(ProductCachingService);
 });
 
-afterEach((done) => {
-  jest.restoreAllMocks();
-  jest.resetAllMocks();
-  done();
-});
-
 describe('update product', () => {
   it('update product was success', async () => {
     expect.hasAssertions();
