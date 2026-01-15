@@ -12,7 +12,7 @@ export default class SchedulerService {
     private readonly logger: LoggingService,
   ) {}
 
-  deleteItemExpired(expiredTime: number, action: () => Promise<any>, jobName: string, actionName: string): void {
+  updateStateExpired(expiredTime: number, action: () => Promise<any>, jobName: string, actionName: string): void {
     try {
       if (expiredTime > Date.now()) {
         const date = new Date(expiredTime);
@@ -23,14 +23,14 @@ export default class SchedulerService {
         } else {
           const job = new cron.CronJob(date, async () => {
             await action();
-            this.logger.log(messages.PRODUCT.PRODUCT_DELETED, actionName);
+            this.logger.log(messages.PRODUCT.PRODUCT_STATE_UPDATED, actionName);
           });
           this.schedulerRegistry.addCronJob(jobName, job);
           job.start();
         }
         this.logger.log(`job "${jobName}" added at ${dateStr}!`, actionName);
       }
-      this.logger.warn(messages.PRODUCT.SCHEDULE_DELETE_PRODUCT_FAILED, actionName);
+      this.logger.warn(messages.PRODUCT.SCHEDULE_UPDATE_STATE_PRODUCT_FAILED, actionName);
     } catch (error) {
       this.logger.error(error.message, actionName);
     }

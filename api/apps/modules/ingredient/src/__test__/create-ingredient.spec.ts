@@ -33,7 +33,7 @@ describe('create ingredient', () => {
   it('create ingredient success', async () => {
     expect.hasAssertions();
     const createIngredient = jest.spyOn(prismaService.ingredient, 'create').mockResolvedValue(ingredient);
-    const deleteIngredientExpired = jest.spyOn(ingredientService as any, 'deleteIngredientExpired');
+    const updateIngredientStateWhenExpired = jest.spyOn(ingredientService as any, 'updateIngredientStateWhenExpired');
     const deleteAllIngredients = jest.spyOn(ingredientCachingService, 'deleteAllIngredients');
     const createIngredientControllerMethod = jest.spyOn(ingredientController, 'createIngredient');
     const createIngredientServiceMethod = jest.spyOn(ingredientService, 'createIngredient');
@@ -47,15 +47,15 @@ describe('create ingredient', () => {
       data: ingredient,
     });
     expect(deleteAllIngredients).toHaveBeenCalledTimes(1);
-    expect(deleteIngredientExpired).toHaveBeenCalledTimes(1);
-    expect(deleteIngredientExpired).toHaveBeenCalledWith(ingredient, expect.any(String));
+    expect(updateIngredientStateWhenExpired).toHaveBeenCalledTimes(1);
+    expect(updateIngredientStateWhenExpired).toHaveBeenCalledWith(ingredient, expect.any(String));
   });
 
   it('create ingredient failed with create method got unknown error', async () => {
     expect.hasAssertions();
     const logMethod = jest.spyOn(loggerService, 'error');
     const createIngredient = jest.spyOn(prismaService.ingredient, 'create').mockRejectedValue(UnknownError);
-    const deleteIngredientExpired = jest.spyOn(ingredientService as any, 'deleteIngredientExpired');
+    const updateIngredientStateWhenExpired = jest.spyOn(ingredientService as any, 'updateIngredientStateWhenExpired');
     const deleteAllIngredients = jest.spyOn(ingredientCachingService, 'deleteAllIngredients');
     const createIngredientControllerMethod = jest.spyOn(ingredientController, 'createIngredient');
     const createIngredientServiceMethod = jest.spyOn(ingredientService, 'createIngredient');
@@ -73,14 +73,14 @@ describe('create ingredient', () => {
     expect(deleteAllIngredients).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
-    expect(deleteIngredientExpired).not.toHaveBeenCalled();
+    expect(updateIngredientStateWhenExpired).not.toHaveBeenCalled();
   });
 
   it('create ingredient failed with deleteAllIngredients method got unknown error', async () => {
     expect.hasAssertions();
     const logMethod = jest.spyOn(loggerService, 'error');
     const createIngredient = jest.spyOn(prismaService.ingredient, 'create').mockResolvedValue(ingredient);
-    const deleteIngredientExpired = jest.spyOn(ingredientService as any, 'deleteIngredientExpired');
+    const updateIngredientStateWhenExpired = jest.spyOn(ingredientService as any, 'updateIngredientStateWhenExpired');
     const deleteAllIngredients = jest
       .spyOn(ingredientCachingService, 'deleteAllIngredients')
       .mockRejectedValue(UnknownError);
@@ -98,17 +98,17 @@ describe('create ingredient', () => {
       data: ingredient,
     });
     expect(deleteAllIngredients).toHaveBeenCalledTimes(1);
-    expect(deleteIngredientExpired).not.toHaveBeenCalled();
+    expect(updateIngredientStateWhenExpired).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
   });
 
-  it('create ingredient failed with deleteIngredientExpired method got unknown error', async () => {
+  it('create ingredient failed with updateIngredientStateWhenExpired method got unknown error', async () => {
     expect.hasAssertions();
     const logMethod = jest.spyOn(loggerService, 'error');
     const createIngredient = jest.spyOn(prismaService.ingredient, 'create').mockResolvedValue(ingredient);
-    const deleteIngredientExpired = jest
-      .spyOn(ingredientService as any, 'deleteIngredientExpired')
+    const updateIngredientStateWhenExpired = jest
+      .spyOn(ingredientService as any, 'updateIngredientStateWhenExpired')
       .mockImplementation(() => {
         throw UnknownError;
       });
@@ -127,8 +127,8 @@ describe('create ingredient', () => {
       data: ingredient,
     });
     expect(deleteAllIngredients).toHaveBeenCalledTimes(1);
-    expect(deleteIngredientExpired).toHaveBeenCalledTimes(1);
-    expect(deleteIngredientExpired).toHaveBeenLastCalledWith(ingredient, expect.any(String));
+    expect(updateIngredientStateWhenExpired).toHaveBeenCalledTimes(1);
+    expect(updateIngredientStateWhenExpired).toHaveBeenLastCalledWith(ingredient, expect.any(String));
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
   });
@@ -137,7 +137,7 @@ describe('create ingredient', () => {
     expect.hasAssertions();
     const logMethod = jest.spyOn(loggerService, 'error');
     const createIngredient = jest.spyOn(prismaService.ingredient, 'create').mockRejectedValue(PrismaDisconnectError);
-    const deleteIngredientExpired = jest.spyOn(ingredientService as any, 'deleteIngredientExpired');
+    const updateIngredientStateWhenExpired = jest.spyOn(ingredientService as any, 'updateIngredientStateWhenExpired');
     const deleteAllIngredients = jest.spyOn(ingredientCachingService, 'deleteAllIngredients');
     const createIngredientControllerMethod = jest.spyOn(ingredientController, 'createIngredient');
     const createIngredientServiceMethod = jest.spyOn(ingredientService, 'createIngredient');
@@ -153,7 +153,7 @@ describe('create ingredient', () => {
       data: ingredient,
     });
     expect(deleteAllIngredients).not.toHaveBeenCalled();
-    expect(deleteIngredientExpired).not.toHaveBeenCalled();
+    expect(updateIngredientStateWhenExpired).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(PrismaDisconnectError.message, expect.any(String));
   });

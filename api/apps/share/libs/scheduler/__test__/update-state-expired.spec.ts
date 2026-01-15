@@ -28,7 +28,7 @@ describe('delete item expired', () => {
     const addJob = jest.spyOn(schedulerRegistry, 'addCronJob');
     const getCronJob = jest.spyOn(schedulerRegistry, 'getCronJob');
     const doesExist = jest.spyOn(schedulerRegistry, 'doesExist').mockReturnValue(false);
-    schedulerService.deleteItemExpired(expiredTime, action, jobName, actionName);
+    schedulerService.updateStateExpired(expiredTime, action, jobName, actionName);
     expect(doesExist).toHaveBeenCalledTimes(1);
     expect(doesExist).toHaveBeenCalledWith('cron', expect.any(String));
     expect(addJob).toHaveBeenCalledTimes(1);
@@ -48,7 +48,7 @@ describe('delete item expired', () => {
     const doesExist = jest.spyOn(schedulerRegistry, 'doesExist').mockReturnValue(true);
     const addJob = jest.spyOn(schedulerRegistry, 'addCronJob');
     const getCronJob = jest.spyOn(schedulerRegistry, 'getCronJob').mockReturnValue(mockCronJob);
-    schedulerService.deleteItemExpired(expiredTime, action, jobName, actionName);
+    schedulerService.updateStateExpired(expiredTime, action, jobName, actionName);
     expect(doesExist).toHaveBeenCalledTimes(1);
     expect(doesExist).toHaveBeenCalledWith('cron', expect.any(String));
     expect(getCronJob).toHaveBeenCalledTimes(1);
@@ -67,12 +67,12 @@ describe('delete item expired', () => {
     const doesExist = jest.spyOn(schedulerRegistry, 'doesExist');
     const addJob = jest.spyOn(schedulerRegistry, 'addCronJob');
     const getCronJob = jest.spyOn(schedulerRegistry, 'getCronJob');
-    schedulerService.deleteItemExpired(expiredTimePassed, action, jobName, actionName);
+    schedulerService.updateStateExpired(expiredTimePassed, action, jobName, actionName);
     expect(doesExist).not.toHaveBeenCalled();
     expect(getCronJob).not.toHaveBeenCalled();
     expect(addJob).not.toHaveBeenCalled();
     expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn).toHaveBeenCalledWith(messages.PRODUCT.SCHEDULE_DELETE_PRODUCT_FAILED, actionName);
+    expect(warn).toHaveBeenCalledWith(messages.PRODUCT.SCHEDULE_UPDATE_STATE_PRODUCT_FAILED, actionName);
   });
 
   it('delete item expired failed with unknown error', () => {
@@ -83,7 +83,7 @@ describe('delete item expired', () => {
     });
     const addJob = jest.spyOn(schedulerRegistry, 'addCronJob');
     const getCronJob = jest.spyOn(schedulerRegistry, 'getCronJob');
-    schedulerService.deleteItemExpired(expiredTime, action, jobName, actionName);
+    schedulerService.updateStateExpired(expiredTime, action, jobName, actionName);
     expect(doesExist).toHaveBeenCalled();
     expect(doesExist).toHaveBeenCalledWith('cron', expect.any(String));
     expect(getCronJob).not.toHaveBeenCalled();

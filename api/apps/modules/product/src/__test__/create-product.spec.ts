@@ -32,7 +32,7 @@ describe('create product', () => {
     const deleteAllProductIngredients = jest
       .spyOn(ingredientCachingService, 'deleteAllProductIngredients')
       .mockResolvedValue(1);
-    const deleteProductWhenExpired = jest.spyOn(productService as any, 'deleteProductWhenExpired');
+    const updateProductStateWhenExpired = jest.spyOn(productService as any, 'updateProductStateWhenExpired');
     const createPrismaMethod = jest.spyOn(prismaService.product, 'create').mockResolvedValue(product);
     const createMethodService = jest.spyOn(productService, 'createProduct');
     const createMethodController = jest.spyOn(productController, 'createProduct');
@@ -45,8 +45,8 @@ describe('create product', () => {
     expect(createPrismaMethod).toHaveBeenCalledWith({
       data: product,
     });
-    expect(deleteProductWhenExpired).toHaveBeenCalledTimes(1);
-    expect(deleteProductWhenExpired).toHaveBeenCalledWith(product, productService.createProduct.name);
+    expect(updateProductStateWhenExpired).toHaveBeenCalledTimes(1);
+    expect(updateProductStateWhenExpired).toHaveBeenCalledWith(product, productService.createProduct.name);
     expect(deleteAllProductIngredients).toHaveBeenCalledTimes(1);
     expect(deleteAllProductIngredients).toHaveBeenCalledWith(product.product_id);
   });
@@ -54,7 +54,7 @@ describe('create product', () => {
   it('create product failed with unknown error', async () => {
     expect.hasAssertions();
     const deleteAllProductIngredients = jest.spyOn(ingredientCachingService, 'deleteAllProductIngredients');
-    const deleteProductWhenExpired = jest.spyOn(productService as any, 'deleteProductWhenExpired');
+    const updateProductStateWhenExpired = jest.spyOn(productService as any, 'updateProductStateWhenExpired');
     const createPrismaMethod = jest.spyOn(prismaService.product, 'create').mockRejectedValue(UnknownError);
     const createMethodService = jest.spyOn(productService, 'createProduct');
     const createMethodController = jest.spyOn(productController, 'createProduct');
@@ -69,14 +69,14 @@ describe('create product', () => {
     expect(createPrismaMethod).toHaveBeenCalledWith({
       data: product,
     });
-    expect(deleteProductWhenExpired).not.toHaveBeenCalled();
+    expect(updateProductStateWhenExpired).not.toHaveBeenCalled();
     expect(deleteAllProductIngredients).not.toHaveBeenCalled();
   });
 
   it('create product failed with database disconnect error', async () => {
     expect.hasAssertions();
     const deleteAllProductIngredients = jest.spyOn(ingredientCachingService, 'deleteAllProductIngredients');
-    const deleteProductWhenExpired = jest.spyOn(productService as any, 'deleteProductWhenExpired');
+    const updateProductStateWhenExpired = jest.spyOn(productService as any, 'updateProductStateWhenExpired');
     const createPrismaMethod = jest.spyOn(prismaService.product, 'create').mockRejectedValue(PrismaDisconnectError);
     const createMethodService = jest.spyOn(productService, 'createProduct');
     const createMethodController = jest.spyOn(productController, 'createProduct');
@@ -91,7 +91,7 @@ describe('create product', () => {
     expect(createPrismaMethod).toHaveBeenCalledWith({
       data: product,
     });
-    expect(deleteProductWhenExpired).not.toHaveBeenCalled();
+    expect(updateProductStateWhenExpired).not.toHaveBeenCalled();
     expect(deleteAllProductIngredients).not.toHaveBeenCalled();
   });
 });

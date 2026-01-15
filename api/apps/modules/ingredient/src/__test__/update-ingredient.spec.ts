@@ -29,17 +29,11 @@ beforeEach(async () => {
   ingredientCachingService = moduleRef.get(IngredientCachingService);
 });
 
-afterEach((done) => {
-  jest.restoreAllMocks();
-  jest.resetAllMocks();
-  done();
-});
-
 describe('update ingredient', () => {
   it('update ingredient was success', async () => {
     expect.hasAssertions();
     const deleteAllIngredients = jest.spyOn(ingredientCachingService, 'deleteAllIngredients').mockResolvedValue(1);
-    const deleteIngredientExpired = jest.spyOn(ingredientService as any, 'deleteIngredientExpired');
+    const updateIngredientStateWhenExpired = jest.spyOn(ingredientService as any, 'updateIngredientStateWhenExpired');
     const updatePrismaMethod = jest.spyOn(prismaService.ingredient, 'update').mockResolvedValue(ingredient);
     const updateMethodService = jest.spyOn(ingredientService, 'updateIngredient');
     const updateMethodController = jest.spyOn(ingredientController, 'updateIngredient');
@@ -63,14 +57,14 @@ describe('update ingredient', () => {
       },
     });
     expect(deleteAllIngredients).toHaveBeenCalledTimes(1);
-    expect(deleteIngredientExpired).toHaveBeenCalledTimes(1);
-    expect(deleteIngredientExpired).toHaveBeenCalledWith(ingredient, expect.any(String));
+    expect(updateIngredientStateWhenExpired).toHaveBeenCalledTimes(1);
+    expect(updateIngredientStateWhenExpired).toHaveBeenCalledWith(ingredient, expect.any(String));
   });
 
   it('update ingredient failed with not found error', async () => {
     expect.hasAssertions();
     const deleteAllIngredients = jest.spyOn(ingredientCachingService, 'deleteAllIngredients').mockResolvedValue(1);
-    const deleteIngredientExpired = jest.spyOn(ingredientService as any, 'deleteIngredientExpired');
+    const updateIngredientStateWhenExpired = jest.spyOn(ingredientService as any, 'updateIngredientStateWhenExpired');
     const updatePrismaMethod = jest.spyOn(prismaService.ingredient, 'update').mockRejectedValue(PrismaNotFoundError);
     const updateMethodService = jest.spyOn(ingredientService, 'updateIngredient');
     const updateMethodController = jest.spyOn(ingredientController, 'updateIngredient');
@@ -96,14 +90,14 @@ describe('update ingredient', () => {
       },
     });
     expect(deleteAllIngredients).not.toHaveBeenCalled();
-    expect(deleteIngredientExpired).not.toHaveBeenCalled();
+    expect(updateIngredientStateWhenExpired).not.toHaveBeenCalled();
   });
 
   it('update ingredient failed with unknown error', async () => {
     expect.hasAssertions();
     const logMethod = jest.spyOn(loggerService, 'error');
     const deleteAllIngredients = jest.spyOn(ingredientCachingService, 'deleteAllIngredients').mockResolvedValue(1);
-    const deleteIngredientExpired = jest.spyOn(ingredientService as any, 'deleteIngredientExpired');
+    const updateIngredientStateWhenExpired = jest.spyOn(ingredientService as any, 'updateIngredientStateWhenExpired');
     const updatePrismaMethod = jest.spyOn(prismaService.ingredient, 'update').mockRejectedValue(UnknownError);
     const updateMethodService = jest.spyOn(ingredientService, 'updateIngredient');
     const updateMethodController = jest.spyOn(ingredientController, 'updateIngredient');
@@ -129,7 +123,7 @@ describe('update ingredient', () => {
       },
     });
     expect(deleteAllIngredients).not.toHaveBeenCalled();
-    expect(deleteIngredientExpired).not.toHaveBeenCalled();
+    expect(updateIngredientStateWhenExpired).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
   });
@@ -138,7 +132,7 @@ describe('update ingredient', () => {
     expect.hasAssertions();
     const logMethod = jest.spyOn(loggerService, 'error');
     const deleteAllIngredients = jest.spyOn(ingredientCachingService, 'deleteAllIngredients').mockResolvedValue(1);
-    const deleteIngredientExpired = jest.spyOn(ingredientService as any, 'deleteIngredientExpired');
+    const updateIngredientStateWhenExpired = jest.spyOn(ingredientService as any, 'updateIngredientStateWhenExpired');
     const updatePrismaMethod = jest.spyOn(prismaService.ingredient, 'update').mockRejectedValue(PrismaDisconnectError);
     const updateMethodService = jest.spyOn(ingredientService, 'updateIngredient');
     const updateMethodController = jest.spyOn(ingredientController, 'updateIngredient');
@@ -164,7 +158,7 @@ describe('update ingredient', () => {
       },
     });
     expect(deleteAllIngredients).not.toHaveBeenCalled();
-    expect(deleteIngredientExpired).not.toHaveBeenCalled();
+    expect(updateIngredientStateWhenExpired).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(PrismaDisconnectError.message, expect.any(String));
   });
