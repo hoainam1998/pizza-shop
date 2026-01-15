@@ -17,7 +17,7 @@ import ProductCachingService from '@share/libs/caching/product/product.service';
 
 @Injectable()
 export default class ProductService {
-  private readonly _jobName: string = 'delete_expired_product';
+  private readonly _jobName: string = 'update_product_expired_product';
 
   constructor(
     @Inject(PRISMA_CLIENT) private readonly prismaClient: prisma.PrismaClient,
@@ -26,13 +26,24 @@ export default class ProductService {
     private readonly schedulerService: SchedulerService,
   ) {}
 
-  private deleteProductWhenExpired(product: prisma.product, actionName: string): void {
-    this.schedulerService.deleteItemExpired(
+  private updateProductStateWhenExpired(product: prisma.product, actionName: string): void {
+    this.schedulerService.updateStateExpired(
       +product.expired_time,
-      () => this.delete(product.product_id),
+      () => this.updateProductStateExpired(product.product_id),
       this._jobName,
       actionName,
     );
+  }
+
+  private updateProductStateExpired(productId: string): Promise<prisma.product> {
+    return this.prismaClient.product.update({
+      where: {
+        product_id: productId,
+      },
+      data: {
+        status: prisma.Status.EXPIRED,
+      },
+    });
   }
 
   @HandlePrismaError(messages.PRODUCT)
@@ -42,7 +53,7 @@ export default class ProductService {
         data: product,
       })
       .then(async (product) => {
-        this.deleteProductWhenExpired(product, this.createProduct.name);
+        this.updateProductStateWhenExpired(product, this.createProduct.name);
         await this.ingredientCachingService.deleteAllProductIngredients(product.product_id);
         return product;
       });
@@ -167,61 +178,58 @@ export default class ProductService {
     });
   }
 
-  private delete(id: string): Promise<prisma.product> {
+  @HandlePrismaError(messages.PRODUCT)
+  deleteProduct(productId: string): Promise<prisma.product> {
     return this.prismaClient
       .$transaction([
         this.prismaClient.product_ingredient.deleteMany({
           where: {
-            product_id: id,
+            product_id: productId,
           },
         }),
         this.prismaClient.product.delete({
           where: {
-            product_id: id,
+            product_id: productId,
           },
         }),
       ])
-      .then((results) => results[1]);
-  }
-
-  @HandlePrismaError(messages.PRODUCT)
-  deleteProduct(productId: string): Promise<prisma.product> {
-    return this.delete(productId).then((product) => {
-      this.schedulerService.deleteScheduler(this._jobName, this.deleteProduct.name);
-      return product;
-    });
+      .then((results) => {
+        const product = results[1];
+        this.schedulerService.deleteScheduler(this._jobName, this.deleteProduct.name);
+        return product;
+      });
   }
 
   @HandlePrismaError(messages.PRODUCT)
   updateProduct(product: ProductCreate): Promise<string[]> {
-    return this.prismaClient
-      .$transaction([
-        this.prismaClient.product_ingredient.deleteMany({
-          where: {
-            product_id: product.product_id,
-          },
-        }),
-        this.prismaClient.product.update({
-          where: {
-            product_id: product.product_id,
-          },
-          data: {
-            name: product.name,
-            avatar: product.avatar,
-            count: product.count,
-            price: product.price,
-            original_price: product.price,
-            expired_time: product.expired_time,
-            category_id: product.category_id,
-            product_ingredient: product.product_ingredient,
-          },
-        }),
-      ])
-      .then(async (results) => {
-        const product = results[1];
-        this.deleteProductWhenExpired(product, this.updateProduct.name);
-        await this.ingredientCachingService.deleteAllProductIngredients(product.product_id);
-        return this.productCachingService.getVisitor(product.product_id);
+    return this.prismaClient.product_ingredient
+      .deleteMany({
+        where: {
+          product_id: product.product_id,
+        },
+      })
+      .then(() => {
+        return this.prismaClient.product
+          .update({
+            where: {
+              product_id: product.product_id,
+            },
+            data: {
+              name: product.name,
+              avatar: product.avatar,
+              count: product.count,
+              price: product.price,
+              original_price: product.price,
+              expired_time: product.expired_time,
+              category_id: product.category_id,
+              product_ingredient: product.product_ingredient,
+            },
+          })
+          .then(async (product) => {
+            this.updateProductStateWhenExpired(product, this.updateProduct.name);
+            await this.ingredientCachingService.deleteAllProductIngredients(product.product_id);
+            return this.productCachingService.getVisitor(product.product_id);
+          });
       });
   }
 }

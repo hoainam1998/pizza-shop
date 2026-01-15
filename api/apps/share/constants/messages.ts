@@ -42,10 +42,10 @@ export default Object.freeze({
     CREATE_PRODUCT_SUCCESS: 'Create product was success!',
     UPDATE_PRODUCT_SUCCESS: 'Update product was success!',
     NOT_FOUND: 'The product item requirement is not found!',
-    PRODUCT_DELETED: 'The product was deleted!',
+    PRODUCT_STATE_UPDATED: 'The state product was updated!',
     DELETE_PRODUCT_SUCCESS: 'Delete product was success!',
-    SCHEDULE_DELETE_PRODUCT_FAILED: 'Date in past. Delete product will never be fired.',
-    PRODUCTS_DID_NOT_EXIST: 'Some products in cart did not exist!',
+    SCHEDULE_UPDATE_STATE_PRODUCT_FAILED: 'Date in past. Update state product will never be fired.',
+    PRODUCT_DID_NOT_EXIST: 'Product requirement did not exist!',
   },
   JWT: {
     MALFORMED: 'The jwt token malformed!',

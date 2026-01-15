@@ -19,13 +19,13 @@ afterEach((done) => {
   done();
 });
 
-describe('delete product expired', () => {
-  it('delete product expired success', () => {
+describe('update product state when expired', () => {
+  it('update product state when expired success', () => {
     expect.hasAssertions();
-    const deleteItemExpired = jest.spyOn(schedulerService as any, 'deleteItemExpired');
-    (productService as any).deleteProductWhenExpired(product, actionName);
-    expect(deleteItemExpired).toHaveBeenCalledTimes(1);
-    expect(deleteItemExpired).toHaveBeenCalledWith(
+    const updateStateExpired = jest.spyOn(schedulerService as any, 'updateStateExpired');
+    (productService as any).updateProductStateWhenExpired(product, actionName);
+    expect(updateStateExpired).toHaveBeenCalledTimes(1);
+    expect(updateStateExpired).toHaveBeenCalledWith(
       +product.expired_time,
       expect.any(Function),
       (productService as any)._jobName,
@@ -35,10 +35,10 @@ describe('delete product expired', () => {
 
   it('delete product expired success when cronJob was exits', () => {
     expect.hasAssertions();
-    const deleteItemExpired = jest.spyOn(schedulerService as any, 'deleteItemExpired');
-    (productService as any).deleteProductWhenExpired(product, actionName);
-    expect(deleteItemExpired).toHaveBeenCalledTimes(1);
-    expect(deleteItemExpired).toHaveBeenCalledWith(
+    const updateStateExpired = jest.spyOn(schedulerService as any, 'updateStateExpired');
+    (productService as any).updateProductStateWhenExpired(product, actionName);
+    expect(updateStateExpired).toHaveBeenCalledTimes(1);
+    expect(updateStateExpired).toHaveBeenCalledWith(
       +product.expired_time,
       expect.any(Function),
       (productService as any)._jobName,
@@ -49,10 +49,10 @@ describe('delete product expired', () => {
   it('delete product expired failed due date regis used past', () => {
     expect.hasAssertions();
     product.expired_time = (Date.now() - 1000 * 10).toString();
-    const deleteItemExpired = jest.spyOn(schedulerService as any, 'deleteItemExpired');
-    (productService as any).deleteProductWhenExpired(product, actionName);
-    expect(deleteItemExpired).toHaveBeenCalledTimes(1);
-    expect(deleteItemExpired).toHaveBeenCalledWith(
+    const updateStateExpired = jest.spyOn(schedulerService as any, 'updateStateExpired');
+    (productService as any).updateProductStateWhenExpired(product, actionName);
+    expect(updateStateExpired).toHaveBeenCalledTimes(1);
+    expect(updateStateExpired).toHaveBeenCalledWith(
       +product.expired_time,
       expect.any(Function),
       (productService as any)._jobName,
