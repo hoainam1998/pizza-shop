@@ -26,10 +26,18 @@ export default (prisma: PrismaClient) => ({
         if (!productSelected) {
           throw new RpcException(new NotFoundException(createMessage(messages.PRODUCT.PRODUCT_DID_NOT_EXIST)));
         }
+      }
 
-        if (!Object.hasOwn(args.data, 'status') && args.data.count <= 10) {
-          args.data.status = Status.LESS;
+      if (Object.hasOwn(args.data, 'expired_time')) {
+        if (+args.data.expired_time <= Date.now()) {
+          args.data.status = Status.EXPIRED;
+        } else {
+          args.data.status = Status.IN_STOCK;
         }
+      }
+
+      if (!Object.hasOwn(args.data, 'status') && args.data.count <= 10) {
+        args.data.status = Status.LESS;
       }
       return await pm.product.update(args as any);
     });

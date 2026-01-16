@@ -48,7 +48,14 @@ const payload = {
   select: paginationBody,
 };
 const where = {
-  status: Status.IN_STOCK,
+  OR: [
+    {
+      status: Status.IN_STOCK,
+    },
+    {
+      status: Status.LESS,
+    },
+  ],
 };
 const redisServiceResult = 1;
 

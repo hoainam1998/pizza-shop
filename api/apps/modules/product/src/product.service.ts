@@ -137,7 +137,14 @@ export default class ProductService {
   @HandlePrismaError(messages.PRODUCT)
   paginationForSale(userId: string, select: ProductPaginationForSale): Promise<ProductPaginationPrismaResponse> {
     const where = {
-      status: prisma.Status.IN_STOCK,
+      OR: [
+        {
+          status: prisma.Status.IN_STOCK,
+        },
+        {
+          status: prisma.Status.LESS,
+        },
+      ],
     };
     return this.handlePagination(select, where).then((results) => {
       return this.removeOldProductAccessByVisitor(userId).then(() => {
@@ -152,7 +159,14 @@ export default class ProductService {
       .findMany({
         select: select.query,
         where: {
-          status: prisma.Status.IN_STOCK,
+          OR: [
+            {
+              status: prisma.Status.IN_STOCK,
+            },
+            {
+              status: prisma.Status.LESS,
+            },
+          ],
           product_id: {
             in: select.productIds,
           },
