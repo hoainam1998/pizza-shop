@@ -72,7 +72,14 @@ describe('get products in cart', () => {
     expect(findMany).toHaveBeenCalledWith({
       select: payload.select.query,
       where: {
-        status: Status.IN_STOCK,
+        OR: [
+          {
+            status: Status.IN_STOCK,
+          },
+          {
+            status: Status.LESS,
+          },
+        ],
         product_id: {
           in: payload.select.productIds,
         },
@@ -102,7 +109,14 @@ describe('get products in cart', () => {
     expect(findMany).toHaveBeenCalledWith({
       select: payload.select.query,
       where: {
-        status: Status.IN_STOCK,
+        OR: [
+          {
+            status: Status.IN_STOCK,
+          },
+          {
+            status: Status.LESS,
+          },
+        ],
         product_id: {
           in: payload.select.productIds,
         },
@@ -132,7 +146,14 @@ describe('get products in cart', () => {
     expect(findMany).toHaveBeenCalledWith({
       select: payload.select.query,
       where: {
-        status: Status.IN_STOCK,
+        OR: [
+          {
+            status: Status.IN_STOCK,
+          },
+          {
+            status: Status.LESS,
+          },
+        ],
         product_id: {
           in: payload.select.productIds,
         },
@@ -163,7 +184,14 @@ describe('get products in cart', () => {
     expect(findMany).toHaveBeenCalledWith({
       select: payload.select.query,
       where: {
-        status: Status.IN_STOCK,
+        OR: [
+          {
+            status: Status.IN_STOCK,
+          },
+          {
+            status: Status.LESS,
+          },
+        ],
         product_id: {
           in: payload.select.productIds,
         },
@@ -197,7 +225,14 @@ describe('get products in cart', () => {
     expect(findMany).toHaveBeenCalledWith({
       select: payload.select.query,
       where: {
-        status: Status.IN_STOCK,
+        OR: [
+          {
+            status: Status.IN_STOCK,
+          },
+          {
+            status: Status.LESS,
+          },
+        ],
         product_id: {
           in: payload.select.productIds,
         },
@@ -230,7 +265,14 @@ describe('get products in cart', () => {
     expect(findMany).toHaveBeenCalledWith({
       select: payload.select.query,
       where: {
-        status: Status.IN_STOCK,
+        OR: [
+          {
+            status: Status.IN_STOCK,
+          },
+          {
+            status: Status.LESS,
+          },
+        ],
         product_id: {
           in: payload.select.productIds,
         },

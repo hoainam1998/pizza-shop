@@ -35,7 +35,7 @@ import BaseController from '../controller';
 import { ProductRouter } from '@share/router';
 import { ProductPaginationResponse } from '@share/interfaces';
 import { EventsGateway } from '@share/libs/socket/event-socket.gateway';
-import { Throttle } from '@nestjs/throttler';
+import { SkipThrottle } from '@nestjs/throttler';
 import { createMessage } from '@share/utils';
 
 @Controller(ProductRouter.BaseUrl)
@@ -95,7 +95,7 @@ export default class ProductController extends BaseController {
     return this.handlePaginationObservable(this.productService.pagination({ ...select, query }), select);
   }
 
-  @Throttle({ default: { ttl: 500 } })
+  @SkipThrottle()
   @Post(ProductRouter.relative.paginationForSale)
   @HttpCode(HttpStatus.OK)
   @HandleHttpError
@@ -113,6 +113,7 @@ export default class ProductController extends BaseController {
     );
   }
 
+  @SkipThrottle()
   @Post(ProductRouter.relative.productsInCart)
   @HttpCode(HttpStatus.OK)
   @HandleHttpError
