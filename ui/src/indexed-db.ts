@@ -22,6 +22,10 @@ const handleRequestAsPromise = (
  */
 const DELAY = 100;
 
+/**
+ * IndexedDb helper class.
+ * @class
+ */
 export default class IndexedDb {
   private static readonly _itSelf: IndexedDb = new IndexedDb();
   private _request?: IDBOpenDBRequest;
@@ -45,6 +49,10 @@ export default class IndexedDb {
     }
   }
 
+  /**
+   * Create object store.
+   * @private
+   */
   private createObjectStore(): void {
     if (this._request) {
       this._request.onupgradeneeded = (event: any): void => {
@@ -55,6 +63,10 @@ export default class IndexedDb {
     }
   }
 
+  /**
+   * Integrate all behavior functions when database connect success.
+   * @private
+   */
   private completing(): void {
     if (this._request) {
       this._request.onsuccess = (event: any): void => {
@@ -100,6 +112,13 @@ export default class IndexedDb {
     }
   }
 
+  /**
+   * Add a row to object store.
+   * @static
+   * @param {OBJECT_STORE_NAME} objectStoreName - An object store name.
+   * @param {*} payload - The data.
+   * @returns {Promise<IDBRequest<IDBValidKey> | undefined>} The promise hold result.
+   */
   static add(objectStoreName: OBJECT_STORE_NAME, payload: any): Promise<IDBRequest<IDBValidKey> | undefined> {
     return new Promise((resolve, reject) => {
       if (this._itSelf._add) {
@@ -114,6 +133,13 @@ export default class IndexedDb {
     });
   }
 
+  /**
+   * Update a row in object store.
+   * @static
+   * @param {OBJECT_STORE_NAME} objectStoreName - An object store name.
+   * @param {*} payload - The data.
+   * @returns {Promise<IDBRequest<IDBValidKey> | undefined>} The promise hold result.
+   */
   static update(
     objectStoreName: OBJECT_STORE_NAME,
     payload: any,
@@ -131,6 +157,13 @@ export default class IndexedDb {
     });
   }
 
+  /**
+   * Delete a row in object store.
+   * @static
+   * @param {OBJECT_STORE_NAME} objectStoreName - An object store name.
+   * @param {string} key - The primary key.
+   * @returns {Promise<IDBRequest<IDBValidKey> | undefined>} The promise hold result.
+   */
   static delete(objectStoreName: OBJECT_STORE_NAME, key: string): Promise<IDBRequest<undefined> | undefined> {
     return new Promise((resolve, reject) => {
       if (this._itSelf._delete) {
@@ -145,6 +178,13 @@ export default class IndexedDb {
     });
   }
 
+  /**
+   * Get a row in object store.
+   * @static
+   * @param {OBJECT_STORE_NAME} objectStoreName - An object store name.
+   * @param {string} key - The primary key.
+   * @returns {Promise<IDBRequest<IDBValidKey> | undefined>} The promise hold result.
+   */
   static get(objectStoreName: OBJECT_STORE_NAME, key: string | number): Promise<any> {
     return new Promise((resolve, reject) => {
       if (this._itSelf._get) {
@@ -159,7 +199,13 @@ export default class IndexedDb {
     });
   }
 
-  static getAllKeys(objectStoreName: OBJECT_STORE_NAME): Promise<any> {
+  /**
+   * Get all the primary keys in object store.
+   * @static
+   * @param {OBJECT_STORE_NAME} objectStoreName - An object store name.
+   * @returns {Promise<IDBRequest<IDBValidKey[]>>} The promise hold result.
+   */
+  static getAllKeys(objectStoreName: OBJECT_STORE_NAME): Promise<IDBRequest<IDBValidKey[]>> {
     return new Promise((resolve, reject) => {
       if (this._itSelf._getAllKeys) {
         const request = this._itSelf._getAllKeys!(objectStoreName);
@@ -173,7 +219,13 @@ export default class IndexedDb {
     });
   }
 
-  static getAll(objectStoreName: OBJECT_STORE_NAME): Promise<any> {
+  /**
+   * Get all data rows in object store.
+   * @static
+   * @param {OBJECT_STORE_NAME} objectStoreName - An object store name.
+   * @returns {Promise<IDBRequest<IDBValidKey[]>>} The promise hold result.
+   */
+  static getAll(objectStoreName: OBJECT_STORE_NAME): Promise<IDBRequest<IDBValidKey[]>> {
     return new Promise((resolve, reject) => {
       if (this._itSelf._getAll) {
         const request = this._itSelf._getAll!(objectStoreName);
@@ -181,20 +233,6 @@ export default class IndexedDb {
       } else {
         setTimeout(() => {
           const request = this._itSelf._getAll!(objectStoreName);
-          handleRequestAsPromise(request, resolve, reject);
-        }, DELAY);
-      }
-    });
-  }
-
-  static count(objectStoreName: OBJECT_STORE_NAME): Promise<number> {
-    return new Promise((resolve, reject) => {
-      if (this._itSelf._count) {
-        const request = this._itSelf._count!(objectStoreName);
-        handleRequestAsPromise(request, resolve, reject);
-      } else {
-        setTimeout(() => {
-          const request = this._itSelf._count!(objectStoreName);
           handleRequestAsPromise(request, resolve, reject);
         }, DELAY);
       }

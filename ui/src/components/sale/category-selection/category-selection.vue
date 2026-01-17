@@ -103,8 +103,8 @@ const showCategories = (size: number = 10): void => {
 const responsiveCategorySelect = (): void => {
   const screenWidth = window.innerWidth;
     const isMobile = screenWidth >= breakPoint.MOBILE && screenWidth < breakPoint.TABLET;
-    const isTablet = screenWidth > breakPoint.TABLET && screenWidth < breakPoint.LARGE_TABLET;
-    const isLargeTablet = screenWidth > breakPoint.LARGE_TABLET && screenWidth < breakPoint.DESKTOP;
+    const isTablet = screenWidth >= breakPoint.TABLET && screenWidth < breakPoint.LARGE_TABLET;
+    const isLargeTablet = screenWidth >= breakPoint.LARGE_TABLET && screenWidth < breakPoint.DESKTOP;
     const isDesktop = screenWidth > breakPoint.DESKTOP && screenWidth < breakPoint.EXTRA_DESKTOP;
     const isExtraDesktop = screenWidth > breakPoint.EXTRA_DESKTOP;
 

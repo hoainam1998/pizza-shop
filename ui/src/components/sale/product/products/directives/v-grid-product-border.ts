@@ -1,11 +1,18 @@
 /**
+ * Default padding x.
+ */
+const paddingX = 20;
+
+/**
+ * setTimeout delay.
+ */
+const DELAY = 50;
+
+/**
  * Adding border for product item.
  *
  * @param {HTMLElement} target - The directive binding element.
  */
-const paddingX = 20;
-const DELAY = 50;
-
 export default (target: HTMLElement): void => {
   setTimeout(() => {
     for (const el of target.children) {
