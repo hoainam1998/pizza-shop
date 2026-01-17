@@ -1,7 +1,6 @@
 <template>
   <div class="product-item ps-px-10 ps-py-10">
-    <div class="
-      ps-mb-10
+    <div class="ps-mb-10
       ps-display-flex
       ps-flex-direction-mobile-column
       ps-flex-direction-tablet-column
@@ -20,45 +19,87 @@
               ps-align-items-desktop-center
               ps-flex-direction-mobile-column">
                 <span class="ps-fw-bold">{{ $formatVNDCurrency(item.price) }}</span>
-                <span class="ps-fs-13 ps-text-color-606266">Bought:&nbsp;{{ $replaceThousand(100) }}</span>
+                <span class="ps-fs-13 ps-text-color-606266">Bought:&nbsp;{{ $replaceThousand(item.bought) }}</span>
             </span>
           </div>
           <hr />
           <ul class="ps-px-0 ps-list-style-none">
             <li class="ps-display-inline ps-fs-14 ps-fw-bold">Ingredients:&nbsp;</li>
-            <List :items="ingredients">
+            <List :items="item.ingredients">
               <template #default="{ item }">
-                <li class="ingredient-item ps-fs-13 ps-display-inline">{{ item }}</li>
+                <li class="ingredient-item ps-fs-13 ps-display-inline">{{ item.name }}</li>
               </template>
             </List>
           </ul>
         </div>
     </div>
-    <el-button class="ps-bg-eb2f06
+    <p v-if="disabledAddButton"
+      class="ps-text-align-center ps-fs-12 ps-fw-bold ps-text-color-f56c6c ps-mb-5">
+        Quantity overcome to limit.
+    </p>
+    <el-button
+      class="ps-bg-eb2f06
       ps-text-color-black
+      ps-bg-gray-disabled
       ps-fw-bold
       ps-display-block
       ps-margin-auto
       ps-w-100px
-      ps-line-height-10">
+      ps-line-height-10"
+      :disabled="disabledAddButton"
+      @click="add">
         Add
     </el-button>
   </div>
 </template>
 <script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
 import List from '@/components/common/list.vue';
-const { item } = defineProps<{
-  item: {
-    productId: string;
-    name: string;
-    avatar: string;
-    price: number;
-    bought: number;
-    ingredients: string[];
-  }
-}>();
+import { type ProductItemsPropsType } from './props-validator';
+import { useProductsInCart } from '@/composables/store';
+import IndexedDb from '@/indexed-db';
+import { OBJECT_STORE_NAME } from '@/enums';
+import { type ClientCartItemType } from '@/interfaces';
 
-const ingredients = Array.apply(this, Array(20)).map(() => 'Lorem ipsum');
+const cart = useProductsInCart();
+const quantity = ref<number>(0);
+const { item } = defineProps<ProductItemsPropsType>();
+
+const createCartItem = (quantity: number): Omit<ClientCartItemType, 'total'> => {
+  return {
+    name: item.name,
+    avatar: item.avatar,
+    quantity,
+    limit: item.count,
+    price: item.price,
+    productId: item.productId,
+  };
+};
+
+const add = (): void => {
+  IndexedDb.get(OBJECT_STORE_NAME.CARTS, item.productId).then((result) => {
+    if (result) {
+      if (result.quantity < item.count) {
+        quantity.value = result.quantity + 1;
+        IndexedDb.update(OBJECT_STORE_NAME.CARTS, createCartItem(quantity.value));
+        cart.calcTotal();
+      }
+    } else {
+      IndexedDb.add(OBJECT_STORE_NAME.CARTS, createCartItem(1));
+      cart.calcTotal();
+    }
+  });
+};
+
+const disabledAddButton = computed<boolean>(() => quantity.value === item.count);
+
+onMounted(() => {
+  IndexedDb.get(OBJECT_STORE_NAME.CARTS, item.productId).then((result) => {
+    if (result) {
+      quantity.value = result.quantity;
+    }
+  });
+});
 </script>
 <style lang="scss" scoped>
 .ingredient-item {

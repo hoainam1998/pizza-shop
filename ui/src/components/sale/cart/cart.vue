@@ -24,18 +24,19 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { ShoppingCartFull } from '@element-plus/icons-vue';
 import { whiteColor } from '@/assets/scss/variables.module.scss';
 import useWrapperRouter from '@/composables/use-router';
+import { useProductsInCart } from '@/composables/store';
 import paths from '@/router/paths';
 
 const { push } = useWrapperRouter();
+const cart = useProductsInCart();
 const navigateToCart = () => push(paths.CART);
-const amount = ref<number>(100000);
 
-const amountText = computed(() => {
-  const value = amount.value.toString();
+const amountText = computed<string>(() => {
+  const value = cart.total.toString();
   return value.length > 3 ? `${value.slice(0, 3)}+` : value;
 });
 </script>

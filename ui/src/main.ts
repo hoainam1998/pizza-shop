@@ -7,7 +7,8 @@ import SaleApp from './views/app/sale.vue';
 import router from './router';
 import plugin from './plugin';
 import 'element-plus/dist/index.css';
-
+import './socket';
+import './indexed-db';
 globalThis.router = router;
 
 const app = createApp(isSale ? SaleApp : AdminApp);

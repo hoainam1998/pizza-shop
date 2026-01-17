@@ -225,7 +225,12 @@ onBeforeMount(() => {
         price: true,
         status: true,
         categoryId: true,
-        ingredients: true,
+        ingredients: {
+          unit: true,
+          count: true,
+          name: true,
+          avatar: true,
+        },
         avatar: true,
         originalPrice: true,
         expiredTime: true
