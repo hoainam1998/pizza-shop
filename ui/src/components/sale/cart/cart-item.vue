@@ -1,44 +1,58 @@
 <template>
-  <img :src="cart.avatar" class="ps-w-60px ps-h-60px ps-mr-10" alt="product-cart" />
-  <div class="ps-w-82">
-    <h4 class="ps-text-truncate-2 ps-fs-14">
-      {{ cart.name }}
-    </h4>
-    <div class="ps-display-flex ps-flex-gap-10 ps-mt-5">
-      <div class="ps-display-flex ps-align-items-center">
-        <button class="ps-cursor-pointer
-          ps-border-none
-          ps-border-radius-4
-          ps-w-25px
-          ps-h-25px"
-          @click="amount.increase">
-            <el-icon class="ps-pt-2" size="12"><Plus /></el-icon>
-        </button>
-        <div class="ps-w-60px ps-text-align-center">{{ amount.data }}</div>
-        <button class="ps-cursor-pointer
-          ps-border-none
-          ps-border-radius-4
-          ps-w-25px
-          ps-h-25px"
-          @click="amount.decrease">
-            <el-icon class="ps-pt-2" size="12"><Minus /></el-icon>
-        </button>
+  <div class="ps-display-flex ps-position-relative ps-px-7 ps-py-7" :class="{ 'ps-unselect no-exist': cart.noExist }">
+    <img :src="cart.avatar" class="ps-w-60px ps-h-60px ps-mr-10" alt="product-cart" />
+    <div class="ps-w-82">
+      <h4 class="ps-text-truncate-2 ps-fs-14">
+        {{ cart.name }}
+      </h4>
+      <div class="ps-display-flex ps-flex-gap-10 ps-mt-5">
+        <div class="ps-display-flex ps-align-items-center">
+          <button class="ps-cursor-pointer
+            ps-border-none
+            ps-border-radius-4
+            ps-w-25px
+            ps-h-25px"
+            @click="amount.increase">
+              <el-icon class="ps-pt-2" size="12"><Plus /></el-icon>
+          </button>
+          <div class="ps-w-60px ps-text-align-center">{{ amount.data }}</div>
+          <button class="ps-cursor-pointer
+            ps-border-none
+            ps-border-radius-4
+            ps-w-25px
+            ps-h-25px"
+            @click="amount.decrease">
+              <el-icon class="ps-pt-2" size="12"><Minus /></el-icon>
+          </button>
+        </div>
+        <span v-if="!cart.noExist"
+          class="ps-display-flex
+          ps-align-items-center
+          ps-flex-gap-4
+          ps-cursor-pointer
+          ps-fw-bold
+          ps-fs-12
+          ps-text-color-f56c6c"
+          @click="emit('delete')">
+            <el-icon class="ps-pt-2"><Close /></el-icon>
+            Delete
+        </span>
       </div>
-      <span class="ps-display-flex
-        ps-align-items-center
-        ps-flex-gap-4
-        ps-cursor-pointer
-        ps-fw-bold
-        ps-fs-12
-        ps-text-color-f56c6c"
-        @click="emit('delete')">
-          <el-icon class="ps-pt-2"><Close /></el-icon>
-          Delete
+      <span v-if="amount.isExceeding" class="ps-fs-12 ps-text-color-f56c6c">
+        Exceeding the available quantity!
       </span>
     </div>
-    <span v-if="amount.isExceeding" class="ps-fs-12 ps-text-color-f56c6c">
-      Exceeding the available quantity!
-    </span>
+    <button v-if="cart.noExist"
+      class="ps-position-absolute
+      ps-z-index-plus
+      ps-cursor-pointer
+      ps-right-5px
+      ps-bg-eb2f06
+      ps-border-none
+      ps-border-radius-4"
+      @click="emit('delete')">
+        <el-icon class="ps-pt-5" color="white" size="14"><Close /></el-icon>
+    </button>
   </div>
   <DeleteDialog v-model="deleteDialogVisible" @confirm="emit('delete')" />
 </template>
@@ -67,7 +81,8 @@ const { cart } = defineProps<{
     quantity: number;
     total: number;
     price: number;
-  }
+    noExist: boolean;
+  };
 }>();
 
 const amount = reactive({

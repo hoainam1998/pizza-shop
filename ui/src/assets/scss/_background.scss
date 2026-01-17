@@ -15,6 +15,10 @@ $background-color: (
   .ps-bg-#{$name} {
     background-color: $color !important;
   }
+
+  .ps-bg-#{$name}-disabled:disabled {
+    background-color: $color !important;
+  }
 }
 
 .ps-bg-no-repeat {

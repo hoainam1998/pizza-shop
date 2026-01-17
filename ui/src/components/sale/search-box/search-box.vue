@@ -1,0 +1,48 @@
+<template>
+  <div class="search-box
+    ps-overflow-hidden
+    ps-display-flex
+    ps-justify-content-center
+    ps-bg-white
+    ps-h-35px
+    ps-w-300px
+    ps-border-radius-30">
+      <input v-enter-press="search"
+        type="text"
+        class="ps-px-7 ps-fs-15 ps-w-87 ps-h-100 ps-border-none ps-outline-none"
+        v-model="keyword" />
+      <button class="ps-w-13 ps-h-100 ps-py-7 ps-cursor-pointer ps-border-none ps-outline-none" @click="search">
+        <el-icon size="20"><Search /></el-icon>
+      </button>
+  </div>
+</template>
+<script setup lang="ts">
+import { ref, watch } from 'vue';
+import { Search } from '@element-plus/icons-vue';
+import { useRoute } from 'vue-router';
+import useWrapperRouter from '@/composables/use-router';
+import paths from '@/router/paths';
+const { push } = useWrapperRouter();
+const route = useRoute();
+const keyword = ref<string>(route.query.search as string);
+
+watch(route, (to) => {
+  keyword.value = to.query.search as string;
+});
+
+const emit = defineEmits<{
+  (e: 'search', keyword: string): void;
+}>();
+
+const search = (): void => {
+  if (keyword.value) {
+    push({ path: paths.BASE.Path, query: { ...route.query, search: keyword.value } });
+  } else {
+    const query = { ...route.query };
+    delete query.search;
+    push({ path: paths.BASE.Path, query });
+  }
+  emit('search', keyword.value);
+};
+</script>
+

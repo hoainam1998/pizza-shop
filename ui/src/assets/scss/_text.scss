@@ -18,6 +18,22 @@ $text-colors: (
       color: $color !important;
     }
   }
+
+  .ps-text-color-#{$name}-hover:hover {
+    color: $color !important;
+
+    &>* {
+      color: $color !important;
+    }
+  }
+
+  .ps-text-color-#{$name}-disabled:disabled {
+    color: $color !important;
+
+    &>* {
+      color: $color !important;
+    }
+  }
 }
 
 @for $i from 0 through 20 {

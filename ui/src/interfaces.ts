@@ -52,3 +52,13 @@ export type LoginResponseType = {
   power: number;
   sex: number;
 };
+
+export type ClientCartItemType = {
+  productId: string;
+  name: string;
+  avatar: string;
+  limit: number;
+  quantity: number;
+  total: number;
+  price: number;
+};

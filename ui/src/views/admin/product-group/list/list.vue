@@ -149,7 +149,12 @@ const fetchProducts = (pageSize: number, pageNumber: number): void => {
       status: true,
       expiredTime: true,
       category: true,
-      ingredients: true,
+      ingredients: {
+        unit: true,
+        count: true,
+        name: true,
+        avatar: true,
+      },
       disabled: true,
     }
   }, { allowNotFound: true }).then((response) => {

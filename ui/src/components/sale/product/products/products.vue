@@ -1,6 +1,8 @@
 <template>
   <section class="products ps-bg-white">
-    <div v-position-top v-scroll
+    <div
+    v-position-top
+    v-scroll
     class="ps-position-sticky
     ps-display-desktop-flex
     ps-display-tablet-flex
@@ -17,48 +19,49 @@
     ps-border-style-top-solid">
       <ResultSearch :total="total" />
       <div class="ps-display-mobile-flex ps-justify-content-center">
-        <Pagination v-model="model" :pagerCount="7" :page-size="10" :total="100" @onChange="onChange" />
+        <Pagination v-model="currentPage" :pagerCount="7" :page-size="10" :total="total"  @onChange="onChange" />
       </div>
     </div>
     <hr/>
-    <ul v-grid-product-border class="products-wrapper ps-list-style-none ps-px-0 ps-display-grid ps-px-10 ps-py-10">
-      <List :items="products" key-field="productId">
-        <template #default="{ item }">
-          <li><ProductItem :item="item" /></li>
-        </template>
-      </List>
+    <ul v-if="products.length"
+      v-grid-product-border
+      class="products-wrapper ps-list-style-none ps-px-0 ps-display-grid ps-px-10 ps-py-10">
+        <List :items="products" key-field="productId">
+          <template #default="{ item }">
+            <li><ProductItem :item="item" /></li>
+          </template>
+        </List>
     </ul>
+    <div v-else
+      class="ps-display-flex ps-flex-direction-column ps-justify-content-center ps-align-items-center ps-py-7">
+        <img :src="EmptyLogo" alt="empty logo" height="200" width="200" />
+        <h3 class="ps-fw-bold">Not found!</h3>
+    </div>
   </section>
 </template>
 <script setup lang="ts">
-import { useId, ref } from 'vue';
+import { ref } from 'vue';
 import ProductItem from '../product-item/product-item.vue';
 import List from '@/components/common/list.vue';
 import Pagination from '@/components/common/pagination/pagination.vue';
 import ResultSearch from '@/components/sale/product/result-search/result-search.vue';
-import avatar from '@/assets/images/logo.png';
+import EmptyLogo from '@/assets/images/empty.png';
 import { vGridProductBorder, vPositionTop } from './directives';
-const model = ref<number>(1);
+import { type ProductPropsType } from './props-validator';
+const currentPage = ref<number>(1);
 
-const createProducts = (length: number = 10): any[] => {
-  return Array.apply(this, Array(length)).map(() => {
-    return {
-      productId: useId(),
-      name: 'product',
-      avatar,
-      price: 10000,
-      bought: 2,
-      ingredients: ['ingredient 1', 'ingredient 2'],
-    };
-  });
+const { total = 0, products = [] } = defineProps<ProductPropsType>();
+const emit = defineEmits<{
+  (e: 'onChange', pageNumber: number): void;
+}>();
+
+const onChange = (pageNumber: number): void => {
+  emit('onChange', pageNumber);
 };
 
-const onChange = () => {
-  // TODO
-};
-
-const products = ref<any[]>(createProducts(22));
-const total = products.value.length;
+defineExpose({
+  currentPage
+});
 </script>
 <style lang="scss" scoped>
 .products-wrapper {

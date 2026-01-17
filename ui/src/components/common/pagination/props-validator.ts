@@ -4,7 +4,7 @@ export default {
     required: true,
   },
   total: {
-    type: Number,
+    type: [Number, String],
     required: true,
   },
   pagerCount: {
