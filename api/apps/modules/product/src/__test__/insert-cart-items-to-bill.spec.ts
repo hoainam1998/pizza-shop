@@ -19,8 +19,8 @@ beforeEach(async () => {
   prismaService = moduleRef.get(PRISMA_CLIENT);
 });
 
-describe('insert cart item to bill', () => {
-  it('insert cart item to bill was success', async () => {
+describe('insert cart items to bill', () => {
+  it('insert cart items to bill was success', async () => {
     expect.hasAssertions();
     const create = jest.spyOn(prismaService.bill, 'create').mockResolvedValue(bill);
     const insertCartItemsToBill = jest.spyOn(productService as any, 'insertCartItemsToBill');
@@ -43,7 +43,7 @@ describe('insert cart item to bill', () => {
     });
   });
 
-  it('validate carts failed with unknown error', async () => {
+  it('insert cart items failed with unknown error', async () => {
     expect.hasAssertions();
     const create = jest.spyOn(prismaService.bill, 'create').mockRejectedValue(UnknownError);
     const insertCartItemsToBill = jest.spyOn(productService as any, 'insertCartItemsToBill');
@@ -66,7 +66,7 @@ describe('insert cart item to bill', () => {
     });
   });
 
-  it('validate carts failed with prisma disconnect error', async () => {
+  it('insert cart items failed with prisma disconnect error', async () => {
     expect.hasAssertions();
     const create = jest.spyOn(prismaService.bill, 'create').mockRejectedValue(PrismaDisconnectError);
     const insertCartItemsToBill = jest.spyOn(productService as any, 'insertCartItemsToBill');
