@@ -245,7 +245,7 @@ export default class IndexedDb {
    * @param {OBJECT_STORE_NAME} objectStoreName - An object store name.
    * @returns {Promise<undefined>} The promise hold result.
    */
-  static clear(objectStoreName: OBJECT_STORE_NAME): Promise<any[]> {
+  static clear(objectStoreName: OBJECT_STORE_NAME): Promise<undefined> {
     return new Promise((resolve, reject) => {
       if (this._itSelf._clear) {
         const request = this._itSelf._clear!(objectStoreName);
