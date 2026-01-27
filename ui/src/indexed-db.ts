@@ -39,7 +39,7 @@ export default class IndexedDb {
   private _get?: (objectStoreName: string, key: string | number) => IDBRequest<IDBValidKey>;
   private _getAllKeys?: (objectStoreName: string) => IDBRequest<IDBValidKey[]>;
   private _getAll?: (objectStoreName: string) => IDBRequest<IDBValidKey[]>;
-  private _count?: (objectStoreName: string) => IDBRequest<number>;
+  private _clear?: (objectStoreName: string) => IDBRequest<undefined>;
 
   constructor() {
     if (!IndexedDb._itSelf) {
@@ -97,16 +97,16 @@ export default class IndexedDb {
           const index = objectStore.index('productId');
           return index.getAllKeys();
         };
-        this._getAll = (objectStoreName: string): IDBRequest<IDBValidKey[]> => {
+        this._getAll = (objectStoreName: string): IDBRequest<any[]> => {
           const transaction = this._dbObject!.transaction([this._objectStoreName], 'readonly');
           const objectStore = transaction.objectStore(objectStoreName);
           const index = objectStore.index('productId');
           return index.getAll();
         };
-        this._count = (objectStoreName: string): IDBRequest<number> => {
-          const transaction = this._dbObject!.transaction([this._objectStoreName], 'readonly');
+        this._clear = (objectStoreName: string): IDBRequest<undefined> => {
+          const transaction = this._dbObject!.transaction([this._objectStoreName], 'readwrite');
           const objectStore = transaction.objectStore(objectStoreName);
-          return objectStore.count();
+          return objectStore.clear();
         };
       };
     }
@@ -225,7 +225,7 @@ export default class IndexedDb {
    * @param {OBJECT_STORE_NAME} objectStoreName - An object store name.
    * @returns {Promise<IDBRequest<IDBValidKey[]>>} The promise hold result.
    */
-  static getAll(objectStoreName: OBJECT_STORE_NAME): Promise<IDBRequest<IDBValidKey[]>> {
+  static getAll(objectStoreName: OBJECT_STORE_NAME): Promise<any[]> {
     return new Promise((resolve, reject) => {
       if (this._itSelf._getAll) {
         const request = this._itSelf._getAll!(objectStoreName);
@@ -233,6 +233,26 @@ export default class IndexedDb {
       } else {
         setTimeout(() => {
           const request = this._itSelf._getAll!(objectStoreName);
+          handleRequestAsPromise(request, resolve, reject);
+        }, DELAY);
+      }
+    });
+  }
+
+  /**
+   * Clear all data rows in object store.
+   * @static
+   * @param {OBJECT_STORE_NAME} objectStoreName - An object store name.
+   * @returns {Promise<undefined>} The promise hold result.
+   */
+  static clear(objectStoreName: OBJECT_STORE_NAME): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      if (this._itSelf._clear) {
+        const request = this._itSelf._clear!(objectStoreName);
+        handleRequestAsPromise(request, resolve, reject);
+      } else {
+        setTimeout(() => {
+          const request = this._itSelf._clear!(objectStoreName);
           handleRequestAsPromise(request, resolve, reject);
         }, DELAY);
       }
