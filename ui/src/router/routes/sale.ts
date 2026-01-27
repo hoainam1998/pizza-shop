@@ -1,9 +1,15 @@
 import type { RouterOptions } from 'vue-router';
 import SaleHome from '@/views/home/sale.vue';
 import Cart from '@/views/sale/cart/cart.vue';
-import paths from '../paths';
+import NotFound from '@/views/not-found/not-found.vue';
+import paths from '@/router/paths';
 
 const saleRoutes: RouterOptions['routes'] = [
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'not-found',
+    component: NotFound,
+  },
   {
     path: `${paths.BASE}`,
     name: 'home',
