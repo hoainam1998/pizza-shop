@@ -10,7 +10,9 @@ import {
   Delete,
   Param,
   Req,
+  Res,
 } from '@nestjs/common';
+import { type Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { map, Observable } from 'rxjs';
 import { product } from 'generated/prisma';
@@ -24,12 +26,13 @@ import {
   ProductPagination,
   ProductPaginationForSale,
   GetProductsInCart,
+  Carts,
 } from '@share/dto/validators/product.dto';
+import { PaginationProductSerializer, Products, ProductSerializer, BillErrors } from '@share/dto/serializer/product';
 import { IdValidationPipe, ImageTransformPipe } from '@share/pipes';
 import ProductService from './product.service';
 import { MessageSerializer } from '@share/dto/serializer/common';
 import messages from '@share/constants/messages';
-import { PaginationProductSerializer, Products, ProductSerializer } from '@share/dto/serializer/product';
 import LoggingService from '@share/libs/logging/logging.service';
 import BaseController from '../controller';
 import { ProductRouter } from '@share/router';
@@ -181,5 +184,50 @@ export default class ProductController extends BaseController {
     return this.productService
       .deleteProduct(productId)
       .pipe(map(() => MessageSerializer.create(messages.PRODUCT.DELETE_PRODUCT_SUCCESS)));
+  }
+
+  @Post(ProductRouter.relative.validateProductsInCart)
+  @HttpCode(HttpStatus.OK)
+  @HandleHttpError
+  validateProductsInCart(@Body() carts: Carts): Observable<Promise<BillErrors>> {
+    return this.productService.validateProductsInCart(carts).pipe(
+      map((billErrors) => {
+        const billErrorsInstance = new BillErrors(billErrors);
+        return billErrorsInstance.validate().then((errors) => {
+          if (errors.length) {
+            this.logError(errors, this.validateProductsInCart.name);
+            throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
+          }
+          return billErrorsInstance;
+        });
+      }),
+    );
+  }
+
+  @Post(ProductRouter.relative.payment)
+  @HttpCode(HttpStatus.OK)
+  @HandleHttpError
+  payment(
+    @Req() req: Express.Request,
+    @Body() carts: Carts,
+    @Res() response: Response,
+  ): Observable<Promise<Response<string, any>>> {
+    return this.productService.payment(req.session.user?.userId || '1764900213623', carts).pipe(
+      map((billErrors) => {
+        const billErrorsInstance = new BillErrors(billErrors);
+        return billErrorsInstance.validate().then((errors) => {
+          if (errors.length) {
+            this.logError(errors, this.payment.name);
+            throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
+          }
+
+          if (!billErrors.validateResult) {
+            return response.status(HttpStatus.BAD_REQUEST).json(billErrorsInstance);
+          }
+
+          return response.status(HttpStatus.OK).json(MessageSerializer.create(messages.PRODUCT.PAYMENT_SUCCESS));
+        });
+      }),
+    );
   }
 }

@@ -32,3 +32,5 @@ export const updateProductPattern = createMicroserviceEvent('update_product');
 export const deleteProductPattern = createMicroserviceEvent('delete_product');
 export const paginationForSalePattern = createMicroserviceEvent('pagination_for_sale');
 export const getProductsInCartPattern = createMicroserviceEvent('get_products_in_cart');
+export const validateProductsInCartPattern = createMicroserviceEvent('validate_products_in_cart');
+export const paymentPattern = createMicroserviceEvent('payment');

@@ -10,9 +10,12 @@ import {
   getProductsInCartPattern,
   updateProductPattern,
   deleteProductPattern,
+  paymentPattern,
+  validateProductsInCartPattern,
 } from '@share/pattern';
 import { PRODUCT_SERVICE } from '@share/di-token';
-import { GetProduct, ProductPagination } from '@share/dto/validators/product.dto';
+import { GetProduct, ProductPagination, Carts } from '@share/dto/validators/product.dto';
+import { BillErrors } from '@share/dto/serializer/product';
 import { ProductPaginationResponse } from '@share/interfaces';
 
 @Injectable()
@@ -45,5 +48,13 @@ export default class ProductService {
 
   deleteProduct(productId: string): Observable<product> {
     return this.product.send<product>(deleteProductPattern, productId);
+  }
+
+  validateProductsInCart(carts: Carts): Observable<Omit<BillErrors, 'validate'>> {
+    return this.product.send<Omit<BillErrors, 'validate'>>(validateProductsInCartPattern, carts);
+  }
+
+  payment(userId: string, carts: Carts): Observable<Omit<BillErrors, 'validate'>> {
+    return this.product.send<Omit<BillErrors, 'validate'>>(paymentPattern, { userId, bill: carts });
   }
 }
