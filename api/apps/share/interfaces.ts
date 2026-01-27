@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 import { user, category, product, ingredient } from 'generated/prisma';
-import { GetProductsInCart, ProductPagination } from './dto/validators/product.dto';
+import { Carts, GetProductsInCart, ProductPagination } from './dto/validators/product.dto';
 
 export type CategoryBodyType = category & {
   disabled?: boolean;
@@ -101,5 +101,10 @@ export type ProductSelectForSaleType = {
 
 export type ProductSelectInCartType = {
   select: GetProductsInCart;
+  userId: string;
+};
+
+export type PaymentCreatePayloadType = {
+  bill: Carts;
   userId: string;
 };

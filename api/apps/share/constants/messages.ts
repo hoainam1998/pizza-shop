@@ -46,6 +46,14 @@ export default Object.freeze({
     DELETE_PRODUCT_SUCCESS: 'Delete product was success!',
     SCHEDULE_UPDATE_STATE_PRODUCT_FAILED: 'Date in past. Update state product will never be fired.',
     PRODUCT_DID_NOT_EXIST: 'Product requirement did not exist!',
+    PAYMENT_SUCCESS: 'Payment process was success!',
+  },
+  BILL: {
+    PRODUCT_EXPIRED: 'Product was expired!',
+    OVERCOME_LIMIT: 'Over product quantity in stock!',
+    PRICE_NOT_CONSISTENT: 'Product price is not consistent!',
+    TOTAL_NOT_CONSISTENT: 'Product total is not consistent!',
+    FINISH_TOTAL_NOT_CONSISTENT: 'Finish total is not consistent!',
   },
   JWT: {
     MALFORMED: 'The jwt token malformed!',

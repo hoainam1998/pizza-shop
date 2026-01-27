@@ -377,3 +377,27 @@ export class GetProductsInCart {
   @IsArray()
   productIds: string[];
 }
+
+export class Cart {
+  @IsNumberString()
+  productId: string;
+
+  @IsInt()
+  quantity: number;
+
+  @IsInt()
+  price: number;
+
+  @IsInt()
+  total: number;
+}
+
+export class Carts {
+  @IsDefined()
+  @Type(() => Cart)
+  @ValidateNested({ each: true })
+  carts: Cart[];
+
+  @IsInt()
+  total: number;
+}

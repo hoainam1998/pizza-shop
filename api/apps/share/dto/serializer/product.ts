@@ -1,6 +1,16 @@
 import { ProductPaginationResponse } from '@share/interfaces';
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
-import { IsArray, IsInt, IsNumberString, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsDefined,
+  IsInt,
+  IsNumberString,
+  IsObject,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { product } from 'generated/prisma';
 import Validator from './validator';
 
@@ -153,5 +163,42 @@ export class Products extends Validator {
 
   get List() {
     return this._list;
+  }
+}
+
+export class PaymentErrors {
+  @IsNumberString()
+  productId: string;
+
+  @IsArray()
+  messages: string[];
+
+  @IsString()
+  errorCode: string;
+
+  constructor(target: PaymentErrors) {
+    Object.assign(this, target);
+  }
+}
+
+export class BillErrors extends Validator {
+  @IsDefined()
+  @Type(() => PaymentErrors)
+  @ValidateNested({ each: true })
+  errors: PaymentErrors[];
+
+  @IsString()
+  @IsOptional()
+  totalErrorMessage: string | null;
+
+  @IsBoolean()
+  validateResult: boolean;
+
+  constructor(target: Omit<BillErrors, 'validate'>) {
+    super();
+    Object.assign(this, {
+      ...target,
+      errors: target.errors.map((error) => new PaymentErrors(error)),
+    });
   }
 }

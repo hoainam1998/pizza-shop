@@ -8,11 +8,19 @@ import {
   getProductsInCartPattern,
   updateProductPattern,
   deleteProductPattern,
+  paymentPattern,
+  validateProductsInCartPattern,
 } from '@share/pattern';
 import * as prisma from 'generated/prisma';
 import ProductService from './product.service';
-import { ProductCreate, ProductPagination } from '@share/dto/validators/product.dto';
-import type { ProductPaginationResponse, ProductSelectForSaleType, ProductSelectInCartType } from '@share/interfaces';
+import { ProductCreate, ProductPagination, Carts } from '@share/dto/validators/product.dto';
+import { BillErrors } from '@share/dto/serializer/product';
+import type {
+  ProductPaginationResponse,
+  ProductSelectForSaleType,
+  ProductSelectInCartType,
+  PaymentCreatePayloadType,
+} from '@share/interfaces';
 import { checkArrayHaveValues } from '@share/utils';
 import LoggingService from '@share/libs/logging/logging.service';
 import { HandleServiceError } from '@share/decorators';
@@ -95,5 +103,18 @@ export default class ProductController {
   @HandleServiceError
   deleteProduct(productId: string): Promise<prisma.product> {
     return this.productService.deleteProduct(productId);
+  }
+
+  @MessagePattern(validateProductsInCartPattern)
+  @HandleServiceError
+  validateProductsInCart(carts: Carts): Promise<Omit<BillErrors, 'validate'>> {
+    return this.productService.validateProductsInCart(carts.carts, carts.total);
+  }
+
+  @MessagePattern(paymentPattern)
+  @HandleServiceError
+  payment(paymentPayload: PaymentCreatePayloadType): Promise<Omit<BillErrors, 'validate'>> {
+    const { carts, total } = paymentPayload.bill;
+    return this.productService.payment(paymentPayload.userId, carts, total);
   }
 }
