@@ -30,6 +30,13 @@ export default {
       legend: {
         display: false,
       },
+      tooltip: {
+        callbacks: {
+          title: function (context: any) {
+            return `${context[0].label}h`;
+          },
+        },
+      },
     },
     scales: {
       x: {
@@ -52,7 +59,7 @@ export default {
             weight: 'bold',
           },
         },
-      }
+      },
     },
   },
 };

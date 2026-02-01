@@ -7,6 +7,6 @@ const router = createRouter({
   routes,
 });
 
-// router.beforeEach(guard);
+router.beforeEach(guard);
 
 export default router;

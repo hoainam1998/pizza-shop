@@ -11,11 +11,11 @@ import { onMounted, useTemplateRef, onBeforeUnmount, reactive } from 'vue';
 import ChartControl from '../chart-control/chart-control.vue';
 import Chart from 'chart.js/auto';
 import { ChartMode } from '@/enums';
-import type { SizeChartType } from '@/interfaces';
 import config from './config';
+import chartPropsValidator from '../props-validator';
 import { useSizeChart } from '@/composables';
 
-const size = defineProps<SizeChartType>();
+const size = defineProps(chartPropsValidator);
 const chartSize = useSizeChart(size);
 const ctx = useTemplateRef('revenue-chart');
 let chart: Chart | null = null;
