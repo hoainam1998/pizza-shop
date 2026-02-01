@@ -9,6 +9,7 @@ import Login from '@/views/login-group/login.vue';
 import ProductDetail from '@/views/admin/product-group/detail/detail.vue';
 import ProductList from '@/views/admin/product-group/list/list.vue';
 import IngredientList from '@/views/admin/ingredient-group/list/list.vue';
+import Report from '@/views/admin/report/report.vue';
 
 const adminRoutes: RouterOptions['routes'] = [
   {
@@ -71,6 +72,11 @@ const adminRoutes: RouterOptions['routes'] = [
           },
         ],
       },
+      {
+        path: `${paths.HOME.REPORT}`,
+        name: 'report',
+        component: Report,
+      },
     ],
   },
   {
@@ -82,6 +88,11 @@ const adminRoutes: RouterOptions['routes'] = [
     path: `${paths.RESET_PASSWORD}`,
     name: 'reset_password',
     component: ResetPassword,
+  },
+  {
+    path: `/${paths.HOME.REPORT}`,
+    name: 'report',
+    component: Report,
   },
 ];
 

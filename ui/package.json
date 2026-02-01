@@ -18,11 +18,13 @@
   "dependencies": {
     "@soda/friendly-errors-webpack-plugin": "^1.8.1",
     "axios": "^1.11.0",
+    "chart.js": "^4.5.1",
     "element-plus": "^2.11.1",
     "eslint-webpack-plugin": "^5.0.2",
     "mini-svg-data-uri": "^1.4.4",
     "node-notifier": "^10.0.1",
     "portfinder": "^1.0.37",
+    "socket.io-client": "^4.8.3",
     "style-loader": "^4.0.0",
     "vue": "^3.5.18",
     "vue-router": "^4.5.1"
