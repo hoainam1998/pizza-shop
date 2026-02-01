@@ -62,3 +62,8 @@ export type ClientCartItemType = {
   total: number;
   price: number;
 };
+
+export type SizeChartType = {
+  height?: string | number;
+  width?: string | number;
+};

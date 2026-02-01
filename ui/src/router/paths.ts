@@ -13,6 +13,7 @@ export default Object.freeze({
       NEW: new RouterPath('new'),
     }),
     CATEGORY: new RouterPath('category'),
+    REPORT: new RouterPath('report'),
   }),
   ID: new RouterPath(':id'),
   CART: new RouterPath('/cart'),

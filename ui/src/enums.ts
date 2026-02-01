@@ -16,3 +16,11 @@ export enum ERROR_PRODUCT_STATE {
   DISABLED_PRODUCT = 'DISABLED_PRODUCT',
   REFRESH_PRODUCT = 'REFRESH_PRODUCT',
 }
+
+export enum ChartMode {
+  HOUR = 'hour',
+  DAY = 'day',
+  MONTH = 'month',
+  QUARTER = 'quarter',
+  YEAR = 'year',
+}
