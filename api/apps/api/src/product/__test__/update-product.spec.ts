@@ -52,7 +52,7 @@ let clientProxy: ClientProxy;
 let close: () => Promise<void>;
 let productService: ProductService;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const requestTest = await startUp(MockProductModule);
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;

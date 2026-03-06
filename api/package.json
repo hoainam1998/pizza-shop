@@ -115,8 +115,7 @@
     "test:e2e:user.login": "jest --watch apps/api/src/user/__test__/login.spec.ts",
     "test:e2e:user.reset-password": "jest --watch apps/api/src/user/__test__/reset-password.spec.ts",
     "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./apps/api/apps/users/api/apps/modules/users/api/apps/apps/modules/socket/api/test/jest-e2e.json"
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.0.2",
@@ -200,8 +199,7 @@
       "<rootDir>/apps/share/test/pre-setup/test-run-setup.ts"
     ],
     "roots": [
-      "<rootDir>/apps",
-      "<rootDir>/apps/"
+      "<rootDir>/apps"
     ],
     "moduleNameMapper": {
       "^@share(|/.*)$": "<rootDir>/apps/share/$1",
