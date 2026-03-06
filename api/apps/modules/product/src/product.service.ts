@@ -1,24 +1,53 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { PRISMA_CLIENT } from '@share/di-token';
+import { ClientProxy } from '@nestjs/microservices';
+import { PRISMA_CLIENT, SOCKET_SERVICE } from '@share/di-token';
 import * as prisma from 'generated/prisma';
+import {
+  startOfMonth,
+  endOfMonth,
+  startOfQuarter,
+  endOfQuarter,
+  startOfYear,
+  endOfYear,
+  eachMonthOfInterval,
+  eachQuarterOfInterval,
+  eachDayOfInterval,
+  eachHourOfInterval,
+  sub,
+  add,
+  set,
+  endOfDay,
+} from 'date-fns';
 import {
   GetProductsInCart,
   ProductCreate,
   ProductPagination,
   ProductPaginationForSale,
   Cart,
+  ChartRequestPayload,
 } from '@share/dto/validators/product.dto';
 import { HandlePrismaError } from '@share/decorators';
-import { BillErrors } from '@share/dto/serializer/product';
-import { ProductPaginationPrismaResponse } from '@share/interfaces';
+import {
+  BillErrors,
+  BestSellingProductDataChartItem,
+  RevenueDataChart,
+  PurchaseVolumeDataChart,
+} from '@share/dto/serializer/product';
+import { ProductPaginationPrismaResponse, DataChartType } from '@share/interfaces';
 import { calcSkip } from '@share/utils';
 import messages from '@share/constants/messages';
 import IngredientCachingService from '@share/libs/caching/ingredient/ingredient.service';
 import SchedulerService from '@share/libs/scheduler/scheduler.service';
 import ProductCachingService from '@share/libs/caching/product/product.service';
 import ErrorCode from '@share/error-code';
+import { CHART_BY } from '@share/enums';
+import { action } from './chart-helper.helper';
+import { addDataChartEventPattern, refreshProductInfoPattern } from '@share/pattern';
 
 const billMessages = messages.BILL;
+
+type ActionFnType = (start: number, end: number, coreDate: DataChartType) => void;
+type StepFnType = (action: ActionFnType, startIndex?: number, coreData?: DataChartType) => DataChartType;
 
 @Injectable()
 export default class ProductService {
@@ -26,6 +55,7 @@ export default class ProductService {
 
   constructor(
     @Inject(PRISMA_CLIENT) private readonly prismaClient: prisma.PrismaClient,
+    @Inject(SOCKET_SERVICE) private readonly socketGateway: ClientProxy,
     private readonly ingredientCachingService: IngredientCachingService,
     private readonly productCachingService: ProductCachingService,
     private readonly schedulerService: SchedulerService,
@@ -220,7 +250,7 @@ export default class ProductService {
   }
 
   @HandlePrismaError(messages.PRODUCT)
-  updateProduct(product: ProductCreate): Promise<string[]> {
+  updateProduct(product: ProductCreate): Promise<prisma.product> {
     return this.prismaClient.product_ingredient
       .deleteMany({
         where: {
@@ -247,7 +277,9 @@ export default class ProductService {
           .then(async (product) => {
             this.updateProductStateWhenExpired(product, this.updateProduct.name);
             await this.ingredientCachingService.deleteAllProductIngredients(product.product_id);
-            return this.productCachingService.getVisitor(product.product_id);
+            const visitorIds = await this.productCachingService.getVisitor(product.product_id);
+            visitorIds.forEach((visitorId) => this.socketGateway.emit(refreshProductInfoPattern, visitorId));
+            return product;
           });
       });
   }
@@ -322,9 +354,11 @@ export default class ProductService {
     });
   }
 
-  private insertCartItemsToBill(userId: string, carts: Cart[], total: number): Promise<prisma.bill> {
+  private async insertCartItemsToBill(userId: string, carts: Cart[], total: number): Promise<prisma.bill> {
     const billId = Date.now().toString();
+    const productIds: string[] = [];
     const bills = carts.map((cart) => {
+      productIds.push(cart.productId);
       return {
         product_id: cart.productId,
         count: cart.quantity,
@@ -332,12 +366,33 @@ export default class ProductService {
       };
     });
 
+    const originPrice = await this.prismaClient.product
+      .findMany({
+        where: {
+          product_id: {
+            in: productIds,
+          },
+        },
+        select: {
+          original_price: true,
+          product_id: true,
+        },
+      })
+      .then((products) => {
+        return products.reduce((originPrice, product) => {
+          const quantity = carts.find((cart) => cart.productId === product.product_id)?.quantity || 0;
+          originPrice += product.original_price * quantity;
+          return originPrice;
+        }, 0);
+      });
+
     return this.prismaClient.bill.create({
       data: {
         bill_id: billId,
         user_id: userId,
+        capital: originPrice,
         complete_total: total,
-        created_at: Date.now().toString(),
+        created_at: billId,
         bill_detail: {
           createMany: {
             data: bills,
@@ -360,5 +415,336 @@ export default class ProductService {
       }
       return result;
     });
+  }
+
+  @HandlePrismaError(messages.PRODUCT)
+  loadDataBestSellingProductsChart(payload: ChartRequestPayload): Promise<BestSellingProductDataChartItem[]> {
+    const { time, by } = payload;
+    let timeRange: {
+      start?: string;
+      end?: string;
+    } = {};
+
+    const assignTimeRange = (startDate: Date, endDate: Date): void => {
+      timeRange = {
+        start: startDate.getTime().toString(),
+        end: endDate.getTime().toString(),
+      };
+    };
+
+    switch (by) {
+      case CHART_BY.DAY: {
+        const startDate = new Date(time);
+        const endDate = new Date(time);
+        startDate.setHours(7, 0, 0, 0);
+        endDate.setHours(23, 59, 0, 0);
+        assignTimeRange(startDate, endDate);
+        break;
+      }
+      case CHART_BY.MONTH: {
+        const selectedDate = new Date(time);
+        const startDateOfMonth = startOfMonth(selectedDate);
+        const endDateOfMonth = endOfMonth(selectedDate);
+        assignTimeRange(startDateOfMonth, endDateOfMonth);
+        break;
+      }
+      case CHART_BY.QUARTER: {
+        const selectedDate = new Date(time);
+        const startDateOfQuarter = startOfQuarter(selectedDate);
+        const endDateOfQuarter = endOfQuarter(selectedDate);
+        assignTimeRange(startDateOfQuarter, endDateOfQuarter);
+        break;
+      }
+      case CHART_BY.YEAR: {
+        const selectedDate = new Date(time);
+        const startDateOfYear = startOfYear(selectedDate);
+        const endDateOfYear = endOfYear(selectedDate);
+        assignTimeRange(startDateOfYear, endDateOfYear);
+        break;
+      }
+      default:
+        break;
+    }
+
+    return this.prismaClient.bill
+      .findMany({
+        where: {
+          created_at: {
+            gte: timeRange.start,
+            lt: timeRange.end,
+          },
+        },
+        select: {
+          bill_detail: {
+            select: {
+              product: {
+                select: {
+                  name: true,
+                },
+              },
+              product_id: true,
+              count: true,
+            },
+          },
+          created_at: true,
+        },
+      })
+      .then((bills) => {
+        return bills.reduce<BestSellingProductDataChartItem[]>((products, bill) => {
+          products = products.concat(
+            Array.from(
+              bill.bill_detail
+                .reduce((collect, productInBill) => {
+                  if (collect.has(productInBill.product_id)) {
+                    const item = collect.get(productInBill.product_id);
+                    item.count += productInBill.count;
+                    collect.set(productInBill.product_id, item);
+                  } else {
+                    collect.set(productInBill.product_id, {
+                      id: productInBill.product_id,
+                      name: productInBill.product.name,
+                      count: productInBill.count,
+                    });
+                  }
+                  return collect;
+                }, new Map())
+                .values(),
+            ).flat(),
+          );
+          return products;
+        }, []);
+      })
+      .then((products) => {
+        return Array.from(
+          products
+            .reduce((mergedCollection, product) => {
+              if (mergedCollection.has(product.id)) {
+                const item = mergedCollection.get(product.id);
+                item.count += product.count;
+                mergedCollection.set(product.id, item);
+              } else {
+                mergedCollection.set(product.id, product);
+              }
+              return mergedCollection;
+            }, new Map())
+            .values(),
+        ).flat();
+      });
+  }
+
+  @HandlePrismaError(messages.PRODUCT)
+  loadDataRevenueChart(payload: ChartRequestPayload): Promise<Omit<RevenueDataChart, 'validate'>> {
+    const { time, by } = payload;
+
+    function step(
+      action: ActionFnType,
+      startIndex: number = 0,
+      coreData: DataChartType = { revenue: [], capital: [], labels: [] },
+    ) {
+      const nextIndex = startIndex + 1;
+      if (nextIndex < this.range.length) {
+        const start: number = this.range[startIndex].getTime();
+        const next: number = this.range[nextIndex].getTime();
+        action(start, next, coreData);
+        this.step(action, nextIndex, coreData);
+        if (nextIndex === this.range.length - 1) {
+          action(next, +this.end, coreData);
+        }
+      }
+      return coreData;
+    }
+
+    const timeRange: {
+      start?: string;
+      end?: string;
+      range?: Date[];
+      step: StepFnType;
+    } = {
+      step,
+    };
+
+    const assignTimeRange = (start: Date, end: Date, range: Date[]): void => {
+      Object.assign(timeRange, {
+        start: start.getTime().toString(),
+        end: end.getTime().toString(),
+        range,
+      });
+    };
+
+    switch (by) {
+      case CHART_BY.DAY: {
+        const startDate = new Date(time);
+        const endDate = new Date(time);
+        startDate.setHours(7, 0, 0, 0);
+        endDate.setHours(23, 59, 0, 0);
+        const hoursInDay = eachHourOfInterval({ start: startDate, end: endDate });
+        assignTimeRange(startDate, endDate, hoursInDay);
+        break;
+      }
+      case CHART_BY.MONTH: {
+        const selectedDate = new Date(time);
+        const startDateOfMonth = startOfMonth(selectedDate);
+        const endDateOfMonth = endOfMonth(selectedDate);
+        const daysInMonth = eachDayOfInterval({ start: startDateOfMonth, end: endDateOfMonth });
+        assignTimeRange(startDateOfMonth, endDateOfMonth, daysInMonth);
+        break;
+      }
+      case CHART_BY.QUARTER: {
+        const selectedDate = new Date(time);
+        const startDateOfYear = startOfYear(selectedDate);
+        const endDateOfYear = endOfYear(selectedDate);
+        const quarters = eachQuarterOfInterval({ start: startDateOfYear, end: endDateOfYear });
+        assignTimeRange(startDateOfYear, endDateOfYear, quarters);
+        break;
+      }
+      case CHART_BY.YEAR: {
+        const selectedDate = new Date(time);
+        const startDateOfYear = startOfYear(selectedDate);
+        const endDateOfYear = endOfYear(selectedDate);
+        const monthsInYear = eachMonthOfInterval({ start: startDateOfYear, end: endDateOfYear });
+        assignTimeRange(startDateOfYear, endDateOfYear, monthsInYear);
+        break;
+      }
+      default:
+        break;
+    }
+
+    return this.prismaClient.bill
+      .findMany({
+        where: {
+          created_at: {
+            gte: timeRange.start,
+            lt: timeRange.end,
+          },
+        },
+        select: {
+          capital: true,
+          complete_total: true,
+          created_at: true,
+        },
+      })
+      .then((bills) => timeRange.step(action(bills, by)) as RevenueDataChart);
+  }
+
+  private getBillsAtSpecificTime(
+    start: number,
+    end: number,
+  ): Promise<Pick<prisma.bill, 'capital' | 'complete_total' | 'created_at'>[]> {
+    return this.prismaClient.bill.findMany({
+      where: {
+        created_at: {
+          gte: start.toString(),
+          lt: end.toString(),
+        },
+      },
+      select: {
+        capital: true,
+        complete_total: true,
+        created_at: true,
+      },
+    });
+  }
+
+  private loadDataPurchaseVolumeChartAtSpecificTime(timeline: number): Promise<void> {
+    const start = new Date(timeline);
+    const end = new Date(timeline);
+    start.setMinutes(0, 0, 0);
+    end.setMinutes(59, 59, 59);
+    const upperLimit = new Date();
+    upperLimit.setHours(23, 59, 59, 59);
+    const lowerLimit = new Date();
+    lowerLimit.setHours(7, 0, 0, 0);
+
+    if (timeline >= start.getTime() && timeline < end.getTime()) {
+      return this.getBillsAtSpecificTime(start.getTime(), end.getTime())
+        .then((bills) => {
+          return bills.reduce(
+            (data, bill) => {
+              data.revenue += bill.complete_total - bill.capital;
+              data.capital += bill.capital;
+              return data;
+            },
+            { revenue: 0, capital: 0 },
+          );
+        })
+        .then((payload) => {
+          this.socketGateway.emit(addDataChartEventPattern, payload);
+          const stepTime = set(add(start, { hours: 1 }), { minutes: 0, seconds: 0, milliseconds: 0 });
+          this.executeActionAtTimeline(stepTime.getTime());
+        });
+    }
+    return Promise.resolve();
+  }
+
+  private executeActionAtTimeline(timeline: number): void {
+    this.schedulerService.takeActionAtSpecificTime(
+      timeline,
+      () => this.loadDataPurchaseVolumeChartAtSpecificTime(timeline),
+      'adding_data_chart',
+      this.loadDataPurchaseVolumeChart.name,
+    );
+  }
+
+  @HandlePrismaError(messages.PRODUCT)
+  loadDataPurchaseVolumeChart(): Promise<Omit<PurchaseVolumeDataChart, 'validate'>> {
+    let end;
+    let start;
+    let executeTime: Date;
+    const current = new Date();
+    const limitTimestamp = set(new Date(), { hours: 23, minutes: 0, seconds: 0, milliseconds: 0 }).getTime();
+    const minimumTimestamp = set(new Date(), { hours: 7, minutes: 0, seconds: 0, milliseconds: 0 }).getTime();
+    const currentTimestamp = current.getTime();
+
+    if (current.getTime() <= limitTimestamp) {
+      if (currentTimestamp <= minimumTimestamp) {
+        start = sub(new Date(), { days: 1 });
+        start.setHours(7, 0, 0, 0);
+        end = sub(new Date(), { days: 1 });
+        end.setHours(23, 59, 59, 59);
+      } else {
+        start = new Date();
+        start.setHours(7, 0, 0, 0);
+        end = new Date();
+        end.setMinutes(59, 59, 59);
+        executeTime = set(add(new Date(), { hours: 1 }), { minutes: 0, seconds: 0, milliseconds: 0 });
+      }
+    } else {
+      const endOfDayTimestamp = endOfDay(current).getTime();
+      if (current.getTime() <= endOfDayTimestamp) {
+        end = set(new Date(), { hours: 23, minutes: 59, seconds: 59, milliseconds: 59 });
+        start = set(new Date(), { hours: 7, minutes: 0, seconds: 0, milliseconds: 0 });
+      } else {
+        end = set(sub(new Date(), { days: 1 }), { hours: 23, minutes: 59, seconds: 59, milliseconds: 59 });
+        start = set(sub(new Date(), { days: 1 }), { hours: 7, minutes: 0, seconds: 0, milliseconds: 0 });
+      }
+    }
+
+    function step(
+      action: ActionFnType,
+      range: Date[],
+      startIndex: number = 0,
+      coreData: DataChartType = { revenue: [], capital: [] },
+    ) {
+      const nextIndex = startIndex + 1;
+      if (nextIndex < range.length) {
+        const start: number = range[startIndex].getTime();
+        const next: number = range[nextIndex].getTime();
+        action(start, next, coreData);
+        step(action, range, nextIndex, coreData);
+      }
+      return coreData;
+    }
+
+    return this.getBillsAtSpecificTime(start.getTime(), end.getTime())
+      .then((bills) => {
+        const hours = eachHourOfInterval({ start, end });
+        return step(action(bills), hours);
+      })
+      .then((result) => {
+        if (executeTime) {
+          this.executeActionAtTimeline(executeTime.getTime());
+        }
+        return { ...result, targetTime: start.getTime() } as PurchaseVolumeDataChart;
+      });
   }
 }

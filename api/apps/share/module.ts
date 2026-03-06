@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import EnvironmentConfigModule from './environment-config/environment-config.module';
 import SendEmailModule from './libs/mailer/mailer.module';
 import CachingModule from './libs/caching/caching.module';
@@ -6,6 +6,7 @@ import LoggingModule from './libs/logging/logging.module';
 import SchedulerModule from './libs/scheduler/scheduler.module';
 import { redisClient, prismaClient } from './providers';
 
+@Global()
 @Module({
   imports: [
     EnvironmentConfigModule,

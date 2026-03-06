@@ -7,6 +7,7 @@ jest.mock('cron', () => {
         globalThis.cronJob = this;
       }
       start = jest.fn();
+      setTime = jest.fn();
     },
     CronTime: class extends actualCron.CronTime {},
   };

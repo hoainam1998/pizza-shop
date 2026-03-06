@@ -3,7 +3,6 @@ import { of, throwError } from 'rxjs';
 import { UserRouter } from '@share/router';
 import TestAgent from 'supertest/lib/agent';
 import { ClientProxy } from '@nestjs/microservices';
-import UserModule from '../user.module';
 import UserService from '../user.service';
 import startUp from './pre-setup';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
@@ -29,7 +28,7 @@ const requestBody = {
 };
 
 beforeEach(async () => {
-  const requestTest = await startUp(UserModule);
+  const requestTest = await startUp();
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;
   close = () => requestTest.app.close();

@@ -8,7 +8,6 @@ import ShareModule from '@share/module';
 import CategoryModule from './category/category.module';
 import UserModule from './user/user.module';
 import AuthGuard from '@share/guards/auth.service';
-import EventsModule from '@share/libs/socket/event-socket.module';
 
 @Module({
   imports: [
@@ -17,7 +16,6 @@ import EventsModule from '@share/libs/socket/event-socket.module';
     UserModule,
     IngredientModule,
     ProductModule,
-    EventsModule,
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => [

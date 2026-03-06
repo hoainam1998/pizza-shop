@@ -4,7 +4,6 @@ import IngredientController from './ingredient.controller';
 import { ClientProvider, ClientsModule, Transport } from '@nestjs/microservices';
 import { INGREDIENT_SERVICE } from '@share/di-token';
 import { ConfigService } from '@nestjs/config';
-import ShareModule from '@share/module';
 import LoggingModule from '@share/libs/logging/logging.module';
 
 @Module({
@@ -23,7 +22,6 @@ import LoggingModule from '@share/libs/logging/logging.module';
         name: INGREDIENT_SERVICE,
       },
     ]),
-    ShareModule,
     LoggingModule,
   ],
   providers: [IngredientService],

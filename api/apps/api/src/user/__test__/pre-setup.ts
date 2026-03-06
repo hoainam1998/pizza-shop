@@ -9,10 +9,11 @@ import RedisClient from '@share/libs/redis-client/redis';
 import { HttpExceptionFilter } from '@share/exception-filter';
 import { GlobalValidatePipe } from '@share/pipes';
 import sessionConfig from '@share/session-config';
+import ShareModule from '@share/module';
 
 const startUp = async (module = UserModule) => {
   const moduleFixture: TestingModule = await Test.createTestingModule({
-    imports: [module],
+    imports: [module, ShareModule],
   })
     .overrideProvider(USER_SERVICE)
     .useValue({

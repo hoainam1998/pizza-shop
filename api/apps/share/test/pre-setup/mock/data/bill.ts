@@ -2,6 +2,7 @@ import { Status } from 'generated/prisma';
 import messages from '@share/constants/messages';
 import ErrorCode from '@share/error-code';
 import { user } from '@share/test/pre-setup/mock/data/user';
+import { createProductList } from '@share/test/pre-setup/mock/data/product';
 
 export const total = 10000;
 
@@ -120,13 +121,6 @@ export const errorObjectWithValidateOk = {
   validateResult: true,
 };
 
-export const bill = {
-  bill_id: Date.now().toString(),
-  user_id: user.user_id,
-  complete_total: 100000,
-  created_at: Date.now().toString(),
-};
-
 export const billDetail = carts.map((cart) => {
   return {
     product_id: cart.productId,
@@ -134,3 +128,18 @@ export const billDetail = carts.map((cart) => {
     total: cart.total,
   };
 });
+
+export const productsInBill = createProductList(carts.length);
+
+const capital = carts.reduce<number>((capital, cart, index) => {
+  capital += cart.quantity * productsInBill[index].original_price;
+  return capital;
+}, 0);
+
+export const bill = {
+  bill_id: Date.now().toString(),
+  user_id: user.user_id,
+  complete_total: 100000,
+  capital,
+  created_at: Date.now().toString(),
+};

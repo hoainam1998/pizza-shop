@@ -11,6 +11,7 @@ import { GlobalValidatePipe } from '@share/pipes';
 import sessionConfig from '@share/session-config';
 import RedisClient from '@share/libs/redis-client/redis';
 import AuthGuard from '@share/guards/auth.service';
+import { redisClient as redisClientProvider } from '@share/providers';
 
 const startUp = async (module = ProductModule) => {
   const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -20,6 +21,7 @@ const startUp = async (module = ProductModule) => {
         provide: APP_GUARD,
         useClass: AuthGuard,
       },
+      redisClientProvider,
     ],
   })
     .overrideProvider(PRODUCT_SERVICE)

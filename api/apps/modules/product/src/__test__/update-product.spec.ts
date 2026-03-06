@@ -1,19 +1,20 @@
 import { PrismaClient } from 'generated/prisma';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { PrismaDisconnectError, PrismaNotFoundError } from '@share/test/pre-setup/mock/errors/prisma-errors';
-import { RpcException } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import startUp from './pre-setup';
 import ProductController from '../product.controller';
 import ProductService from '../product.service';
 import { product } from '@share/test/pre-setup/mock/data/product';
 import { user } from '@share/test/pre-setup/mock/data/user';
-import { PRISMA_CLIENT } from '@share/di-token';
+import { PRISMA_CLIENT, SOCKET_SERVICE } from '@share/di-token';
 import LoggingService from '@share/libs/logging/logging.service';
 import { createMessage } from '@share/utils';
 import messages from '@share/constants/messages';
 import ProductCachingService from '@share/libs/caching/product/product.service';
 import IngredientCachingService from '@share/libs/caching/ingredient/ingredient.service';
+import { refreshProductInfoPattern } from '@share/pattern';
 
 const userIds = [user.user_id];
 let productController: ProductController;
@@ -22,6 +23,9 @@ let prismaService: PrismaClient;
 let loggerService: LoggingService;
 let ingredientCachingService: IngredientCachingService;
 let productCachingService: ProductCachingService;
+let clientProxy: ClientProxy;
+
+const emitMockParameters = userIds.map((userId) => [refreshProductInfoPattern, userId]);
 
 beforeEach(async () => {
   const moduleRef = await startUp();
@@ -32,11 +36,13 @@ beforeEach(async () => {
   prismaService = moduleRef.get(PRISMA_CLIENT);
   ingredientCachingService = moduleRef.get(IngredientCachingService);
   productCachingService = moduleRef.get(ProductCachingService);
+  clientProxy = moduleRef.get(SOCKET_SERVICE);
 });
 
 describe('update product', () => {
   it('update product was success', async () => {
     expect.hasAssertions();
+    const emit = jest.spyOn(clientProxy, 'emit').mockImplementation(jest.fn());
     const deleteAllProductIngredients = jest
       .spyOn(ingredientCachingService, 'deleteAllProductIngredients')
       .mockResolvedValue(1);
@@ -48,7 +54,7 @@ describe('update product', () => {
     const updatePrismaMethod = jest.spyOn(prismaService.product, 'update').mockResolvedValue(product);
     const updateMethodService = jest.spyOn(productService, 'updateProduct');
     const updateMethodController = jest.spyOn(productController, 'updateProduct');
-    await expect(productController.updateProduct(product)).resolves.toBe(userIds);
+    await expect(productController.updateProduct(product)).resolves.toBe(product);
     expect(updateMethodController).toHaveBeenCalledTimes(1);
     expect(updateMethodController).toHaveBeenCalledWith(product);
     expect(updateMethodService).toHaveBeenCalledTimes(1);
@@ -81,10 +87,13 @@ describe('update product', () => {
     expect(deleteAllProductIngredients).toHaveBeenCalledWith(product.product_id);
     expect(getVisitor).toHaveBeenCalledTimes(1);
     expect(getVisitor).toHaveBeenCalledWith(product.product_id);
+    expect(emit).toHaveBeenCalledTimes(userIds.length);
+    expect(emit.mock.calls).toEqual(emitMockParameters);
   });
 
   it('update product failed with deleteIngredient got not found error', async () => {
     expect.hasAssertions();
+    const emit = jest.spyOn(clientProxy, 'emit').mockImplementation(jest.fn());
     const getVisitor = jest.spyOn(productCachingService, 'getVisitor');
     const deleteAllProductIngredients = jest.spyOn(ingredientCachingService, 'deleteAllProductIngredients');
     const updateProductStateWhenExpired = jest.spyOn(productService as any, 'updateProductStateWhenExpired');
@@ -111,10 +120,12 @@ describe('update product', () => {
     expect(updateProductStateWhenExpired).not.toHaveBeenCalled();
     expect(deleteAllProductIngredients).not.toHaveBeenCalled();
     expect(getVisitor).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
   });
 
   it('update product failed with updateMethod got not found error', async () => {
     expect.hasAssertions();
+    const emit = jest.spyOn(clientProxy, 'emit').mockImplementation(jest.fn());
     const getVisitor = jest.spyOn(productCachingService, 'getVisitor');
     const deleteAllProductIngredients = jest.spyOn(ingredientCachingService, 'deleteAllProductIngredients');
     const updateProductStateWhenExpired = jest.spyOn(productService as any, 'updateProductStateWhenExpired');
@@ -156,10 +167,12 @@ describe('update product', () => {
     expect(updateProductStateWhenExpired).not.toHaveBeenCalled();
     expect(deleteAllProductIngredients).not.toHaveBeenCalled();
     expect(getVisitor).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
   });
 
   it('update product failed with deleteIngredient got unknown error', async () => {
     expect.hasAssertions();
+    const emit = jest.spyOn(clientProxy, 'emit').mockImplementation(jest.fn());
     const logMethod = jest.spyOn(loggerService, 'error');
     const deleteAllProductIngredients = jest.spyOn(ingredientCachingService, 'deleteAllProductIngredients');
     const getVisitor = jest.spyOn(productCachingService, 'getVisitor');
@@ -189,10 +202,12 @@ describe('update product', () => {
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
     expect(deleteAllProductIngredients).not.toHaveBeenCalled();
     expect(getVisitor).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
   });
 
   it('update product failed with update got unknown error', async () => {
     expect.hasAssertions();
+    const emit = jest.spyOn(clientProxy, 'emit').mockImplementation(jest.fn());
     const logMethod = jest.spyOn(loggerService, 'error');
     const deleteAllProductIngredients = jest.spyOn(ingredientCachingService, 'deleteAllProductIngredients');
     const getVisitor = jest.spyOn(productCachingService, 'getVisitor');
@@ -237,10 +252,12 @@ describe('update product', () => {
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
     expect(deleteAllProductIngredients).not.toHaveBeenCalled();
     expect(getVisitor).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
   });
 
   it('update product failed with database disconnect error', async () => {
     expect.hasAssertions();
+    const emit = jest.spyOn(clientProxy, 'emit').mockImplementation(jest.fn());
     const logMethod = jest.spyOn(loggerService, 'error');
     const deleteAllProductIngredients = jest.spyOn(ingredientCachingService, 'deleteAllProductIngredients');
     const getVisitor = jest.spyOn(productCachingService, 'getVisitor');
@@ -270,5 +287,6 @@ describe('update product', () => {
     expect(getVisitor).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledWith(PrismaDisconnectError.message, expect.any(String));
+    expect(emit).not.toHaveBeenCalled();
   });
 });

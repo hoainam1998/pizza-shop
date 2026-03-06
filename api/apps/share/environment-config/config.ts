@@ -11,6 +11,8 @@ export const portConfig = registerAs('ports', () => ({
   CATEGORY_MICROSERVICE_TCP_PORT: process.env.CATEGORY_MICROSERVICE_TCP_PORT,
   INGREDIENT_MICROSERVICE_TCP_PORT: process.env.INGREDIENT_MICROSERVICE_TCP_PORT,
   PRODUCT_MICROSERVICE_TCP_PORT: process.env.PRODUCT_MICROSERVICE_TCP_PORT,
+  SOCKET_MICROSERVICE_TCP_PORT: process.env.SOCKET_MICROSERVICE_TCP_PORT,
+  SOCKET_PORT: process.env.SOCKET_PORT,
 }));
 
 export const emailConfig = registerAs('mail', () => ({
@@ -27,4 +29,9 @@ export const throttleConfig = registerAs('throttle', () => ({
 
 export const sessionConfig = registerAs('session', () => ({
   SESSION_EXPIRES: process.env.SESSION_EXPIRES,
+}));
+
+export const socketConfig = registerAs('socket', () => ({
+  SOCKET_PING_INTERVAL: process.env.SOCKET_PING_INTERVAL,
+  SOCKET_PING_TIMEOUT: process.env.SOCKET_PING_TIMEOUT,
 }));

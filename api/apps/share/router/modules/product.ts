@@ -22,6 +22,9 @@ export default class ProductRouter extends RouterBase {
     ProductRouter.createRouterPath('payment');
     ProductRouter.createRouterPath('detail');
     ProductRouter.createRouterPath('delete', ':id');
+    ProductRouter.createRouterPath('load-data-best-selling-products-chart');
+    ProductRouter.createRouterPath('load-data-revenue-chart');
+    ProductRouter.createRouterPath('load-data-purchase-volume-chart');
   }
 }
 
