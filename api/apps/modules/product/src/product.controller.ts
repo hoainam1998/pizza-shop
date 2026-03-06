@@ -10,11 +10,19 @@ import {
   deleteProductPattern,
   paymentPattern,
   validateProductsInCartPattern,
+  loadDataBestSellingProductsChartPattern,
+  loadDataRevenueChartPattern,
+  loadDataPurchaseVolumeChartPattern,
 } from '@share/pattern';
 import * as prisma from 'generated/prisma';
 import ProductService from './product.service';
-import { ProductCreate, ProductPagination, Carts } from '@share/dto/validators/product.dto';
-import { BillErrors } from '@share/dto/serializer/product';
+import { ProductCreate, ProductPagination, Carts, ChartRequestPayload } from '@share/dto/validators/product.dto';
+import {
+  BillErrors,
+  BestSellingProductDataChartItem,
+  RevenueDataChart,
+  PurchaseVolumeDataChart,
+} from '@share/dto/serializer/product';
 import type {
   ProductPaginationResponse,
   ProductSelectForSaleType,
@@ -95,7 +103,7 @@ export default class ProductController {
 
   @MessagePattern(updateProductPattern)
   @HandleServiceError
-  updateProduct(product: ProductCreate): Promise<string[]> {
+  updateProduct(product: ProductCreate): Promise<prisma.product> {
     return this.productService.updateProduct(product);
   }
 
@@ -116,5 +124,23 @@ export default class ProductController {
   payment(paymentPayload: PaymentCreatePayloadType): Promise<Omit<BillErrors, 'validate'>> {
     const { carts, total } = paymentPayload.bill;
     return this.productService.payment(paymentPayload.userId, carts, total);
+  }
+
+  @MessagePattern(loadDataBestSellingProductsChartPattern)
+  @HandleServiceError
+  loadDataBestSellingProductsChart(payload: ChartRequestPayload): Promise<BestSellingProductDataChartItem[]> {
+    return this.productService.loadDataBestSellingProductsChart(payload);
+  }
+
+  @MessagePattern(loadDataRevenueChartPattern)
+  @HandleServiceError
+  loadDataRevenueChart(payload: ChartRequestPayload): Promise<Omit<RevenueDataChart, 'validate'>> {
+    return this.productService.loadDataRevenueChart(payload);
+  }
+
+  @MessagePattern(loadDataPurchaseVolumeChartPattern)
+  @HandleServiceError
+  loadDataPurchaseVolumeChart(): Promise<Omit<PurchaseVolumeDataChart, 'validate'>> {
+    return this.productService.loadDataPurchaseVolumeChart();
   }
 }

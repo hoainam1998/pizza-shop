@@ -24,7 +24,6 @@ import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-
 import { ProductCreate, ProductCreateTransform } from '@share/dto/validators/product.dto';
 import { createMessages } from '@share/utils';
 import { ProductRouter } from '@share/router';
-import { EventsGateway } from '@share/libs/socket/event-socket.gateway';
 const updateProductUrl = ProductRouter.absolute.update;
 
 const MockProductModule = getMockModule(ProductModule, { path: updateProductUrl, method: RequestMethod.PUT });
@@ -52,7 +51,6 @@ let api: TestAgent;
 let clientProxy: ClientProxy;
 let close: () => Promise<void>;
 let productService: ProductService;
-let socketGateway: EventsGateway;
 
 beforeEach(async () => {
   const requestTest = await startUp(MockProductModule);
@@ -60,7 +58,6 @@ beforeEach(async () => {
   clientProxy = requestTest.clientProxy;
   close = () => requestTest.app.close();
   productService = requestTest.app.get(ProductService);
-  socketGateway = requestTest.app.get(EventsGateway);
 });
 
 afterEach(async () => {
@@ -74,7 +71,6 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(userIds));
     const updateProduct = jest.spyOn(productService, 'updateProduct');
-    const refreshCurrentInfo = jest.spyOn(socketGateway, 'refreshCurrentInfo').mockImplementation(jest.fn());
     await api
       .put(updateProductUrl)
       .set('mock-session', JSON.stringify(sessionPayload))
@@ -92,8 +88,6 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
       .expect(createMessages(messages.PRODUCT.UPDATE_PRODUCT_SUCCESS));
     expect(updateProduct).toHaveBeenCalledTimes(1);
     expect(updateProduct).toHaveBeenCalledWith(productUpdate);
-    expect(refreshCurrentInfo).toHaveBeenCalledTimes(userIds.length);
-    expect(refreshCurrentInfo.mock.calls).toEqual([userIds]);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(updateProductPattern, productUpdate);
   });
@@ -101,7 +95,6 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
   it(createTestName('update product failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(userIds));
-    const refreshCurrentInfo = jest.spyOn(socketGateway, 'refreshCurrentInfo');
     const updateProduct = jest.spyOn(productService, 'updateProduct');
     await api
       .put(updateProductUrl)
@@ -120,14 +113,12 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
       .expect(createMessages(messages.USER.DID_NOT_LOGIN));
     expect(updateProduct).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
-    expect(refreshCurrentInfo).not.toHaveBeenCalled();
   });
 
   it(createTestName('update product failed with undefined field', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
     const updateProduct = jest.spyOn(productService, 'updateProduct');
-    const refreshCurrentInfo = jest.spyOn(socketGateway, 'refreshCurrentInfo');
     const response = await api
       .put(updateProductUrl)
       .set('mock-session', JSON.stringify(sessionPayload))
@@ -146,13 +137,11 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     expect(response.body).toEqual(createMessages(expect.any(String)));
     expect(updateProduct).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
-    expect(refreshCurrentInfo).not.toHaveBeenCalled();
   });
 
   it(createTestName('update product failed with count field is zero value', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
-    const refreshCurrentInfo = jest.spyOn(socketGateway, 'refreshCurrentInfo');
     const updateProduct = jest.spyOn(productService, 'updateProduct');
     const response = await api
       .put(updateProductUrl)
@@ -171,13 +160,11 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     expect(response.body).toEqual(createMessages('count must be a positive number'));
     expect(updateProduct).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
-    expect(refreshCurrentInfo).not.toHaveBeenCalled();
   });
 
   it(createTestName('update product failed with price field is zero value', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
-    const refreshCurrentInfo = jest.spyOn(socketGateway, 'refreshCurrentInfo');
     const updateProduct = jest.spyOn(productService, 'updateProduct');
     const response = await api
       .put(updateProductUrl)
@@ -196,7 +183,6 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     expect(response.body).toEqual(createMessages('price must be a positive number'));
     expect(updateProduct).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
-    expect(refreshCurrentInfo).not.toHaveBeenCalled();
   });
 
   it(
@@ -205,7 +191,6 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
       expect.hasAssertions();
       const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
       const updateProduct = jest.spyOn(productService, 'updateProduct');
-      const refreshCurrentInfo = jest.spyOn(socketGateway, 'refreshCurrentInfo');
       const response = await api
         .put(updateProductUrl)
         .set('mock-session', JSON.stringify(sessionPayload))
@@ -223,7 +208,6 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
       expect(response.body).toEqual(createMessages('originalPrice must be a positive number'));
       expect(updateProduct).not.toHaveBeenCalled();
       expect(send).not.toHaveBeenCalled();
-      expect(refreshCurrentInfo).not.toHaveBeenCalled();
     },
   );
 
@@ -231,7 +215,6 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
     const updateProduct = jest.spyOn(productService, 'updateProduct');
-    const refreshCurrentInfo = jest.spyOn(socketGateway, 'refreshCurrentInfo');
     await api
       .put(updateProductUrl)
       .set('mock-session', JSON.stringify(sessionPayload))
@@ -251,7 +234,6 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     expect(updateProduct).toHaveBeenCalledWith(productUpdate);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(updateProductPattern, productUpdate);
-    expect(refreshCurrentInfo).not.toHaveBeenCalled();
   });
 
   it(createTestName('update product failed with not found error', HttpStatus.NOT_FOUND), async () => {
@@ -259,7 +241,6 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     const send = jest
       .spyOn(clientProxy, 'send')
       .mockReturnValue(throwError(() => new NotFoundException(messages.PRODUCT.NOT_FOUND)));
-    const refreshCurrentInfo = jest.spyOn(socketGateway, 'refreshCurrentInfo');
     const updateProduct = jest.spyOn(productService, 'updateProduct');
     await api
       .put(updateProductUrl)
@@ -280,7 +261,6 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     expect(updateProduct).toHaveBeenCalledWith(productUpdate);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(updateProductPattern, productUpdate);
-    expect(refreshCurrentInfo).not.toHaveBeenCalled();
   });
 
   it(createTestName('update product failed with avatar empty', HttpStatus.BAD_REQUEST), async () => {
@@ -288,7 +268,6 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     const errorMessage = messages.COMMON.EMPTY_FILE.replace(/{fieldname}/, 'avatar');
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
     const updateProduct = jest.spyOn(productService, 'updateProduct');
-    const refreshCurrentInfo = jest.spyOn(socketGateway, 'refreshCurrentInfo');
     await api
       .put(updateProductUrl)
       .set('mock-session', JSON.stringify(sessionPayload))
@@ -306,14 +285,12 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
       .expect(createMessages(errorMessage));
     expect(updateProduct).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
-    expect(refreshCurrentInfo).not.toHaveBeenCalled();
   });
 
   it(createTestName('update product failed with avatar wrong type', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
     const updateProduct = jest.spyOn(productService, 'updateProduct');
-    const refreshCurrentInfo = jest.spyOn(socketGateway, 'refreshCurrentInfo');
     await api
       .put(updateProductUrl)
       .set('mock-session', JSON.stringify(sessionPayload))
@@ -331,14 +308,12 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
       .expect(createMessages(messages.COMMON.FILE_TYPE_INVALID));
     expect(updateProduct).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
-    expect(refreshCurrentInfo).not.toHaveBeenCalled();
   });
 
   it(createTestName('update product failed with missing avatar field', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
     const updateProduct = jest.spyOn(productService, 'updateProduct');
-    const refreshCurrentInfo = jest.spyOn(socketGateway, 'refreshCurrentInfo');
     const response = await api
       .put(updateProductUrl)
       .set('mock-session', JSON.stringify(sessionPayload))
@@ -355,13 +330,11 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     expect(response.body).toEqual(createMessages(expect.any(String)));
     expect(updateProduct).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
-    expect(refreshCurrentInfo).not.toHaveBeenCalled();
   });
 
   it(createTestName('update product failed with missing productId field', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(product));
-    const refreshCurrentInfo = jest.spyOn(socketGateway, 'refreshCurrentInfo');
     const updateProduct = jest.spyOn(productService, 'updateProduct');
     const response = await api
       .put(updateProductUrl)
@@ -379,7 +352,6 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     expect(response.body).toEqual({ messages: expect.any(Array) });
     expect(updateProduct).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
-    expect(refreshCurrentInfo).not.toHaveBeenCalled();
   });
 
   it(createTestName('update product failed with database disconnect', HttpStatus.BAD_REQUEST), async () => {
@@ -387,7 +359,6 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     const send = jest
       .spyOn(clientProxy, 'send')
       .mockReturnValue(throwError(() => new BadRequestException(PrismaDisconnectError.message)));
-    const refreshCurrentInfo = jest.spyOn(socketGateway, 'refreshCurrentInfo');
     const updateProduct = jest.spyOn(productService, 'updateProduct');
     await api
       .put(updateProductUrl)
@@ -408,14 +379,12 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     expect(updateProduct).toHaveBeenCalledWith(productUpdate);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(updateProductPattern, productUpdate);
-    expect(refreshCurrentInfo).not.toHaveBeenCalled();
   });
 
   it(createTestName('update product failed with server error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
     const serverError = new InternalServerErrorException();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => serverError));
-    const refreshCurrentInfo = jest.spyOn(socketGateway, 'refreshCurrentInfo');
     const updateProduct = jest.spyOn(productService, 'updateProduct');
     await api
       .put(updateProductUrl)
@@ -436,6 +405,5 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateProductUrl), () => {
     expect(updateProduct).toHaveBeenCalledWith(productUpdate);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(updateProductPattern, productUpdate);
-    expect(refreshCurrentInfo).not.toHaveBeenCalled();
   });
 });

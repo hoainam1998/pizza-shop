@@ -34,3 +34,10 @@ export const paginationForSalePattern = createMicroserviceEvent('pagination_for_
 export const getProductsInCartPattern = createMicroserviceEvent('get_products_in_cart');
 export const validateProductsInCartPattern = createMicroserviceEvent('validate_products_in_cart');
 export const paymentPattern = createMicroserviceEvent('payment');
+export const loadDataBestSellingProductsChartPattern = createMicroserviceEvent('load_data_best_selling_products_chart');
+export const loadDataRevenueChartPattern = createMicroserviceEvent('load_data_revenue_chart');
+export const loadDataPurchaseVolumeChartPattern = createMicroserviceEvent('load_data_purchase_volume_chart');
+
+// socket
+export const addDataChartEventPattern = 'add_data_chart';
+export const refreshProductInfoPattern = 'refresh_product_info';

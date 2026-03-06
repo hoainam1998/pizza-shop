@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { databaseConfig, portConfig, emailConfig, throttleConfig, sessionConfig } from './config';
+import { databaseConfig, portConfig, emailConfig, throttleConfig, sessionConfig, socketConfig } from './config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      load: [databaseConfig, portConfig, emailConfig, throttleConfig, sessionConfig],
+      load: [databaseConfig, portConfig, emailConfig, throttleConfig, sessionConfig, socketConfig],
       isGlobal: true,
     }),
   ],

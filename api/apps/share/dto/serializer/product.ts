@@ -202,3 +202,65 @@ export class BillErrors extends Validator {
     });
   }
 }
+
+export class BestSellingProductDataChartItem {
+  @IsDefined()
+  @IsString()
+  name: string;
+
+  @IsDefined()
+  @IsInt()
+  count: number;
+
+  @Exclude({ toPlainOnly: true })
+  @IsDefined()
+  @IsString()
+  id: string;
+
+  constructor(target: BestSellingProductDataChartItem) {
+    Object.assign(this, target);
+  }
+}
+
+export class BestSellingProductDataChart extends Validator {
+  @IsDefined()
+  @IsArray()
+  @Type(() => BestSellingProductDataChartItem)
+  @ValidateNested({ each: true })
+  list: BestSellingProductDataChartItem[];
+
+  constructor(dataChart: BestSellingProductDataChartItem[]) {
+    super();
+    Object.assign(this, { list: dataChart.map((item) => new BestSellingProductDataChartItem(item)) });
+  }
+}
+
+export class RevenueDataChart extends Validator {
+  @IsDefined()
+  @IsArray()
+  revenue: number[];
+
+  @IsDefined()
+  @IsArray()
+  capital: number[];
+
+  @IsOptional()
+  @IsArray()
+  labels: string[];
+
+  constructor(target: Omit<RevenueDataChart, 'validate'>) {
+    super();
+    Object.assign(this, target);
+  }
+}
+
+export class PurchaseVolumeDataChart extends RevenueDataChart {
+  @IsDefined()
+  @IsInt()
+  targetTime: number;
+
+  constructor(target: Omit<RevenueDataChart, 'validate'>) {
+    super(target);
+    Object.assign(this, target);
+  }
+}

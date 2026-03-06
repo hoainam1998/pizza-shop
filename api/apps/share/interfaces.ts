@@ -1,6 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import { user, category, product, ingredient } from 'generated/prisma';
 import { Carts, GetProductsInCart, ProductPagination } from './dto/validators/product.dto';
+import { VIEW } from './enums';
 
 export type CategoryBodyType = category & {
   disabled?: boolean;
@@ -107,4 +108,20 @@ export type ProductSelectInCartType = {
 export type PaymentCreatePayloadType = {
   bill: Carts;
   userId: string;
+};
+
+export type DataChartType = {
+  revenue: number[];
+  capital: number[];
+  labels?: string[];
+};
+
+export type DataChartAddedType = {
+  revenue: number;
+  capital: number;
+};
+
+export type ConnectedPayloadType = {
+  userId: string;
+  view: VIEW;
 };

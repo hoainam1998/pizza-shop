@@ -27,8 +27,17 @@ import {
   ProductPaginationForSale,
   GetProductsInCart,
   Carts,
+  ChartRequestPayload,
 } from '@share/dto/validators/product.dto';
-import { PaginationProductSerializer, Products, ProductSerializer, BillErrors } from '@share/dto/serializer/product';
+import {
+  PaginationProductSerializer,
+  Products,
+  ProductSerializer,
+  BillErrors,
+  BestSellingProductDataChart,
+  RevenueDataChart,
+  PurchaseVolumeDataChart,
+} from '@share/dto/serializer/product';
 import { IdValidationPipe, ImageTransformPipe } from '@share/pipes';
 import ProductService from './product.service';
 import { MessageSerializer } from '@share/dto/serializer/common';
@@ -37,7 +46,6 @@ import LoggingService from '@share/libs/logging/logging.service';
 import BaseController from '../controller';
 import { ProductRouter } from '@share/router';
 import { ProductPaginationResponse } from '@share/interfaces';
-import { EventsGateway } from '@share/libs/socket/event-socket.gateway';
 import { SkipThrottle } from '@nestjs/throttler';
 import { createMessage } from '@share/utils';
 
@@ -46,7 +54,6 @@ export default class ProductController extends BaseController {
   constructor(
     private readonly productService: ProductService,
     private readonly loggingService: LoggingService,
-    private readonly socketEventGateway: EventsGateway,
   ) {
     super(loggingService, 'product');
   }
@@ -167,14 +174,9 @@ export default class ProductController extends BaseController {
   ): Observable<MessageSerializer> {
     product.avatar = avatar;
     const productUpdate = instanceToPlain(plainToInstance(ProductCreateTransform, product));
-    return this.productService.updateProduct(productUpdate).pipe(
-      map((userIds) => {
-        userIds.forEach((userId) => {
-          this.socketEventGateway.refreshCurrentInfo(userId);
-        });
-        return MessageSerializer.create(messages.PRODUCT.UPDATE_PRODUCT_SUCCESS);
-      }),
-    );
+    return this.productService
+      .updateProduct(productUpdate)
+      .pipe(map(() => MessageSerializer.create(messages.PRODUCT.UPDATE_PRODUCT_SUCCESS)));
   }
 
   @Delete(ProductRouter.relative.delete)
@@ -226,6 +228,63 @@ export default class ProductController extends BaseController {
           }
 
           return response.status(HttpStatus.OK).json(MessageSerializer.create(messages.PRODUCT.PAYMENT_SUCCESS));
+        });
+      }),
+    );
+  }
+
+  @SkipThrottle()
+  @Post(ProductRouter.relative.loadDataBestSellingProductsChart)
+  @HttpCode(HttpStatus.OK)
+  @HandleHttpError
+  loadDataBestSellingProductsChart(@Body() payload: ChartRequestPayload): Observable<Promise<Record<string, any>>> {
+    return this.productService.loadDataBestSellingProductsChart(payload).pipe(
+      map((data) => {
+        const bestSellingProductDataChartInstance = new BestSellingProductDataChart(data);
+        return bestSellingProductDataChartInstance.validate().then((errors) => {
+          if (errors.length) {
+            this.logError(errors, this.loadDataBestSellingProductsChart.name);
+            throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
+          }
+          return instanceToPlain(bestSellingProductDataChartInstance.list);
+        });
+      }),
+    );
+  }
+
+  @SkipThrottle()
+  @Post(ProductRouter.relative.loadDataRevenueChart)
+  @HttpCode(HttpStatus.OK)
+  @HandleHttpError
+  loadDataRevenueChart(@Body() payload: ChartRequestPayload): Observable<Promise<Omit<RevenueDataChart, 'validate'>>> {
+    return this.productService.loadDataRevenueChart(payload).pipe(
+      map((data) => {
+        const revenueDataChartInstance = new RevenueDataChart(data);
+        return revenueDataChartInstance.validate().then((errors) => {
+          if (errors.length) {
+            this.logError(errors, this.loadDataRevenueChart.name);
+            throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
+          }
+          return revenueDataChartInstance;
+        });
+      }),
+    );
+  }
+
+  @SkipThrottle()
+  @Post(ProductRouter.relative.loadDataPurchaseVolumeChart)
+  @HttpCode(HttpStatus.OK)
+  @HandleHttpError
+  loadDataPurchaseVolumeChart(): Observable<Promise<Omit<PurchaseVolumeDataChart, 'validate'>>> {
+    return this.productService.loadDataPurchaseVolumeChart().pipe(
+      map((data) => {
+        const purchaseVolumeDataChartInstance = new PurchaseVolumeDataChart(data);
+        return purchaseVolumeDataChartInstance.validate().then((errors) => {
+          if (errors.length) {
+            this.logError(errors, this.loadDataPurchaseVolumeChart.name);
+            throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
+          }
+          return purchaseVolumeDataChartInstance;
         });
       }),
     );

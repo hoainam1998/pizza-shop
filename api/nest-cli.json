@@ -46,6 +46,15 @@
         "tsConfigPath": "apps/modules/product/tsconfig.app.json"
       }
     },
+    "socket": {
+      "type": "application",
+      "root": "apps/modules/socket",
+      "entryFile": "main",
+      "sourceRoot": "apps/modules/socket/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/modules/socket/tsconfig.app.json"
+      }
+    },
     "user": {
       "type": "application",
       "root": "apps/modules/user",

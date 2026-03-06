@@ -10,10 +10,13 @@ import {
   IsPositive,
   ValidateNested,
   IsNumber,
+  IsIn,
 } from 'class-validator';
 import { OmitType } from '@nestjs/mapped-types';
 import { Status } from 'generated/prisma';
 import { Pagination } from './common.dto';
+import { CHART_BY } from '@share/enums';
+const chartBy = Object.values(CHART_BY);
 
 class IngredientSelect {
   @IsOptional()
@@ -400,4 +403,15 @@ export class Carts {
 
   @IsInt()
   total: number;
+}
+
+export class ChartRequestPayload {
+  @IsDefined()
+  @IsString()
+  @IsIn(chartBy)
+  by: string;
+
+  @IsDefined()
+  @IsInt()
+  time: number;
 }

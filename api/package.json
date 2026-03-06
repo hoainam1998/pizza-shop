@@ -60,6 +60,8 @@
     "test:ut:user.signup": "jest --watch --testPathPatterns=apps/modules/user/src/__test__/signup.spec.ts",
     "test:ut:user.login": "jest --watch --testPathPatterns=apps/modules/user/src/__test__/login.spec.ts",
     "test:ut:user.reset-password": "jest --watch --testPathPatterns=apps/modules/user/src/__test__/reset-password.spec.ts",
+    "test:ut:socket.add-data-chart": "jest --watch --testPathPatterns=apps/modules/socket/src/__test__/add-data-chart.spec.ts",
+    "test:ut:socket.refresh-product-info": "jest --watch --testPathPatterns=apps/modules/socket/src/__test__/refresh-product-info.spec.ts",
     "test:ut:caching.ingredient.delete-all-ingredients": "jest --watch apps/share/libs/caching/ingredient/__test__/delete-all-ingredients.spec.ts",
     "test:ut:caching.ingredient.delete-all-product-ingredients": "jest --watch apps/share/libs/caching/ingredient/__test__/delete-all-product-ingredients.spec.ts",
     "test:ut:caching.ingredient.get-product-ingredients-stored": "jest --watch apps/share/libs/caching/ingredient/__test__/get-product-ingredients-stored.spec.ts",
@@ -74,8 +76,15 @@
     "test:ut:caching.product.remove-all-visitors-of-product": "jest --watch apps/share/libs/caching/product/__test__/remove-all-visitors-of-product.spec.ts",
     "test:ut:caching.product.remove-product-access-by-visitor": "jest --watch apps/share/libs/caching/product/__test__/remove-product-access-by-visitor.spec.ts",
     "test:ut:caching.product.remove-products-access-by-visitor": "jest --watch apps/share/libs/caching/product/__test__/remove-products-access-by-visitor.spec.ts",
+    "test:ut:caching.report.add-report-viewer": "jest --watch apps/share/libs/caching/report/__test__/add-report-viewer.spec.ts",
+    "test:ut:caching.report.get-all-report-viewer": "jest --watch apps/share/libs/caching/report/__test__/get-all-report-viewer.spec.ts",
+    "test:ut:caching.report.remove-report-viewer": "jest --watch apps/share/libs/caching/report/__test__/remove-report-viewer.spec.ts",
     "test:ut:scheduler.update-state-expired": "jest --watch --testPathPatterns=apps/share/libs/scheduler/__test__/update-state-expired.spec.ts",
+    "test:ut:scheduler.take-action-at-specific-time": "jest --watch --testPathPatterns=apps/share/libs/scheduler/__test__/take-action-at-specific-time.spec.ts",
     "test:ut:scheduler.delete-scheduler": "jest --watch --testPathPatterns=apps/share/libs/scheduler/__test__/delete-scheduler.spec.ts",
+    "test:ut:socket.refresh-current-info": "jest --watch --testPathPatterns=apps/share/libs/socket/__test__/refresh-current-info.spec.ts",
+    "test:ut:socket.add-chart-data": "jest --watch --testPathPatterns=apps/share/libs/socket/__test__/add-chart-data.spec.ts",
+    "test:ut:socket.connected": "jest --watch --testPathPatterns=apps/share/libs/socket/__test__/connected.spec.ts",
     "test:e2e:product.create": "jest --watch apps/api/src/product/__test__/create-product.spec.ts",
     "test:e2e:product.pagination": "jest --watch apps/api/src/product/__test__/pagination.spec.ts",
     "test:e2e:product.pagination-for-sale": "jest --watch apps/api/src/product/__test__/pagination-for-sale.spec.ts",
@@ -107,7 +116,7 @@
     "test:e2e:user.reset-password": "jest --watch apps/api/src/user/__test__/reset-password.spec.ts",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./apps/api/apps/users/api/apps/modules/users/api/test/jest-e2e.json"
+    "test:e2e": "jest --config ./apps/api/apps/users/api/apps/modules/users/api/apps/apps/modules/socket/api/test/jest-e2e.json"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.0.2",
@@ -126,12 +135,14 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "connect-redis": "^9.0.0",
+    "date-fns": "^4.1.0",
     "express-session": "^1.18.2",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^7.0.6",
     "redis": "^5.8.2",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "socket.io-client": "^4.8.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -189,7 +200,8 @@
       "<rootDir>/apps/share/test/pre-setup/test-run-setup.ts"
     ],
     "roots": [
-      "<rootDir>/apps"
+      "<rootDir>/apps",
+      "<rootDir>/apps/"
     ],
     "moduleNameMapper": {
       "^@share(|/.*)$": "<rootDir>/apps/share/$1",

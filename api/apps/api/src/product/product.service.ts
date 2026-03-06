@@ -12,10 +12,18 @@ import {
   deleteProductPattern,
   paymentPattern,
   validateProductsInCartPattern,
+  loadDataBestSellingProductsChartPattern,
+  loadDataRevenueChartPattern,
+  loadDataPurchaseVolumeChartPattern,
 } from '@share/pattern';
 import { PRODUCT_SERVICE } from '@share/di-token';
-import { GetProduct, ProductPagination, Carts } from '@share/dto/validators/product.dto';
-import { BillErrors } from '@share/dto/serializer/product';
+import { GetProduct, ProductPagination, Carts, ChartRequestPayload } from '@share/dto/validators/product.dto';
+import {
+  BillErrors,
+  BestSellingProductDataChartItem,
+  RevenueDataChart,
+  PurchaseVolumeDataChart,
+} from '@share/dto/serializer/product';
 import { ProductPaginationResponse } from '@share/interfaces';
 
 @Injectable()
@@ -42,8 +50,8 @@ export default class ProductService {
     return this.product.send<product>(getProductPattern, select);
   }
 
-  updateProduct(product: Record<string, any>): Observable<string[]> {
-    return this.product.send<string[]>(updateProductPattern, product);
+  updateProduct(product: Record<string, any>): Observable<product> {
+    return this.product.send<product>(updateProductPattern, product);
   }
 
   deleteProduct(productId: string): Observable<product> {
@@ -56,5 +64,17 @@ export default class ProductService {
 
   payment(userId: string, carts: Carts): Observable<Omit<BillErrors, 'validate'>> {
     return this.product.send<Omit<BillErrors, 'validate'>>(paymentPattern, { userId, bill: carts });
+  }
+
+  loadDataBestSellingProductsChart(payload: ChartRequestPayload): Observable<BestSellingProductDataChartItem[]> {
+    return this.product.send(loadDataBestSellingProductsChartPattern, payload);
+  }
+
+  loadDataRevenueChart(payload: ChartRequestPayload): Observable<Omit<RevenueDataChart, 'validate'>> {
+    return this.product.send(loadDataRevenueChartPattern, payload);
+  }
+
+  loadDataPurchaseVolumeChart(): Observable<Omit<PurchaseVolumeDataChart, 'validate'>> {
+    return this.product.send(loadDataPurchaseVolumeChartPattern, {});
   }
 }

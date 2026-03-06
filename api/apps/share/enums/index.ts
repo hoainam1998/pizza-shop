@@ -10,3 +10,15 @@ export enum HTTP_METHOD {
   PUT = 'PUT',
   DELETE = 'DELETE',
 }
+
+export enum CHART_BY {
+  DAY = 'day',
+  MONTH = 'month',
+  QUARTER = 'quarter',
+  YEAR = 'year',
+}
+
+export enum VIEW {
+  ADMIN = 'admin',
+  CLIENT = 'client',
+}
