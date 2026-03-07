@@ -1,4 +1,5 @@
 import type { AxiosRequestConfig } from 'axios';
+import { ChartMode } from '@/enums';
 
 export type TableFieldType = {
   key: string;
@@ -66,4 +67,19 @@ export type ClientCartItemType = {
 export type SizeChartType = {
   height?: string | number;
   width?: string | number;
+};
+
+export type ChartPayloadType = {
+  by: ChartMode;
+  time: number;
+};
+
+export type BestSellingProductsChartPropsType = {
+  values: number[];
+  labels: string[];
+};
+
+export type RealTimeShoppingChartPropsType = {
+  revenue: number[];
+  capital: number[];
 };

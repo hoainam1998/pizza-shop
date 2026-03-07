@@ -12,5 +12,5 @@ export default {
     validator(value: any) {
       return sizePropertyPattern.test(value);
     }
-  }
+  },
 };

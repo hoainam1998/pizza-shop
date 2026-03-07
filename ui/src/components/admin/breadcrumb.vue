@@ -1,5 +1,7 @@
 <template>
-  <el-breadcrumb :separator-icon="separatorIcon" class="breadcrumb ps-py-5 ps-px-5 ps-bg-f39c12">
+  <el-breadcrumb
+  :separator-icon="separatorIcon"
+  class="breadcrumb ps-position-fixed ps-z-index-plus ps-w-100 ps-py-5 ps-px-5 ps-bg-f39c12">
     <template v-for="(match, index) in matched" :key="index">
       <el-breadcrumb-item
         v-if="shouldShowBreadcrumbItem(match)"
@@ -43,11 +45,13 @@ watch(route, (_, newRoute): void => {
 </script>
 
 <style lang="scss">
-.breadcrumb-item {
-  &:last-of-type {
-    & > span {
-      color: v-bind(whiteColor) !important;
-      font-weight: bold !important;
+.breadcrumb {
+  &-item {
+    &:last-of-type {
+      &>span {
+        color: v-bind(whiteColor) !important;
+        font-weight: bold !important;
+      }
     }
   }
 }

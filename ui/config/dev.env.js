@@ -3,5 +3,6 @@ module.exports = {
   ADMIN_PORT: 3000,
   SALE_PORT: 3001,
   BASE_URL: 'http://localhost:5000',
+  SOCKET_URL: 'http://localhost:8000',
   ROUTER_BASE_URL: '/',
 };

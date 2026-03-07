@@ -1,25 +1,30 @@
-function getRandomRgbColor() {
+import type { ChartData } from 'chart.js';
+
+const getRandomRgbColor = (): string => {
   const r = Math.floor(Math.random() * 256);
   const g = Math.floor(Math.random() * 256);
   const b = Math.floor(Math.random() * 256);
 
   return `rgb(${r}, ${g}, ${b})`;
-}
+};
+
+export const createDataSet = (values: number[]): ChartData['datasets'] => {
+  return [
+    {
+      data: values,
+      backgroundColor: values.map(getRandomRgbColor),
+    },
+  ];
+};
 
 const data = {
-  labels: ['product 1', 'product 2', 'product 3', 'product 4', 'product 5', 'product 6', 'product 7'],
-  datasets: [{
-    data: [65, 59, 80, 81, 56, 55, 40],
-    backgroundColor: [
-      getRandomRgbColor(),
-      getRandomRgbColor(),
-      getRandomRgbColor(),
-      getRandomRgbColor(),
-      getRandomRgbColor(),
-      getRandomRgbColor(),
-      getRandomRgbColor()
-    ],
-  }],
+  labels: [],
+  datasets: [
+    {
+      data: [],
+      backgroundColor: [],
+    },
+  ],
 };
 
 const config = {

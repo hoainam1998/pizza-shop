@@ -1,60 +1,57 @@
 <template>
   <div class="ps-display-flex ps-flex-gap-7 ps-align-items-center ps-my-10 ps-px-10">
     <p class="ps-fs-14 ps-text-color-606266">Load data chart by:</p>
-    <el-select v-model="mode" class="ps-w-150px" @change="loadChartData">
+    <el-select v-model="mode" class="ps-w-150px" @change="loadDatePickerType">
       <List :items="options">
         <template #default="{ item }">
           <el-option :label="item" :value="item" />
         </template>
       </List>
     </el-select>
+    <slot />
     <el-date-picker
-    v-if="mode !== ChartMode.YEAR"
-    v-model="time"
-    :type="targetTime.type"
-    :placeholder="targetTime.placeholder"
-    value-format="x"
-    :editable="false"
-    :disabled-date="dateDisabled"
-    class="ps-w-180px"
-    @clear="clear"
-    @change="loadChartData" />
+      v-if="showYearPicker"
+      v-model="time"
+      :type="calendarType"
+      value-format="x"
+      :editable="false"
+      class="ps-w-180px"
+      @clear="clear"
+      @change="loadChartData" />
   </div>
 </template>
 <script setup lang="ts">
-import { reactive } from 'vue';
 import List from '@/components/common/list.vue';
 import { ChartMode } from '@/enums';
 
-const mode = defineModel('mode', { default: ChartMode.HOUR });
+const mode = defineModel('mode', { default: ChartMode.DAY });
 const time = defineModel('time');
-const establishDay = Date.now();
+const { calendarType, showYearPicker = true } = defineProps<{
+  calendarType: string,
+  showYearPicker?: boolean,
+}>();
 const defaultDate = new Date();
 defaultDate.setHours(0, 0, 0, 0);
-const targetTime = reactive({
-  type: 'date',
-  placeholder: 'Pick a date!',
-});
 
 const emit = defineEmits<{
   (e: 'load'): Promise<any>,
+  (e: 'showDatePicker', type: string): Promise<any>,
 }>();
+
+const options = Object.values(ChartMode);
+
+const loadDatePickerType = (type: string): void => {
+  emit('showDatePicker', type);
+  loadChartData();
+};
 
 const clear = (): void => {
   time.value = defaultDate.getTime();
   emit('load');
 };
 
-const options = Object.values(ChartMode);
-
-const dateDisabled = (date: Date): boolean => {
-  const establishDayLocal = new Date(establishDay);
-  establishDayLocal.setHours(0, 0, 0, 0);
-  return date.getTime() < establishDayLocal.getTime();
-};
-
-const loadChartData = (value: number | null): void => {
-  if (value) {
+const loadChartData = (): void => {
+  if (time.value) {
     emit('load');
   }
 };

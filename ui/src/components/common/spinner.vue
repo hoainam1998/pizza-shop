@@ -1,5 +1,5 @@
 <template>
-  <section v-loading="loadingStore.loading" class="spinner ps-w-100vw ps-h-100vh">
+  <section v-loading.fullscreen.lock="loadingStore.loading" class="spinner">
     <slot />
   </section>
 </template>
