@@ -1,12 +1,12 @@
 <template>
   <div class="admin-home ps-display-grid">
-    <section class="ps-w-200px">
+    <section>
       <Menu />
     </section>
-    <div>
+    <section>
       <Breadcrumb :lastName="routerName.name" />
-      <router-view class="ps-mt-30"/>
-    </div>
+      <router-view class="ps-mt-30" />
+    </section>
   </div>
 </template>
 

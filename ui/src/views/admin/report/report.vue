@@ -14,14 +14,14 @@
         <el-icon size="20"><Minus /></el-icon>
         Best selling products
       </h3>
-      <BestSellingProductsChart :height="450" @onLoad="loadBestSellingProductsChart" />
+      <BestSellingProductsChart :height="450" @onLoad="loadBestSellingProductsChart" ref="best-selling-product-chart" />
     </div>
     <div class="ps-mt-10">
       <h3 class="ps-display-flex ps-flex-align-items-center ps-flex-gap-7 ps-fw-bold ps-line-height-17 ps-my-10">
         <el-icon size="20"><Minus /></el-icon>
         Revenue
       </h3>
-      <RevenueChart :height="500" />
+      <RevenueChart :height="500" @onLoad="loadRevenueChart" ref="revenue-chart" />
     </div>
   </section>
 </template>
@@ -35,7 +35,7 @@ import BestSellingProductsChart
 from '@/components/admin/charts/best-selling-products-chart/best-selling-products-chart.vue';
 import RealTimeShoppingChart from '@/components/admin/charts/real-time-shopping-chart/real-time-shopping-chart.vue';
 import { ProductService } from '@/services';
-import type { BestSellingProductsChartPropsType, ChartPayloadType, RealTimeShoppingChartPropsType } from '@/interfaces';
+import type { BestSellingProductsChartPropsType, ChartPayloadType } from '@/interfaces';
 import { showErrorNotification } from '@/utils';
 import SocketService from '@/socket';
 import { SOCKET_EVENT_NAME } from '@/enums';
@@ -46,19 +46,20 @@ type BestSellingProductsDataChartType = {
 };
 
 const realTimeShoppingChartRef = useTemplateRef('real-time-shopping-chart');
+const revenueChartRef = useTemplateRef('revenue-chart');
+const bestSellingProductChartRef = useTemplateRef('best-selling-product-chart');
 
-const loadRealTimeShoppingChart = (callback: (data: RealTimeShoppingChartPropsType | null) => void): void => {
+const loadRealTimeShoppingChart = (): void => {
   ProductService.post('load-data-purchase-volume-chart', {})
-    .then((response) => callback(response.data))
+    .then((response) => realTimeShoppingChartRef.value?.onLoadingComplete(response.data))
     .catch((error) => {
-      callback(null);
+      realTimeShoppingChartRef.value?.onLoadingComplete();
       showErrorNotification('Load real time shopping chart!', error.response.data.message);
     });
 };
 
 const loadBestSellingProductsChart = (
-  payload: ChartPayloadType,
-  callback: (data: BestSellingProductsChartPropsType | null) => void,
+  payload: ChartPayloadType
 ): void => {
   ProductService.post('load-data-best-selling-products-chart', payload)
     .then((response) => {
@@ -73,10 +74,19 @@ const loadBestSellingProductsChart = (
         values: [],
         labels: [],
       });
-      callback(data);
+      bestSellingProductChartRef.value?.onLoadingComplete(data);
     }).catch((error) => {
-      callback(null);
+      bestSellingProductChartRef.value?.onLoadingComplete();
       showErrorNotification('Load best selling products chart!', error.response.data.message);
+    });
+};
+
+const loadRevenueChart = (payload: ChartPayloadType): void => {
+  ProductService.post('load-data-revenue-chart', payload)
+    .then((response) => revenueChartRef.value?.onLoadingComplete(response.data))
+    .catch((error) => {
+      revenueChartRef.value?.onLoadingComplete();
+      showErrorNotification('Load revenue chart!', error.response.data.message);
     });
 };
 

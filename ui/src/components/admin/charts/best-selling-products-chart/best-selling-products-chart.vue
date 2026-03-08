@@ -6,16 +6,17 @@
       :calendarType="calendarType"
       @load="loadChartData"
       @showDatePicker="showDatePicker">
-        <el-select v-if="showQuarterSelect"
-          v-model="quarter"
-          class="ps-w-170px"
-          placeholder="Select a quarter!"
-          @change="onQuarterChange">
-            <el-option label="Quarter 1" :value="1" />
-            <el-option label="Quarter 2" :value="2" />
-            <el-option label="Quarter 3" :value="3" />
-            <el-option label="Quarter 4" :value="4" />
-        </el-select>
+      <el-select
+        v-if="showQuarterSelect"
+        v-model="quarter"
+        class="ps-w-170px"
+        placeholder="Select a quarter!"
+        @change="onQuarterChange">
+        <el-option label="Quarter 1" :value="1" />
+        <el-option label="Quarter 2" :value="2" />
+        <el-option label="Quarter 3" :value="3" />
+        <el-option label="Quarter 4" :value="4" />
+      </el-select>
     </ChartControl>
     <div :style="chartSize">
       <canvas ref="best-selling-products-chart" />
@@ -37,7 +38,7 @@ const calendarType = ref<string>('date');
 const showQuarterSelect = ref<boolean>(false);
 const quarter = ref<number>(1);
 const emit = defineEmits<{
-  (e: 'onLoad', payload: ChartPayloadType, callback: typeof onLoadingComplete): void;
+  (e: 'onLoad', payload: ChartPayloadType): void;
 }>();
 const chartSize = useSizeChart(size);
 let chart: Chart | null = null;
@@ -72,7 +73,7 @@ const onQuarterChange = (quarter: number): void => {
   loadChartData();
 };
 
-const onLoadingComplete = (data: BestSellingProductsChartPropsType | null): void => {
+const onLoadingComplete = (data?: BestSellingProductsChartPropsType): void => {
   if (chart) {
     if (data) {
       chart.data.datasets = createDataSet(data.values);
@@ -102,8 +103,12 @@ const showDatePicker = (type: string): void => {
 };
 
 const loadChartData = (): void => {
-  emit('onLoad', chartPayload, onLoadingComplete);
+  emit('onLoad', chartPayload);
 };
+
+defineExpose({
+  onLoadingComplete,
+});
 
 onMounted(() => {
   if (!chart) {

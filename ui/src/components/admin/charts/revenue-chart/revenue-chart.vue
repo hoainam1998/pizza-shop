@@ -4,11 +4,11 @@
       v-model:mode="chartPayload.by"
       v-model:time="chartPayload.time"
       :calendarType="calendarType"
-      @load="loadChartData"
+      @load="chartUpdate"
       @showDatePicker="showDatePicker" />
-    <div :style="chartSize">
-      <canvas ref="revenue-chart" />
-    </div>
+      <div :style="chartSize">
+        <canvas ref="revenue-chart" />
+      </div>
   </section>
 </template>
 <script lang="ts" setup>
@@ -19,7 +19,7 @@ import { ChartMode } from '@/enums';
 import config from './config';
 import chartPropsValidator from '../props-validator';
 import { useSizeChart } from '@/composables';
-import { ProductService } from '@/services';
+import type { RevenueChartPropsType, ChartPayloadType } from '@/interfaces';
 
 const size = defineProps(chartPropsValidator);
 const calendarType = ref<string>('date');
@@ -29,10 +29,14 @@ let chart: Chart | null = null;
 const defaultDate = new Date();
 defaultDate.setHours(0, 0, 0, 0);
 
-const chartPayload = reactive({
+const chartPayload = reactive<ChartPayloadType>({
   by: ChartMode.DAY,
   time: defaultDate.getTime(),
 });
+
+const emit = defineEmits<{
+  (e: 'onLoad', payload: ChartPayloadType): void;
+}>();
 
 const showDatePicker = (type: string): void => {
     switch (type) {
@@ -64,27 +68,37 @@ const renderXTitle = (mode: string): string => {
   }
 };
 
-const chartUpdate = (mode: ChartMode = ChartMode.DAY): void => {
+const onLoadingComplete = (data?: RevenueChartPropsType): void => {
   if (chart) {
-    (chart.options as any).scales.x.title.text = renderXTitle(mode);
-    ProductService.post('load-data-revenue-chart', chartPayload)
-      .then((response) => {
-        chart!.data.labels = response.data.labels;
-        chart!.data.datasets[0].data = response.data.capital;
-        chart!.data.datasets[1].data = response.data.revenue;
-        chart!.data.datasets[2].data = response.data.capital;
-        chart!.data.datasets[3].data = response.data.revenue;
-        chart!.update();
-      });
+    if (data) {
+      chart!.data.labels = data.labels;
+      chart!.data.datasets[0].data = data.capital;
+      chart!.data.datasets[1].data = data.revenue;
+      chart!.data.datasets[2].data = data.capital;
+      chart!.data.datasets[3].data = data.revenue;
+    } else {
+      chart!.data.labels = [];
+      chart!.data.datasets[0].data = [];
+      chart!.data.datasets[1].data = [];
+      chart!.data.datasets[2].data = [];
+      chart!.data.datasets[3].data = [];
+    }
+    chart!.update();
   }
 };
 
-const loadChartData = (): void => {
-  chartUpdate(chartPayload.by);
+const chartUpdate = (): void => {
+  if (chart) {
+    (chart.options as any).scales.x.title.text = renderXTitle(chartPayload.by);
+    emit('onLoad', chartPayload);
+  }
 };
 
+defineExpose({
+  onLoadingComplete,
+});
+
 onMounted(() => {
-  loadChartData();
   if (!chart) {
     chart = new Chart(ctx.value!, config as any);
     chartUpdate();

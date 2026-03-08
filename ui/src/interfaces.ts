@@ -83,3 +83,5 @@ export type RealTimeShoppingChartPropsType = {
   revenue: number[];
   capital: number[];
 };
+
+export type RevenueChartPropsType = RealTimeShoppingChartPropsType & { labels: string[] };

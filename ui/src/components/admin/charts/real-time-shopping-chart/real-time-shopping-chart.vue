@@ -16,13 +16,13 @@ import { type RealTimeShoppingChartPropsType } from '@/interfaces';
 
 const { height, width } = defineProps(chartPropsValidator);
 const emit = defineEmits<{
-  (e: 'onLoad', callback: typeof onLoadingComplete): void;
+  (e: 'onLoad'): void;
 }>();
 const chartSize = useSizeChart({ height, width });
 const ctx = useTemplateRef('shopping-chart');
 let chart: Chart | null = null;
 
-const onLoadingComplete = (data: RealTimeShoppingChartPropsType | null): void => {
+const onLoadingComplete = (data?: RealTimeShoppingChartPropsType): void => {
   if (chart) {
     if (data) {
       chart!.data.datasets[0].data = data!.revenue;
@@ -45,13 +45,14 @@ const addDataChart = (payload: any): void => {
 
 defineExpose({
   addDataChart,
+  onLoadingComplete,
 });
 
 onMounted(() => {
   if (!chart) {
     chart = new Chart(ctx.value!, config as any);
   }
-  emit('onLoad', onLoadingComplete);
+  emit('onLoad');
 });
 
 onBeforeUnmount(() => {
