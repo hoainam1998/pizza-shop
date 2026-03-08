@@ -1,5 +1,5 @@
 import type { RouterOptions } from 'vue-router';
-import SaleHome from '@/views/home/sale.vue';
+import SaleHome from '@/views/sale/home/home.vue';
 import Cart from '@/views/sale/cart/cart.vue';
 import NotFound from '@/views/not-found/not-found.vue';
 import paths from '@/router/paths';

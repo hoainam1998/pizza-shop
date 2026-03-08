@@ -6,23 +6,34 @@ import { SOCKET_EVENT_NAME } from './enums';
  * @class
  */
 export default class SocketService {
-  private static socket: SocketService = new SocketService();
+  private static socket: SocketService;
   private _io: Socket;
 
   constructor() {
-    this._io = io(process.env.BASE_URL);
+    this._io = io(process.env.SOCKET_URL);
     this._io.on('connect', () => {
-      this._io.emit('connected', { userId: '1764900213623' });
+      this._io.emit('connected', { userId: '1764900213623', view: isSale ? 'client' : 'admin' });
     });
+  }
+
+  /**
+   * Create socket service.
+   * @returns {SocketService} - The socket service.
+   */
+  static create() {
+    if (!SocketService.socket) {
+      SocketService.socket = new SocketService();
+    }
+    return SocketService.socket;
   }
 
   /**
    * The subscribe event helper.
    * @param {SOCKET_EVENT_NAME} eventName - The socket event name.
-   * @param {() => void} callback - The callback event.
+   * @param {(payload: any) => void} callback - The callback event.
    */
-  static subscribe(eventName: SOCKET_EVENT_NAME, callback: () => void): void {
-    this.socket._io.on(eventName, callback);
+  static subscribe(eventName: SOCKET_EVENT_NAME, callback: (payload: any) => void): void {
+    this.create()._io.on(eventName, callback);
   }
 
   /**
@@ -30,7 +41,7 @@ export default class SocketService {
    * @param {SOCKET_EVENT_NAME} eventName - The socket event name.
    */
   static unsubscribe(eventName: SOCKET_EVENT_NAME): void {
-    this.socket._io.removeAllListeners(eventName);
+    this.create()._io.removeAllListeners(eventName);
   }
 
   /**
@@ -39,6 +50,13 @@ export default class SocketService {
    * @param {*} payload - The payload data.
    */
   static emit(eventName: SOCKET_EVENT_NAME, payload: any): void {
-    this.socket._io.emit(eventName, payload);
+    this.create()._io.emit(eventName, payload);
+  }
+
+  /**
+   * Ws disconnect.
+   */
+  static disconnect(): void {
+    this.create()._io.disconnect();
   }
 }

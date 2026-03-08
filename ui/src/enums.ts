@@ -10,6 +10,8 @@ export enum OBJECT_STORE_NAME {
 
 export enum SOCKET_EVENT_NAME {
   REFRESH = 'refresh',
+  REMOVE_REPORT_VIEWER = 'remove_report_viewer',
+  ADD_DATA_CHART = 'add_data_chart',
 }
 
 export enum ERROR_PRODUCT_STATE {
@@ -18,7 +20,6 @@ export enum ERROR_PRODUCT_STATE {
 }
 
 export enum ChartMode {
-  HOUR = 'hour',
   DAY = 'day',
   MONTH = 'month',
   QUARTER = 'quarter',

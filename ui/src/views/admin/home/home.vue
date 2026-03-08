@@ -1,10 +1,12 @@
 <template>
-  <div class="ps-display-flex ps-flex-gap-7">
-    <Menu />
-    <div class="ps-w-100">
+  <div class="admin-home ps-display-grid">
+    <section>
+      <Menu />
+    </section>
+    <section>
       <Breadcrumb :lastName="routerName.name" />
-      <router-view />
-    </div>
+      <router-view class="ps-mt-30" />
+    </section>
   </div>
 </template>
 
@@ -27,3 +29,9 @@ provide(ROUTE_NAME, routerName);
 onBeforeRouteUpdate(() => routerName.setName(''));
 onBeforeRouteLeave(() => routerName.setName(''));
 </script>
+<style lang="scss" scoped>
+.admin-home {
+  grid-template-columns: 200px calc(100vw - 200px);
+  grid-column-gap: 14px;
+}
+</style>

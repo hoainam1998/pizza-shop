@@ -1,5 +1,10 @@
 <template>
-  <div class="menu-wrapper ps-display-flex ps-flex-direction-column ps-justify-content-space-between ps-bg-f39c12">
+  <div class="menu-wrapper
+  ps-position-fixed
+  ps-display-flex
+  ps-flex-direction-column
+  ps-justify-content-space-between
+  ps-bg-f39c12">
     <div class="ps-mt-10 ps-text-align-center">
       <RouterLink :to="paths.BASE.Path">
         <img src="@/assets/images/logo.png" height="40" width="40" />
@@ -41,7 +46,7 @@
 import { onMounted, useTemplateRef, type Component } from 'vue';
 import { RouterLink, onBeforeRouteUpdate, useRoute } from 'vue-router';
 import { primaryColor, whiteColor } from '@/assets/scss/variables.module.scss';
-import { Document, Menu as IconMenu, Burger } from '@element-plus/icons-vue';
+import { Document, Menu as IconMenu, Burger, Tickets } from '@element-plus/icons-vue';
 import paths from '@/router/paths';
 import useWrapperRouter from '@/composables/use-router';
 
@@ -55,12 +60,6 @@ type MenuItem = {
   title: string;
   index: string;
 };
-
-const indexes = [
-  `${paths.HOME}/${paths.HOME.CATEGORY}`,
-  `${paths.HOME}/${paths.HOME.INGREDIENT}`,
-  `${paths.HOME}/${paths.HOME.PRODUCT}`,
-];
 
 const menuItems: MenuItem[] = [
   {
@@ -77,8 +76,15 @@ const menuItems: MenuItem[] = [
     title: 'product',
     icon: Burger,
     index: `${paths.HOME}/${paths.HOME.PRODUCT}`,
+  },
+  {
+    title: 'report',
+    icon: Tickets,
+    index: `${paths.HOME}/${paths.HOME.REPORT}`,
   }
 ];
+
+const menuPaths: string[] = menuItems.map((item) => item.index);
 
 const menuItemClick = (menuItemProps: any): void => {
   push(menuItemProps.index);
@@ -89,7 +95,7 @@ onBeforeRouteUpdate((to) => {
 });
 
 onMounted(() => {
-  const routeItem = route.matched.find((match) => indexes.includes(match.path));
+  const routeItem = route.matched.find((match) => menuPaths.includes(match.path));
   if (routeItem) {
     menuRef.value.updateActiveIndex(routeItem.path);
   }
