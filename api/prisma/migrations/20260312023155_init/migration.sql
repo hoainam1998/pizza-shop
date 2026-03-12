@@ -1,24 +1,34 @@
-/*
-  Warnings:
+-- CreateTable
+CREATE TABLE `category` (
+    `category_id` VARCHAR(20) NOT NULL,
+    `avatar` TEXT NOT NULL,
+    `name` VARCHAR(200) NOT NULL,
 
-  - You are about to alter the column `category_id` on the `product` table. The data in that column could be lost. The data in that column will be cast from `VarChar(191)` to `VarChar(20)`.
+    PRIMARY KEY (`category_id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-*/
--- DropForeignKey
-ALTER TABLE `product` DROP FOREIGN KEY `FK_CATEGORY`;
+-- CreateTable
+CREATE TABLE `product` (
+    `product_id` VARCHAR(20) NOT NULL,
+    `name` VARCHAR(200) NOT NULL,
+    `avatar` TEXT NOT NULL,
+    `count` INTEGER NOT NULL,
+    `price` INTEGER NOT NULL,
+    `original_price` INTEGER NOT NULL,
+    `status` ENUM('IN_STOCK', 'EXPIRED', 'LESS') NOT NULL DEFAULT 'IN_STOCK',
+    `expired_time` VARCHAR(20) NOT NULL,
+    `category_id` VARCHAR(20) NOT NULL,
 
--- DropIndex
-DROP INDEX `FK_CATEGORY` ON `product`;
-
--- AlterTable
-ALTER TABLE `product` MODIFY `category_id` VARCHAR(20) NOT NULL;
+    INDEX `IDX_PRODUCT_ID_NAME`(`product_id`, `name`),
+    PRIMARY KEY (`product_id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `ingredient` (
     `ingredient_id` VARCHAR(20) NOT NULL,
     `name` VARCHAR(100) NOT NULL,
     `avatar` TEXT NOT NULL,
-    `unit` VARCHAR(10) NOT NULL,
+    `unit` ENUM('KG', 'GRAM', 'CAN') NOT NULL,
     `count` INTEGER NOT NULL,
     `price` INTEGER NOT NULL,
     `expired_time` VARCHAR(20) NOT NULL,
@@ -32,7 +42,7 @@ CREATE TABLE `ingredient` (
 CREATE TABLE `product_ingredient` (
     `product_id` VARCHAR(20) NOT NULL,
     `ingredient_id` VARCHAR(20) NOT NULL,
-    `unit` VARCHAR(10) NOT NULL,
+    `unit` ENUM('KG', 'GRAM', 'CAN') NOT NULL,
     `count` INTEGER NOT NULL,
 
     INDEX `FK_PRODUCT_INGREDIENT`(`product_id`),
@@ -44,14 +54,17 @@ CREATE TABLE `user` (
     `user_id` VARCHAR(20) NOT NULL,
     `first_name` VARCHAR(200) NOT NULL,
     `last_name` VARCHAR(20) NOT NULL,
-    `avatar` TEXT NOT NULL,
-    `account` VARCHAR(100) NOT NULL,
-    `password` VARCHAR(10) NOT NULL,
+    `avatar` TEXT NULL,
+    `password` VARCHAR(100) NOT NULL,
     `sex` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `power` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `phone` VARCHAR(11) NOT NULL,
     `email` VARCHAR(100) NOT NULL,
+    `reset_password_token` TEXT NULL,
 
+    UNIQUE INDEX `user_password_key`(`password`),
+    UNIQUE INDEX `user_phone_key`(`phone`),
+    UNIQUE INDEX `user_email_key`(`email`),
     INDEX `user_user_id_last_name_email_idx`(`user_id`, `last_name`, `email`),
     PRIMARY KEY (`user_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -60,6 +73,7 @@ CREATE TABLE `user` (
 CREATE TABLE `bill` (
     `bill_id` VARCHAR(20) NOT NULL,
     `user_id` VARCHAR(20) NOT NULL,
+    `capital` INTEGER NOT NULL,
     `complete_total` INTEGER NOT NULL,
     `created_at` VARCHAR(20) NOT NULL,
 
@@ -76,9 +90,6 @@ CREATE TABLE `bill_detail` (
     INDEX `FK_BILL`(`bill_id`),
     PRIMARY KEY (`bill_id`, `product_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateIndex
-CREATE INDEX `FK_CATEGORY` ON `product`(`product_id`, `name`);
 
 -- AddForeignKey
 ALTER TABLE `product` ADD CONSTRAINT `FK_CATEGORY` FOREIGN KEY (`category_id`) REFERENCES `category`(`category_id`) ON DELETE NO ACTION ON UPDATE NO ACTION;

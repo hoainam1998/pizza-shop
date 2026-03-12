@@ -90,7 +90,7 @@ export default class UserController extends BaseController {
         const loginResult = new LoginSerializer(user);
         return loginResult.validate().then((errors) => {
           if (errors.length) {
-            this.logError(errors, this.canSignup.name);
+            this.logError(errors, this.login.name);
             throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
           } else {
             const serializerResponse = instanceToPlain(loginResult);
