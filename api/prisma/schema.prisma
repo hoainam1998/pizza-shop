@@ -81,11 +81,11 @@ model user {
   first_name           String  @db.VarChar(200)
   last_name            String  @db.VarChar(20)
   avatar               String? @db.Text
-  password             String  @unique     @db.VarChar(100)
+  password             String  @unique @db.VarChar(100)
   sex                  Int     @default(0) @db.UnsignedTinyInt
   power                Int     @default(0) @db.UnsignedTinyInt
-  phone                String  @unique     @db.VarChar(11)
-  email                String  @unique     @db.VarChar(100)
+  phone                String  @unique @db.VarChar(11)
+  email                String  @unique @db.VarChar(100)
   reset_password_token String? @db.Text
   bill                 bill[]
 
@@ -95,6 +95,7 @@ model user {
 model bill {
   bill_id        String        @id @db.VarChar(20)
   user_id        String        @db.VarChar(20)
+  capital        Int
   complete_total Int
   created_at     String        @db.VarChar(20)
   user           user          @relation(fields: [user_id], references: user_id, onDelete: NoAction, onUpdate: NoAction, map: "FK_BILL_USER")
