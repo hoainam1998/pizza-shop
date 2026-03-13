@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import session from 'express-session';
+import helmet from 'helmet';
 import AppModule from './app.module';
 import { HttpExceptionFilter } from '@share/exception-filter';
 import corsConfig from './cors-config';
@@ -16,6 +17,7 @@ async function bootstrap() {
   const redisClient: RedisClient = app.get(REDIS_CLIENT);
   const config: ConfigService = app.get(ConfigService);
   const port = config.get<number | string>('ports.API_PORT') || 5000;
+  app.use(helmet());
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(GlobalValidatePipe.getInstance());
   app.use(session(sessionConfig(redisClient.Client)));
