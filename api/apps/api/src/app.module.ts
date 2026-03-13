@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { xss } from 'express-xss-sanitizer';
 import ProductModule from './product/product.module';
 import IngredientModule from './ingredient/ingredient.module';
 import ShareModule from '@share/module';
@@ -38,4 +39,8 @@ import AuthGuard from '@share/guards/auth.service';
     // },
   ],
 })
-export default class AppModule {}
+export default class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(xss()).forRoutes('*');
+  }
+}
