@@ -102,11 +102,9 @@ const resetForm = (): void => {
 };
 
 onBeforeMount(() => {
-  UserService.get('can-signup').then((response) => {
-    canSignup.value = response.data.canSignup;
-  }).catch(() => {
-    canSignup.value = false;
-  });
+  UserService.get('can-signup')
+    .then((response) => canSignup.value = response.data.canSignup)
+    .catch(() => canSignup.value = false);
 });
 
 onBeforeRouteLeave(resetForm);
