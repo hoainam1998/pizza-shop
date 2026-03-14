@@ -15,6 +15,7 @@ import {
 import { type Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { map, Observable } from 'rxjs';
+import { SkipThrottle } from '@nestjs/throttler';
 import { product } from 'generated/prisma';
 import { HandleHttpError, UploadImage } from '@share/decorators';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
@@ -46,7 +47,6 @@ import LoggingService from '@share/libs/logging/logging.service';
 import BaseController from '../controller';
 import { ProductRouter } from '@share/router';
 import { ProductPaginationResponse } from '@share/interfaces';
-import { SkipThrottle } from '@nestjs/throttler';
 import { createMessage } from '@share/utils';
 
 @Controller(ProductRouter.BaseUrl)

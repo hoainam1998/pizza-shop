@@ -31,6 +31,8 @@ export default Object.freeze({
     PASSWORD_NOT_MATCH: 'Your password are not match!',
     RESET_PASSWORD_SUCCESS: 'Reset password was success!',
     DID_NOT_LOGIN: 'Your did not login yet!',
+    CREATE_USER_SUCCESS: 'Create user was success. An email was sent to user has been created!',
+    CREATE_USER_FAILED: 'Create user was failed!',
   },
   INGREDIENT: {
     CREATE_INGREDIENT_SUCCESS: 'Create ingredient was success!',

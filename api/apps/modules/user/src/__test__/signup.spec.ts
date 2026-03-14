@@ -11,6 +11,7 @@ import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { createMessage } from '@share/utils';
 import messages from '@share/constants/messages';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
+import constants from '@share/constants';
 
 let prismaService: PrismaClient;
 let loggerService: LoggingService;
@@ -25,7 +26,7 @@ const userInput = {
   sex: user.sex,
 };
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
 
   userService = moduleRef.get(UserService);
@@ -47,6 +48,33 @@ describe('signup', () => {
     expect(create).toHaveBeenCalledTimes(1);
     expect(create).toHaveBeenCalledWith({
       data: userInput,
+      select: {
+        email: true,
+        reset_password_token: true,
+      },
+    });
+  });
+
+  it('signup success with payload include power', async () => {
+    expect.hasAssertions();
+    const userInputIncludePower = {
+      ...userInput,
+      power: constants.POWER_NUMERIC.ADMIN,
+    };
+    const create = jest.spyOn(prismaService.user, 'create').mockResolvedValue(user);
+    const signupService = jest.spyOn(userService, 'signup');
+    const signupController = jest.spyOn(userController, 'signup');
+    await expect(userController.signup(userInputIncludePower)).resolves.toBe(user);
+    expect(signupController).toHaveBeenCalledTimes(1);
+    expect(signupService).toHaveBeenCalledTimes(1);
+    expect(signupService).toHaveBeenCalledWith(userInputIncludePower);
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(create).toHaveBeenCalledWith({
+      data: userInputIncludePower,
+      select: {
+        email: true,
+        reset_password_token: true,
+      },
     });
   });
 
@@ -65,6 +93,10 @@ describe('signup', () => {
     expect(create).toHaveBeenCalledTimes(1);
     expect(create).toHaveBeenCalledWith({
       data: userInput,
+      select: {
+        email: true,
+        reset_password_token: true,
+      },
     });
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
@@ -85,6 +117,10 @@ describe('signup', () => {
     expect(create).toHaveBeenCalledTimes(1);
     expect(create).toHaveBeenCalledWith({
       data: userInput,
+      select: {
+        email: true,
+        reset_password_token: true,
+      },
     });
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(PrismaDisconnectError.message, expect.any(String));
@@ -104,6 +140,10 @@ describe('signup', () => {
     expect(create).toHaveBeenCalledTimes(1);
     expect(create).toHaveBeenCalledWith({
       data: userInput,
+      select: {
+        email: true,
+        reset_password_token: true,
+      },
     });
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(messages.USER.YOUR_GENDER_INVALID, expect.any(String));
@@ -123,6 +163,10 @@ describe('signup', () => {
     expect(create).toHaveBeenCalledTimes(1);
     expect(create).toHaveBeenCalledWith({
       data: userInput,
+      select: {
+        email: true,
+        reset_password_token: true,
+      },
     });
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(messages.USER.YOUR_POWER_INVALID, expect.any(String));
@@ -142,6 +186,10 @@ describe('signup', () => {
     expect(create).toHaveBeenCalledTimes(1);
     expect(create).toHaveBeenCalledWith({
       data: userInput,
+      select: {
+        email: true,
+        reset_password_token: true,
+      },
     });
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(messages.USER.EMAIL_REGIS_ALREADY_EXIST, expect.any(String));
@@ -161,6 +209,10 @@ describe('signup', () => {
     expect(create).toHaveBeenCalledTimes(1);
     expect(create).toHaveBeenCalledWith({
       data: userInput,
+      select: {
+        email: true,
+        reset_password_token: true,
+      },
     });
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(messages.USER.PHONE_ALREADY_EXIST, expect.any(String));

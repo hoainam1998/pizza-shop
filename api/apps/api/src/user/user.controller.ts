@@ -11,11 +11,10 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
-import { instanceToPlain } from 'class-transformer';
-import { user } from 'generated/prisma';
+import { instanceToPlain, plainToInstance } from 'class-transformer';
 import UserService from './user.service';
 import { CanSignupSerializer, LoginSerializer } from '@share/dto/serializer/user';
-import { LoginInfo, SignupDTO, ResetPassword } from '@share/dto/validators/user.dto';
+import { LoginInfo, SignupDTO, ResetPassword, CreateUser } from '@share/dto/validators/user.dto';
 import { createMessage, getAdminResetPasswordLink } from '@share/utils';
 import messages from '@share/constants/messages';
 import SendEmailService from '@share/libs/mailer/mailer.service';
@@ -66,7 +65,7 @@ export default class UserController extends BaseController {
     if (!req.session.user?.canSignup) {
       throw new UnauthorizedException(createMessage(messages.USER.CAN_NOT_SIGNUP, ErrorCode.CAN_NOT_SIGNUP));
     }
-    return this.userService.signup(instanceToPlain(user) as user).pipe(
+    return this.userService.signup(instanceToPlain(user)).pipe(
       map((user: UserCreatedType) => {
         const link = getAdminResetPasswordLink(user.reset_password_token!);
         return this.sendEmailService
@@ -117,5 +116,24 @@ export default class UserController extends BaseController {
     return this.userService
       .resetPassword(resetPasswordBody)
       .pipe(map(() => MessageSerializer.create(messages.USER.RESET_PASSWORD_SUCCESS)));
+  }
+
+  @HttpCode(HttpStatus.CREATED)
+  @Post(UserRouter.relative.create)
+  @HandleHttpError
+  create(@Body() user: CreateUser): Observable<Promise<MessageSerializer>> {
+    const plainUser = instanceToPlain(plainToInstance(CreateUser, user));
+    return this.userService.signup(plainUser).pipe(
+      map((user: UserCreatedType) => {
+        const link = getAdminResetPasswordLink(user.reset_password_token!);
+        return this.sendEmailService
+          .sendPassword(user.email, link, user.plain_password)
+          .then(() => MessageSerializer.create(messages.USER.CREATE_USER_SUCCESS))
+          .catch((error) => {
+            Logger.error(this.create.name, error);
+            throw new BadRequestException(MessageSerializer.create(messages.USER.CREATE_USER_FAILED));
+          });
+      }),
+    );
   }
 }

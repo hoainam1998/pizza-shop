@@ -83,7 +83,9 @@ export type UserRequestType = Omit<user, 'password' | 'reset_password_token'> & 
   reset_password_token?: string;
 };
 
-export type UserCreateType = Pick<user, 'first_name' | 'last_name' | 'email' | 'phone' | 'sex'>;
+export type UserSignupType = Pick<user, 'first_name' | 'last_name' | 'email' | 'phone' | 'sex'> & {
+  power?: number;
+};
 
 export type MessageResponseTestingType = {
   messages: string[];
