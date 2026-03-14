@@ -1,8 +1,10 @@
 import { Exclude, Expose } from 'class-transformer';
-import { IsBoolean, IsEmail, IsInt, IsPhoneNumber, IsString, IsStrongPassword, Matches } from 'class-validator';
+import { IsBoolean, IsEmail, IsInt, IsPhoneNumber, IsString, IsStrongPassword, Matches, IsIn } from 'class-validator';
 import constants from '@share/constants';
 import { UserRequestType } from '@share/interfaces';
 import Validator from '../serializer/validator';
+import { OmitType } from '@nestjs/mapped-types';
+const power = Object.values(constants.POWER_NUMERIC);
 
 export class SignupDTO {
   @Exclude({ toPlainOnly: true })
@@ -39,6 +41,22 @@ export class SignupDTO {
 
   constructor(target: UserRequestType) {
     Object.assign(this, target);
+  }
+}
+
+export class CreateUser extends OmitType(SignupDTO, ['power']) {
+  @IsInt()
+  @IsIn(power)
+  power: number;
+
+  @Expose({ toPlainOnly: true })
+  get first_name() {
+    return this.firstName;
+  }
+
+  @Expose({ toPlainOnly: true })
+  get last_name() {
+    return this.lastName;
   }
 }
 

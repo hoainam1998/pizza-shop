@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { user } from 'generated/prisma';
 import { USER_SERVICE } from '@share/di-token';
 import { canSignupPattern, signupPattern, loginPattern, resetPasswordPattern } from '@share/pattern';
-import { UserRequestType } from '@share/interfaces';
+import type { UserRequestType } from '@share/interfaces';
 import { LoginInfo, ResetPassword } from '@share/dto/validators/user.dto';
 
 @Injectable()
@@ -15,7 +15,7 @@ export default class UserService {
     return this.user.send<number>(canSignupPattern, {});
   }
 
-  signup(user: user): Observable<user> {
+  signup(user: Record<string, any>): Observable<Pick<user, 'email' | 'reset_password_token'>> {
     return this.user.send<user>(signupPattern, user);
   }
 

@@ -3,7 +3,7 @@ import { PrismaClient, type user } from 'generated/prisma';
 import { PRISMA_CLIENT } from '@share/di-token';
 import messages from '@share/constants/messages';
 import { HandlePrismaError } from '@share/decorators';
-import type { UserCreateType } from '@share/interfaces';
+import type { UserSignupType } from '@share/interfaces';
 import { ResetPassword } from '@share/dto/validators/user.dto';
 
 @Injectable()
@@ -16,9 +16,13 @@ export default class UserService {
   }
 
   @HandlePrismaError(messages.USER)
-  signup(user: UserCreateType): Promise<user> {
+  signup(user: UserSignupType): Promise<Pick<user, 'email' | 'reset_password_token'>> {
     return this.prismaClient.user.create({
       data: user as any,
+      select: {
+        email: true,
+        reset_password_token: true,
+      },
     });
   }
 

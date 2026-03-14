@@ -5,7 +5,7 @@ import UsersService from './user.service';
 import LoggingService from '@share/libs/logging/logging.service';
 import { HandleServiceError, HandleJwtVerifyError } from '@share/decorators';
 import { canSignupPattern, signupPattern, loginPattern, resetPasswordPattern } from '@share/pattern';
-import type { UserCreateType } from '@share/interfaces';
+import type { UserSignupType } from '@share/interfaces';
 import { LoginInfo, ResetPassword } from '@share/dto/validators/user.dto';
 import { comparePassword, createMessage, omitFields, verifyAdminResetPasswordToken } from '@share/utils';
 import messages from '@share/constants/messages';
@@ -25,7 +25,7 @@ export default class UserController {
 
   @MessagePattern(signupPattern)
   @HandleServiceError
-  signup(user: UserCreateType): Promise<user> {
+  signup(user: UserSignupType): Promise<Pick<user, 'email' | 'reset_password_token'>> {
     return this.userService.signup(user);
   }
 
