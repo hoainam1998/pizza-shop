@@ -30,7 +30,7 @@ const { cart } = defineProps<{
     total: number;
     price: number;
     noExist: boolean;
-  }
+  };
 }>();
 </script>
 

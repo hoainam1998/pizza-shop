@@ -9,6 +9,8 @@ import Login from '@/views/login-group/login.vue';
 import ProductDetail from '@/views/admin/product-group/detail/detail.vue';
 import ProductList from '@/views/admin/product-group/list/list.vue';
 import IngredientList from '@/views/admin/ingredient-group/list/list.vue';
+import UserList from '@/views/admin/user-group/list/list.vue';
+import UserDetail from '@/views/admin/user-group/detail/detail.vue';
 import Report from '@/views/admin/report/report.vue';
 
 const adminRoutes: RouterOptions['routes'] = [
@@ -69,6 +71,31 @@ const adminRoutes: RouterOptions['routes'] = [
               notShowBreadcrumb: true,
             },
             component: IngredientList,
+          },
+        ],
+      },
+      {
+        path: `${paths.HOME.USER}`,
+        name: 'user',
+        component: RouterView,
+        children: [
+          {
+            path: '',
+            name: 'user_list',
+            props: {
+              notShowBreadcrumb: true,
+            },
+            component: UserList,
+          },
+          {
+            path: 'new',
+            name: 'user_create',
+            component: UserDetail,
+          },
+          {
+            path: `${paths.HOME.USER.ID}`,
+            name: 'user_update',
+            component: UserDetail,
           },
         ],
       },

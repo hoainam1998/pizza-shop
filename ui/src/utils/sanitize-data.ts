@@ -22,11 +22,7 @@ const sanitizeData = (data: string): string => sanitize(data, options);
  */
 const sanitizeDataObject = (obj: object): object => {
   return Object.entries(obj).reduce((data, [key, value]) => {
-    if (typeof value === 'string') {
-      Object.assign(data, { [key]: sanitizeData(value) });
-    } else {
-      Object.assign(data, { [key]: value });
-    }
+    Object.assign(data, { [key]: typeof value === 'string' ? sanitizeData(value) : value });
     return data;
   }, {});
 };

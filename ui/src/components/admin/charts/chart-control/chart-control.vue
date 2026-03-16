@@ -22,23 +22,23 @@
 </template>
 <script setup lang="ts">
 import List from '@/components/common/list.vue';
-import { ChartMode } from '@/enums';
+import { CHART_MODE } from '@/enums';
 
-const mode = defineModel('mode', { default: ChartMode.DAY });
+const mode = defineModel('mode', { default: CHART_MODE.DAY });
 const time = defineModel('time');
 const { calendarType, showYearPicker = true } = defineProps<{
-  calendarType: string,
-  showYearPicker?: boolean,
+  calendarType: string;
+  showYearPicker?: boolean;
 }>();
 const defaultDate = new Date();
 defaultDate.setHours(0, 0, 0, 0);
 
 const emit = defineEmits<{
-  (e: 'load'): Promise<any>,
-  (e: 'showDatePicker', type: string): Promise<any>,
+  (e: 'load'): Promise<any>;
+  (e: 'showDatePicker', type: string): Promise<any>;
 }>();
 
-const options = Object.values(ChartMode);
+const options = Object.values(CHART_MODE);
 
 const loadDatePickerType = (type: string): void => {
   emit('showDatePicker', type);

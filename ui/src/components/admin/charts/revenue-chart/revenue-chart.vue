@@ -15,7 +15,7 @@
 import { onMounted, useTemplateRef, onBeforeUnmount, reactive, ref } from 'vue';
 import ChartControl from '../chart-control/chart-control.vue';
 import Chart from 'chart.js/auto';
-import { ChartMode } from '@/enums';
+import { CHART_MODE } from '@/enums';
 import config from './config';
 import chartPropsValidator from '../props-validator';
 import { useSizeChart } from '@/composables';
@@ -30,7 +30,7 @@ const defaultDate = new Date();
 defaultDate.setHours(0, 0, 0, 0);
 
 const chartPayload = reactive<ChartPayloadType>({
-  by: ChartMode.DAY,
+  by: CHART_MODE.DAY,
   time: defaultDate.getTime(),
 });
 
@@ -40,14 +40,14 @@ const emit = defineEmits<{
 
 const showDatePicker = (type: string): void => {
     switch (type) {
-    case ChartMode.DAY:
+    case CHART_MODE.DAY:
       calendarType.value = 'date';
       break;
-    case ChartMode.MONTH:
+    case CHART_MODE.MONTH:
       calendarType.value = 'month';
       break;
-    case ChartMode.QUARTER:
-    case ChartMode.YEAR:
+    case CHART_MODE.QUARTER:
+    case CHART_MODE.YEAR:
       calendarType.value = 'year';
       break;
     default: break;
@@ -56,13 +56,13 @@ const showDatePicker = (type: string): void => {
 
 const renderXTitle = (mode: string): string => {
   switch (mode) {
-    case ChartMode.DAY:
+    case CHART_MODE.DAY:
       return 'Hours in a day.';
-    case ChartMode.MONTH:
+    case CHART_MODE.MONTH:
       return 'Days in a month.';
-    case ChartMode.QUARTER:
+    case CHART_MODE.QUARTER:
       return 'Quarters in a year.';
-    case ChartMode.YEAR:
+    case CHART_MODE.YEAR:
       return 'Months in a year.';
     default: return '';
   }

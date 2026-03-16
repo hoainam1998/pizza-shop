@@ -27,7 +27,7 @@
 import { useTemplateRef, onMounted, onBeforeUnmount, reactive, ref, watch } from 'vue';
 import ChartControl from '../chart-control/chart-control.vue';
 import Chart from 'chart.js/auto';
-import { ChartMode } from '@/enums';
+import { CHART_MODE } from '@/enums';
 import config, { createDataSet } from './config';
 import { useSizeChart } from '@/composables';
 import chartPropsValidator from '../props-validator';
@@ -54,12 +54,12 @@ const startMonthOfQuarter: Record<number, number> = {
 };
 
 const chartPayload = reactive({
-  by: ChartMode.DAY,
+  by: CHART_MODE.DAY,
   time: defaultDate.getTime(),
 });
 
 watch(() => chartPayload.by, () => {
-  if (chartPayload.by == ChartMode.QUARTER) {
+  if (chartPayload.by == CHART_MODE.QUARTER) {
     showQuarterSelect.value = true;
   } else {
     showQuarterSelect.value = false;
@@ -88,14 +88,14 @@ const onLoadingComplete = (data?: BestSellingProductsChartPropsType): void => {
 
 const showDatePicker = (type: string): void => {
     switch (type) {
-    case ChartMode.DAY:
+    case CHART_MODE.DAY:
       calendarType.value = 'date';
       break;
-    case ChartMode.MONTH:
+    case CHART_MODE.MONTH:
       calendarType.value = 'month';
       break;
-    case ChartMode.QUARTER:
-    case ChartMode.YEAR:
+    case CHART_MODE.QUARTER:
+    case CHART_MODE.YEAR:
       calendarType.value = 'year';
       break;
     default: break;

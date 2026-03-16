@@ -4,7 +4,7 @@
       <Menu />
     </section>
     <section>
-      <Breadcrumb :lastName="routerName.name" />
+      <div class="ps-mb-25"><Breadcrumb :lastName="routerName.name" /></div>
       <router-view class="ps-mt-30" />
     </section>
   </div>
@@ -31,7 +31,7 @@ onBeforeRouteLeave(() => routerName.setName(''));
 </script>
 <style lang="scss" scoped>
 .admin-home {
-  grid-template-columns: 200px calc(100vw - 200px);
+  grid-template-columns: 200px calc(100vw - 200px - 14px);
   grid-column-gap: 14px;
 }
 </style>

@@ -19,9 +19,15 @@ export enum ERROR_PRODUCT_STATE {
   REFRESH_PRODUCT = 'REFRESH_PRODUCT',
 }
 
-export enum ChartMode {
+export enum CHART_MODE {
   DAY = 'day',
   MONTH = 'month',
   QUARTER = 'quarter',
   YEAR = 'year',
+}
+
+export enum POWER {
+  SUPER_ADMIN = 0,
+  ADMIN = 1,
+  SALE = 2,
 }
