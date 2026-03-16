@@ -10,6 +10,6 @@
 <script setup lang="ts">
 import { FolderAdd } from '@element-plus/icons-vue';
 const emit = defineEmits<{
-  (e: 'onClick'): void,
+  (e: 'onClick'): void;
 }>();
 </script>

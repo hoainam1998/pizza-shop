@@ -20,7 +20,7 @@ const model = defineModel<UserDetailModelType>({ default: {
 const userDetailFormRef = ref<FormInstance>();
 
 const { rules } = defineProps<{
-  rules: FormRules<UserDetailModelType>,
+  rules: FormRules<UserDetailModelType>;
 }>();
 
 const validate = async (): Promise<boolean> => {
@@ -32,6 +32,6 @@ const validate = async (): Promise<boolean> => {
 
 defineExpose<UserDetailExposeType>({
   validate,
-  reset: () => userDetailFormRef.value?.resetFields(),
+  reset: userDetailFormRef.value?.resetFields,
 });
 </script>

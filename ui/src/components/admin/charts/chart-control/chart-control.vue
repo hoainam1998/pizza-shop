@@ -27,15 +27,15 @@ import { CHART_MODE } from '@/enums';
 const mode = defineModel('mode', { default: CHART_MODE.DAY });
 const time = defineModel('time');
 const { calendarType, showYearPicker = true } = defineProps<{
-  calendarType: string,
-  showYearPicker?: boolean,
+  calendarType: string;
+  showYearPicker?: boolean;
 }>();
 const defaultDate = new Date();
 defaultDate.setHours(0, 0, 0, 0);
 
 const emit = defineEmits<{
-  (e: 'load'): Promise<any>,
-  (e: 'showDatePicker', type: string): Promise<any>,
+  (e: 'load'): Promise<any>;
+  (e: 'showDatePicker', type: string): Promise<any>;
 }>();
 
 const options = Object.values(CHART_MODE);

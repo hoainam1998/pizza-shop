@@ -92,7 +92,7 @@ const userDetailFormModel = reactive<UserDetailModelType>(model);
 const userFormRules = reactive<FormRules<UserDetailModelType>>(rules);
 
 const reset = (): void => {
-  if (userFormRef.value) {
+  if (userFormRef.value && userFormRef.value.reset) {
     userFormRef.value.reset();
   }
 };

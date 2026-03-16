@@ -4,13 +4,13 @@ import { POWER } from '@/enums';
 import type { UserDetailModelType } from '@/interfaces';
 
 type UserFormInputType = {
-  model: Partial<Pick<UserDetailModelType, 'power'>>,
-  rules: FormRules<UserDetailModelType>,
+  model: Partial<Pick<UserDetailModelType, 'power'>>;
+  rules: FormRules<UserDetailModelType>;
 };
 
 type UserFormReturnType = {
-  model: UserDetailModelType,
-  rules: FormRules<UserDetailModelType>,
+  model: UserDetailModelType;
+  rules: FormRules<UserDetailModelType>;
 };
 
 const checkPhoneNumber = (rule: any, value: string, callback: any): any | void => {

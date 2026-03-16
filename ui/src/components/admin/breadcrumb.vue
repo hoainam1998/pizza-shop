@@ -36,7 +36,7 @@ const shouldShowBreadcrumbItem =
   };
 
 const { lastName } = defineProps<{
-  lastName: string,
+  lastName: string;
 }>();
 
 watch(route, (_, newRoute): void => {

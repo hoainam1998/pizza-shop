@@ -12,7 +12,7 @@ import propsValidator from './props-validator';
 const currentPage = defineModel();
 const { pageSize, pagerCount, total } = defineProps(propsValidator);
 const emit = defineEmits<{
-  (e: 'onChange', pageNumber: number): void,
+  (e: 'onChange', pageNumber: number): void;
 }>();
 
 const paginationOnChange = (pageNumber: number): void => emit('onChange', pageNumber);

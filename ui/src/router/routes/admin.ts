@@ -74,7 +74,7 @@ const adminRoutes: RouterOptions['routes'] = [
           },
         ],
       },
-            {
+      {
         path: `${paths.HOME.USER}`,
         name: 'user',
         component: RouterView,

@@ -1,4 +1,5 @@
 import type { AxiosRequestConfig } from 'axios';
+import type { FormContext } from 'element-plus';
 import { CHART_MODE } from '@/enums';
 
 export type TableFieldType = {
@@ -96,6 +97,6 @@ export type UserDetailModelType = {
 };
 
 export type UserDetailExposeType = {
-  validate: () => Promise<boolean>,
-  reset: () => void,
+  validate: () => Promise<boolean>;
+  reset?: FormContext['resetFields'];
 };
