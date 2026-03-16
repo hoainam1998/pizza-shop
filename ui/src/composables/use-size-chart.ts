@@ -1,7 +1,7 @@
-import { computed, type CSSProperties } from 'vue';
+import { computed, type ComputedRef, type CSSProperties } from 'vue';
 import type { SizeChartType } from '@/interfaces';
 
-export default function useSizeChart(size: SizeChartType) {
+export default (size: SizeChartType): ComputedRef<CSSProperties> => {
   const { width, height } = size;
 
   return computed<CSSProperties>(() => {
@@ -24,4 +24,4 @@ export default function useSizeChart(size: SizeChartType) {
 
     return sizeChart;
   });
-}
+};

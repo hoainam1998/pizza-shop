@@ -1,5 +1,8 @@
 <template>
   <div class="menu-wrapper
+  ps-overflow-hidden
+  ps-w-200px
+  ps-h-100vh
   ps-position-fixed
   ps-display-flex
   ps-flex-direction-column
@@ -46,7 +49,7 @@
 import { onMounted, useTemplateRef, type Component } from 'vue';
 import { RouterLink, onBeforeRouteUpdate, useRoute } from 'vue-router';
 import { primaryColor, whiteColor } from '@/assets/scss/variables.module.scss';
-import { Document, Menu as IconMenu, Burger, Tickets } from '@element-plus/icons-vue';
+import { Document, Menu as IconMenu, Burger, Tickets, User } from '@element-plus/icons-vue';
 import paths from '@/router/paths';
 import useWrapperRouter from '@/composables/use-router';
 
@@ -77,6 +80,11 @@ const menuItems: MenuItem[] = [
     icon: Burger,
     index: `${paths.HOME}/${paths.HOME.PRODUCT}`,
   },
+    {
+    title: 'user',
+    icon: User,
+    index: `${paths.HOME}/${paths.HOME.USER}`,
+  },
   {
     title: 'report',
     icon: Tickets,
@@ -104,9 +112,6 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .menu-wrapper {
-  height: 100vh;
-  max-width: 200px;
-
   .is-active {
     background-color: v-bind(whiteColor);
   }

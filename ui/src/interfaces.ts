@@ -1,5 +1,5 @@
 import type { AxiosRequestConfig } from 'axios';
-import { ChartMode } from '@/enums';
+import { CHART_MODE } from '@/enums';
 
 export type TableFieldType = {
   key: string;
@@ -70,7 +70,7 @@ export type SizeChartType = {
 };
 
 export type ChartPayloadType = {
-  by: ChartMode;
+  by: CHART_MODE;
   time: number;
 };
 
@@ -85,3 +85,17 @@ export type RealTimeShoppingChartPropsType = {
 };
 
 export type RevenueChartPropsType = RealTimeShoppingChartPropsType & { labels: string[] };
+
+export type UserDetailModelType = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  sex: number;
+  power: number | null;
+};
+
+export type UserDetailExposeType = {
+  validate: () => Promise<boolean>,
+  reset: () => void,
+};

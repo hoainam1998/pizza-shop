@@ -12,6 +12,10 @@ export default Object.freeze({
     INGREDIENT: new RouterPath('ingredient', {
       NEW: new RouterPath('new'),
     }),
+    USER: new RouterPath('user', {
+      NEW: new RouterPath('new'),
+      ID: new RouterPath(':id'),
+    }),
     CATEGORY: new RouterPath('category'),
     REPORT: new RouterPath('report'),
   }),
