@@ -1,7 +1,16 @@
-import { IsBoolean, IsInt, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
-import { Exclude, Expose } from 'class-transformer';
+import {
+  IsArray,
+  IsBoolean,
+  IsDefined,
+  IsInt,
+  IsOptional,
+  IsPhoneNumber,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+import { Exclude, Expose, plainToInstance, Type } from 'class-transformer';
 import Validator from './validator';
-import { UserRequestType } from '@share/interfaces';
+import { UserPaginationResponse, UserRequestType } from '@share/interfaces';
 
 export class CanSignupSerializer extends Validator {
   @IsBoolean()
@@ -13,7 +22,7 @@ export class CanSignupSerializer extends Validator {
   }
 }
 
-export class LoginSerializer extends Validator {
+export class User extends Validator {
   @Exclude({ toPlainOnly: true })
   @IsString()
   user_id: string;
@@ -43,11 +52,6 @@ export class LoginSerializer extends Validator {
   @IsInt()
   power: number;
 
-  @Exclude({ toPlainOnly: true })
-  @IsOptional()
-  @IsString()
-  reset_password_token: string;
-
   @Expose({ toPlainOnly: true })
   get userId() {
     return this.user_id;
@@ -62,6 +66,13 @@ export class LoginSerializer extends Validator {
   get lastName() {
     return this.last_name;
   }
+}
+
+export class LoginSerializer extends User {
+  @Exclude({ toPlainOnly: true })
+  @IsOptional()
+  @IsString()
+  reset_password_token: string;
 
   @IsOptional()
   @Expose({ toPlainOnly: true })
@@ -77,5 +88,24 @@ export class LoginSerializer extends Validator {
   constructor(target: UserRequestType) {
     super();
     Object.assign(this, target);
+  }
+}
+
+export class PaginationUserSerializer extends Validator {
+  @IsDefined()
+  @IsInt()
+  total: number;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => User)
+  list: User[];
+
+  constructor(results: UserPaginationResponse) {
+    super();
+    if (results) {
+      this.total = results.total;
+      this.list = results.list.map((user) => plainToInstance(User, user));
+    }
   }
 }

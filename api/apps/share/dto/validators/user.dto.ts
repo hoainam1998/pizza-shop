@@ -1,9 +1,22 @@
-import { Exclude, Expose } from 'class-transformer';
-import { IsBoolean, IsEmail, IsInt, IsPhoneNumber, IsString, IsStrongPassword, Matches, IsIn } from 'class-validator';
+import { Exclude, Expose, instanceToPlain, plainToInstance, Type } from 'class-transformer';
+import {
+  IsBoolean,
+  IsEmail,
+  IsInt,
+  IsPhoneNumber,
+  IsString,
+  IsStrongPassword,
+  Matches,
+  IsIn,
+  IsOptional,
+  IsDefined,
+  ValidateNested,
+} from 'class-validator';
+import { OmitType } from '@nestjs/mapped-types';
 import constants from '@share/constants';
 import { UserRequestType } from '@share/interfaces';
 import Validator from '../serializer/validator';
-import { OmitType } from '@nestjs/mapped-types';
+import { Pagination } from './common.dto';
 const power = Object.values(constants.POWER_NUMERIC);
 
 export class SignupDTO {
@@ -102,4 +115,84 @@ export class LoginSessionPayload extends Validator {
     super();
     Object.assign(this, target);
   }
+}
+
+export class UserQuery {
+  @IsOptional()
+  @IsBoolean()
+  avatar: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  firstName: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  lastName: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  email: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  phone: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  sex: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  power: boolean;
+
+  @Expose({ toPlainOnly: true })
+  get last_name() {
+    return this.lastName;
+  }
+
+  @Expose({ toPlainOnly: true })
+  get first_name() {
+    return this.firstName;
+  }
+
+  @Expose({ toPlainOnly: true })
+  get user_id() {
+    return true;
+  }
+
+  static plain(target: UserPagination['query']): Record<string, any> {
+    if (Array.from(Object.values(target)).every((value) => value == undefined)) {
+      target.avatar = true;
+      target.firstName = true;
+      target.lastName = true;
+      target.email = true;
+      target.phone = true;
+      target.sex = true;
+      target.power = true;
+    }
+    const query = instanceToPlain(plainToInstance(UserQuery, target));
+    return instanceToPlain(plainToInstance(UserQueryTransform, query), {
+      exposeUnsetFields: false,
+    });
+  }
+}
+
+export class UserQueryTransform extends OmitType(UserQuery, ['firstName', 'lastName']) {
+  @Exclude()
+  firstName: boolean;
+
+  @Exclude()
+  lastName: boolean;
+}
+
+export class UserPagination extends Pagination {
+  @IsOptional()
+  @IsString()
+  search: string;
+
+  @IsDefined()
+  @Type(() => UserQuery)
+  @ValidateNested({ each: true })
+  query: UserQuery;
 }

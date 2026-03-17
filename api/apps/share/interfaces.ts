@@ -16,6 +16,8 @@ export type CategoryPaginationResponse = PaginationResponse<CategoryBodyType>;
 
 export type ProductPaginationResponse = PaginationResponse<product>;
 
+export type UserPaginationResponse = PaginationResponse<user>;
+
 export type IngredientPrismaOmitType = Omit<
   ingredient,
   'units' | 'ingredientId' | '_count' | 'disabled' | 'expiredTime'
@@ -26,6 +28,8 @@ export type IngredientPaginationResponse = PaginationResponse<IngredientPrismaOm
 export type CategoryPaginationPrismaResponse = (CategoryBodyType[] | number)[];
 
 export type ProductPaginationPrismaResponse = (product[] | number)[];
+
+export type UserPaginationPrismaResponse = (Partial<user>[] | number)[];
 
 export type IngredientPaginationPrismaResponseType = (ingredient[] | number)[];
 
