@@ -74,21 +74,6 @@ export class LoginSerializer extends User {
   @IsString()
   reset_password_token: string;
 
-  @Expose({ toPlainOnly: true })
-  get userId() {
-    return this.user_id;
-  }
-
-  @Expose({ toPlainOnly: true })
-  get firstName() {
-    return this.first_name;
-  }
-
-  @Expose({ toPlainOnly: true })
-  get lastName() {
-    return this.last_name;
-  }
-
   @IsOptional()
   @Expose({ toPlainOnly: true })
   get resetPasswordToken() {
