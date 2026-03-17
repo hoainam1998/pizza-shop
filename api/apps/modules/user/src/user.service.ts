@@ -3,8 +3,9 @@ import { PrismaClient, type user } from 'generated/prisma';
 import { PRISMA_CLIENT } from '@share/di-token';
 import messages from '@share/constants/messages';
 import { HandlePrismaError } from '@share/decorators';
-import type { UserSignupType } from '@share/interfaces';
-import { ResetPassword } from '@share/dto/validators/user.dto';
+import type { UserPaginationPrismaResponse, UserSignupType } from '@share/interfaces';
+import { calcSkip } from '@share/utils';
+import { ResetPassword, UserPagination } from '@share/dto/validators/user.dto';
 
 @Injectable()
 export default class UserService {
@@ -63,5 +64,41 @@ export default class UserService {
       },
       select,
     });
+  }
+
+  @HandlePrismaError(messages.USER)
+  pagination(select: UserPagination): Promise<UserPaginationPrismaResponse> {
+    const skip = calcSkip(select.pageSize, select.pageNumber);
+    const condition = select.search
+      ? {
+          OR: [
+            {
+              first_name: {
+                contains: select.search,
+              },
+            },
+            {
+              last_name: {
+                contains: select.search,
+              },
+            },
+          ],
+        }
+      : {};
+
+    return this.prismaClient.$transaction([
+      this.prismaClient.user.findMany({
+        take: select.pageSize,
+        skip,
+        select: select.query,
+        where: condition,
+        orderBy: {
+          user_id: 'desc',
+        },
+      }),
+      this.prismaClient.user.count({
+        where: condition,
+      }),
+    ]);
   }
 }

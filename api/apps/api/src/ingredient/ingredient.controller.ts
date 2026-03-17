@@ -140,7 +140,7 @@ export default class IngredientController extends BaseController {
   @Post(IngredientRouter.relative.pagination)
   @HttpCode(HttpStatus.OK)
   @HandleHttpError
-  pagination(@Body() select: IngredientPaginationSelect): Observable<any> {
+  pagination(@Body() select: IngredientPaginationSelect): Observable<Promise<Record<string, any>>> {
     const query = instanceToPlain(plainToInstance(IngredientSelect, IngredientSelect.plain(select.query)));
     return this.ingredientService.pagination({ ...select, query }).pipe(
       map((result) => {

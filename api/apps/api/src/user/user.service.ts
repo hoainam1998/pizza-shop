@@ -3,8 +3,8 @@ import { ClientProxy } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 import { user } from 'generated/prisma';
 import { USER_SERVICE } from '@share/di-token';
-import { canSignupPattern, signupPattern, loginPattern, resetPasswordPattern } from '@share/pattern';
-import type { UserRequestType } from '@share/interfaces';
+import { canSignupPattern, signupPattern, loginPattern, resetPasswordPattern, paginationPattern } from '@share/pattern';
+import type { UserPaginationResponse, UserRequestType } from '@share/interfaces';
 import { LoginInfo, ResetPassword } from '@share/dto/validators/user.dto';
 
 @Injectable()
@@ -25,5 +25,9 @@ export default class UserService {
 
   resetPassword(resetPasswordBody: ResetPassword): Observable<Omit<user, 'password' | 'phone'>> {
     return this.user.send<user>(resetPasswordPattern, resetPasswordBody);
+  }
+
+  pagination(select: Record<string, any>): Observable<UserPaginationResponse> {
+    return this.user.send<UserPaginationResponse>(paginationPattern, select);
   }
 }

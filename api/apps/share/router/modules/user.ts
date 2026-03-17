@@ -18,6 +18,7 @@ export default class UserRouter extends RouterBase {
     UserRouter.createRouterPath('login');
     UserRouter.createRouterPath('reset-password');
     UserRouter.createRouterPath('create');
+    UserRouter.createRouterPath('pagination');
   }
 }
 

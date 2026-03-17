@@ -1,13 +1,19 @@
-import { BadRequestException, Controller, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Controller, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { type user } from 'generated/prisma';
 import { MessagePattern } from '@nestjs/microservices';
 import UsersService from './user.service';
 import LoggingService from '@share/libs/logging/logging.service';
 import { HandleServiceError, HandleJwtVerifyError } from '@share/decorators';
-import { canSignupPattern, signupPattern, loginPattern, resetPasswordPattern } from '@share/pattern';
-import type { UserSignupType } from '@share/interfaces';
-import { LoginInfo, ResetPassword } from '@share/dto/validators/user.dto';
-import { comparePassword, createMessage, omitFields, verifyAdminResetPasswordToken } from '@share/utils';
+import { canSignupPattern, signupPattern, loginPattern, resetPasswordPattern, paginationPattern } from '@share/pattern';
+import type { UserPaginationResponse, UserSignupType } from '@share/interfaces';
+import { LoginInfo, ResetPassword, UserPagination } from '@share/dto/validators/user.dto';
+import {
+  checkArrayHaveValues,
+  comparePassword,
+  createMessage,
+  omitFields,
+  verifyAdminResetPasswordToken,
+} from '@share/utils';
 import messages from '@share/constants/messages';
 
 @Controller('user')
@@ -61,5 +67,23 @@ export default class UserController {
     } else {
       throw new UnauthorizedException(createMessage(messages.USER.NOT_FOUND));
     }
+  }
+
+  @MessagePattern(paginationPattern)
+  @HandleServiceError
+  pagination(select: UserPagination): Promise<UserPaginationResponse> {
+    return this.userService.pagination(select).then((results) => {
+      const [list, total] = results;
+      if (!checkArrayHaveValues(list as Partial<user>[])) {
+        throw new NotFoundException({
+          list: [],
+          total: 0,
+        });
+      }
+      return {
+        list,
+        total,
+      } as UserPaginationResponse;
+    });
   }
 }

@@ -13,8 +13,15 @@ import {
 import { map, Observable } from 'rxjs';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import UserService from './user.service';
-import { CanSignupSerializer, LoginSerializer } from '@share/dto/serializer/user';
-import { LoginInfo, SignupDTO, ResetPassword, CreateUser } from '@share/dto/validators/user.dto';
+import { CanSignupSerializer, LoginSerializer, PaginationUserSerializer } from '@share/dto/serializer/user';
+import {
+  LoginInfo,
+  SignupDTO,
+  ResetPassword,
+  CreateUser,
+  UserPagination,
+  UserQuery,
+} from '@share/dto/validators/user.dto';
 import { createMessage, getAdminResetPasswordLink } from '@share/utils';
 import messages from '@share/constants/messages';
 import SendEmailService from '@share/libs/mailer/mailer.service';
@@ -133,6 +140,29 @@ export default class UserController extends BaseController {
             Logger.error(this.create.name, error);
             throw new BadRequestException(MessageSerializer.create(messages.USER.CREATE_USER_FAILED));
           });
+      }),
+    );
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post(UserRouter.relative.pagination)
+  @HandleHttpError
+  pagination(@Body() select: UserPagination): Observable<Promise<Record<string, any>>> {
+    const query = UserQuery.plain(select.query);
+    return this.userService.pagination({ ...select, query }).pipe(
+      map((result) => {
+        const response = new PaginationUserSerializer(result);
+        return response.validate().then((errors) => {
+          if (errors.length) {
+            this.logError(errors, this.pagination.name);
+            throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
+          }
+
+          return {
+            total: response.total,
+            list: instanceToPlain(response.list),
+          };
+        });
       }),
     );
   }

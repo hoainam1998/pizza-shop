@@ -24,3 +24,16 @@ export const sessionPayload: SessionData['user'] = {
   userId: user.user_id,
   canSignup: false,
 };
+
+export const createUsers = (length: number): Partial<typeof user>[] => {
+  return Array.apply(this, Array(length)).map(() => ({
+    user_id: user.user_id,
+    first_name: user.first_name,
+    last_name: user.last_name,
+    email: user.email,
+    phone: user.phone,
+    avatar: user.avatar,
+    sex: user.sex,
+    power: user.power,
+  }));
+};
