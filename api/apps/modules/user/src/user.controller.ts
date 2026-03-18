@@ -4,8 +4,15 @@ import { MessagePattern } from '@nestjs/microservices';
 import UsersService from './user.service';
 import LoggingService from '@share/libs/logging/logging.service';
 import { HandleServiceError, HandleJwtVerifyError } from '@share/decorators';
-import { canSignupPattern, signupPattern, loginPattern, resetPasswordPattern, paginationPattern } from '@share/pattern';
-import type { UserPaginationResponse, UserSignupType } from '@share/interfaces';
+import {
+  canSignupPattern,
+  signupPattern,
+  loginPattern,
+  resetPasswordPattern,
+  paginationPattern,
+  getUserDetailPattern,
+} from '@share/pattern';
+import type { UserDetailType, UserPaginationResponse, UserSignupType } from '@share/interfaces';
 import { LoginInfo, ResetPassword, UserPagination } from '@share/dto/validators/user.dto';
 import {
   checkArrayHaveValues,
@@ -85,5 +92,11 @@ export default class UserController {
         total,
       } as UserPaginationResponse;
     });
+  }
+
+  @MessagePattern(getUserDetailPattern)
+  @HandleServiceError
+  getUser(select: UserDetailType): Promise<user> {
+    return this.userService.getUser(select);
   }
 }

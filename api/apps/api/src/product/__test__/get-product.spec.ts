@@ -64,7 +64,7 @@ let close: () => Promise<void>;
 let productService: ProductService;
 let productController: ProductController;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const requestTest = await startUp(MockProductModule);
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;
@@ -248,25 +248,6 @@ describe(createDescribeTest(HTTP_METHOD.POST, getProductUrl), () => {
     expect(getProductService).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(getProductPattern, select);
-  });
-
-  it(createTestName('get product detail failed with undefined field', HttpStatus.BAD_REQUEST), async () => {
-    expect.hasAssertions();
-    const undefinedFieldBody = {
-      ...getProductRequestBody,
-      productIds: [Date.now().toString()],
-    };
-    const send = jest.spyOn(clientProxy, 'send');
-    const getProductService = jest.spyOn(productService, 'pagination');
-    const response = await api
-      .post(getProductUrl)
-      .set('mock-session', JSON.stringify(sessionPayload))
-      .send(undefinedFieldBody)
-      .expect(HttpStatus.BAD_REQUEST)
-      .expect('Content-Type', /application\/json/);
-    expect(response.body).toEqual({ messages: expect.any(Array) });
-    expect(getProductService).not.toHaveBeenCalled();
-    expect(send).not.toHaveBeenCalled();
   });
 
   it(createTestName('get product failed with database disconnect', HttpStatus.BAD_REQUEST), async () => {

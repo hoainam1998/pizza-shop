@@ -1,6 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import { user, category, product, ingredient } from 'generated/prisma';
 import { Carts, GetProductsInCart, ProductPagination } from './dto/validators/product.dto';
+import { UserDetail } from './dto/validators/user.dto';
 import { VIEW } from './enums';
 
 export type CategoryBodyType = category & {
@@ -130,4 +131,9 @@ export type DataChartAddedType = {
 export type ConnectedPayloadType = {
   userId: string;
   view: VIEW;
+};
+
+export type UserDetailType = {
+  user_id: UserDetail['user_id'];
+  query: Omit<UserDetail['query'], 'firstName' | 'lastName'>;
 };

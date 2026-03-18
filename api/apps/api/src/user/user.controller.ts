@@ -13,7 +13,12 @@ import {
 import { map, Observable } from 'rxjs';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import UserService from './user.service';
-import { CanSignupSerializer, LoginSerializer, PaginationUserSerializer } from '@share/dto/serializer/user';
+import {
+  CanSignupSerializer,
+  LoginSerializer,
+  PaginationUserSerializer,
+  UserSerializer,
+} from '@share/dto/serializer/user';
 import {
   LoginInfo,
   SignupDTO,
@@ -21,6 +26,7 @@ import {
   CreateUser,
   UserPagination,
   UserQuery,
+  UserDetail,
 } from '@share/dto/validators/user.dto';
 import { createMessage, getAdminResetPasswordLink } from '@share/utils';
 import messages from '@share/constants/messages';
@@ -162,6 +168,23 @@ export default class UserController extends BaseController {
             total: response.total,
             list: instanceToPlain(response.list),
           };
+        });
+      }),
+    );
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post(UserRouter.relative.detail)
+  @HandleHttpError
+  getUserDetail(@Body() select: UserDetail): Observable<Promise<Record<string, any>>> {
+    return this.userService.getUserDetail(UserDetail.plain(select)).pipe(
+      map((user) => {
+        return new UserSerializer(user).validate().then((errors) => {
+          if (errors.length) {
+            this.logError(errors, this.getUserDetail.name);
+            throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
+          }
+          return instanceToPlain(plainToInstance(UserSerializer, user));
         });
       }),
     );

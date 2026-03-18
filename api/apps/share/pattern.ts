@@ -16,6 +16,7 @@ export const canSignupPattern = createMicroserviceEvent('can_signup');
 export const signupPattern = createMicroserviceEvent('signup');
 export const loginPattern = createMicroserviceEvent('login');
 export const resetPasswordPattern = createMicroserviceEvent('reset_password');
+export const getUserDetailPattern = createMicroserviceEvent('get_user');
 
 // ingredient
 export const createIngredientPattern = createMicroserviceEvent('create_ingredient');

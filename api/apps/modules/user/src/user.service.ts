@@ -3,7 +3,7 @@ import { PrismaClient, type user } from 'generated/prisma';
 import { PRISMA_CLIENT } from '@share/di-token';
 import messages from '@share/constants/messages';
 import { HandlePrismaError } from '@share/decorators';
-import type { UserPaginationPrismaResponse, UserSignupType } from '@share/interfaces';
+import type { UserDetailType, UserPaginationPrismaResponse, UserSignupType } from '@share/interfaces';
 import { calcSkip } from '@share/utils';
 import { ResetPassword, UserPagination } from '@share/dto/validators/user.dto';
 
@@ -100,5 +100,15 @@ export default class UserService {
         where: condition,
       }),
     ]);
+  }
+
+  @HandlePrismaError(messages.USER)
+  getUser(select: UserDetailType): Promise<any> {
+    return this.prismaClient.user.findUniqueOrThrow({
+      where: {
+        user_id: select.user_id,
+      },
+      select: select.query,
+    });
   }
 }

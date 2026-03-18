@@ -11,6 +11,8 @@ import {
   IsOptional,
   IsDefined,
   ValidateNested,
+  IsNumberString,
+  Length,
 } from 'class-validator';
 import { OmitType } from '@nestjs/mapped-types';
 import constants from '@share/constants';
@@ -161,7 +163,7 @@ export class UserQuery {
     return true;
   }
 
-  static plain(target: UserPagination['query']): Record<string, any> {
+  static plain(target: Record<string, any>): Record<string, any> {
     if (Array.from(Object.values(target)).every((value) => value == undefined)) {
       target.avatar = true;
       target.firstName = true;
@@ -195,4 +197,37 @@ export class UserPagination extends Pagination {
   @Type(() => UserQuery)
   @ValidateNested({ each: true })
   query: UserQuery;
+}
+
+export class UserDetail {
+  @IsDefined()
+  @Type(() => UserQuery)
+  @ValidateNested({ each: true })
+  query: UserQuery;
+
+  @IsDefined()
+  @IsNumberString()
+  @Length(13)
+  userId: string;
+
+  @Expose({ toPlainOnly: true })
+  get user_id() {
+    return this.userId;
+  }
+
+  static plain(target: Record<string, any>): Record<string, any> {
+    const userDetailPlain = instanceToPlain(plainToInstance(UserDetail, target));
+    const userDetailTransform = instanceToPlain(plainToInstance(UserDetailTransform, userDetailPlain));
+    const query = UserQuery.plain(target.query as Record<string, any>);
+
+    return {
+      ...userDetailTransform,
+      query,
+    };
+  }
+}
+
+export class UserDetailTransform extends OmitType(UserDetail, ['userId']) {
+  @Exclude()
+  userId: string;
 }

@@ -10,7 +10,8 @@ import {
 } from 'class-validator';
 import { Exclude, Expose, plainToInstance, Type } from 'class-transformer';
 import Validator from './validator';
-import { UserPaginationResponse, UserRequestType } from '@share/interfaces';
+import { UserPaginationResponse } from '@share/interfaces';
+import { user } from 'generated/prisma';
 
 export class CanSignupSerializer extends Validator {
   @IsBoolean()
@@ -22,7 +23,7 @@ export class CanSignupSerializer extends Validator {
   }
 }
 
-export class User extends Validator {
+export class UserSerializer extends Validator {
   @Exclude({ toPlainOnly: true })
   @IsString()
   user_id: string;
@@ -66,9 +67,14 @@ export class User extends Validator {
   get lastName() {
     return this.last_name;
   }
+
+  constructor(target: user) {
+    super();
+    Object.assign(this, target);
+  }
 }
 
-export class LoginSerializer extends User {
+export class LoginSerializer extends UserSerializer {
   @Exclude({ toPlainOnly: true })
   @IsOptional()
   @IsString()
@@ -85,8 +91,8 @@ export class LoginSerializer extends User {
     return !!this.reset_password_token;
   }
 
-  constructor(target: UserRequestType) {
-    super();
+  constructor(target: user) {
+    super(target);
     Object.assign(this, target);
   }
 }
@@ -98,14 +104,14 @@ export class PaginationUserSerializer extends Validator {
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => User)
-  list: User[];
+  @Type(() => UserSerializer)
+  list: UserSerializer[];
 
   constructor(results: UserPaginationResponse) {
     super();
     if (results) {
       this.total = results.total;
-      this.list = results.list.map((user) => plainToInstance(User, user));
+      this.list = results.list.map((user) => plainToInstance(UserSerializer, user));
     }
   }
 }
