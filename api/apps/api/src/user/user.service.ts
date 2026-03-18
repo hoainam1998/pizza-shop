@@ -3,8 +3,15 @@ import { ClientProxy } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 import { user } from 'generated/prisma';
 import { USER_SERVICE } from '@share/di-token';
-import { canSignupPattern, signupPattern, loginPattern, resetPasswordPattern, paginationPattern } from '@share/pattern';
-import type { UserPaginationResponse, UserRequestType } from '@share/interfaces';
+import {
+  canSignupPattern,
+  signupPattern,
+  loginPattern,
+  resetPasswordPattern,
+  paginationPattern,
+  getUserDetailPattern,
+} from '@share/pattern';
+import type { UserPaginationResponse } from '@share/interfaces';
 import { LoginInfo, ResetPassword } from '@share/dto/validators/user.dto';
 
 @Injectable()
@@ -19,8 +26,8 @@ export default class UserService {
     return this.user.send<user>(signupPattern, user);
   }
 
-  login(loginInfo: LoginInfo): Observable<UserRequestType> {
-    return this.user.send<UserRequestType>(loginPattern, loginInfo);
+  login(loginInfo: LoginInfo): Observable<user> {
+    return this.user.send<user>(loginPattern, loginInfo);
   }
 
   resetPassword(resetPasswordBody: ResetPassword): Observable<Omit<user, 'password' | 'phone'>> {
@@ -29,5 +36,9 @@ export default class UserService {
 
   pagination(select: Record<string, any>): Observable<UserPaginationResponse> {
     return this.user.send<UserPaginationResponse>(paginationPattern, select);
+  }
+
+  getUserDetail(query: Record<string, any>): Observable<user> {
+    return this.user.send<user>(getUserDetailPattern, query);
   }
 }
