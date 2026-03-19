@@ -10,6 +10,7 @@ import {
   resetPasswordPattern,
   paginationPattern,
   getUserDetailPattern,
+  updateUserPattern,
 } from '@share/pattern';
 import type { UserPaginationResponse } from '@share/interfaces';
 import { LoginInfo, ResetPassword } from '@share/dto/validators/user.dto';
@@ -40,5 +41,9 @@ export default class UserService {
 
   getUserDetail(query: Record<string, any>): Observable<user> {
     return this.user.send<user>(getUserDetailPattern, query);
+  }
+
+  updateUser(user: Record<string, any>): Observable<user> {
+    return this.user.send<user>(updateUserPattern, user);
   }
 }

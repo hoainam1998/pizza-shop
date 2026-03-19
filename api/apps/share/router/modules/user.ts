@@ -20,6 +20,7 @@ export default class UserRouter extends RouterBase {
     UserRouter.createRouterPath('create');
     UserRouter.createRouterPath('pagination');
     UserRouter.createRouterPath('detail');
+    UserRouter.createRouterPath('update');
   }
 }
 

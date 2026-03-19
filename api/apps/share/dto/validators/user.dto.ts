@@ -75,6 +75,27 @@ export class CreateUser extends OmitType(SignupDTO, ['power']) {
   }
 }
 
+export class UpdateUser extends CreateUser {
+  @IsNumberString()
+  @Length(13)
+  userId: string;
+
+  @Expose({ toPlainOnly: true })
+  get user_id() {
+    return this.userId;
+  }
+
+  static plain(target: Record<string, any>): Record<string, any> {
+    const updateUserPlain = instanceToPlain(plainToInstance(UpdateUser, target));
+    return instanceToPlain(plainToInstance(UpdateUserTransform, updateUserPlain));
+  }
+}
+
+export class UpdateUserTransform extends OmitType(UpdateUser, ['userId']) {
+  @Exclude()
+  userId: string;
+}
+
 export class LoginInfo {
   @IsEmail()
   email: string;
