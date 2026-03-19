@@ -11,6 +11,7 @@ import {
   resetPasswordPattern,
   paginationPattern,
   getUserDetailPattern,
+  updateUserPattern,
 } from '@share/pattern';
 import type { UserDetailType, UserPaginationResponse, UserSignupType } from '@share/interfaces';
 import { LoginInfo, ResetPassword, UserPagination } from '@share/dto/validators/user.dto';
@@ -98,5 +99,11 @@ export default class UserController {
   @HandleServiceError
   getUser(select: UserDetailType): Promise<user> {
     return this.userService.getUser(select);
+  }
+
+  @MessagePattern(updateUserPattern)
+  @HandleServiceError
+  update(user: user): Promise<user> {
+    return this.userService.update(user);
   }
 }

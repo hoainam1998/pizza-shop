@@ -111,4 +111,14 @@ export default class UserService {
       select: select.query,
     });
   }
+
+  @HandlePrismaError(messages.USER)
+  update(user: user): Promise<user> {
+    return this.prismaClient.user.update({
+      where: {
+        user_id: user.user_id,
+      },
+      data: user,
+    });
+  }
 }
