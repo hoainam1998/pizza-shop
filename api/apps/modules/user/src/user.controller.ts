@@ -12,6 +12,7 @@ import {
   paginationPattern,
   getUserDetailPattern,
   updateUserPattern,
+  deleteUserPattern,
 } from '@share/pattern';
 import type { UserDetailType, UserPaginationResponse, UserSignupType } from '@share/interfaces';
 import { LoginInfo, ResetPassword, UserPagination } from '@share/dto/validators/user.dto';
@@ -105,5 +106,11 @@ export default class UserController {
   @HandleServiceError
   update(user: user): Promise<user> {
     return this.userService.update(user);
+  }
+
+  @MessagePattern(deleteUserPattern)
+  @HandleServiceError
+  delete(userId: string): Promise<user> {
+    return this.userService.delete(userId);
   }
 }

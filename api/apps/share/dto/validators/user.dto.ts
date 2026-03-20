@@ -252,3 +252,10 @@ export class UserDetailTransform extends OmitType(UserDetail, ['userId']) {
   @Exclude()
   userId: string;
 }
+
+export class UserDelete {
+  @IsDefined()
+  @IsNumberString()
+  @Length(13)
+  userId: string;
+}

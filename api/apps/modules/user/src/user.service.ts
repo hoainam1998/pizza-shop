@@ -121,4 +121,42 @@ export default class UserService {
       data: user,
     });
   }
+
+  @HandlePrismaError(messages.USER)
+  async delete(userId: string): Promise<user> {
+    await this.prismaClient.bill
+      .findMany({
+        where: {
+          user_id: userId,
+        },
+        select: {
+          bill_id: true,
+        },
+      })
+      .then((bills) => {
+        const billIds = bills.map((bill) => bill.bill_id);
+        return this.prismaClient.bill_detail.deleteMany({
+          where: {
+            bill_id: {
+              in: billIds,
+            },
+          },
+        });
+      });
+
+    return this.prismaClient
+      .$transaction([
+        this.prismaClient.bill.deleteMany({
+          where: {
+            user_id: userId,
+          },
+        }),
+        this.prismaClient.user.delete({
+          where: {
+            user_id: userId,
+          },
+        }),
+      ])
+      .then((results) => results[1]);
+  }
 }

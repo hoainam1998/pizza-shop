@@ -30,6 +30,16 @@ export default {
   },
   user: {
     count: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+  },
+  bill: {
+    findMany: jest.fn(),
+    create: jest.fn(),
+    deleteMany: jest.fn(),
+  },
+  bill_detail: {
+    findMany: jest.fn(),
   },
   $transaction: jest.fn().mockResolvedValue({}),
 };

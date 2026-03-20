@@ -34,6 +34,7 @@ export default Object.freeze({
     CREATE_USER_SUCCESS: 'Create user was success. An email was sent to user has been created!',
     CREATE_USER_FAILED: 'Create user was failed!',
     UPDATE_USER_SUCCESS: 'Update user was success!',
+    DELETE_USER_SUCCESS: 'Delete user was success!',
   },
   INGREDIENT: {
     CREATE_INGREDIENT_SUCCESS: 'Create ingredient was success!',

@@ -9,6 +9,8 @@ import {
   Req,
   Logger,
   UnauthorizedException,
+  Param,
+  Delete,
 } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
@@ -28,6 +30,7 @@ import {
   UserQuery,
   UserDetail,
   UpdateUser,
+  UserDelete,
 } from '@share/dto/validators/user.dto';
 import { createMessage, getAdminResetPasswordLink } from '@share/utils';
 import messages from '@share/constants/messages';
@@ -158,6 +161,15 @@ export default class UserController extends BaseController {
     return this.userService
       .updateUser(UpdateUser.plain(user))
       .pipe(map(() => MessageSerializer.create(messages.USER.UPDATE_USER_SUCCESS)));
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Delete(UserRouter.relative.delete)
+  @HandleHttpError
+  delete(@Param() user: UserDelete): Observable<MessageSerializer> {
+    return this.userService
+      .deleteUser(user.userId)
+      .pipe(map(() => MessageSerializer.create(messages.USER.DELETE_USER_SUCCESS)));
   }
 
   @HttpCode(HttpStatus.OK)
