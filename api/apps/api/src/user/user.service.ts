@@ -11,6 +11,7 @@ import {
   paginationPattern,
   getUserDetailPattern,
   updateUserPattern,
+  deleteUserPattern,
 } from '@share/pattern';
 import type { UserPaginationResponse } from '@share/interfaces';
 import { LoginInfo, ResetPassword } from '@share/dto/validators/user.dto';
@@ -45,5 +46,9 @@ export default class UserService {
 
   updateUser(user: Record<string, any>): Observable<user> {
     return this.user.send<user>(updateUserPattern, user);
+  }
+
+  deleteUser(userId: string): Observable<user> {
+    return this.user.send<user>(deleteUserPattern, userId);
   }
 }
