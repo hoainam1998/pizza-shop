@@ -78,6 +78,9 @@ describe('delete user', () => {
       where: {
         user_id: userId,
       },
+      select: {
+        session_id: true,
+      },
     });
     expect(logMethod).not.toHaveBeenCalled();
   });
@@ -205,6 +208,9 @@ describe('delete user', () => {
     expect(deleteUserPrismaMethod).toHaveBeenCalledWith({
       where: {
         user_id: userId,
+      },
+      select: {
+        session_id: true,
       },
     });
     expect(logMethod).not.toHaveBeenCalled();
@@ -335,6 +341,9 @@ describe('delete user', () => {
     expect(deleteUserPrismaMethod).toHaveBeenCalledWith({
       where: {
         user_id: userId,
+      },
+      select: {
+        session_id: true,
       },
     });
     expect(logMethod).toHaveBeenCalledTimes(1);
