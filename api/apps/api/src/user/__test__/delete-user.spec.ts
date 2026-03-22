@@ -28,19 +28,6 @@ const deleteUserUrl: string = `${deleteUserBaseUrl}/${userId}`;
 
 const MockUserModule = getMockModule(UserModule, { path: deleteUserBaseUrl, method: RequestMethod.DELETE });
 
-const getUserRequestBody = {
-  userId: Date.now().toString(),
-  query: {
-    firstName: true,
-    lastName: true,
-    email: true,
-    phone: true,
-    power: true,
-    sex: true,
-    avatar: true,
-  },
-};
-
 let api: TestAgent;
 let clientProxy: ClientProxy;
 let close: () => Promise<void>;
@@ -77,18 +64,14 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     expect(send).toHaveBeenCalledWith(deleteUserPattern, userId);
   });
 
-  // it.skip(createTestName('get user detail failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
+  // it.skip(createTestName('delete user failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
   //   expect.hasAssertions();
   //   const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
-  //   const deleteUserService = jest.spyOn(userService, 'getUserDetail');
+  //   const deleteUserService = jest.spyOn(userService, 'deleteUser');
   //   await api
-  //     .post(getUserUrl)
-  //     .send(getUserRequestBody)
+  //     .delete(deleteUserUrl)
   //     .expect(HttpStatus.UNAUTHORIZED)
-  //     .expect('Content-Type', /application\/json/)
-  //     .expect(createMessages(messages.USER.DID_NOT_LOGIN));
-  //   expect(deleteUserService).not.toHaveBeenCalled();
-  //   expect(send).not.toHaveBeenCalled();
+  //     .expect('Content-Type', /application\/json/);
   // });
 
   it(createTestName('delete user failed with not found error', HttpStatus.NOT_FOUND), async () => {
@@ -100,7 +83,6 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     await api
       .delete(deleteUserUrl)
       .set('mock-session', JSON.stringify(sessionPayload))
-      .send(getUserRequestBody)
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.NOT_FOUND));
@@ -117,7 +99,6 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     await api
       .delete(deleteUserUrl)
       .set('mock-session', JSON.stringify(sessionPayload))
-      .send(getUserRequestBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(new InternalServerErrorException().message));
@@ -135,7 +116,6 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     await api
       .delete(deleteUserUrl)
       .set('mock-session', JSON.stringify(sessionPayload))
-      .send(getUserRequestBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(serverError.message));
@@ -168,7 +148,6 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     await api
       .delete(deleteUserUrl)
       .set('mock-session', JSON.stringify(sessionPayload))
-      .send(getUserRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
