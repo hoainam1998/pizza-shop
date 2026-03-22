@@ -121,6 +121,8 @@
     "test:e2e:user.reset-password": "jest --watch apps/api/src/user/__test__/reset-password.spec.ts",
     "test:e2e:user.pagination": "jest --watch apps/api/src/user/__test__/pagination.spec.ts",
     "test:e2e:user.get-user": "jest --watch apps/api/src/user/__test__/get-user.spec.ts",
+    "test:e2e:user.delete-user": "jest --watch apps/api/src/user/__test__/delete-user.spec.ts",
+    "test:e2e:user.update-user": "jest --watch apps/api/src/user/__test__/update-user.spec.ts",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
   },

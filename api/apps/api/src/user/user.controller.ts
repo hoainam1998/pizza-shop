@@ -11,6 +11,7 @@ import {
   UnauthorizedException,
   Param,
   Delete,
+  Put,
 } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
@@ -155,12 +156,15 @@ export default class UserController extends BaseController {
   }
 
   @HttpCode(HttpStatus.CREATED)
-  @Post(UserRouter.relative.update)
+  @Put(UserRouter.relative.update)
   @HandleHttpError
-  update(@Body() user: UpdateUser): Observable<MessageSerializer> {
-    return this.userService
-      .updateUser(UpdateUser.plain(user))
-      .pipe(map(() => MessageSerializer.create(messages.USER.UPDATE_USER_SUCCESS)));
+  update(@Req() req: Express.Request, @Body() user: UpdateUser): Observable<MessageSerializer> {
+    return this.userService.updateUser(UpdateUser.plain(user)).pipe(
+      map((user) => {
+        req.sessionStore.destroy(user.session_id as string);
+        return MessageSerializer.create(messages.USER.UPDATE_USER_SUCCESS);
+      }),
+    );
   }
 
   @HttpCode(HttpStatus.OK)

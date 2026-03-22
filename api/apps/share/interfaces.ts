@@ -137,3 +137,7 @@ export type UserDetailType = {
   user_id: UserDetail['user_id'];
   query: Omit<UserDetail['query'], 'firstName' | 'lastName'>;
 };
+
+export type UserWithOnlySessionIDType = Pick<user, 'session_id'>;
+
+export type UserLoggedType = Omit<user, 'password' | 'phone' | 'session_id'>;

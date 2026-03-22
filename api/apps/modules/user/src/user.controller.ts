@@ -14,7 +14,12 @@ import {
   updateUserPattern,
   deleteUserPattern,
 } from '@share/pattern';
-import type { UserDetailType, UserPaginationResponse, UserSignupType } from '@share/interfaces';
+import type {
+  UserDetailType,
+  UserPaginationResponse,
+  UserSignupType,
+  UserWithOnlySessionIDType,
+} from '@share/interfaces';
 import { LoginInfo, ResetPassword, UserPagination } from '@share/dto/validators/user.dto';
 import {
   checkArrayHaveValues,
@@ -104,7 +109,7 @@ export default class UserController {
 
   @MessagePattern(updateUserPattern)
   @HandleServiceError
-  update(user: user): Promise<user> {
+  update(user: user): Promise<UserWithOnlySessionIDType> {
     return this.userService.update(user);
   }
 
