@@ -9,6 +9,7 @@ import {
   comparePassword,
 } from './auth';
 import { createMessage, createMessages } from './message';
+import constants from '@share/constants';
 
 /**
  * Create microservice event.
@@ -65,6 +66,7 @@ const handleValidateException = (exceptions: ValidationError[]): string[] => {
     return messages;
   }, []);
 };
+
 /**
  * Convert date object to date time string.
  *
@@ -148,6 +150,14 @@ const getExceptionMessages = (errors: ValidationError[]): string => {
  */
 const getControllerContext = (controllerName: string) => (actionName: string) => `${controllerName} - ${actionName}`;
 
+/**
+ * Get redis session id.
+ *
+ * @param {string} sessionId - The session id.
+ * @returns {string} - The redis session id.
+ */
+const getRedisSessionId = (sessionId: string) => (sessionId ? `${constants.REDIS_PREFIX.SESSION_KEY}${sessionId}` : '');
+
 export {
   createMicroserviceEvent,
   createMessage,
@@ -167,4 +177,5 @@ export {
   omitFields,
   getExceptionMessages,
   getControllerContext,
+  getRedisSessionId,
 };

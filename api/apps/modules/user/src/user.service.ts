@@ -3,7 +3,12 @@ import { PrismaClient, type user } from 'generated/prisma';
 import { PRISMA_CLIENT } from '@share/di-token';
 import messages from '@share/constants/messages';
 import { HandlePrismaError } from '@share/decorators';
-import type { UserDetailType, UserPaginationPrismaResponse, UserSignupType } from '@share/interfaces';
+import type {
+  UserDetailType,
+  UserPaginationPrismaResponse,
+  UserSignupType,
+  UserWithOnlySessionIDType,
+} from '@share/interfaces';
 import { calcSkip } from '@share/utils';
 import { ResetPassword, UserPagination } from '@share/dto/validators/user.dto';
 
@@ -113,13 +118,25 @@ export default class UserService {
   }
 
   @HandlePrismaError(messages.USER)
-  update(user: user): Promise<user> {
-    return this.prismaClient.user.update({
-      where: {
-        user_id: user.user_id,
-      },
-      data: user,
-    });
+  update(user: user): Promise<UserWithOnlySessionIDType> {
+    return this.prismaClient
+      .$transaction([
+        this.prismaClient.user.findUniqueOrThrow({
+          where: {
+            user_id: user.user_id,
+          },
+          select: {
+            session_id: true,
+          },
+        }),
+        this.prismaClient.user.update({
+          where: {
+            user_id: user.user_id,
+          },
+          data: user,
+        }),
+      ])
+      .then((results) => results[0]);
   }
 
   @HandlePrismaError(messages.USER)

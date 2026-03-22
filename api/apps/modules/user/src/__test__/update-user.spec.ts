@@ -39,13 +39,24 @@ beforeAll(async () => {
 describe('update user', () => {
   it('update user success', async () => {
     expect.hasAssertions();
+    const findUniqueOrThrow = jest.spyOn(prismaService.user, 'findUniqueOrThrow').mockResolvedValue(user);
     const update = jest.spyOn(prismaService.user, 'update').mockResolvedValue(user);
+    const transaction = jest.spyOn(prismaService, '$transaction').mockResolvedValue([user, user]);
     const updateService = jest.spyOn(userService, 'update');
     const updateController = jest.spyOn(userController, 'update');
     await expect(userController.update(userInput)).resolves.toBe(user);
     expect(updateController).toHaveBeenCalledTimes(1);
     expect(updateService).toHaveBeenCalledTimes(1);
     expect(updateService).toHaveBeenCalledWith(userInput);
+    expect(findUniqueOrThrow).toHaveBeenCalledTimes(1);
+    expect(findUniqueOrThrow).toHaveBeenCalledWith({
+      where: {
+        user_id: user.user_id,
+      },
+      select: {
+        session_id: true,
+      },
+    });
     expect(update).toHaveBeenCalledTimes(1);
     expect(update).toHaveBeenCalledWith({
       data: userInput,
@@ -53,12 +64,16 @@ describe('update user', () => {
         user_id: userInput.user_id,
       },
     });
+    expect(transaction).toHaveBeenCalledTimes(1);
+    expect(transaction).toHaveBeenCalledWith(expect.any(Array));
   });
 
   it('update user failed with unknown error', async () => {
     expect.hasAssertions();
     const logMethod = jest.spyOn(loggerService, 'error');
-    const update = jest.spyOn(prismaService.user, 'update').mockRejectedValue(UnknownError);
+    const findUniqueOrThrow = jest.spyOn(prismaService.user, 'findUniqueOrThrow').mockResolvedValue(user);
+    const update = jest.spyOn(prismaService.user, 'update').mockResolvedValue(user);
+    const transaction = jest.spyOn(prismaService, '$transaction').mockRejectedValue(UnknownError);
     const updateService = jest.spyOn(userService, 'update');
     const updateController = jest.spyOn(userController, 'update');
     await expect(userController.update(userInput)).rejects.toThrow(
@@ -67,6 +82,15 @@ describe('update user', () => {
     expect(updateController).toHaveBeenCalledTimes(1);
     expect(updateService).toHaveBeenCalledTimes(1);
     expect(updateService).toHaveBeenCalledWith(userInput);
+    expect(findUniqueOrThrow).toHaveBeenCalledTimes(1);
+    expect(findUniqueOrThrow).toHaveBeenCalledWith({
+      where: {
+        user_id: user.user_id,
+      },
+      select: {
+        session_id: true,
+      },
+    });
     expect(update).toHaveBeenCalledTimes(1);
     expect(update).toHaveBeenCalledWith({
       data: userInput,
@@ -74,6 +98,8 @@ describe('update user', () => {
         user_id: userInput.user_id,
       },
     });
+    expect(transaction).toHaveBeenCalledTimes(1);
+    expect(transaction).toHaveBeenCalledWith(expect.any(Array));
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
   });
@@ -81,7 +107,9 @@ describe('update user', () => {
   it('update user failed with database disconnect error', async () => {
     expect.hasAssertions();
     const logMethod = jest.spyOn(loggerService, 'error');
-    const update = jest.spyOn(prismaService.user, 'update').mockRejectedValue(PrismaDisconnectError);
+    const findUniqueOrThrow = jest.spyOn(prismaService.user, 'findUniqueOrThrow').mockResolvedValue(user);
+    const update = jest.spyOn(prismaService.user, 'update').mockResolvedValue(user);
+    const transaction = jest.spyOn(prismaService, '$transaction').mockRejectedValue(PrismaDisconnectError);
     const updateService = jest.spyOn(userService, 'update');
     const updateController = jest.spyOn(userController, 'update');
     await expect(userController.update(userInput)).rejects.toThrow(
@@ -90,6 +118,15 @@ describe('update user', () => {
     expect(updateController).toHaveBeenCalledTimes(1);
     expect(updateService).toHaveBeenCalledTimes(1);
     expect(updateService).toHaveBeenCalledWith(userInput);
+    expect(findUniqueOrThrow).toHaveBeenCalledTimes(1);
+    expect(findUniqueOrThrow).toHaveBeenCalledWith({
+      where: {
+        user_id: user.user_id,
+      },
+      select: {
+        session_id: true,
+      },
+    });
     expect(update).toHaveBeenCalledTimes(1);
     expect(update).toHaveBeenCalledWith({
       data: userInput,
@@ -97,6 +134,8 @@ describe('update user', () => {
         user_id: userInput.user_id,
       },
     });
+    expect(transaction).toHaveBeenCalledTimes(1);
+    expect(transaction).toHaveBeenCalledWith(expect.any(Array));
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(PrismaDisconnectError.message, expect.any(String));
   });
@@ -105,13 +144,24 @@ describe('update user', () => {
     expect.hasAssertions();
     const sexInvalidException = new BadRequestException(createMessage(messages.USER.YOUR_GENDER_INVALID));
     const logMethod = jest.spyOn(loggerService, 'error');
-    const update = jest.spyOn(prismaService.user, 'update').mockRejectedValue(sexInvalidException);
+    const findUniqueOrThrow = jest.spyOn(prismaService.user, 'findUniqueOrThrow').mockResolvedValue(user);
+    const update = jest.spyOn(prismaService.user, 'update').mockResolvedValue(user);
+    const transaction = jest.spyOn(prismaService, '$transaction').mockRejectedValue(sexInvalidException);
     const updateService = jest.spyOn(userService, 'update');
     const updateController = jest.spyOn(userController, 'update');
     await expect(userController.update(userInput)).rejects.toThrow(new RpcException(sexInvalidException));
     expect(updateController).toHaveBeenCalledTimes(1);
     expect(updateService).toHaveBeenCalledTimes(1);
     expect(updateService).toHaveBeenCalledWith(userInput);
+    expect(findUniqueOrThrow).toHaveBeenCalledTimes(1);
+    expect(findUniqueOrThrow).toHaveBeenCalledWith({
+      where: {
+        user_id: user.user_id,
+      },
+      select: {
+        session_id: true,
+      },
+    });
     expect(update).toHaveBeenCalledTimes(1);
     expect(update).toHaveBeenCalledWith({
       data: userInput,
@@ -119,6 +169,8 @@ describe('update user', () => {
         user_id: userInput.user_id,
       },
     });
+    expect(transaction).toHaveBeenCalledTimes(1);
+    expect(transaction).toHaveBeenCalledWith(expect.any(Array));
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(messages.USER.YOUR_GENDER_INVALID, expect.any(String));
   });
@@ -127,13 +179,24 @@ describe('update user', () => {
     expect.hasAssertions();
     const powerInvalidException = new BadRequestException(createMessage(messages.USER.YOUR_POWER_INVALID));
     const logMethod = jest.spyOn(loggerService, 'error');
-    const update = jest.spyOn(prismaService.user, 'update').mockRejectedValue(powerInvalidException);
+    const findUniqueOrThrow = jest.spyOn(prismaService.user, 'findUniqueOrThrow').mockResolvedValue(user);
+    const update = jest.spyOn(prismaService.user, 'update').mockResolvedValue(user);
+    const transaction = jest.spyOn(prismaService, '$transaction').mockRejectedValue(powerInvalidException);
     const updateService = jest.spyOn(userService, 'update');
     const updateController = jest.spyOn(userController, 'update');
     await expect(userController.update(userInput)).rejects.toThrow(new RpcException(powerInvalidException));
     expect(updateController).toHaveBeenCalledTimes(1);
     expect(updateService).toHaveBeenCalledTimes(1);
     expect(updateService).toHaveBeenCalledWith(userInput);
+    expect(findUniqueOrThrow).toHaveBeenCalledTimes(1);
+    expect(findUniqueOrThrow).toHaveBeenCalledWith({
+      where: {
+        user_id: user.user_id,
+      },
+      select: {
+        session_id: true,
+      },
+    });
     expect(update).toHaveBeenCalledTimes(1);
     expect(update).toHaveBeenCalledWith({
       data: userInput,
@@ -141,6 +204,8 @@ describe('update user', () => {
         user_id: userInput.user_id,
       },
     });
+    expect(transaction).toHaveBeenCalledTimes(1);
+    expect(transaction).toHaveBeenCalledWith(expect.any(Array));
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(messages.USER.YOUR_POWER_INVALID, expect.any(String));
   });
@@ -149,13 +214,24 @@ describe('update user', () => {
     expect.hasAssertions();
     const emailExistException = new UnauthorizedException(createMessage(messages.USER.EMAIL_REGIS_ALREADY_EXIST));
     const logMethod = jest.spyOn(loggerService, 'error');
-    const update = jest.spyOn(prismaService.user, 'update').mockRejectedValue(emailExistException);
+    const findUniqueOrThrow = jest.spyOn(prismaService.user, 'findUniqueOrThrow').mockResolvedValue(user);
+    const update = jest.spyOn(prismaService.user, 'update').mockResolvedValue(user);
+    const transaction = jest.spyOn(prismaService, '$transaction').mockRejectedValue(emailExistException);
     const updateService = jest.spyOn(userService, 'update');
     const updateController = jest.spyOn(userController, 'update');
     await expect(userController.update(userInput)).rejects.toThrow(new RpcException(emailExistException));
     expect(updateController).toHaveBeenCalledTimes(1);
     expect(updateService).toHaveBeenCalledTimes(1);
     expect(updateService).toHaveBeenCalledWith(userInput);
+    expect(findUniqueOrThrow).toHaveBeenCalledTimes(1);
+    expect(findUniqueOrThrow).toHaveBeenCalledWith({
+      where: {
+        user_id: user.user_id,
+      },
+      select: {
+        session_id: true,
+      },
+    });
     expect(update).toHaveBeenCalledTimes(1);
     expect(update).toHaveBeenCalledWith({
       data: userInput,
@@ -163,6 +239,8 @@ describe('update user', () => {
         user_id: userInput.user_id,
       },
     });
+    expect(transaction).toHaveBeenCalledTimes(1);
+    expect(transaction).toHaveBeenCalledWith(expect.any(Array));
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(messages.USER.EMAIL_REGIS_ALREADY_EXIST, expect.any(String));
   });
@@ -171,13 +249,24 @@ describe('update user', () => {
     expect.hasAssertions();
     const phoneExistException = new UnauthorizedException(createMessage(messages.USER.PHONE_ALREADY_EXIST));
     const logMethod = jest.spyOn(loggerService, 'error');
-    const update = jest.spyOn(prismaService.user, 'update').mockRejectedValue(phoneExistException);
+    const findUniqueOrThrow = jest.spyOn(prismaService.user, 'findUniqueOrThrow').mockResolvedValue(user);
+    const update = jest.spyOn(prismaService.user, 'update').mockResolvedValue(user);
+    const transaction = jest.spyOn(prismaService, '$transaction').mockRejectedValue(phoneExistException);
     const updateService = jest.spyOn(userService, 'update');
     const updateController = jest.spyOn(userController, 'update');
     await expect(userController.update(userInput)).rejects.toThrow(new RpcException(phoneExistException));
     expect(updateController).toHaveBeenCalledTimes(1);
     expect(updateService).toHaveBeenCalledTimes(1);
     expect(updateService).toHaveBeenCalledWith(userInput);
+    expect(findUniqueOrThrow).toHaveBeenCalledTimes(1);
+    expect(findUniqueOrThrow).toHaveBeenCalledWith({
+      where: {
+        user_id: user.user_id,
+      },
+      select: {
+        session_id: true,
+      },
+    });
     expect(update).toHaveBeenCalledTimes(1);
     expect(update).toHaveBeenCalledWith({
       data: userInput,
@@ -185,6 +274,8 @@ describe('update user', () => {
         user_id: userInput.user_id,
       },
     });
+    expect(transaction).toHaveBeenCalledTimes(1);
+    expect(transaction).toHaveBeenCalledWith(expect.any(Array));
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(messages.USER.PHONE_ALREADY_EXIST, expect.any(String));
   });

@@ -13,6 +13,7 @@ import {
   ValidateNested,
   IsNumberString,
   Length,
+  Allow,
 } from 'class-validator';
 import { OmitType } from '@nestjs/mapped-types';
 import constants from '@share/constants';
@@ -85,6 +86,11 @@ export class UpdateUser extends CreateUser {
     return this.userId;
   }
 
+  @Expose({ toPlainOnly: true })
+  get session_id() {
+    return null;
+  }
+
   static plain(target: Record<string, any>): Record<string, any> {
     const updateUserPlain = instanceToPlain(plainToInstance(UpdateUser, target));
     return instanceToPlain(plainToInstance(UpdateUserTransform, updateUserPlain));
@@ -103,6 +109,9 @@ export class LoginInfo {
   @IsStrongPassword({ minLength: 8, minUppercase: 0, minNumbers: 0, minSymbols: 1 })
   @Matches(new RegExp(constants.PASSWORD_PATTERN))
   password: string;
+
+  @Allow()
+  session_id: string;
 }
 
 export class ResetPassword {

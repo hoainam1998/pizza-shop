@@ -110,9 +110,15 @@ export default (prisma: PrismaClient) => ({
     }
 
     if (Object.hasOwn(args.data, 'phone')) {
+      const userIdFilter = {};
+      if (args.where.user_id) {
+        Object.assign(userIdFilter, { user_id: { not: args.where.user_id } });
+      }
+
       const count = await prisma.user.count({
         where: {
           phone: args.data.phone as string,
+          ...userIdFilter,
         },
       });
 
