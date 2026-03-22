@@ -140,7 +140,7 @@ export default class UserService {
   }
 
   @HandlePrismaError(messages.USER)
-  async delete(userId: string): Promise<user> {
+  async delete(userId: string): Promise<UserWithOnlySessionIDType> {
     await this.prismaClient.bill
       .findMany({
         where: {
@@ -171,6 +171,9 @@ export default class UserService {
         this.prismaClient.user.delete({
           where: {
             user_id: userId,
+          },
+          select: {
+            session_id: true,
           },
         }),
       ])

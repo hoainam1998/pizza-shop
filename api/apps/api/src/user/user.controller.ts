@@ -170,10 +170,13 @@ export default class UserController extends BaseController {
   @HttpCode(HttpStatus.OK)
   @Delete(UserRouter.relative.delete)
   @HandleHttpError
-  delete(@Param() user: UserDelete): Observable<MessageSerializer> {
-    return this.userService
-      .deleteUser(user.userId)
-      .pipe(map(() => MessageSerializer.create(messages.USER.DELETE_USER_SUCCESS)));
+  delete(@Req() req: Express.Request, @Param() user: UserDelete): Observable<MessageSerializer> {
+    return this.userService.deleteUser(user.userId).pipe(
+      map((user) => {
+        req.sessionStore.destroy(user.session_id as string);
+        return MessageSerializer.create(messages.USER.DELETE_USER_SUCCESS);
+      }),
+    );
   }
 
   @HttpCode(HttpStatus.OK)

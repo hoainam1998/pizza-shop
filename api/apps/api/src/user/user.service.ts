@@ -48,7 +48,7 @@ export default class UserService {
     return this.user.send<UserWithOnlySessionIDType>(updateUserPattern, user);
   }
 
-  deleteUser(userId: string): Observable<user> {
-    return this.user.send<user>(deleteUserPattern, userId);
+  deleteUser(userId: string): Observable<UserWithOnlySessionIDType> {
+    return this.user.send<UserWithOnlySessionIDType>(deleteUserPattern, userId);
   }
 }

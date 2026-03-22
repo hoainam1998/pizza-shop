@@ -115,7 +115,7 @@ export default class UserController {
 
   @MessagePattern(deleteUserPattern)
   @HandleServiceError
-  delete(userId: string): Promise<user> {
+  delete(userId: string): Promise<UserWithOnlySessionIDType> {
     return this.userService.delete(userId);
   }
 }
