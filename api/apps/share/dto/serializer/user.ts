@@ -10,7 +10,7 @@ import {
 } from 'class-validator';
 import { Exclude, Expose, plainToInstance, Type } from 'class-transformer';
 import Validator from './validator';
-import { UserPaginationResponse } from '@share/interfaces';
+import { UserLoggedType, UserPaginationResponse } from '@share/interfaces';
 import { user } from 'generated/prisma';
 
 export class CanSignupSerializer extends Validator {
@@ -68,7 +68,7 @@ export class UserSerializer extends Validator {
     return this.last_name;
   }
 
-  constructor(target: user) {
+  constructor(target: Partial<user>) {
     super();
     Object.assign(this, target);
   }
@@ -91,7 +91,7 @@ export class LoginSerializer extends UserSerializer {
     return !!this.reset_password_token;
   }
 
-  constructor(target: user) {
+  constructor(target: UserLoggedType) {
     super(target);
     Object.assign(this, target);
   }

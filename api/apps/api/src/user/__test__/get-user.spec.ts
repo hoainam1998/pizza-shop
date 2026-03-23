@@ -31,6 +31,7 @@ const user: Partial<typeof originUser> = Object.assign({}, originUser);
 delete user.reset_password_token;
 delete user.password;
 delete user.plain_password;
+delete user.session_id;
 const getUserUrl: string = UserRouter.absolute.detail;
 
 const MockUserModule = getMockModule(UserModule, { path: getUserUrl, method: RequestMethod.POST });

@@ -3,6 +3,7 @@ import CategoryCachingModule from './category/category.module';
 import IngredientCachingModule from './ingredient/ingredient.module';
 import ProductCachingModule from './product/product.module';
 import ReportCachingModule from './report/report.module';
+import UserCachingModule from './user/user.module';
 
 @Module({})
 export default class CachingModule {
@@ -14,8 +15,15 @@ export default class CachingModule {
         IngredientCachingModule.register(redisProvider),
         ProductCachingModule.register(redisProvider),
         ReportCachingModule.register(redisProvider),
+        UserCachingModule.register(redisProvider),
       ],
-      exports: [CategoryCachingModule, IngredientCachingModule, ProductCachingModule, ReportCachingModule],
+      exports: [
+        CategoryCachingModule,
+        IngredientCachingModule,
+        ProductCachingModule,
+        ReportCachingModule,
+        UserCachingModule,
+      ],
     };
   }
 }

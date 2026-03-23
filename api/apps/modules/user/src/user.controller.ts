@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Controller, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { type user } from 'generated/prisma';
 import { MessagePattern } from '@nestjs/microservices';
 import UsersService from './user.service';
@@ -16,6 +16,7 @@ import {
 } from '@share/pattern';
 import type {
   UserDetailType,
+  UserLoggedType,
   UserPaginationResponse,
   UserSignupType,
   UserWithOnlySessionIDType,
@@ -51,13 +52,22 @@ export default class UserController {
 
   @MessagePattern(loginPattern)
   @HandleServiceError
-  login(loginInfo: LoginInfo): Promise<Omit<user, 'password' | 'phone'>> {
-    return this.userService.login(loginInfo.email).then((user) => {
-      if (comparePassword(loginInfo.password, user.password)) {
-        return omitFields(['password'], user) as Omit<user, 'password'>;
-      }
-      throw new BadRequestException(createMessage(messages.USER.PASSWORD_NOT_MATCH));
-    });
+  async login(loginInfo: LoginInfo): Promise<UserLoggedType> {
+    if (!(await this.userService.checkSessionIdExist(loginInfo.session_id))) {
+      return this.userService.login(loginInfo.email).then((user) => {
+        if (user.session_id) {
+          throw new UnauthorizedException(createMessage(messages.USER.ALREADY_LOGIN));
+        } else {
+          if (comparePassword(loginInfo.password, user.password)) {
+            return this.userService
+              .updateUserSessionId(user.user_id, loginInfo.session_id)
+              .then(() => omitFields(['password', 'session_id'], user) as UserLoggedType);
+          }
+          throw new UnauthorizedException(createMessage(messages.USER.PASSWORD_NOT_MATCH));
+        }
+      });
+    }
+    throw new UnauthorizedException(createMessage(messages.USER.ALREADY_LOGIN));
   }
 
   @MessagePattern(resetPasswordPattern)
