@@ -1,4 +1,10 @@
-import { BadRequestException, HttpStatus, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { of, throwError } from 'rxjs';
 import { instanceToPlain } from 'class-transformer';
 import { UserRouter } from '@share/router';
@@ -16,7 +22,7 @@ import { createMessage, createMessages, omitFields } from '@share/utils';
 import messages from '@share/constants/messages';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { LoginInfo } from '@share/dto/validators/user.dto';
-import { UserRequestType } from '@share/interfaces';
+import { UserLoggedType } from '@share/interfaces';
 const loginUrl = UserRouter.absolute.login;
 
 let api: TestAgent;
@@ -27,9 +33,10 @@ let userService: UserService;
 const loginInfo: LoginInfo = {
   email: user.email,
   password: user.password,
+  session_id: expect.any(String),
 };
 
-beforeEach(async () => {
+beforeAll(async () => {
   const requestTest = await startUp();
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;
@@ -46,7 +53,7 @@ afterEach(async () => {
 describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
   it(createTestName('login success', HttpStatus.OK), async () => {
     expect.hasAssertions();
-    const userExpected = omitFields(['password', 'plain_password'], user) as UserRequestType;
+    const userExpected = omitFields(['password', 'plain_password', 'session_id'], user) as UserLoggedType;
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(userExpected));
     const loginService = jest.spyOn(userService, 'login');
     const loginSerializer = new LoginSerializer(userExpected);
@@ -65,7 +72,10 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
 
   it(createTestName('login success with session regis', HttpStatus.OK), async () => {
     expect.hasAssertions();
-    const userExpected = omitFields(['password', 'plain_password', 'reset_password_token'], user) as UserRequestType;
+    const userExpected = omitFields(
+      ['password', 'plain_password', 'session_id', 'reset_password_token'],
+      user,
+    ) as UserLoggedType;
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(userExpected));
     const loginService = jest.spyOn(userService, 'login');
     const loginSerializer = new LoginSerializer(userExpected);
@@ -100,16 +110,16 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
     expect(send).toHaveBeenCalledWith(loginPattern, loginInfo);
   });
 
-  it(createTestName('login failed when password not match', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('login failed when password not match', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
     const send = jest
       .spyOn(clientProxy, 'send')
-      .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.USER.PASSWORD_NOT_MATCH))));
+      .mockReturnValue(throwError(() => new UnauthorizedException(createMessage(messages.USER.PASSWORD_NOT_MATCH))));
     const loginService = jest.spyOn(userService, 'login');
     await api
       .post(loginUrl)
       .send(loginInfo)
-      .expect(HttpStatus.BAD_REQUEST)
+      .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.PASSWORD_NOT_MATCH));
     expect(loginService).toHaveBeenCalledTimes(1);

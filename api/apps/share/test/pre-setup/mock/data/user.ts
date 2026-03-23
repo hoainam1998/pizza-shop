@@ -15,6 +15,7 @@ export const user: Required<UserRequestType> = {
   sex: constants.SEX.FEMALE,
   power: constants.POWER_NUMERIC.SUPER_ADMIN,
   plain_password: plainPassword,
+  session_id: null,
   reset_password_token: signingAdminResetPasswordToken({ email: 'myemail@gmail.com', password: plainPassword }),
 };
 

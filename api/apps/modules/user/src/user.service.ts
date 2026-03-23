@@ -11,10 +11,14 @@ import type {
 } from '@share/interfaces';
 import { calcSkip } from '@share/utils';
 import { ResetPassword, UserPagination } from '@share/dto/validators/user.dto';
+import UserCachingService from '@share/libs/caching/user/user.service';
 
 @Injectable()
 export default class UserService {
-  constructor(@Inject(PRISMA_CLIENT) private readonly prismaClient: PrismaClient) {}
+  constructor(
+    @Inject(PRISMA_CLIENT) private readonly prismaClient: PrismaClient,
+    private readonly userCachingService: UserCachingService,
+  ) {}
 
   @HandlePrismaError(messages.USER)
   canSignup(): Promise<number> {
@@ -34,12 +38,28 @@ export default class UserService {
 
   @HandlePrismaError(messages.USER)
   login(email: string): Promise<Omit<user, 'phone'>> {
-    return this.prismaClient.user.findFirstOrThrow({
+    return this.prismaClient.user.findUniqueOrThrow({
       where: {
         email,
       },
       omit: {
         phone: true,
+      },
+    });
+  }
+
+  checkSessionIdExist(sessionId: string): Promise<boolean> {
+    return this.userCachingService.checkExists(sessionId);
+  }
+
+  @HandlePrismaError(messages.USER)
+  updateUserSessionId(userId: string, sessionId: string): Promise<user> {
+    return this.prismaClient.user.update({
+      where: {
+        user_id: userId,
+      },
+      data: {
+        session_id: sessionId,
       },
     });
   }

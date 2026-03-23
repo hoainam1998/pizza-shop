@@ -29,6 +29,8 @@ export default {
     findMany: jest.fn(),
   },
   user: {
+    findUniqueOrThrow: jest.fn(),
+    create: jest.fn(),
     count: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),

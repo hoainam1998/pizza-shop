@@ -13,7 +13,7 @@ import {
   updateUserPattern,
   deleteUserPattern,
 } from '@share/pattern';
-import type { UserPaginationResponse, UserWithOnlySessionIDType } from '@share/interfaces';
+import type { UserLoggedType, UserPaginationResponse, UserWithOnlySessionIDType } from '@share/interfaces';
 import { LoginInfo, ResetPassword } from '@share/dto/validators/user.dto';
 
 @Injectable()
@@ -28,8 +28,8 @@ export default class UserService {
     return this.user.send<user>(signupPattern, user);
   }
 
-  login(loginInfo: LoginInfo): Observable<user> {
-    return this.user.send<user>(loginPattern, loginInfo);
+  login(loginInfo: LoginInfo): Observable<UserLoggedType> {
+    return this.user.send<UserLoggedType>(loginPattern, loginInfo);
   }
 
   resetPassword(resetPasswordBody: ResetPassword): Observable<Omit<user, 'password' | 'phone'>> {
