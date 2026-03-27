@@ -12,12 +12,16 @@ import type {
 import { calcSkip } from '@share/utils';
 import { ResetPassword, UserPagination } from '@share/dto/validators/user.dto';
 import UserCachingService from '@share/libs/caching/user/user.service';
+import ProductCachingService from '@share/libs/caching/product/product.service';
+import ReportCachingService from '@share/libs/caching/report/report.service';
 
 @Injectable()
 export default class UserService {
   constructor(
     @Inject(PRISMA_CLIENT) private readonly prismaClient: PrismaClient,
     private readonly userCachingService: UserCachingService,
+    private readonly productCachingService: ProductCachingService,
+    private readonly reportCachingService: ReportCachingService,
   ) {}
 
   @HandlePrismaError(messages.USER)
@@ -48,12 +52,24 @@ export default class UserService {
     });
   }
 
+  async logout(userId: string): Promise<null> {
+    await this.productCachingService.getProductsAccessByVisitor(userId).then((productIds) => {
+      return Promise.all(
+        productIds.map((productId) => {
+          return this.productCachingService.removeVisitor(productId, userId);
+        }),
+      );
+    });
+    await this.reportCachingService.removeReportViewer(userId);
+    return this.updateUserSessionId(userId, null).then(() => null);
+  }
+
   checkSessionIdExist(sessionId: string): Promise<boolean> {
     return this.userCachingService.checkExists(sessionId);
   }
 
   @HandlePrismaError(messages.USER)
-  updateUserSessionId(userId: string, sessionId: string): Promise<user> {
+  updateUserSessionId(userId: string, sessionId: string | null): Promise<user> {
     return this.prismaClient.user.update({
       where: {
         user_id: userId,

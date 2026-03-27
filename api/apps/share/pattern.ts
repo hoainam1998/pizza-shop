@@ -15,6 +15,7 @@ export const filterValidCategoriesPattern = createMicroserviceEvent('filter_vali
 export const canSignupPattern = createMicroserviceEvent('can_signup');
 export const signupPattern = createMicroserviceEvent('signup');
 export const loginPattern = createMicroserviceEvent('login');
+export const logoutPattern = createMicroserviceEvent('logout');
 export const resetPasswordPattern = createMicroserviceEvent('reset_password');
 export const getUserDetailPattern = createMicroserviceEvent('get_user');
 export const updateUserPattern = createMicroserviceEvent('update');
