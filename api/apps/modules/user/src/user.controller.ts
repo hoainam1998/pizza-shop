@@ -8,6 +8,7 @@ import {
   canSignupPattern,
   signupPattern,
   loginPattern,
+  logoutPattern,
   resetPasswordPattern,
   paginationPattern,
   getUserDetailPattern,
@@ -120,12 +121,24 @@ export default class UserController {
   @MessagePattern(updateUserPattern)
   @HandleServiceError
   update(user: user): Promise<UserWithOnlySessionIDType> {
-    return this.userService.update(user);
+    return this.userService.update(user).then(async (userResult) => {
+      await this.userService.logout(user.user_id);
+      return userResult;
+    });
   }
 
   @MessagePattern(deleteUserPattern)
   @HandleServiceError
   delete(userId: string): Promise<UserWithOnlySessionIDType> {
-    return this.userService.delete(userId);
+    return this.userService.delete(userId).then(async (user) => {
+      await this.userService.logout(userId);
+      return user;
+    });
+  }
+
+  @MessagePattern(logoutPattern)
+  @HandleServiceError
+  logout(userId: string): Promise<null> {
+    return this.userService.logout(userId);
   }
 }

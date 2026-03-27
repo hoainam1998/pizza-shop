@@ -12,6 +12,7 @@ import {
   getUserDetailPattern,
   updateUserPattern,
   deleteUserPattern,
+  logoutPattern,
 } from '@share/pattern';
 import type { UserLoggedType, UserPaginationResponse, UserWithOnlySessionIDType } from '@share/interfaces';
 import { LoginInfo, ResetPassword } from '@share/dto/validators/user.dto';
@@ -50,5 +51,9 @@ export default class UserService {
 
   deleteUser(userId: string): Observable<UserWithOnlySessionIDType> {
     return this.user.send<UserWithOnlySessionIDType>(deleteUserPattern, userId);
+  }
+
+  logout(userId: string): Observable<null> {
+    return this.user.send<null>(logoutPattern, userId);
   }
 }

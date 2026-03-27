@@ -12,8 +12,10 @@ import {
   Param,
   Delete,
   Put,
+  Res,
 } from '@nestjs/common';
-import { map, Observable } from 'rxjs';
+import express from 'express';
+import { map, Observable, tap } from 'rxjs';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import UserService from './user.service';
 import {
@@ -218,5 +220,26 @@ export default class UserController extends BaseController {
         });
       }),
     );
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Get(UserRouter.relative.logout)
+  @HandleHttpError
+  logout(@Req() req: Express.Request, @Res() res: express.Response): Observable<null> | void {
+    if (req.session.user && req.session.user.userId) {
+      return this.userService.logout(req.session.user.userId).pipe(
+        tap(() => {
+          req.session.destroy((error) => {
+            if (error) {
+              res.status(HttpStatus.BAD_REQUEST).json(MessageSerializer.create(messages.USER.LOGOUT_USER_FAIL));
+            } else {
+              res.json();
+            }
+          });
+        }),
+      );
+    } else {
+      res.status(HttpStatus.BAD_REQUEST).json(MessageSerializer.create(messages.USER.ALREADY_LOGOUT));
+    }
   }
 }
