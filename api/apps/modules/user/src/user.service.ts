@@ -215,4 +215,14 @@ export default class UserService {
       ])
       .then((results) => results[1]);
   }
+
+  @HandlePrismaError(messages.USER)
+  updatePersonalInfo(user: user): Promise<user> {
+    return this.prismaClient.user.update({
+      where: {
+        user_id: user.user_id,
+      },
+      data: user,
+    });
+  }
 }

@@ -34,6 +34,7 @@ import {
   UserDetail,
   UpdateUser,
   UserDelete,
+  UpdatePersonalInfo,
 } from '@share/dto/validators/user.dto';
 import { createMessage, getAdminResetPasswordLink } from '@share/utils';
 import messages from '@share/constants/messages';
@@ -241,5 +242,14 @@ export default class UserController extends BaseController {
     } else {
       res.status(HttpStatus.BAD_REQUEST).json(MessageSerializer.create(messages.USER.ALREADY_LOGOUT));
     }
+  }
+
+  @HttpCode(HttpStatus.CREATED)
+  @Put(UserRouter.relative.updatePersonalInfo)
+  @HandleHttpError
+  updatePersonalInfo(@Body() personalInfo: UpdatePersonalInfo): any {
+    return this.userService
+      .updatePersonalInfo(UpdatePersonalInfo.plain(personalInfo))
+      .pipe(map(() => MessageSerializer.create(messages.USER.UPDATE_PERSONAL_INFO_SUCCESS)));
   }
 }

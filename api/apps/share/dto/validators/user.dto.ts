@@ -22,7 +22,7 @@ import Validator from '../serializer/validator';
 import { Pagination } from './common.dto';
 const power = Object.values(constants.POWER_NUMERIC);
 
-export class SignupDTO {
+export class UserDTO {
   @Exclude({ toPlainOnly: true })
   @IsString()
   firstName: string;
@@ -41,11 +41,6 @@ export class SignupDTO {
   sex: number;
 
   @Expose({ toPlainOnly: true })
-  get power() {
-    return constants.POWER_NUMERIC.SUPER_ADMIN;
-  }
-
-  @Expose({ toPlainOnly: true })
   get first_name() {
     return this.firstName;
   }
@@ -60,20 +55,22 @@ export class SignupDTO {
   }
 }
 
-export class CreateUser extends OmitType(SignupDTO, ['power']) {
+export class SignupDTO extends UserDTO {
+  @Expose({ toPlainOnly: true })
+  get power() {
+    return constants.POWER_NUMERIC.SUPER_ADMIN;
+  }
+
+  constructor(target: UserRequestType) {
+    super(target);
+    Object.assign(this, target);
+  }
+}
+
+export class CreateUser extends UserDTO {
   @IsInt()
   @IsIn(power)
   power: number;
-
-  @Expose({ toPlainOnly: true })
-  get first_name() {
-    return this.firstName;
-  }
-
-  @Expose({ toPlainOnly: true })
-  get last_name() {
-    return this.lastName;
-  }
 }
 
 export class UpdateUser extends CreateUser {
@@ -112,6 +109,27 @@ export class LoginInfo {
 
   @Allow()
   session_id: string;
+}
+
+export class UpdatePersonalInfo extends UserDTO {
+  @IsNumberString()
+  @Length(13)
+  userId: string;
+
+  @Expose({ toPlainOnly: true })
+  get user_id() {
+    return this.userId;
+  }
+
+  static plain(target: UpdatePersonalInfo): Record<string, any> {
+    const updatePersonalInfoPlain = instanceToPlain(plainToInstance(UpdatePersonalInfo, target));
+    return instanceToPlain(plainToInstance(UpdatePersonalInfoTransform, updatePersonalInfoPlain));
+  }
+}
+
+export class UpdatePersonalInfoTransform extends OmitType(UpdatePersonalInfo, ['userId']) {
+  @Exclude()
+  userId: string;
 }
 
 export class ResetPassword {
