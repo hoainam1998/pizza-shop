@@ -64,6 +64,7 @@
     "test:ut:user.pagination": "jest --watch --testPathPatterns=apps/modules/user/src/__test__/pagination.spec.ts",
     "test:ut:user.get-user": "jest --watch --testPathPatterns=apps/modules/user/src/__test__/get-user.spec.ts",
     "test:ut:user.update-user": "jest --watch --testPathPatterns=apps/modules/user/src/__test__/update-user.spec.ts",
+    "test:ut:user.update-personal-info": "jest --watch --testPathPatterns=apps/modules/user/src/__test__/update-personal-info.spec.ts",
     "test:ut:user.delete-user": "jest --watch --testPathPatterns=apps/modules/user/src/__test__/delete-user.spec.ts",
     "test:ut:user.check-session-id-exist": "jest --watch --testPathPatterns=apps/modules/user/src/__test__/check-session-id-exist.spec.ts",
     "test:ut:user.update-user-session-id": "jest --watch --testPathPatterns=apps/modules/user/src/__test__/update-user-session-id.spec.ts",
@@ -129,6 +130,7 @@
     "test:e2e:user.get-user": "jest --watch apps/api/src/user/__test__/get-user.spec.ts",
     "test:e2e:user.delete-user": "jest --watch apps/api/src/user/__test__/delete-user.spec.ts",
     "test:e2e:user.update-user": "jest --watch apps/api/src/user/__test__/update-user.spec.ts",
+    "test:e2e:user.update-personal-info": "jest --watch apps/api/src/user/__test__/update-personal-info.spec.ts",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
   },

@@ -13,6 +13,7 @@ import {
   updateUserPattern,
   deleteUserPattern,
   logoutPattern,
+  updatePersonalInfoPattern,
 } from '@share/pattern';
 import type { UserLoggedType, UserPaginationResponse, UserWithOnlySessionIDType } from '@share/interfaces';
 import { LoginInfo, ResetPassword } from '@share/dto/validators/user.dto';
@@ -47,6 +48,10 @@ export default class UserService {
 
   updateUser(user: Record<string, any>): Observable<UserWithOnlySessionIDType> {
     return this.user.send<UserWithOnlySessionIDType>(updateUserPattern, user);
+  }
+
+  updatePersonalInfo(personalInfo: Record<string, any>): Observable<user> {
+    return this.user.send<user>(updatePersonalInfoPattern, personalInfo);
   }
 
   deleteUser(userId: string): Observable<UserWithOnlySessionIDType> {

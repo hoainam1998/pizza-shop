@@ -13,6 +13,7 @@ import {
   paginationPattern,
   getUserDetailPattern,
   updateUserPattern,
+  updatePersonalInfoPattern,
   deleteUserPattern,
 } from '@share/pattern';
 import type {
@@ -140,5 +141,14 @@ export default class UserController {
   @HandleServiceError
   logout(userId: string): Promise<null> {
     return this.userService.logout(userId);
+  }
+
+  @MessagePattern(updatePersonalInfoPattern)
+  @HandleServiceError
+  updatePersonalInfo(user: user): Promise<user> {
+    return this.userService.updatePersonalInfo(user).then(async (userResult) => {
+      await this.userService.logout(user.user_id);
+      return userResult;
+    });
   }
 }

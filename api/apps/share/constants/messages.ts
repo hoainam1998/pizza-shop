@@ -38,6 +38,7 @@ export default Object.freeze({
     UPDATE_USER_SUCCESS: 'Update user was success!',
     DELETE_USER_SUCCESS: 'Delete user was success!',
     LOGOUT_USER_FAIL: 'Logout user was fail!',
+    UPDATE_PERSONAL_INFO_SUCCESS: 'Update your personal info was success!',
   },
   INGREDIENT: {
     CREATE_INGREDIENT_SUCCESS: 'Create ingredient was success!',
