@@ -247,7 +247,7 @@ export default class UserController extends BaseController {
   @HttpCode(HttpStatus.CREATED)
   @Put(UserRouter.relative.updatePersonalInfo)
   @HandleHttpError
-  updatePersonalInfo(@Body() personalInfo: UpdatePersonalInfo): any {
+  updatePersonalInfo(@Body() personalInfo: UpdatePersonalInfo): Observable<MessageSerializer> {
     return this.userService
       .updatePersonalInfo(UpdatePersonalInfo.plain(personalInfo))
       .pipe(map(() => MessageSerializer.create(messages.USER.UPDATE_PERSONAL_INFO_SUCCESS)));
