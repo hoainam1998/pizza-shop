@@ -1,9 +1,6 @@
 <template>
   <section class="ps-py-10 ps-py-10 ps-px-10 ps-bg-transparent">
-    <el-button class="ps-text-color-00a8ff ps-mb-7" @click="backToHome">
-      <el-icon><Back /></el-icon>&nbsp;
-      Home
-    </el-button>
+    <BackButton>Home</BackButton>
     <div class="ps-bg-white ps-border-radius-5 ps-py-10 ps-px-10">
       <div class="ps-display-flex ps-flex-gap-10 ps-flex-direction-mobile-column ps-flex-direction-desktop-row">
         <ul class="ps-w-mobile-100
@@ -66,6 +63,7 @@ import { Back } from '@element-plus/icons-vue';
 import CartItem from '@/components/sale/cart/cart-item/cart-item.vue';
 import BillItem from '@/components/sale/cart/bill-item.vue';
 import List from '@/components/common/list.vue';
+import BackButton from '@/components/common/buttons/back-button/back-button.vue';
 import useWrapperRouter from '@/composables/use-router';
 import SocketService from '@/socket';
 import IndexedDb from '@/indexed-db';
@@ -345,7 +343,8 @@ onBeforeUnmount(() => SocketService.unsubscribe(SOCKET_EVENT_NAME.REFRESH));
 
 onMounted(() => {
   getAllClientCartItems()
-    .then(getAllServerCartItems);
+    .then(getAllServerCartItems)
+    .catch(() => {});
 });
 </script>
 <style lang="scss">

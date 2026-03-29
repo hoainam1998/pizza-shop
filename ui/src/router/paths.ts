@@ -21,4 +21,5 @@ export default Object.freeze({
   }),
   ID: new RouterPath(':id'),
   CART: new RouterPath('/cart'),
+  PERSONAL: new RouterPath('/personal'),
 });

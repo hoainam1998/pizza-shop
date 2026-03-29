@@ -1,24 +1,36 @@
 import type { RouterOptions } from 'vue-router';
-import SaleHome from '@/views/sale/home/home.vue';
+import All from '@/views/sale/all/all.vue';
 import Cart from '@/views/sale/cart/cart.vue';
-import NotFound from '@/views/not-found/not-found.vue';
+import Personal from '@/views/sale/personal/personal.vue';
+import Home from '@/views/sale/home/home.vue';
 import paths from '@/router/paths';
 
 const saleRoutes: RouterOptions['routes'] = [
   {
-    path: '/:pathMatch(.*)*',
-    name: 'not-found',
-    component: NotFound,
-  },
-  {
     path: `${paths.BASE}`,
-    name: 'home',
-    component: SaleHome,
+    redirect: 'home',
   },
   {
-    path: `${paths.CART}`,
-    name: 'cart',
-    component: Cart,
+    path: `${paths.PERSONAL}`,
+    name: 'personal',
+    component: Personal,
+  },
+  {
+    path: `${paths.HOME}`,
+    name: 'home',
+    component: Home,
+    children: [
+      {
+        path: '',
+        name: 'all',
+        component: All,
+      },
+      {
+        path: `${paths.CART}`,
+        name: 'cart',
+        component: Cart,
+      },
+    ],
   },
 ];
 

@@ -1,5 +1,5 @@
 <template>
-  <el-form ref="userDetailFormRef" :model="model" label-width="auto" :rules="rules" class="ps-bg-white">
+  <el-form :id="formId" ref="userDetailFormRef" :model="model" label-width="auto" :rules="rules" class="ps-bg-white">
     <slot />
   </el-form>
 </template>
@@ -19,8 +19,9 @@ const model = defineModel<UserDetailModelType>({ default: {
 
 const userDetailFormRef = ref<FormInstance>();
 
-const { rules } = defineProps<{
+const { rules, formId } = defineProps<{
   rules: FormRules<UserDetailModelType>;
+  formId?: string;
 }>();
 
 const validate = async (): Promise<boolean> => {
@@ -32,6 +33,6 @@ const validate = async (): Promise<boolean> => {
 
 defineExpose<UserDetailExposeType>({
   validate,
-  reset: userDetailFormRef.value?.resetFields,
+  formInstance: userDetailFormRef,
 });
 </script>

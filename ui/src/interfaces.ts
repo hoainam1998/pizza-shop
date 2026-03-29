@@ -1,6 +1,7 @@
 import type { AxiosRequestConfig } from 'axios';
-import type { FormContext } from 'element-plus';
+import type { FormInstance, UploadRawFile } from 'element-plus';
 import { CHART_MODE } from '@/enums';
+import type { Ref } from 'vue';
 
 export type TableFieldType = {
   key: string;
@@ -94,9 +95,20 @@ export type UserDetailModelType = {
   phone: string;
   sex: number;
   power: number | null;
+  avatar?: (UploadRawFile | File)[];
+};
+
+export type UserPersonalInfoType = {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  sex: number;
+  avatar?: string;
 };
 
 export type UserDetailExposeType = {
   validate: () => Promise<boolean>;
-  reset?: FormContext['resetFields'];
+  formInstance: Ref<FormInstance | undefined, FormInstance | undefined> | FormInstance | undefined;
 };
