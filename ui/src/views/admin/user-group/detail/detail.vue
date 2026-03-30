@@ -63,7 +63,7 @@
 <script setup lang="ts">
 import { reactive, useTemplateRef } from 'vue';
 import { POWER } from '@/enums';
-import type { FormRules } from 'element-plus';
+import type { FormInstance, FormRules } from 'element-plus';
 import UserDetailForm from '@/components/admin/user-detail-form/user-detail-form.vue';
 import PsEmailInput from '@/components/inputs/email.vue';
 import { useUserForm } from '@/composables';
@@ -92,8 +92,9 @@ const userDetailFormModel = reactive<UserDetailModelType>(model);
 const userFormRules = reactive<FormRules<UserDetailModelType>>(rules);
 
 const reset = (): void => {
-  if (userFormRef.value && userFormRef.value.reset) {
-    userFormRef.value.reset();
+  if (userFormRef.value?.formInstance) {
+    (userFormRef.value?.formInstance as FormInstance).resetFields();
+    (userFormRef.value?.formInstance as FormInstance).clearValidate();
   }
 };
 

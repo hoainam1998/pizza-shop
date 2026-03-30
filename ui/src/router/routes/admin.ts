@@ -12,6 +12,7 @@ import IngredientList from '@/views/admin/ingredient-group/list/list.vue';
 import UserList from '@/views/admin/user-group/list/list.vue';
 import UserDetail from '@/views/admin/user-group/detail/detail.vue';
 import Report from '@/views/admin/report/report.vue';
+import Personal from '@/views/admin/personal/personal.vue';
 
 const adminRoutes: RouterOptions['routes'] = [
   {
@@ -115,6 +116,12 @@ const adminRoutes: RouterOptions['routes'] = [
     path: `${paths.RESET_PASSWORD}`,
     name: 'reset_password',
     component: ResetPassword,
+  },
+  {
+    path: `${paths.PERSONAL}`,
+    name: 'personal',
+    component: Personal,
+    meta: { requiresAuth: true },
   },
 ];
 

@@ -6,6 +6,7 @@ $border-colors: (
   'f39c12': colors.$primary-color,
   '00a8ff': colors.$menu-item-active-color,
   'black': colors.$black-color,
+  'eb2f06': colors.$primary-sale-color,
 );
 
 @for $i from 1 through 5 {
