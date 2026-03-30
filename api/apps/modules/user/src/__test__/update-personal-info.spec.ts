@@ -24,6 +24,7 @@ const userInput: any = {
   email: user.email,
   phone: user.phone,
   sex: user.sex,
+  avatar: user.avatar,
 };
 
 beforeAll(async () => {

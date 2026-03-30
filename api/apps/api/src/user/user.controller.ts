@@ -13,7 +13,9 @@ import {
   Delete,
   Put,
   Res,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import express from 'express';
 import { map, Observable, tap } from 'rxjs';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
@@ -36,6 +38,7 @@ import {
   UserDelete,
   UpdatePersonalInfo,
 } from '@share/dto/validators/user.dto';
+import { ImageTransformPipe } from '@share/pipes';
 import { createMessage, getAdminResetPasswordLink } from '@share/utils';
 import messages from '@share/constants/messages';
 import SendEmailService from '@share/libs/mailer/mailer.service';
@@ -44,7 +47,7 @@ import { MessageSerializer } from '@share/dto/serializer/common';
 import LoggingService from '@share/libs/logging/logging.service';
 import ErrorCode from '@share/error-code';
 import { UserRouter } from '@share/router';
-import { HandleHttpError } from '@share/decorators';
+import { HandleHttpError, UploadImage } from '@share/decorators';
 import { Public } from '@share/decorators/auths';
 import BaseController from '../controller';
 
@@ -246,8 +249,13 @@ export default class UserController extends BaseController {
 
   @HttpCode(HttpStatus.CREATED)
   @Put(UserRouter.relative.updatePersonalInfo)
+  @UseInterceptors(FileInterceptor('avatar'))
   @HandleHttpError
-  updatePersonalInfo(@Body() personalInfo: UpdatePersonalInfo): Observable<MessageSerializer> {
+  updatePersonalInfo(
+    @Body() personalInfo: UpdatePersonalInfo,
+    @UploadImage('avatar', ImageTransformPipe) avatar: string,
+  ): Observable<MessageSerializer> {
+    Object.assign(personalInfo, { avatar });
     return this.userService
       .updatePersonalInfo(UpdatePersonalInfo.plain(personalInfo))
       .pipe(map(() => MessageSerializer.create(messages.USER.UPDATE_PERSONAL_INFO_SUCCESS)));

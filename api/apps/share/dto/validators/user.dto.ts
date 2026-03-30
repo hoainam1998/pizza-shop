@@ -1,4 +1,4 @@
-import { Exclude, Expose, instanceToPlain, plainToInstance, Type } from 'class-transformer';
+import { Exclude, Expose, instanceToPlain, plainToInstance, Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEmail,
@@ -37,6 +37,7 @@ export class UserDTO {
   @IsPhoneNumber('VN')
   phone: string;
 
+  @Transform(({ value }) => +value)
   @IsInt()
   sex: number;
 
@@ -115,6 +116,9 @@ export class UpdatePersonalInfo extends UserDTO {
   @IsNumberString()
   @Length(13)
   userId: string;
+
+  @Allow()
+  avatar: string;
 
   @Expose({ toPlainOnly: true })
   get user_id() {
