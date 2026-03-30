@@ -121,6 +121,7 @@ const adminRoutes: RouterOptions['routes'] = [
     path: `${paths.PERSONAL}`,
     name: 'personal',
     component: Personal,
+    meta: { requiresAuth: true },
   },
 ];
 

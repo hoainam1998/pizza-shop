@@ -9,8 +9,11 @@
 <script setup lang="ts">
 import { Back } from '@element-plus/icons-vue';
 import useWrapperRouter from '@/composables/use-router';
+import { currentRoute as currentRouteStorage } from '@/composables/store';
 import paths from '@/router/paths';
 const { push } = useWrapperRouter();
 
-const backToHome = () => push(paths.BASE);
+const path = currentRouteStorage.getCurrentRoute() || paths.BASE.Path;
+
+const backToHome = () => push(path);
 </script>
