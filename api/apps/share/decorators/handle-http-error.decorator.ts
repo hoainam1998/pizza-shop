@@ -14,25 +14,27 @@ export default function (target: any, propertyName: string, descriptor: TypedPro
   const originMethod = descriptor.value!;
   descriptor.value = function (...args: any[]) {
     const output = originMethod.apply(this, args);
-    if (isObservable(output)) {
-      return output.pipe(
-        catchError((error: MicroservicesErrorResponse) => {
-          switch (error.status) {
-            case HttpStatus.NOT_FOUND:
-              throw new NotFoundException(error);
-            case HttpStatus.UNAUTHORIZED:
-              throw new UnauthorizedException(createMessage(error.message));
-            case HttpStatus.BAD_REQUEST: {
-              throw new BadRequestException(createMessage(error.message));
+    if (output) {
+      if (isObservable(output)) {
+        return output.pipe(
+          catchError((error: MicroservicesErrorResponse) => {
+            switch (error.status) {
+              case HttpStatus.NOT_FOUND:
+                throw new NotFoundException(error);
+              case HttpStatus.UNAUTHORIZED:
+                throw new UnauthorizedException(createMessage(error.message));
+              case HttpStatus.BAD_REQUEST:
+                throw new BadRequestException(createMessage(error.message));
+              default:
+                if (error.code === 'ECONNREFUSED') {
+                  throw new BadRequestException(createMessage(messages.COMMON.MODULE_DISCONNECT));
+                }
+                throw new InternalServerErrorException();
             }
-            default:
-              if (error.code === 'ECONNREFUSED') {
-                throw new BadRequestException(createMessage(messages.COMMON.MODULE_DISCONNECT));
-              }
-              throw new InternalServerErrorException();
-          }
-        }),
-      );
+          }),
+        );
+      }
+      return output;
     }
   };
   return descriptor;
