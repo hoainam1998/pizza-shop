@@ -38,7 +38,7 @@ import type { FormInstance, FormRules } from 'element-plus';
 import LoginFrame from './common/login-frame.vue';
 import PsEmailInput from '@/components/inputs/email.vue';
 import paths from '@/router/paths';
-import constants from '@/constants';
+import { SEX } from '@/enums';
 import { UserService } from '@/services';
 import useWrapperRouter from '@/composables/use-router';
 import { showErrorNotification, showSuccessNotification } from '@/utils';
@@ -59,7 +59,7 @@ const signupFormModel = reactive<SignupModelType>({
   lastName: '',
   email: '',
   phone: '',
-  sex: constants.SEX.MALE,
+  sex: SEX.MALE,
 });
 
 const signupFormRef = ref<FormInstance>();

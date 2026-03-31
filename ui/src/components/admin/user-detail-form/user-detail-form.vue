@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
-import constants from '@/constants';
+import { SEX } from '@/enums';
 import type { UserDetailModelType, UserDetailExposeType } from '@/interfaces';
 
 const model = defineModel<UserDetailModelType>({ default: {
@@ -14,7 +14,7 @@ const model = defineModel<UserDetailModelType>({ default: {
   lastName: '',
   email: '',
   phone: '',
-  sex: constants.SEX.MALE,
+  sex: SEX.MALE,
 }});
 
 const userDetailFormRef = ref<FormInstance>();

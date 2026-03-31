@@ -3,7 +3,7 @@
     <div class="ps-display-flex ps-flex-direction-column ps-align-items-center">
       <img :src="pageNotFound" alt="page-not-found" width="50%" height="50%" />
       <h4 class="ps-my-10">Page not found!</h4>
-      <BackButton />
+      <BackButton>Back to home!</BackButton>
     </div>
   </section>
 </template>
