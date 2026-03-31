@@ -1,6 +1,5 @@
 import type { FormRules } from 'element-plus';
-import constants from '@/constants';
-import { POWER } from '@/enums';
+import { POWER, SEX } from '@/enums';
 import type { UserDetailModelType } from '@/interfaces';
 
 type UserFormInputType = {
@@ -27,7 +26,7 @@ export default ({ model, rules }: UserFormInputType = {}): UserFormReturnType =>
       lastName: '',
       email: '',
       phone: '',
-      sex: constants.SEX.MALE,
+      sex: SEX.MALE,
       power: POWER.SALE,
       ...model,
     },

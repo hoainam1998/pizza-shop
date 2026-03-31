@@ -1,6 +1,6 @@
 <template>
-  <div class="ps-display-flex ps-flex-gap-5 ps-mt-5 ps-mb-5">
-    <el-button class="ps-bg-2ecc71 ps-text-color-white" @click="navigateToDetail()">New</el-button>
+  <div class="ps-display-flex ps-flex-gap-5 ps-mt-30 ps-mb-5">
+    <NewButton @click="navigateToDetail()" />
     <SearchBox v-model="keyword" @search="search" />
   </div>
   <Table
@@ -48,12 +48,19 @@ import { onBeforeMount, ref, useTemplateRef, type Ref } from 'vue';
 import type { AxiosResponse } from 'axios';
 import Table from '@/components/common/table.vue';
 import SearchBox from '@/components/admin/search-box.vue';
+import NewButton from '@/components/common/buttons/new-button/new-button.vue';
 import type { TableFieldType } from '@/interfaces';
 import constants from '@/constants';
 import paths from '@/router/paths';
 import { ProductService } from '@/services';
 import useWrapperRouter from '@/composables/use-router';
 import { confirmDeleteMessageBox } from '@/utils';
+const PAGE_SIZE = constants.PAGINATION.PAGE_SIZE;
+const PAGE_NUMBER = constants.PAGINATION.PAGE_NUMBER;
+
+defineOptions({
+  inheritAttrs: false
+});
 
 const showDeleteDialog = confirmDeleteMessageBox(
   'Delete product!',
@@ -61,13 +68,9 @@ const showDeleteDialog = confirmDeleteMessageBox(
   'Delete product request was cancel!');
 const { push } = useWrapperRouter();
 const productTableRef = useTemplateRef('productTable');
-const PAGE_SIZE = constants.PAGINATION.PAGE_SIZE;
-const PAGE_NUMBER = constants.PAGINATION.PAGE_NUMBER;
 const keyword: Ref<string> = ref('');
-
-defineOptions({
-  inheritAttrs: false
-});
+const data: Ref<any[]> = ref([]);
+const total: Ref<number> = ref(0);
 
 const fields: TableFieldType[] = [
   {
@@ -110,15 +113,8 @@ const fields: TableFieldType[] = [
   }
 ];
 
-const data: Ref<any[]> = ref([]);
-const total: Ref<number> = ref(0);
-
 const navigateToDetail = (productId?: string): void => {
-  if (productId) {
-    push(`${paths.HOME.PRODUCT}/${productId}`);
-  } else {
-    push(`${paths.HOME.PRODUCT}/${paths.HOME.PRODUCT.NEW}`);
-  }
+  push(`${paths.HOME.PRODUCT}/${productId ? productId : paths.HOME.PRODUCT.NEW}`);
 };
 
 const search = (): void => {

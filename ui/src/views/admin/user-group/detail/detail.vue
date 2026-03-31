@@ -62,6 +62,7 @@
 </template>
 <script setup lang="ts">
 import { reactive, useTemplateRef } from 'vue';
+import type { AxiosError, AxiosResponse } from 'axios';
 import { POWER } from '@/enums';
 import type { FormInstance, FormRules } from 'element-plus';
 import UserDetailForm from '@/components/admin/user-detail-form/user-detail-form.vue';
@@ -69,11 +70,13 @@ import PsEmailInput from '@/components/inputs/email.vue';
 import { useUserForm } from '@/composables';
 import type { MessageResponseType, UserDetailModelType, UserDetailExposeType } from '@/interfaces';
 import { UserService } from '@/services';
-import type { AxiosError, AxiosResponse } from 'axios';
 import { showErrorNotification, showSuccessNotification } from '@/utils';
 
 const userFormRef = useTemplateRef<UserDetailExposeType>('userFormRef');
 const dialogVisible = defineModel<boolean>();
+const emit = defineEmits<{
+  (e: 'refresh'): void;
+}>();
 
 const { model, rules } = useUserForm({
   model: {
@@ -108,6 +111,7 @@ const onSubmit = (): void => {
       UserService.post('create', userDetailFormModel)
         .then((response: AxiosResponse<MessageResponseType>) => {
           showSuccessNotification('Create user', response.data.messages);
+          emit('refresh');
         })
         .catch((error: AxiosError<MessageResponseType>) => {
           showErrorNotification('Create user', error.response?.data.messages);

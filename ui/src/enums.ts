@@ -31,3 +31,8 @@ export enum POWER {
   ADMIN = 1,
   SALE = 2,
 }
+
+export enum SEX {
+  FEMALE = 1,
+  MALE = 0,
+}
