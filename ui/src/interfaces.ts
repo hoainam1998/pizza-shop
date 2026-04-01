@@ -89,6 +89,7 @@ export type RealTimeShoppingChartPropsType = {
 export type RevenueChartPropsType = RealTimeShoppingChartPropsType & { labels: string[] };
 
 export type UserDetailModelType = {
+  userId?: string;
   firstName: string;
   lastName: string;
   email: string;
