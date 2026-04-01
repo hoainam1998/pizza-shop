@@ -130,11 +130,9 @@ export default class UserController {
 
   @MessagePattern(deleteUserPattern)
   @HandleServiceError
-  delete(userId: string): Promise<UserWithOnlySessionIDType> {
-    return this.userService.delete(userId).then(async (user) => {
-      await this.userService.logout(userId);
-      return user;
-    });
+  async delete(userId: string): Promise<UserWithOnlySessionIDType> {
+    await this.userService.logout(userId);
+    return this.userService.delete(userId);
   }
 
   @MessagePattern(logoutPattern)
