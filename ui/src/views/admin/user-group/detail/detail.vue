@@ -72,13 +72,17 @@ import type { MessageResponseType, UserDetailModelType, UserDetailExposeType } f
 import { UserService } from '@/services';
 import { showErrorNotification, showSuccessNotification } from '@/utils';
 
+type UserFormExposeType = {
+  assignForm: (data: UserDetailModelType) => void;
+};
+
 const userFormRef = useTemplateRef<UserDetailExposeType>('userFormRef');
 const dialogVisible = defineModel<boolean>();
 const emit = defineEmits<{
   (e: 'refresh'): void;
 }>();
 
-const { model, rules } = useUserForm({
+const { model, rules, resetForm } = useUserForm({
   model: {
     power: POWER.SALE,
   },
@@ -86,37 +90,62 @@ const { model, rules } = useUserForm({
     power: [
       {
         required: true, message: 'Power is required!', trigger: 'change',
-      }
-    ]
+      },
+    ],
   },
 });
 
-const userDetailFormModel = reactive<UserDetailModelType>(model);
+const userDetailFormModel = reactive<UserDetailModelType>(reactive(model));
 const userFormRules = reactive<FormRules<UserDetailModelType>>(rules);
 
 const reset = (): void => {
   if (userFormRef.value?.formInstance) {
-    (userFormRef.value?.formInstance as FormInstance).resetFields();
-    (userFormRef.value?.formInstance as FormInstance).clearValidate();
+    (userFormRef.value.formInstance as FormInstance).resetFields();
   }
+  resetForm();
 };
 
-const closeDialog = (): void => {
-  dialogVisible.value = false;
+const assignForm = (data: UserDetailModelType): void => {
+  userDetailFormModel.userId = data.userId;
+  userDetailFormModel.firstName = data.firstName;
+  userDetailFormModel.lastName = data.lastName;
+  userDetailFormModel.email = data.email;
+  userDetailFormModel.phone = data.phone;
+  userDetailFormModel.sex = data.sex;
 };
+
+const closeDialog = () => dialogVisible.value = false;
 
 const onSubmit = (): void => {
   userFormRef.value?.validate()
     .then(() => {
-      UserService.post('create', userDetailFormModel)
+      let promiseResult: Promise<AxiosResponse<MessageResponseType>>;
+      let toastTitle: string;
+
+      if (userDetailFormModel.userId) {
+        toastTitle = 'Update user';
+        promiseResult = UserService.put('update', userDetailFormModel);
+      } else {
+        const userData = { ...userDetailFormModel };
+        delete userData.userId;
+        toastTitle = 'Create user';
+        promiseResult = UserService.post('create', userData);
+      }
+
+      promiseResult
         .then((response: AxiosResponse<MessageResponseType>) => {
-          showSuccessNotification('Create user', response.data.messages);
+          showSuccessNotification(toastTitle, response.data.messages);
           emit('refresh');
         })
         .catch((error: AxiosError<MessageResponseType>) => {
-          showErrorNotification('Create user', error.response?.data.messages);
-        }).finally(closeDialog);
+          showErrorNotification(toastTitle, error.response?.data.messages);
+        })
+        .finally(closeDialog);
     }
     ).catch(() => {});
 };
+
+defineExpose<UserFormExposeType>({
+  assignForm
+});
 </script>

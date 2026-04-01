@@ -2,14 +2,36 @@ import type { FormRules } from 'element-plus';
 import { POWER, SEX } from '@/enums';
 import type { UserDetailModelType } from '@/interfaces';
 
+type ResetUserType = {
+  reset: () => void;
+};
+
+const originUserInfo: UserDetailModelType = {
+  userId: '',
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  sex: SEX.MALE,
+  power: POWER.SALE,
+};
+
+const defaultUserInfo: UserDetailModelType & ResetUserType = {
+  ...originUserInfo,
+  reset() {
+    Object.assign(this, originUserInfo);
+  },
+};
+
 type UserFormInputType = {
-  model?: Partial<Pick<UserDetailModelType, 'power' | 'avatar'>>;
+  model?: Partial<Pick<UserDetailModelType, 'power' | 'avatar' | 'userId'>>;
   rules?: FormRules<UserDetailModelType>;
 };
 
 type UserFormReturnType = {
   model: UserDetailModelType;
   rules: FormRules<UserDetailModelType>;
+  resetForm: () => void;
 };
 
 const checkPhoneNumber = (rule: any, value: string, callback: any): any | void => {
@@ -19,17 +41,9 @@ const checkPhoneNumber = (rule: any, value: string, callback: any): any | void =
   callback();
 };
 
-export default ({ model, rules }: UserFormInputType = {}): UserFormReturnType => {
+export default function({ model, rules }: UserFormInputType = {}): UserFormReturnType {
   return {
-    model: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      sex: SEX.MALE,
-      power: POWER.SALE,
-      ...model,
-    },
+    model: Object.assign(defaultUserInfo, model),
     rules: {
       firstName: [
         {
@@ -77,6 +91,9 @@ export default ({ model, rules }: UserFormInputType = {}): UserFormReturnType =>
         },
       ],
       ...rules,
+    },
+    resetForm() {
+      defaultUserInfo.reset();
     },
   };
 };

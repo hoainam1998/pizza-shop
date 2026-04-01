@@ -1,6 +1,6 @@
 <template>
-  <div class="ps-display-flex ps-flex-gap-5 ps-mt-30 ps-mb-5">
-    <NewButton class="ps-mt-7" @click="showCreateUserDialog" />
+  <div class="ps-display-flex ps-flex-gap-5 ps-mt-35 ps-mb-5">
+    <NewButton @click="showCreateUserDialog" />
     <SearchBox v-model="keyword" @search="search" />
   </div>
   <Table ref="userTable" :fields="fields" :data="data" :total="total" emptyText="Users are empty!"
@@ -34,19 +34,21 @@
       </div>
     </template>
   </Table>
-  <UserDetail v-model="dialogVisible" @refresh="search" />
+  <UserDetail ref="userDetail" v-model="dialogVisible" @refresh="search" />
 </template>
 <script setup lang="ts">
 import { ref, type Ref, onBeforeMount, useTemplateRef } from 'vue';
+import type { AxiosError, AxiosResponse } from 'axios';
 import Table from '@/components/common/table.vue';
 import NewButton from '@/components/common/buttons/new-button/new-button.vue';
 import SearchBox from '@/components/admin/search-box.vue';
 import UserDetail from '@/views/admin/user-group/detail/detail.vue';
 import UserDefaultImage from '@/assets/images/user.png';
-import type { TableFieldType } from '@/interfaces';
+import type { MessageResponseType, TableFieldType } from '@/interfaces';
 import constants from '@/constants';
 import { UserService } from '@/services';
 import { SEX, POWER } from '@/enums';
+import { showErrorNotification, showSuccessNotification } from '@/utils';
 const PAGE_SIZE = constants.PAGINATION.PAGE_SIZE;
 const PAGE_NUMBER = constants.PAGINATION.PAGE_NUMBER;
 
@@ -65,6 +67,7 @@ type UserType = {
 };
 
 const userTableRef = useTemplateRef('userTable');
+const userDetailRef = useTemplateRef('userDetail');
 const dialogVisible = ref<boolean>(false);
 const data: Ref<UserType[]> = ref([]);
 const total: Ref<number> = ref(0);
@@ -109,11 +112,30 @@ const fields: TableFieldType[] = [
 const showCreateUserDialog = () => dialogVisible.value = true;
 
 const getUserDetail = (userId: string): void => {
-  // TODO
+  UserService.post('detail', {
+    userId,
+    query: {
+      firstName: true,
+      lastName: true,
+      email: true,
+      phone: true,
+      sex: true,
+    },
+  }).then((response: AxiosResponse) => {
+    userDetailRef.value?.assignForm(response.data);
+    showCreateUserDialog();
+  });
+
 };
 
 const deleteUser = (userId: string): void => {
-  // TODO
+  UserService.delete(`delete/${userId}`)
+    .then((response: AxiosResponse<MessageResponseType>) => {
+      showSuccessNotification('Delete user', response.data.messages);
+      search();
+    }).catch((error: AxiosError<MessageResponseType>) => {
+      showErrorNotification('Delete user', error.response!.data.messages);
+    });
 };
 
 const search = (): void => {
