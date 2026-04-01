@@ -41,7 +41,7 @@ const checkPhoneNumber = (rule: any, value: string, callback: any): any | void =
   callback();
 };
 
-export default function({ model, rules }: UserFormInputType = {}): UserFormReturnType {
+export default ({ model, rules }: UserFormInputType = {}): UserFormReturnType => {
   return {
     model: Object.assign(defaultUserInfo, model),
     rules: {

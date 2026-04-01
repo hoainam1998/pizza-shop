@@ -95,13 +95,11 @@ const { model, rules, resetForm } = useUserForm({
   },
 });
 
-const userDetailFormModel = reactive<UserDetailModelType>(reactive(model));
+const userDetailFormModel = reactive<UserDetailModelType>(model);
 const userFormRules = reactive<FormRules<UserDetailModelType>>(rules);
 
 const reset = (): void => {
-  if (userFormRef.value?.formInstance) {
-    (userFormRef.value.formInstance as FormInstance).resetFields();
-  }
+  (userFormRef.value?.formInstance as FormInstance).resetFields();
   resetForm();
 };
 
