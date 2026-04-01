@@ -16,6 +16,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { SkipThrottle } from '@nestjs/throttler';
 import express from 'express';
 import { map, Observable, tap } from 'rxjs';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
@@ -186,6 +187,7 @@ export default class UserController extends BaseController {
     );
   }
 
+  @SkipThrottle()
   @HttpCode(HttpStatus.OK)
   @Post(UserRouter.relative.pagination)
   @HandleHttpError

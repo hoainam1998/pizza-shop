@@ -47,9 +47,11 @@ export class UserSerializer extends Validator {
   @IsPhoneNumber('VN')
   phone: string;
 
+  @IsOptional()
   @IsInt()
   sex: number;
 
+  @IsOptional()
   @IsInt()
   power: number;
 
