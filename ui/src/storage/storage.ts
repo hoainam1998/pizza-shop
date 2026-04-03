@@ -27,6 +27,13 @@ abstract class Storage {
    * Remove storage item.
    */
   abstract removeItem(): void;
+
+  /**
+   * Clear all localStorage.
+   */
+  static clear(): void {
+    localStorage.clear();
+  }
 }
 
 export default Storage;

@@ -20,4 +20,4 @@ class SessionStorage extends Storage {
   }
 }
 
-export const AuthStorage = new SessionStorage('auth');
+export const UserStorage = new SessionStorage('user');

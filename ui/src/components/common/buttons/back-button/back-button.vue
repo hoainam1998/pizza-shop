@@ -9,7 +9,7 @@
 <script setup lang="ts">
 import { Back } from '@element-plus/icons-vue';
 import useWrapperRouter from '@/composables/use-router';
-import { currentRoute as currentRouteStorage } from '@/composables/store';
+import { currentRoute as currentRouteStorage } from '@/store';
 import paths from '@/router/paths';
 const { push } = useWrapperRouter();
 

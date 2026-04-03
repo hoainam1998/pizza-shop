@@ -1,5 +1,5 @@
 <template>
-  <main class="category ps-display-flex ps-flex-gap-10 ps-px-7">
+  <main class="category ps-display-flex ps-flex-gap-10 ps-px-10">
     <Table
       ref="categoryTable"
       :fields="fields"

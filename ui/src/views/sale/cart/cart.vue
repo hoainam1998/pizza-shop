@@ -59,21 +59,18 @@
 </template>
 <script setup lang="ts">
 import { computed, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
-import { Back } from '@element-plus/icons-vue';
 import CartItem from '@/components/sale/cart/cart-item/cart-item.vue';
 import BillItem from '@/components/sale/cart/bill-item.vue';
 import List from '@/components/common/list.vue';
 import BackButton from '@/components/common/buttons/back-button/back-button.vue';
-import useWrapperRouter from '@/composables/use-router';
 import SocketService from '@/socket';
 import IndexedDb from '@/indexed-db';
 import { OBJECT_STORE_NAME, SOCKET_EVENT_NAME, ERROR_PRODUCT_STATE } from '@/enums';
 import { ProductService } from '@/services';
-import { useProductsInCart } from '@/composables/store';
+import { useProductsInCart } from '@/composables';
 import { grayColor } from '@/assets/scss/variables.module.scss';
 import { type ClientCartItemType } from '@/interfaces';
 import { showSuccessNotification } from '@/utils';
-import paths from '@/router/paths';
 import type { CartItemInfoType } from '@/components/sale/cart/cart-item/props-validator';
 
 type ServerCartItemType = {
@@ -106,7 +103,6 @@ type PaymentErrorType = {
   validateResult: boolean;
 };
 
-const { push } = useWrapperRouter();
 const cart = useProductsInCart();
 const clientCartItems = ref<ClientCartItemType[]>([]);
 const serverCartItemGroups = ref<Record<string, ServerCartItemType>>({});
@@ -334,8 +330,6 @@ const payment = (): void => {
         });
     });
 };
-
-const backToHome = () => push(paths.BASE);
 
 onBeforeMount(() => SocketService.subscribe(SOCKET_EVENT_NAME.REFRESH, refreshProductInCart));
 

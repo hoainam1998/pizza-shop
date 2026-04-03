@@ -56,7 +56,7 @@
 import { ref, computed, onMounted } from 'vue';
 import List from '@/components/common/list.vue';
 import { type ProductItemsPropsType } from './props-validator';
-import { useProductsInCart } from '@/composables/store';
+import { useProductsInCart } from '@/composables';
 import IndexedDb from '@/indexed-db';
 import { OBJECT_STORE_NAME } from '@/enums';
 import { type ClientCartItemType } from '@/interfaces';

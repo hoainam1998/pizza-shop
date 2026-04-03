@@ -44,16 +44,9 @@ export type ExtraConfigs = AxiosRequestConfig & {
 };
 
 export type LoginResponseType = {
-  lastName: string;
-  firstName: string;
-  avatar?: string;
-  email: string;
-  phone: string;
   resetPasswordToken: string;
   isFirstTime: boolean;
-  userId: string;
-  power: number;
-  sex: number;
+  userLoggedToken: string;
 };
 
 export type ClientCartItemType = {

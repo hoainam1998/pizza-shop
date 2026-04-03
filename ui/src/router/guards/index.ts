@@ -1,3 +1,4 @@
 import adminGuard from './admin';
+import saleGuard from './sale';
 
-export default adminGuard;
+export default  isSale ? saleGuard : adminGuard;;

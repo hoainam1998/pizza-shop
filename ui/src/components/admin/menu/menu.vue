@@ -1,16 +1,15 @@
 <template>
   <div class="menu-wrapper
-  ps-overflow-hidden
   ps-w-200px
-  ps-h-100vh
-  ps-position-fixed
+  ps-h-75vh
   ps-display-flex
   ps-flex-direction-column
-  ps-justify-content-space-between
-  ps-bg-f39c12">
-    <div class="ps-mt-10 ps-text-align-center">
-      <RouterLink :to="paths.BASE.Path">
-        <img src="@/assets/images/logo.png" height="40" width="40" />
+  ps-justify-content-space-between">
+    <div class="ps-text-align-center">
+      <RouterLink :to="paths.BASE.Path" class="ps-display-block ps-line-height-16 ps-bg-2ecc71 ps-py-5 ps-w-100">
+        <div class="ps-py-4 ps-px-4 ps-bg-white ps-display-inline-block ps-border-radius-3">
+          <img src="@/assets/images/logo.png" height="40" width="40" class="ps-box-shadow" />
+        </div>
       </RouterLink>
       <el-menu
         ref="menuRef"
@@ -19,28 +18,19 @@
         :background-color="primaryColor"
         :active-text-color="primaryColor"
         :active-background-color="whiteColor"
-        :text-color="whiteColor">
-        <el-menu-item v-for="(item, index) in menuItems"
-          :key="index"
-          :index="item.index"
-          class="ps-h-40px"
-          @click="menuItemClick">
-          <el-icon><component :is="item.icon"></component></el-icon>
-          <template #title><span class="ps-fw-bold ps-text-transform-capitalize">{{ item.title }}</span></template>
-        </el-menu-item>
+        :text-color="whiteColor"
+        class="menu-items ps-bg-f39c12 ps-overflow-y-auto">
+        <List :items="menuItems">
+          <template #default="{ item }">
+            <el-menu-item :index="item.index" class="ps-h-40px" @click="menuItemClick">
+              <el-icon>
+                <component :is="item.icon"></component>
+              </el-icon>
+              <template #title><span class="ps-fw-bold ps-text-transform-capitalize">{{ item.title }}</span></template>
+            </el-menu-item>
+          </template>
+        </List>
       </el-menu>
-    </div>
-    <div>
-      <el-image :src="url" fit="cover" class="ps-display-block ps-margin-auto ps-w-70px ps-h-70px" />
-      <h5 class="ps-mt-5 ps-text-color-white ps-text-align-center ps-text-truncate-1 ps-px-7">
-        Lorem ipsum dolor sit amet consectetur adipiscing elit. Dolor sit amet consectetur
-        adipiscing elit quisque faucibus.
-      </h5>
-      <hr class="ps-mt-7" />
-      <div class="ps-py-7 ps-text-align-center">
-        <el-button size="small" type="primary" class="ps-fw-bold">Personal</el-button>
-        <el-button size="small" type="danger" class="ps-fw-bold">Logout</el-button>
-      </div>
     </div>
   </div>
 </template>
@@ -50,12 +40,12 @@ import { onMounted, useTemplateRef, type Component } from 'vue';
 import { RouterLink, onBeforeRouteUpdate, useRoute } from 'vue-router';
 import { primaryColor, whiteColor } from '@/assets/scss/variables.module.scss';
 import { Document, Menu as IconMenu, Burger, Tickets, User } from '@element-plus/icons-vue';
+import List from '@/components/common/list.vue';
 import paths from '@/router/paths';
 import useWrapperRouter from '@/composables/use-router';
 
 const menuRef = useTemplateRef('menuRef');
 const { push } = useWrapperRouter();
-const url = 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg';
 const route = useRoute();
 
 type MenuItem = {
@@ -94,7 +84,7 @@ const menuItems: MenuItem[] = [
 
 const menuPaths: string[] = menuItems.map((item) => item.index);
 
-const menuItemClick = (menuItemProps: any): void => {
+const menuItemClick = (menuItemProps: MenuItem): void => {
   push(menuItemProps.index);
 };
 
@@ -114,6 +104,10 @@ onMounted(() => {
 .menu-wrapper {
   .is-active {
     background-color: v-bind(whiteColor);
+  }
+
+  .menu-items {
+    height: calc(75vh - 50px);
   }
 }
 </style>
