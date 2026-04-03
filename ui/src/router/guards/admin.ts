@@ -1,5 +1,5 @@
 import type { NavigationGuardNext, RouteLocationNormalized, RouteLocationNormalizedLoaded } from 'vue-router';
-import { auth as authStore, currentRoute as currentRouteStorage } from '@/composables/store';
+import { auth as authStore, currentRoute as currentRouteStorage } from '@/store';
 import SearchParams from '@/services/search-params';
 import paths from '../paths';
 
@@ -11,7 +11,7 @@ export default (to: RouteLocationNormalized, from: RouteLocationNormalizedLoaded
       currentRouteStorage.setCurrentRoute(to.path);
       return next();
     } else {
-      const path = currentRouteStorage.getCurrentRoute() || paths.HOME.Path;
+      const path = currentRouteStorage.getCurrentRoute() || `${paths.HOME}`;
       return next(path);
     }
   } else {

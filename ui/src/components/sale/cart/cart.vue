@@ -28,7 +28,7 @@ import { computed } from 'vue';
 import { ShoppingCartFull } from '@element-plus/icons-vue';
 import { whiteColor } from '@/assets/scss/variables.module.scss';
 import useWrapperRouter from '@/composables/use-router';
-import { useProductsInCart } from '@/composables/store';
+import { useProductsInCart } from '@/composables';
 import paths from '@/router/paths';
 
 const { push } = useWrapperRouter();

@@ -79,7 +79,7 @@
   </div>
   <ul v-if="cart.messages.length && cart.isDisable === false"
     class="ps-list-style-none ps-px-10 ps-mb-7">
-     <List :items="cart.messages">
+    <List :items="cart.messages">
       <template #default="{ item }">
         <li class="error-item ps-fs-12 ps-text-color-f56c6c ps-text-truncate-2">{{ item }}</li>
       </template >

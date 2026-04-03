@@ -5,5 +5,5 @@
 </template>
 
 <script setup lang="ts">
-import loadingStore from '@/composables/store/loading';
+import loadingStore from '@/store/loading';
 </script>

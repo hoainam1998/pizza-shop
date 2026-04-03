@@ -37,7 +37,7 @@ import PsPasswordInput from '@/components/inputs/password.vue';
 import PsEmailInput from '@/components/inputs/email.vue';
 import constants from '@/constants';
 import paths from '@/router/paths';
-import {auth as authStore } from '@/composables/store';
+import { auth as authStore, userLoggedToken as userLoggedTokenStore } from '@/store';
 import useWrapperRouter from '@/composables/use-router';
 import { UserService } from '@/services';
 import { generateResetPasswordLink, showErrorNotification } from '@/utils';
@@ -87,7 +87,8 @@ const onSubmit = async (): Promise<void> => {
               push(generateResetPasswordLink(response.data.resetPasswordToken));
             } else {
               authStore.setAlreadyLogin(true);
-              push(`${paths.HOME}`);
+              userLoggedTokenStore.setUserLoggedToken(response.data.userLoggedToken);
+              push(`${paths.HOME}/${paths.HOME.CATEGORY}`);
             }
           }).catch((error: AxiosError<MessageResponseType>) => {
             showErrorNotification('Admin login!', error.response?.data.messages);
