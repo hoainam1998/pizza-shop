@@ -36,6 +36,15 @@ const loginInfo: LoginInfo = {
   session_id: expect.any(String),
 };
 
+const userExpected = omitFields(['password', 'plain_password', 'session_id'], user) as UserLoggedType;
+const loginSerializer = new LoginSerializer(userExpected);
+const userPlain = instanceToPlain(loginSerializer);
+const userSerializer = {
+  isFirstTime: userPlain.isFirstTime,
+  resetPasswordToken: userPlain.resetPasswordToken,
+  userLoggedToken: expect.any(String),
+};
+
 beforeAll(async () => {
   const requestTest = await startUp();
   api = requestTest.api;
@@ -53,16 +62,14 @@ afterEach(async () => {
 describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
   it(createTestName('login success', HttpStatus.OK), async () => {
     expect.hasAssertions();
-    const userExpected = omitFields(['password', 'plain_password', 'session_id'], user) as UserLoggedType;
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(userExpected));
     const loginService = jest.spyOn(userService, 'login');
-    const loginSerializer = new LoginSerializer(userExpected);
     const response = await api
       .post(loginUrl)
       .send(loginInfo)
       .expect(HttpStatus.OK)
-      .expect('Content-Type', /application\/json/)
-      .expect(instanceToPlain(loginSerializer));
+      .expect('Content-Type', /application\/json/);
+    expect(response.body).toEqual(userSerializer);
     expect(loginService).toHaveBeenCalledTimes(1);
     expect(loginService).toHaveBeenCalledWith(loginInfo);
     expect(send).toHaveBeenCalledTimes(1);
@@ -72,19 +79,25 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
 
   it(createTestName('login success with session regis', HttpStatus.OK), async () => {
     expect.hasAssertions();
-    const userExpected = omitFields(
-      ['password', 'plain_password', 'session_id', 'reset_password_token'],
-      user,
-    ) as UserLoggedType;
+    const userExpected = omitFields(['password', 'plain_password', 'session_id'], {
+      ...user,
+      reset_password_token: null,
+    }) as UserLoggedType;
+    const loginSerializer = new LoginSerializer(userExpected);
+    const userPlain = instanceToPlain(loginSerializer);
+    const userSerializer = {
+      isFirstTime: userPlain.isFirstTime,
+      resetPasswordToken: userPlain.resetPasswordToken,
+      userLoggedToken: expect.any(String),
+    };
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(userExpected));
     const loginService = jest.spyOn(userService, 'login');
-    const loginSerializer = new LoginSerializer(userExpected);
     const response = await api
       .post(loginUrl)
       .send(loginInfo)
       .expect(HttpStatus.OK)
-      .expect('Content-Type', /application\/json/)
-      .expect(instanceToPlain(loginSerializer, { exposeUnsetFields: false }));
+      .expect('Content-Type', /application\/json/);
+    expect(response.body).toEqual(userSerializer);
     expect(loginService).toHaveBeenCalledTimes(1);
     expect(loginService).toHaveBeenCalledWith(loginInfo);
     expect(send).toHaveBeenCalledTimes(1);

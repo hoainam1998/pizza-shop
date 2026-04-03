@@ -8,10 +8,11 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
+import { user } from 'generated/prisma';
 import { Exclude, Expose, plainToInstance, Type } from 'class-transformer';
 import Validator from './validator';
-import { UserLoggedType, UserPaginationResponse } from '@share/interfaces';
-import { user } from 'generated/prisma';
+import { UserLoggedType, UserPaginationResponse, UserLoggedSerializerType } from '@share/interfaces';
+import { signUserLoggedToken } from '@share/utils';
 
 export class CanSignupSerializer extends Validator {
   @IsBoolean()
@@ -91,6 +92,14 @@ export class LoginSerializer extends UserSerializer {
   @Expose({ toPlainOnly: true })
   get isFirstTime() {
     return !!this.reset_password_token;
+  }
+
+  static serializer(plain: Record<string, any>): UserLoggedSerializerType {
+    return {
+      isFirstTime: plain.isFirstTime,
+      resetPasswordToken: plain.resetPasswordToken,
+      userLoggedToken: signUserLoggedToken(plain),
+    };
   }
 
   constructor(target: UserLoggedType) {

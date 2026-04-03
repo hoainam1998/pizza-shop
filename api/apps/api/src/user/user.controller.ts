@@ -43,7 +43,7 @@ import { ImageTransformPipe } from '@share/pipes';
 import { createMessage, getAdminResetPasswordLink } from '@share/utils';
 import messages from '@share/constants/messages';
 import SendEmailService from '@share/libs/mailer/mailer.service';
-import { type UserCreatedType } from '@share/interfaces';
+import type { UserCreatedType, UserLoggedSerializerType } from '@share/interfaces';
 import { MessageSerializer } from '@share/dto/serializer/common';
 import LoggingService from '@share/libs/logging/logging.service';
 import ErrorCode from '@share/error-code';
@@ -108,7 +108,7 @@ export default class UserController extends BaseController {
   @HttpCode(HttpStatus.OK)
   @Post(UserRouter.relative.login)
   @HandleHttpError
-  login(@Req() req: Express.Request, @Body() loginInfo: LoginInfo): Observable<Promise<Record<string, any>>> {
+  login(@Req() req: Express.Request, @Body() loginInfo: LoginInfo): Observable<Promise<UserLoggedSerializerType>> {
     Object.assign(loginInfo, { session_id: req.sessionID });
     return this.userService.login(loginInfo).pipe(
       map((user) => {
@@ -127,7 +127,7 @@ export default class UserController extends BaseController {
                 userId: serializerResponse.userId,
               };
             }
-            return serializerResponse;
+            return LoginSerializer.serializer(serializerResponse);
           }
         });
       }),

@@ -97,6 +97,15 @@ const verifyLoginToken = (loginToken: string): jwt.JwtPayload =>
   jwt.verify(loginToken, process.env.SECRET_KEY!) as jwt.JwtPayload;
 
 /**
+ * Signing user logged token.
+ *
+ * @param {Record<string, any>} payload - The user data.
+ * @return {string} - The user logged token.
+ */
+const signUserLoggedToken = (payload: Record<string, any>): string =>
+  jwt.sign(payload, process.env.USER_LOGGED_SECRET_KEY!);
+
+/**
  * Hashing password
  *
  * @async
@@ -157,6 +166,7 @@ export {
   signingAdminResetPasswordToken,
   signClientResetPasswordToken,
   signClientLoginToken,
+  signUserLoggedToken,
   passwordHashing,
   autoGeneratePassword,
   verifyAdminResetPasswordToken,
