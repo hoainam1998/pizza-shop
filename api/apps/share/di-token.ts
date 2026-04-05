@@ -5,3 +5,5 @@ export const INGREDIENT_SERVICE = Symbol('INGREDIENT_SERVICE');
 export const PRODUCT_SERVICE = Symbol('PRODUCT_SERVICE');
 export const SOCKET_SERVICE = Symbol('SOCKET_SERVICE');
 export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
+export const IS_PUBLIC_KEY = 'isPublic';
+export const ROLES = 'roles';

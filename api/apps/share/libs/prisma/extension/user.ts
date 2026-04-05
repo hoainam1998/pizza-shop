@@ -1,9 +1,9 @@
 import { PrismaClient, Prisma, PrismaPromise, user } from 'generated/prisma';
-import constants from '@share/constants';
 import messages from '@share/constants/messages';
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { createMessage, autoGeneratePassword, passwordHashing, signingAdminResetPasswordToken } from '@share/utils';
 import { type UserCreatedType } from '@share/interfaces';
+import { POWER_NUMERIC, SEX } from '@share/enums';
 
 type PrismaUserCreateParameter = {
   args: Omit<Prisma.userCreateArgs, 'data'> & {
@@ -20,8 +20,8 @@ type PrismaUserUpdateParameter = {
 };
 
 const USER = messages.USER;
-const SEX_VALID = Object.values(constants.SEX);
-const POWER_VALID = Object.values(constants.POWER_NUMERIC);
+const SEX_VALID = Object.values(SEX);
+const POWER_VALID = Object.values(POWER_NUMERIC);
 
 export default (prisma: PrismaClient) => ({
   create: async ({ args, query }: PrismaUserCreateParameter): Promise<UserCreatedType> => {

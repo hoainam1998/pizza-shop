@@ -1,6 +1,7 @@
 import { BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import messages from '@share/constants/messages';
+import { LoggerIncludeType } from '@share/interfaces';
 import { createMessage } from '@share/utils';
 
 export default function (target: any, propertyName: string, descriptor: TypedPropertyDescriptor<any>) {
@@ -10,7 +11,7 @@ export default function (target: any, propertyName: string, descriptor: TypedPro
       const status = error instanceof RpcException ? (error.getError() as any).status : error.status;
 
       if (status !== HttpStatus.NOT_FOUND) {
-        this.logger.error(error.message, propertyName);
+        (this as LoggerIncludeType).logger.error(error.message as string, propertyName);
       }
 
       if (error instanceof RpcException) {
