@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { IS_PUBLIC_KEY } from '@share/decorators/auths';
+import { IS_PUBLIC_KEY } from '@share/di-token';
 import { LoginSessionPayload } from '@share/dto/validators/user.dto';
 import messages from '@share/constants/messages';
 import { createMessage } from '@share/utils';
@@ -19,12 +19,11 @@ export default class AuthGuard implements CanActivate {
     if (isPublic) {
       return true;
     } else {
-      return new LoginSessionPayload(request.session.user).validate().then((errors) => {
-        if (errors.length) {
-          throw new UnauthorizedException(createMessage(messages.USER.DID_NOT_LOGIN));
-        }
-        return true;
-      });
+      const errors = await new LoginSessionPayload(request.session.user).validate();
+      if (errors.length) {
+        throw new UnauthorizedException(createMessage(messages.USER.DID_NOT_LOGIN));
+      }
+      return true;
     }
   }
 }

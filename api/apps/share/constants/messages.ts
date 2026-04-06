@@ -39,6 +39,9 @@ export default Object.freeze({
     DELETE_USER_SUCCESS: 'Delete user was success!',
     LOGOUT_USER_FAIL: 'Logout user was fail!',
     UPDATE_PERSONAL_INFO_SUCCESS: 'Update your personal info was success!',
+    ONLY_ALLOW_YOUR_SELF: 'Only your self can handle this process!',
+    API_KEY_INVALID: 'Your API key is invalid!',
+    DO_NOT_PERMISSION: 'You do not permission to handle this process!',
   },
   INGREDIENT: {
     CREATE_INGREDIENT_SUCCESS: 'Create ingredient was success!',

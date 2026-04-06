@@ -3,6 +3,7 @@ import { user, category, product, ingredient } from 'generated/prisma';
 import { Carts, GetProductsInCart, ProductPagination } from './dto/validators/product.dto';
 import { UserDetail } from './dto/validators/user.dto';
 import { VIEW } from './enums';
+import LoggingService from './libs/logging/logging.service';
 
 export type CategoryBodyType = category & {
   disabled?: boolean;
@@ -53,7 +54,7 @@ export type SignupUserPayloadType = {
   canSignup: boolean;
 };
 
-export type UserCreatedType = user & {
+export type UserCreatedType = Pick<user, 'email' | 'reset_password_token'> & {
   plain_password: string;
 };
 
@@ -145,5 +146,10 @@ export type UserLoggedType = Omit<user, 'password' | 'phone' | 'session_id'>;
 export type UserLoggedSerializerType = {
   resetPasswordToken: string | null;
   isFirstTime: boolean;
-  userLoggedToken: string;
+  userLoggedToken: string | null;
+  apiKey: string | null;
+};
+
+export type LoggerIncludeType = {
+  logger: LoggingService;
 };

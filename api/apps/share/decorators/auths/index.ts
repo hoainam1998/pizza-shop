@@ -1,4 +1,4 @@
-import { SetMetadata } from '@nestjs/common';
+import Public from './public.decorator';
+import Roles from './roles.decorator';
 
-export const IS_PUBLIC_KEY = 'isPublic';
-export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
+export { Public, Roles };

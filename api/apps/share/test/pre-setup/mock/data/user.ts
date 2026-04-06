@@ -1,7 +1,7 @@
 import { SessionData } from 'express-session';
-import constants from '@share/constants';
 import { UserRequestType } from '@share/interfaces';
-import { autoGeneratePassword, signingAdminResetPasswordToken } from '@share/utils';
+import { autoGeneratePassword, signingAdminResetPasswordToken, signAdminApiKey } from '@share/utils';
+import { POWER_NUMERIC, SEX } from '@share/enums';
 const plainPassword = autoGeneratePassword();
 
 export const user: Required<UserRequestType> = {
@@ -12,8 +12,8 @@ export const user: Required<UserRequestType> = {
   phone: '0987654321',
   avatar: 'avatar',
   password: '$2b$10$Cfc',
-  sex: constants.SEX.FEMALE,
-  power: constants.POWER_NUMERIC.SUPER_ADMIN,
+  sex: SEX.FEMALE,
+  power: POWER_NUMERIC.SUPER_ADMIN,
   plain_password: plainPassword,
   session_id: null,
   reset_password_token: signingAdminResetPasswordToken({ email: 'myemail@gmail.com', password: plainPassword }),
@@ -38,3 +38,5 @@ export const createUsers = (length: number): Partial<typeof user>[] => {
     power: user.power,
   }));
 };
+
+export const apiKey = signAdminApiKey({ userId: user.user_id, email: user.email, power: user.power });

@@ -22,3 +22,14 @@ export enum VIEW {
   ADMIN = 'admin',
   CLIENT = 'client',
 }
+
+export enum SEX {
+  MALE = 0,
+  FEMALE = 1,
+}
+
+export enum POWER_NUMERIC {
+  SUPER_ADMIN = 0,
+  ADMIN = 1,
+  SALE = 2,
+}

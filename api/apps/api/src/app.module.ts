@@ -33,10 +33,10 @@ import AuthGuard from '@share/guards/auth.service';
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: AuthGuard,
-    // },
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
   ],
 })
 export default class AppModule {
