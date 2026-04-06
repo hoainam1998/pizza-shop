@@ -111,25 +111,25 @@ export default class UserController extends BaseController {
   login(@Req() req: Express.Request, @Body() loginInfo: LoginInfo): Observable<Promise<UserLoggedSerializerType>> {
     Object.assign(loginInfo, { session_id: req.sessionID });
     return this.userService.login(loginInfo).pipe(
-      map((user) => {
+      map(async (user) => {
         const loginResult = new LoginSerializer(user);
-        return loginResult.validate().then((errors) => {
-          if (errors.length) {
-            this.logError(errors, this.login.name);
-            throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
-          } else {
-            const serializerResponse = instanceToPlain(loginResult);
-            if (!serializerResponse.resetPasswordToken) {
-              req.session.user = {
-                canSignup: false,
-                email: serializerResponse.email,
-                power: serializerResponse.power,
-                userId: serializerResponse.userId,
-              };
-            }
-            return LoginSerializer.serializer(serializerResponse);
+        const errors = await loginResult.validate();
+
+        if (errors.length) {
+          this.logError(errors, this.login.name);
+          throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
+        } else {
+          const serializerResponse = instanceToPlain(loginResult);
+          if (!serializerResponse.resetPasswordToken) {
+            req.session.user = {
+              canSignup: false,
+              email: serializerResponse.email,
+              power: serializerResponse.power,
+              userId: serializerResponse.userId,
+            };
           }
-        });
+          return LoginSerializer.serializer(serializerResponse);
+        }
       }),
     );
   }

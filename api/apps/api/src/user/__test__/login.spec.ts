@@ -36,13 +36,17 @@ const loginInfo: LoginInfo = {
   session_id: expect.any(String),
 };
 
-const userExpected = omitFields(['password', 'plain_password', 'session_id'], user) as UserLoggedType;
+const userExpected = omitFields(['password', 'plain_password', 'session_id'], {
+  ...user,
+  reset_password_token: null,
+}) as UserLoggedType;
 const loginSerializer = new LoginSerializer(userExpected);
 const userPlain = instanceToPlain(loginSerializer);
 const userSerializer = {
   isFirstTime: userPlain.isFirstTime,
   resetPasswordToken: userPlain.resetPasswordToken,
   userLoggedToken: expect.any(String),
+  apiKey: expect.any(String),
 };
 
 beforeAll(async () => {
@@ -74,21 +78,19 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
     expect(loginService).toHaveBeenCalledWith(loginInfo);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(loginPattern, loginInfo);
-    expect(response.headers['set-cookie']).not.toBeDefined();
+    expect(response.headers['set-cookie']).toEqual([expect.any(String)]);
   });
 
-  it(createTestName('login success with session regis', HttpStatus.OK), async () => {
+  it(createTestName('login success for first time', HttpStatus.OK), async () => {
     expect.hasAssertions();
-    const userExpected = omitFields(['password', 'plain_password', 'session_id'], {
-      ...user,
-      reset_password_token: null,
-    }) as UserLoggedType;
+    const userExpected = omitFields(['password', 'plain_password', 'session_id'], user) as UserLoggedType;
     const loginSerializer = new LoginSerializer(userExpected);
     const userPlain = instanceToPlain(loginSerializer);
     const userSerializer = {
       isFirstTime: userPlain.isFirstTime,
       resetPasswordToken: userPlain.resetPasswordToken,
-      userLoggedToken: expect.any(String),
+      userLoggedToken: null,
+      apiKey: null,
     };
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(userExpected));
     const loginService = jest.spyOn(userService, 'login');
@@ -102,7 +104,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
     expect(loginService).toHaveBeenCalledWith(loginInfo);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(loginPattern, loginInfo);
-    expect(response.headers['set-cookie']).toEqual([expect.any(String)]);
+    expect(response.headers['set-cookie']).not.toBeDefined();
   });
 
   it(createTestName('login failed with not found error', HttpStatus.NOT_FOUND), async () => {
