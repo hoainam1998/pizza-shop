@@ -10,10 +10,18 @@ import { HttpExceptionFilter } from '@share/exception-filter';
 import { GlobalValidatePipe } from '@share/pipes';
 import sessionConfig from '@share/session-config';
 import ShareModule from '@share/module';
+import AuthGuard from '@share/guards/auth.service';
+import { APP_GUARD } from '@nestjs/core';
 
 const startUp = async (module = UserModule) => {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [module, ShareModule],
+    providers: [
+      {
+        provide: APP_GUARD,
+        useClass: AuthGuard,
+      },
+    ],
   })
     .overrideProvider(USER_SERVICE)
     .useValue({

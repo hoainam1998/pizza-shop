@@ -8,11 +8,11 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { user } from 'generated/prisma';
 import { Exclude, Expose, plainToInstance, Type } from 'class-transformer';
+import { user } from 'generated/prisma';
 import Validator from './validator';
 import { UserLoggedType, UserPaginationResponse, UserLoggedSerializerType } from '@share/interfaces';
-import { signUserLoggedToken } from '@share/utils';
+import { signUserLoggedToken, signAdminApiKey } from '@share/utils';
 
 export class CanSignupSerializer extends Validator {
   @IsBoolean()
@@ -98,7 +98,10 @@ export class LoginSerializer extends UserSerializer {
     return {
       isFirstTime: plain.isFirstTime,
       resetPasswordToken: plain.resetPasswordToken,
-      userLoggedToken: signUserLoggedToken(plain),
+      userLoggedToken: plain.isFirstTime ? null : signUserLoggedToken(plain),
+      apiKey: plain.isFirstTime
+        ? null
+        : signAdminApiKey({ userId: plain.userId, email: plain.email, power: plain.power }),
     };
   }
 
