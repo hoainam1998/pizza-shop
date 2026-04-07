@@ -8,12 +8,12 @@ import {
   Post,
   Req,
   Logger,
-  UnauthorizedException,
   Param,
   Delete,
   Put,
   Res,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { SkipThrottle } from '@nestjs/throttler';
@@ -40,17 +40,20 @@ import {
   UpdatePersonalInfo,
 } from '@share/dto/validators/user.dto';
 import { ImageTransformPipe } from '@share/pipes';
-import { createMessage, getAdminResetPasswordLink } from '@share/utils';
+import { createMessage } from '@share/utils';
 import messages from '@share/constants/messages';
 import SendEmailService from '@share/libs/mailer/mailer.service';
-import type { UserCreatedType, UserLoggedSerializerType } from '@share/interfaces';
+import type { UserLoggedSerializerType, UserCreatedReturnType } from '@share/interfaces';
 import { MessageSerializer } from '@share/dto/serializer/common';
 import LoggingService from '@share/libs/logging/logging.service';
-import ErrorCode from '@share/error-code';
 import { UserRouter } from '@share/router';
 import { HandleHttpError, UploadImage } from '@share/decorators';
-import { Public } from '@share/decorators/auths';
+import { Public, Roles } from '@share/decorators/auths';
 import BaseController from '../controller';
+import CanSignupGuard from '@share/guards/can-signup.service';
+import OnlyAllowSelfGuard from '@share/guards/only-allow-self.service';
+import { POWER_NUMERIC } from '@share/enums';
+import RolesGuard from '@share/guards/roles.service';
 
 @Controller(UserRouter.BaseUrl)
 export default class UserController extends BaseController {
@@ -68,38 +71,35 @@ export default class UserController extends BaseController {
   @HandleHttpError
   canSignup(@Req() req: Express.Request): Observable<Promise<CanSignupSerializer>> {
     return this.userService.canSignup().pipe(
-      map((response) => {
+      map(async (response) => {
         const canSignupSerializer = new CanSignupSerializer(response);
-        return canSignupSerializer.validate().then((errors) => {
-          if (errors.length === 0) {
-            req.session.user = canSignupSerializer;
-            return canSignupSerializer;
-          }
-          this.logError(errors, this.canSignup.name);
-          throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
-        });
+        const errors = await canSignupSerializer.validate();
+
+        if (errors.length === 0) {
+          req.session.user = canSignupSerializer;
+          return canSignupSerializer;
+        }
+        this.logError(errors, this.canSignup.name);
+        throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
       }),
     );
   }
 
   @Public()
+  @UseGuards(CanSignupGuard)
   @HttpCode(HttpStatus.CREATED)
   @Post(UserRouter.relative.signup)
   @HandleHttpError
-  signup(@Req() req: Express.Request, @Body() user: SignupDTO): Observable<Promise<MessageSerializer>> {
-    if (!req.session.user?.canSignup) {
-      throw new UnauthorizedException(createMessage(messages.USER.CAN_NOT_SIGNUP, ErrorCode.CAN_NOT_SIGNUP));
-    }
+  signup(@Body() user: SignupDTO): Observable<Promise<MessageSerializer>> {
     return this.userService.signup(instanceToPlain(user)).pipe(
-      map((user: UserCreatedType) => {
-        const link = getAdminResetPasswordLink(user.reset_password_token!);
-        return this.sendEmailService
-          .sendPassword(user.email, link, user.plain_password)
-          .then(() => MessageSerializer.create(messages.USER.SIGNUP_SUCCESS))
-          .catch((error) => {
-            Logger.error(this.signup.name, error);
-            throw new BadRequestException(MessageSerializer.create(messages.USER.SIGNUP_FAILED));
-          });
+      map(async (user: UserCreatedReturnType) => {
+        try {
+          await this.sendEmailService.sendPassword(user.email, user.reset_password_link, user.plain_password);
+          return MessageSerializer.create(messages.USER.SIGNUP_SUCCESS);
+        } catch (error) {
+          Logger.error(this.signup.name, error);
+          throw new BadRequestException(MessageSerializer.create(messages.USER.SIGNUP_FAILED));
+        }
       }),
     );
   }
@@ -144,21 +144,22 @@ export default class UserController extends BaseController {
       .pipe(map(() => MessageSerializer.create(messages.USER.RESET_PASSWORD_SUCCESS)));
   }
 
+  @Roles(POWER_NUMERIC.SUPER_ADMIN)
+  @UseGuards(RolesGuard)
   @HttpCode(HttpStatus.CREATED)
   @Post(UserRouter.relative.create)
   @HandleHttpError
   create(@Body() user: CreateUser): Observable<Promise<MessageSerializer>> {
-    const plainUser = instanceToPlain(plainToInstance(CreateUser, user));
+    const plainUser = CreateUser.plain(user);
     return this.userService.signup(plainUser).pipe(
-      map((user: UserCreatedType) => {
-        const link = getAdminResetPasswordLink(user.reset_password_token!);
-        return this.sendEmailService
-          .sendPassword(user.email, link, user.plain_password)
-          .then(() => MessageSerializer.create(messages.USER.CREATE_USER_SUCCESS))
-          .catch((error) => {
-            Logger.error(this.create.name, error);
-            throw new BadRequestException(MessageSerializer.create(messages.USER.CREATE_USER_FAILED));
-          });
+      map(async (user: UserCreatedReturnType) => {
+        try {
+          await this.sendEmailService.sendPassword(user.email, user.reset_password_link, user.plain_password);
+          return MessageSerializer.create(messages.USER.CREATE_USER_SUCCESS);
+        } catch (error) {
+          Logger.error(this.create.name, error);
+          throw new BadRequestException(MessageSerializer.create(messages.USER.CREATE_USER_FAILED));
+        }
       }),
     );
   }
@@ -194,19 +195,17 @@ export default class UserController extends BaseController {
   pagination(@Body() select: UserPagination): Observable<Promise<Record<string, any>>> {
     const query = UserQuery.plain(select.query);
     return this.userService.pagination({ ...select, query }).pipe(
-      map((result) => {
+      map(async (result) => {
         const response = new PaginationUserSerializer(result);
-        return response.validate().then((errors) => {
-          if (errors.length) {
-            this.logError(errors, this.pagination.name);
-            throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
-          }
-
-          return {
-            total: response.total,
-            list: instanceToPlain(response.list),
-          };
-        });
+        const errors = await response.validate();
+        if (errors.length) {
+          this.logError(errors, this.pagination.name);
+          throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
+        }
+        return {
+          total: response.total,
+          list: instanceToPlain(response.list),
+        };
       }),
     );
   }
@@ -216,14 +215,13 @@ export default class UserController extends BaseController {
   @HandleHttpError
   getUserDetail(@Body() select: UserDetail): Observable<Promise<Record<string, any>>> {
     return this.userService.getUserDetail(UserDetail.plain(select)).pipe(
-      map((user) => {
-        return new UserSerializer(user).validate().then((errors) => {
-          if (errors.length) {
-            this.logError(errors, this.getUserDetail.name);
-            throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
-          }
-          return instanceToPlain(plainToInstance(UserSerializer, user));
-        });
+      map(async (user) => {
+        const errors = await new UserSerializer(user).validate();
+        if (errors.length) {
+          this.logError(errors, this.getUserDetail.name);
+          throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
+        }
+        return instanceToPlain(plainToInstance(UserSerializer, user));
       }),
     );
   }
@@ -232,32 +230,30 @@ export default class UserController extends BaseController {
   @Get(UserRouter.relative.logout)
   @HandleHttpError
   logout(@Req() req: Express.Request, @Res() res: express.Response): Observable<null> | void {
-    if (req.session.user && req.session.user.userId) {
-      return this.userService.logout(req.session.user.userId).pipe(
-        tap(() => {
-          req.session.destroy((error) => {
-            if (error) {
-              res.status(HttpStatus.BAD_REQUEST).json(MessageSerializer.create(messages.USER.LOGOUT_USER_FAIL));
-            } else {
-              res.json();
-            }
-          });
-        }),
-      );
-    } else {
-      res.status(HttpStatus.BAD_REQUEST).json(MessageSerializer.create(messages.USER.ALREADY_LOGOUT));
-    }
+    return this.userService.logout(req.session.user!.userId!).pipe(
+      tap(() => {
+        req.session.destroy((error) => {
+          if (error) {
+            res.status(HttpStatus.BAD_REQUEST).json(MessageSerializer.create(messages.USER.LOGOUT_USER_FAIL));
+          } else {
+            res.json();
+          }
+        });
+      }),
+    );
   }
 
+  @UseGuards(OnlyAllowSelfGuard)
   @HttpCode(HttpStatus.CREATED)
   @Put(UserRouter.relative.updatePersonalInfo)
   @UseInterceptors(FileInterceptor('avatar'))
   @HandleHttpError
   updatePersonalInfo(
+    @Req() req: Express.Request,
     @Body() personalInfo: UpdatePersonalInfo,
     @UploadImage('avatar', ImageTransformPipe) avatar: string,
   ): Observable<MessageSerializer> {
-    Object.assign(personalInfo, { avatar });
+    Object.assign(personalInfo, { avatar, userId: req.session.user!.userId });
     return this.userService
       .updatePersonalInfo(UpdatePersonalInfo.plain(personalInfo))
       .pipe(map(() => MessageSerializer.create(messages.USER.UPDATE_PERSONAL_INFO_SUCCESS)));

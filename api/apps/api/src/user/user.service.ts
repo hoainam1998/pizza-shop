@@ -15,7 +15,12 @@ import {
   logoutPattern,
   updatePersonalInfoPattern,
 } from '@share/pattern';
-import type { UserLoggedType, UserPaginationResponse, UserWithOnlySessionIDType } from '@share/interfaces';
+import type {
+  UserCreatedReturnType,
+  UserLoggedType,
+  UserPaginationResponse,
+  UserWithOnlySessionIDType,
+} from '@share/interfaces';
 import { LoginInfo, ResetPassword } from '@share/dto/validators/user.dto';
 
 @Injectable()
@@ -26,8 +31,8 @@ export default class UserService {
     return this.user.send<number>(canSignupPattern, {});
   }
 
-  signup(user: Record<string, any>): Observable<Pick<user, 'email' | 'reset_password_token'>> {
-    return this.user.send<user>(signupPattern, user);
+  signup(user: Record<string, any>): Observable<UserCreatedReturnType> {
+    return this.user.send<UserCreatedReturnType>(signupPattern, user);
   }
 
   login(loginInfo: LoginInfo): Observable<UserLoggedType> {

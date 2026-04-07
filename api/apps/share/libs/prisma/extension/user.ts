@@ -1,15 +1,21 @@
 import { PrismaClient, Prisma, PrismaPromise, user } from 'generated/prisma';
 import messages from '@share/constants/messages';
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
-import { createMessage, autoGeneratePassword, passwordHashing, signingAdminResetPasswordToken } from '@share/utils';
-import { type UserCreatedType } from '@share/interfaces';
+import {
+  createMessage,
+  autoGeneratePassword,
+  passwordHashing,
+  signingAdminResetPasswordToken,
+  getResetPasswordLink,
+} from '@share/utils';
+import { type UserCreatedReturnType } from '@share/interfaces';
 import { POWER_NUMERIC, SEX } from '@share/enums';
 
 type PrismaUserCreateParameter = {
   args: Omit<Prisma.userCreateArgs, 'data'> & {
     data: Omit<Prisma.userCreateArgs['data'], 'user_id'> | Prisma.userCreateArgs['data'];
   };
-  query: (args: PrismaUserCreateParameter['args']) => PrismaPromise<UserCreatedType>;
+  query: (args: PrismaUserCreateParameter['args']) => PrismaPromise<UserCreatedReturnType>;
 };
 
 type PrismaUserUpdateParameter = {
@@ -24,7 +30,7 @@ const SEX_VALID = Object.values(SEX);
 const POWER_VALID = Object.values(POWER_NUMERIC);
 
 export default (prisma: PrismaClient) => ({
-  create: async ({ args, query }: PrismaUserCreateParameter): Promise<UserCreatedType> => {
+  create: async ({ args, query }: PrismaUserCreateParameter): Promise<UserCreatedReturnType> => {
     const firstTimePassword = autoGeneratePassword();
     if (Object.hasOwn(args.data, 'sex')) {
       if (!SEX_VALID.includes(args.data.sex!)) {
@@ -75,6 +81,7 @@ export default (prisma: PrismaClient) => ({
 
     return {
       ...user,
+      reset_password_link: getResetPasswordLink(args.data.reset_password_token!, args.data.power!),
       plain_password: firstTimePassword,
     };
   },

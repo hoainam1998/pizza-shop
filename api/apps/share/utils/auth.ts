@@ -1,6 +1,7 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { AdminResetPasswordTokenPayload } from '@share/interfaces';
+import { POWER_NUMERIC } from '@share/enums';
 const RESET_PASSWORD_URL = '{origin}/reset-password?token={token}';
 
 /**
@@ -174,10 +175,13 @@ const autoGeneratePassword = (): string => {
  * Return reset password link.
  *
  * @param {string} resetPasswordToken - The reset password token.
+ * @param {POWER_NUMERIC} role - The user role.
  * @return {string} - The reset password link.
  */
-const getAdminResetPasswordLink = (resetPasswordToken: string): string =>
-  RESET_PASSWORD_URL.replace(/{origin}/, process.env.ADMIN_ORIGIN_CORS!).replace(/{token}/, resetPasswordToken);
+const getResetPasswordLink = (resetPasswordToken: string, role: POWER_NUMERIC): string => {
+  const origin = role === POWER_NUMERIC.SALE ? process.env.SALE_ORIGIN_CORS! : process.env.ADMIN_ORIGIN_CORS!;
+  return RESET_PASSWORD_URL.replace(/{origin}/, origin).replace(/{token}/, resetPasswordToken);
+};
 
 // /**
 //  * Return client reset password link.
@@ -203,7 +207,7 @@ export {
   signAdminApiKey,
   verifyAdminApiKey,
   verifyClientLoginToken,
-  getAdminResetPasswordLink,
+  getResetPasswordLink,
   comparePassword,
   // getClientResetPasswordLink,
 };

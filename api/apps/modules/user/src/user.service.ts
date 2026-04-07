@@ -4,13 +4,14 @@ import { PRISMA_CLIENT } from '@share/di-token';
 import messages from '@share/constants/messages';
 import { HandlePrismaError } from '@share/decorators';
 import type {
+  UserCreatedReturnType,
   UserDetailType,
   UserPaginationPrismaResponse,
   UserSignupType,
   UserWithOnlySessionIDType,
 } from '@share/interfaces';
 import { calcSkip } from '@share/utils';
-import { ResetPassword, UserPagination } from '@share/dto/validators/user.dto';
+import { ResetPassword, UserPagination, LoginSessionPayload } from '@share/dto/validators/user.dto';
 import UserCachingService from '@share/libs/caching/user/user.service';
 import ProductCachingService from '@share/libs/caching/product/product.service';
 import ReportCachingService from '@share/libs/caching/report/report.service';
@@ -30,14 +31,13 @@ export default class UserService {
   }
 
   @HandlePrismaError(messages.USER)
-  signup(user: UserSignupType): Promise<Pick<user, 'email' | 'reset_password_token'>> {
+  signup(user: UserSignupType): Promise<UserCreatedReturnType> {
     return this.prismaClient.user.create({
       data: user as any,
       select: {
         email: true,
-        reset_password_token: true,
       },
-    });
+    }) as any;
   }
 
   @HandlePrismaError(messages.USER)

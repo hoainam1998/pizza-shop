@@ -1,23 +1,31 @@
-import { BadRequestException, HttpStatus, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  InternalServerErrorException,
+  RequestMethod,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { of, throwError } from 'rxjs';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { UserRouter } from '@share/router';
 import TestAgent from 'supertest/lib/agent';
 import { ClientProxy } from '@nestjs/microservices';
+import UserModule from '../user.module';
 import UserService from '../user.service';
 import startUp from './pre-setup';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
-import { HTTP_METHOD } from '@share/enums';
-import { user } from '@share/test/pre-setup/mock/data/user';
-import { createDescribeTest, createTestName } from '@share/test/helpers';
-import { createMessage, createMessages, getAdminResetPasswordLink } from '@share/utils';
+import { HTTP_METHOD, POWER_NUMERIC } from '@share/enums';
+import { user, sessionPayload } from '@share/test/pre-setup/mock/data/user';
+import { createDescribeTest, createTestName, getMockModule } from '@share/test/helpers';
+import { createMessage, createMessages } from '@share/utils';
 import messages from '@share/constants/messages';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { CreateUser } from '@share/dto/validators/user.dto';
 import SendEmailService from '@share/libs/mailer/mailer.service';
-import constants from '@share/constants';
 import { signupPattern } from '@share/pattern';
 const createUserUrl = UserRouter.absolute.create;
+
+const MockUserModule = getMockModule(UserModule, { path: createUserUrl, method: RequestMethod.POST });
 
 let api: TestAgent;
 let clientProxy: ClientProxy;
@@ -30,12 +38,12 @@ const requestBody = {
   email: user.email,
   phone: user.phone,
   sex: user.sex,
-  power: constants.POWER_NUMERIC.ADMIN,
+  power: POWER_NUMERIC.ADMIN,
 };
 const userCreate = instanceToPlain(plainToInstance(CreateUser, requestBody));
 
 beforeAll(async () => {
-  const requestTest = await startUp();
+  const requestTest = await startUp(MockUserModule);
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;
   close = () => requestTest.app.close();
@@ -52,12 +60,12 @@ afterEach(async () => {
 describe(createDescribeTest(HTTP_METHOD.POST, createUserUrl), () => {
   it(createTestName('create user success', HttpStatus.OK), async () => {
     expect.hasAssertions();
-    const link = getAdminResetPasswordLink(user.reset_password_token);
     const sendPassword = jest.spyOn(sendEmailService, 'sendPassword').mockResolvedValue({});
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const createUserService = jest.spyOn(userService, 'signup');
     await api
       .post(createUserUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
       .expect(HttpStatus.CREATED)
       .expect('Content-Type', /application\/json/)
@@ -67,7 +75,40 @@ describe(createDescribeTest(HTTP_METHOD.POST, createUserUrl), () => {
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(signupPattern, userCreate);
     expect(sendPassword).toHaveBeenCalledTimes(1);
-    expect(sendPassword).toHaveBeenCalledWith(user.email, link, user.plain_password);
+    expect(sendPassword).toHaveBeenCalledWith(user.email, user.reset_password_link, user.plain_password);
+  });
+
+  it(createTestName('create user failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const sendPassword = jest.spyOn(sendEmailService, 'sendPassword').mockResolvedValue({});
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
+    const createUserService = jest.spyOn(userService, 'signup');
+    await api
+      .post(createUserUrl)
+      .send(requestBody)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.DID_NOT_LOGIN));
+    expect(createUserService).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+    expect(sendPassword).not.toHaveBeenCalled();
+  });
+
+  it(createTestName('create user failed with user do not have permission', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const sendPassword = jest.spyOn(sendEmailService, 'sendPassword').mockResolvedValue({});
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
+    const createUserService = jest.spyOn(userService, 'signup');
+    await api
+      .post(createUserUrl)
+      .set('mock-session', JSON.stringify({ ...sessionPayload, power: POWER_NUMERIC.SALE }))
+      .send(requestBody)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.DO_NOT_PERMISSION));
+    expect(createUserService).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+    expect(sendPassword).not.toHaveBeenCalled();
   });
 
   it(createTestName('create user failed with rpc unknown error', HttpStatus.BAD_REQUEST), async () => {
@@ -79,6 +120,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createUserUrl), () => {
     const createUserService = jest.spyOn(userService, 'signup');
     await api
       .post(createUserUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -97,6 +139,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createUserUrl), () => {
     const createUserService = jest.spyOn(userService, 'signup');
     await api
       .post(createUserUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
@@ -110,12 +153,12 @@ describe(createDescribeTest(HTTP_METHOD.POST, createUserUrl), () => {
 
   it(createTestName('create user failed when sendPassword failed', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
-    const link = getAdminResetPasswordLink(user.reset_password_token);
     const sendPassword = jest.spyOn(sendEmailService, 'sendPassword').mockRejectedValue(UnknownError);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const createUserService = jest.spyOn(userService, 'signup');
     await api
       .post(createUserUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -125,7 +168,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createUserUrl), () => {
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(signupPattern, userCreate);
     expect(sendPassword).toHaveBeenCalledTimes(1);
-    expect(sendPassword).toHaveBeenCalledWith(user.email, link, user.plain_password);
+    expect(sendPassword).toHaveBeenCalledWith(user.email, user.reset_password_link, user.plain_password);
   });
 
   it(createTestName('create user failed with database disconnect error', HttpStatus.BAD_REQUEST), async () => {
@@ -137,6 +180,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createUserUrl), () => {
     const createUserService = jest.spyOn(userService, 'signup');
     await api
       .post(createUserUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -156,6 +200,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createUserUrl), () => {
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => serverError));
     await api
       .post(createUserUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
@@ -176,6 +221,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createUserUrl), () => {
       .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.USER.YOUR_GENDER_INVALID))));
     await api
       .post(createUserUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -196,6 +242,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createUserUrl), () => {
       .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.USER.YOUR_POWER_INVALID))));
     await api
       .post(createUserUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -218,6 +265,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createUserUrl), () => {
       );
     await api
       .post(createUserUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
@@ -238,6 +286,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createUserUrl), () => {
       .mockReturnValue(throwError(() => new UnauthorizedException(createMessage(messages.USER.PHONE_ALREADY_EXIST))));
     await api
       .post(createUserUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)

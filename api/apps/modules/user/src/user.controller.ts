@@ -48,7 +48,7 @@ export default class UserController {
 
   @MessagePattern(signupPattern)
   @HandleServiceError
-  signup(user: UserSignupType): Promise<Pick<user, 'email' | 'reset_password_token'>> {
+  signup(user: UserSignupType): Promise<UserCreatedReturnType> {
     return this.userService.signup(user);
   }
 

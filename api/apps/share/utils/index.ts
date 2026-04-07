@@ -9,7 +9,7 @@ import {
   verifyAdminResetPasswordToken,
   signAdminApiKey,
   verifyAdminApiKey,
-  getAdminResetPasswordLink,
+  getResetPasswordLink,
   comparePassword,
 } from './auth';
 import { createMessage, createMessages } from './message';
@@ -176,7 +176,7 @@ export {
   verifyAdminResetPasswordToken,
   signAdminApiKey,
   verifyAdminApiKey,
-  getAdminResetPasswordLink,
+  getResetPasswordLink,
   comparePassword,
   calcSkip,
   handleValidateException,

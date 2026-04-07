@@ -7,4 +7,8 @@ export default class UserCachingService extends CachingService {
   checkExists(sessionId: string): Promise<boolean> {
     return this.exists(getRedisSessionId(sessionId));
   }
+
+  checkUserAlreadyLogged(sessionId: string): Promise<string | null> {
+    return this.RedisClientInstance.get(getRedisSessionId(sessionId));
+  }
 }
