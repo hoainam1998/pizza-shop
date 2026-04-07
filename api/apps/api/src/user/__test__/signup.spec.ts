@@ -19,7 +19,7 @@ import { HTTP_METHOD } from '@share/enums';
 import { user } from '@share/test/pre-setup/mock/data/user';
 import { createDescribeTest, createTestName, createMessagesTesting } from '@share/test/helpers';
 import { signupPattern } from '@share/pattern';
-import { createMessage, createMessages, getAdminResetPasswordLink } from '@share/utils';
+import { createMessage, createMessages } from '@share/utils';
 import messages from '@share/constants/messages';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { SignupDTO } from '@share/dto/validators/user.dto';
@@ -64,9 +64,8 @@ afterEach(async () => {
 });
 
 describe(createDescribeTest(HTTP_METHOD.POST, signupUrl), () => {
-  it(createTestName('signup success', HttpStatus.OK), async () => {
+  it(createTestName('signup success', HttpStatus.CREATED), async () => {
     expect.hasAssertions();
-    const link = getAdminResetPasswordLink(user.reset_password_token);
     const sendPassword = jest.spyOn(sendEmailService, 'sendPassword').mockResolvedValue({});
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const signupService = jest.spyOn(userService, 'signup');
@@ -82,18 +81,18 @@ describe(createDescribeTest(HTTP_METHOD.POST, signupUrl), () => {
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(signupPattern, signupUser);
     expect(sendPassword).toHaveBeenCalledTimes(1);
-    expect(sendPassword).toHaveBeenCalledWith(user.email, link, user.plain_password);
+    expect(sendPassword).toHaveBeenCalledWith(user.email, user.reset_password_link, user.plain_password);
   });
 
-  it(createTestName('signup failed with canSignup flag is false', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('signup failed with canSignup flag is false', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
     const sendPassword = jest.spyOn(sendEmailService, 'sendPassword');
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const signupService = jest.spyOn(userService, 'signup');
     await api
       .post(signupUrl)
-      .send(requestBody)
       .set('mock-session', JSON.stringify({ canSignup: false }))
+      .send(requestBody)
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
       .expect(createMessagesTesting(messages.USER.CAN_NOT_SIGNUP, ErrorCode.CAN_NOT_SIGNUP));
@@ -144,7 +143,6 @@ describe(createDescribeTest(HTTP_METHOD.POST, signupUrl), () => {
 
   it(createTestName('signup failed when sendPassword failed', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
-    const link = getAdminResetPasswordLink(user.reset_password_token);
     const sendPassword = jest.spyOn(sendEmailService, 'sendPassword').mockRejectedValue(UnknownError);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const signupService = jest.spyOn(userService, 'signup');
@@ -160,7 +158,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, signupUrl), () => {
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(signupPattern, signupUser);
     expect(sendPassword).toHaveBeenCalledTimes(1);
-    expect(sendPassword).toHaveBeenCalledWith(user.email, link, user.plain_password);
+    expect(sendPassword).toHaveBeenCalledWith(user.email, user.reset_password_link, user.plain_password);
   });
 
   it(createTestName('signup failed with database disconnect error', HttpStatus.BAD_REQUEST), async () => {

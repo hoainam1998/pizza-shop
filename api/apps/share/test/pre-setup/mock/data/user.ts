@@ -17,6 +17,7 @@ export const user: Required<UserRequestType> = {
   plain_password: plainPassword,
   session_id: null,
   reset_password_token: signingAdminResetPasswordToken({ email: 'myemail@gmail.com', password: plainPassword }),
+  reset_password_link: expect.any(String),
 };
 
 export const sessionPayload: SessionData['user'] = {

@@ -54,8 +54,13 @@ export type SignupUserPayloadType = {
   canSignup: boolean;
 };
 
-export type UserCreatedType = Pick<user, 'email' | 'reset_password_token'> & {
+export type UserCreatedType = Pick<user, 'email'> & {
   plain_password: string;
+};
+
+export type UserCreatedReturnType = user & {
+  plain_password: string;
+  reset_password_link: string;
 };
 
 export type ProductIngredientType = {
@@ -87,6 +92,7 @@ export type UserRequestType = Omit<user, 'password' | 'reset_password_token'> & 
   plain_password?: string;
   password?: string;
   reset_password_token?: string;
+  reset_password_link?: string;
 };
 
 export type UserSignupType = Pick<user, 'first_name' | 'last_name' | 'email' | 'phone' | 'sex'> & {

@@ -11,7 +11,7 @@ import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { createMessage } from '@share/utils';
 import messages from '@share/constants/messages';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
-import constants from '@share/constants';
+import { POWER_NUMERIC } from '@share/enums';
 
 let prismaService: PrismaClient;
 let loggerService: LoggingService;
@@ -28,7 +28,6 @@ const userInput = {
 
 beforeAll(async () => {
   const moduleRef = await startUp();
-
   userService = moduleRef.get(UserService);
   userController = moduleRef.get(UserController);
   loggerService = moduleRef.get(LoggingService);
@@ -50,7 +49,6 @@ describe('signup', () => {
       data: userInput,
       select: {
         email: true,
-        reset_password_token: true,
       },
     });
   });
@@ -59,7 +57,7 @@ describe('signup', () => {
     expect.hasAssertions();
     const userInputIncludePower = {
       ...userInput,
-      power: constants.POWER_NUMERIC.ADMIN,
+      power: POWER_NUMERIC.ADMIN,
     };
     const create = jest.spyOn(prismaService.user, 'create').mockResolvedValue(user);
     const signupService = jest.spyOn(userService, 'signup');
@@ -73,7 +71,6 @@ describe('signup', () => {
       data: userInputIncludePower,
       select: {
         email: true,
-        reset_password_token: true,
       },
     });
   });
@@ -95,7 +92,6 @@ describe('signup', () => {
       data: userInput,
       select: {
         email: true,
-        reset_password_token: true,
       },
     });
     expect(logMethod).toHaveBeenCalledTimes(1);
@@ -119,7 +115,6 @@ describe('signup', () => {
       data: userInput,
       select: {
         email: true,
-        reset_password_token: true,
       },
     });
     expect(logMethod).toHaveBeenCalledTimes(1);
@@ -142,7 +137,6 @@ describe('signup', () => {
       data: userInput,
       select: {
         email: true,
-        reset_password_token: true,
       },
     });
     expect(logMethod).toHaveBeenCalledTimes(1);
@@ -165,7 +159,6 @@ describe('signup', () => {
       data: userInput,
       select: {
         email: true,
-        reset_password_token: true,
       },
     });
     expect(logMethod).toHaveBeenCalledTimes(1);
@@ -188,7 +181,6 @@ describe('signup', () => {
       data: userInput,
       select: {
         email: true,
-        reset_password_token: true,
       },
     });
     expect(logMethod).toHaveBeenCalledTimes(1);
@@ -211,7 +203,6 @@ describe('signup', () => {
       data: userInput,
       select: {
         email: true,
-        reset_password_token: true,
       },
     });
     expect(logMethod).toHaveBeenCalledTimes(1);

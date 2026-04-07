@@ -41,6 +41,6 @@ import AuthGuard from '@share/guards/auth.service';
 })
 export default class AppModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(xss()).forRoutes('*');
+    consumer.apply(xss({ allowedKeys: ['oldPassword'] })).forRoutes('*');
   }
 }

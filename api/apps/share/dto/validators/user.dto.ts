@@ -20,7 +20,8 @@ import constants from '@share/constants';
 import { UserRequestType } from '@share/interfaces';
 import Validator from '../serializer/validator';
 import { Pagination } from './common.dto';
-const power = Object.values(constants.POWER_NUMERIC);
+import { POWER_NUMERIC } from '@share/enums';
+const power: POWER_NUMERIC[] = [POWER_NUMERIC.ADMIN, POWER_NUMERIC.SALE];
 
 export class UserDTO {
   @Exclude({ toPlainOnly: true })
@@ -59,7 +60,7 @@ export class UserDTO {
 export class SignupDTO extends UserDTO {
   @Expose({ toPlainOnly: true })
   get power() {
-    return constants.POWER_NUMERIC.SUPER_ADMIN;
+    return POWER_NUMERIC.SUPER_ADMIN;
   }
 
   constructor(target: UserRequestType) {
@@ -72,6 +73,10 @@ export class CreateUser extends UserDTO {
   @IsInt()
   @IsIn(power)
   power: number;
+
+  static plain(user: CreateUser): Record<string, any> {
+    return instanceToPlain(plainToInstance(CreateUser, user));
+  }
 }
 
 export class UpdateUser extends CreateUser {
@@ -113,8 +118,7 @@ export class LoginInfo {
 }
 
 export class UpdatePersonalInfo extends UserDTO {
-  @IsNumberString()
-  @Length(13)
+  @Allow()
   userId: string;
 
   @Allow()

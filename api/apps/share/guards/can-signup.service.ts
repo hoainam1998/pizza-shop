@@ -8,7 +8,7 @@ import ErrorCode from '@share/error-code';
 export default class CanSignupGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
-    if (!request.session.user.canSignup) {
+    if (!request.session.user?.canSignup) {
       throw new UnauthorizedException(createMessage(messages.USER.CAN_NOT_SIGNUP, ErrorCode.CAN_NOT_SIGNUP));
     }
     return true;
