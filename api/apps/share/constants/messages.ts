@@ -42,6 +42,7 @@ export default Object.freeze({
     ONLY_ALLOW_YOUR_SELF: 'Only your self can handle this process!',
     API_KEY_INVALID: 'Your API key is invalid!',
     DO_NOT_PERMISSION: 'You do not permission to handle this process!',
+    DO_NOT_CHANGE_YOURSELF: 'You can not change self information!',
   },
   INGREDIENT: {
     CREATE_INGREDIENT_SUCCESS: 'Create ingredient was success!',
