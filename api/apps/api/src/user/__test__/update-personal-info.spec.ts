@@ -15,7 +15,7 @@ import UserModule from '../user.module';
 import startUp from './pre-setup';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { HTTP_METHOD } from '@share/enums';
-import { user, sessionPayload } from '@share/test/pre-setup/mock/data/user';
+import { user, sessionPayload, apiKey } from '@share/test/pre-setup/mock/data/user';
 import { createDescribeTest, createTestName, getMockModule, getStaticFile } from '@share/test/helpers';
 import { createMessage, createMessages } from '@share/utils';
 import messages from '@share/constants/messages';
@@ -23,7 +23,6 @@ import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-
 import { UpdatePersonalInfo } from '@share/dto/validators/user.dto';
 import { updatePersonalInfoPattern } from '@share/pattern';
 const updatePersonalInfoUrl = UserRouter.absolute.updatePersonalInfo;
-
 const MockUserModule = getMockModule(UserModule, { path: updatePersonalInfoUrl, method: RequestMethod.PUT });
 
 let api: TestAgent;
@@ -39,6 +38,7 @@ const requestBody: any = {
   phone: user.phone,
   sex: user.sex,
 };
+
 const userUpdate = UpdatePersonalInfo.plain(requestBody);
 Object.assign(userUpdate, { avatar: expect.any(String) });
 
@@ -57,12 +57,13 @@ afterEach(async () => {
 });
 
 describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
-  it(createTestName('update personal info success', HttpStatus.OK), async () => {
+  it(createTestName('update personal info success', HttpStatus.CREATED), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
     await api
       .put(updatePersonalInfoUrl)
+      .set('Authorization', apiKey)
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -80,12 +81,79 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
     expect(send).toHaveBeenCalledWith(updatePersonalInfoPattern, userUpdate);
   });
 
+  it(createTestName('update personal info failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
+    const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
+    await api
+      .put(updatePersonalInfoUrl)
+      .set('Connection', 'keep-alive')
+      .field('userIds', user.user_id)
+      .field('firstName', user.first_name)
+      .field('lastName', user.last_name)
+      .field('email', user.email)
+      .field('phone', user.phone)
+      .field('sex', user.sex)
+      .attach('avatar', getStaticFile('test-image.png'))
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.DID_NOT_LOGIN));
+    expect(updateUserService).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it(createTestName('update personal info failed with apiKey not set', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
+    const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
+    await api
+      .put(updatePersonalInfoUrl)
+      .set('Connection', 'keep-alive')
+      .set('mock-session', JSON.stringify(sessionPayload))
+      .field('userIds', user.user_id)
+      .field('firstName', user.first_name)
+      .field('lastName', user.last_name)
+      .field('email', user.email)
+      .field('phone', user.phone)
+      .field('sex', user.sex)
+      .attach('avatar', getStaticFile('test-image.png'))
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.API_KEY_INVALID));
+    expect(updateUserService).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it(createTestName('update personal info failed with information not match', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
+    const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
+    await api
+      .put(updatePersonalInfoUrl)
+      .set('Connection', 'keep-alive')
+      .set('Authorization', apiKey)
+      .set('mock-session', JSON.stringify({ ...sessionPayload, userId: Date.now().toString() }))
+      .field('userIds', user.user_id)
+      .field('firstName', user.first_name)
+      .field('lastName', user.last_name)
+      .field('email', user.email)
+      .field('phone', user.phone)
+      .field('sex', user.sex)
+      .attach('avatar', getStaticFile('test-image.png'))
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.ONLY_ALLOW_YOUR_SELF));
+    expect(updateUserService).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
   it(createTestName('update personal info failed with undefined field', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
     const response = await api
       .put(updatePersonalInfoUrl)
+      .set('Authorization', apiKey)
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userIds', user.user_id)
       .field('firstName', user.first_name)
@@ -110,6 +178,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
     await api
       .put(updatePersonalInfoUrl)
+      .set('Authorization', apiKey)
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -131,6 +200,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
     await api
       .put(updatePersonalInfoUrl)
+      .set('Authorization', apiKey)
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -152,6 +222,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
     const response = await api
       .put(updatePersonalInfoUrl)
+      .set('Authorization', apiKey)
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -172,6 +243,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
     const response = await api
       .put(updatePersonalInfoUrl)
+      .set('Authorization', apiKey)
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('firstName', user.first_name)
       .field('lastName', user.last_name)
@@ -193,6 +265,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
     await api
       .put(updatePersonalInfoUrl)
+      .set('Authorization', apiKey)
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -216,6 +289,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
     await api
       .put(updatePersonalInfoUrl)
+      .set('Authorization', apiKey)
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -241,6 +315,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
     await api
       .put(updatePersonalInfoUrl)
+      .set('Authorization', apiKey)
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -266,6 +341,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
     await api
       .put(updatePersonalInfoUrl)
+      .set('Authorization', apiKey)
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -290,6 +366,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => serverError));
     await api
       .put(updatePersonalInfoUrl)
+      .set('Authorization', apiKey)
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -315,6 +392,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
       .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.USER.YOUR_GENDER_INVALID))));
     await api
       .put(updatePersonalInfoUrl)
+      .set('Authorization', apiKey)
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -340,6 +418,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
       .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.USER.YOUR_POWER_INVALID))));
     await api
       .put(updatePersonalInfoUrl)
+      .set('Authorization', apiKey)
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -367,6 +446,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
       );
     await api
       .put(updatePersonalInfoUrl)
+      .set('Authorization', apiKey)
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -392,6 +472,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
       .mockReturnValue(throwError(() => new UnauthorizedException(createMessage(messages.USER.PHONE_ALREADY_EXIST))));
     await api
       .put(updatePersonalInfoUrl)
+      .set('Authorization', apiKey)
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)

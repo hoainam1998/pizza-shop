@@ -54,6 +54,7 @@ import CanSignupGuard from '@share/guards/can-signup.service';
 import OnlyAllowSelfGuard from '@share/guards/only-allow-self.service';
 import { POWER_NUMERIC } from '@share/enums';
 import RolesGuard from '@share/guards/roles.service';
+import DoNotAllowUpdateSelfGuard from '@share/guards/do-not-allow-self.service';
 
 @Controller(UserRouter.BaseUrl)
 export default class UserController extends BaseController {
@@ -164,6 +165,8 @@ export default class UserController extends BaseController {
     );
   }
 
+  @Roles(POWER_NUMERIC.SUPER_ADMIN)
+  @UseGuards(RolesGuard, DoNotAllowUpdateSelfGuard)
   @HttpCode(HttpStatus.CREATED)
   @Put(UserRouter.relative.update)
   @HandleHttpError

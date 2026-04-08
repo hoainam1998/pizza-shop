@@ -3,6 +3,7 @@ import {
   HttpStatus,
   InternalServerErrorException,
   NotFoundException,
+  RequestMethod,
   UnauthorizedException,
 } from '@nestjs/common';
 import { of, throwError } from 'rxjs';
@@ -10,18 +11,19 @@ import { UserRouter } from '@share/router';
 import TestAgent from 'supertest/lib/agent';
 import { ClientProxy } from '@nestjs/microservices';
 import UserService from '../user.service';
+import UserModule from '../user.module';
 import startUp from './pre-setup';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
-import { HTTP_METHOD } from '@share/enums';
-import { user } from '@share/test/pre-setup/mock/data/user';
-import { createDescribeTest, createTestName } from '@share/test/helpers';
+import { HTTP_METHOD, POWER_NUMERIC } from '@share/enums';
+import { user, sessionPayload, apiKey } from '@share/test/pre-setup/mock/data/user';
+import { createDescribeTest, createTestName, getMockModule } from '@share/test/helpers';
 import { createMessage, createMessages } from '@share/utils';
 import messages from '@share/constants/messages';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { UpdateUser } from '@share/dto/validators/user.dto';
-import constants from '@share/constants';
 import { updateUserPattern } from '@share/pattern';
 const updateUserUrl = UserRouter.absolute.update;
+const MockUserModule = getMockModule(UserModule, { path: updateUserUrl, method: RequestMethod.PUT });
 
 let api: TestAgent;
 let clientProxy: ClientProxy;
@@ -35,12 +37,15 @@ const requestBody = {
   email: user.email,
   phone: user.phone,
   sex: user.sex,
-  power: constants.POWER_NUMERIC.ADMIN,
+  power: POWER_NUMERIC.ADMIN,
 };
 const userUpdate = UpdateUser.plain(requestBody);
+const invalidSessionPayload = sessionPayload;
+const validSessionPayload = { ...sessionPayload, userId: Date.now().toString() };
+const invalidPowerSessionPayload = { ...sessionPayload, power: POWER_NUMERIC.SALE };
 
 beforeAll(async () => {
-  const requestTest = await startUp();
+  const requestTest = await startUp(MockUserModule);
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;
   close = () => requestTest.app.close();
@@ -54,12 +59,14 @@ afterEach(async () => {
 });
 
 describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
-  it(createTestName('update user success', HttpStatus.OK), async () => {
+  it(createTestName('update user success', HttpStatus.CREATED), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const updateUserService = jest.spyOn(userService, 'updateUser');
     await api
       .put(updateUserUrl)
+      .set('Authorization', apiKey)
+      .set('mock-session', JSON.stringify(validSessionPayload))
       .send(requestBody)
       .expect(HttpStatus.CREATED)
       .expect('Content-Type', /application\/json/)
@@ -70,6 +77,68 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
     expect(send).toHaveBeenCalledWith(updateUserPattern, userUpdate);
   });
 
+  it(createTestName('update user failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
+    const updateUserService = jest.spyOn(userService, 'updateUser');
+    await api
+      .put(updateUserUrl)
+      .set('Authorization', apiKey)
+      .send(requestBody)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.DID_NOT_LOGIN));
+    expect(updateUserService).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it(createTestName('update user failed with API key not set', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
+    const updateUserService = jest.spyOn(userService, 'updateUser');
+    await api
+      .put(updateUserUrl)
+      .set('mock-session', JSON.stringify(validSessionPayload))
+      .send(requestBody)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.API_KEY_INVALID));
+    expect(updateUserService).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it(createTestName('update user failed when update self information', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
+    const updateUserService = jest.spyOn(userService, 'updateUser');
+    await api
+      .put(updateUserUrl)
+      .set('Authorization', apiKey)
+      .set('mock-session', JSON.stringify(invalidSessionPayload))
+      .send(requestBody)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.DO_NOT_CHANGE_YOURSELF));
+    expect(updateUserService).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it(createTestName('update user failed when user have not permission', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
+    const updateUserService = jest.spyOn(userService, 'updateUser');
+    await api
+      .put(updateUserUrl)
+      .set('Authorization', apiKey)
+      .set('mock-session', JSON.stringify(invalidPowerSessionPayload))
+      .send(requestBody)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.DO_NOT_PERMISSION));
+    expect(updateUserService).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
   it(createTestName('update user failed with rpc unknown error', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest
@@ -78,6 +147,8 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updateUser');
     await api
       .put(updateUserUrl)
+      .set('Authorization', apiKey)
+      .set('mock-session', JSON.stringify(validSessionPayload))
       .send(requestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -94,6 +165,8 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updateUser');
     await api
       .put(updateUserUrl)
+      .set('Authorization', apiKey)
+      .set('mock-session', JSON.stringify(validSessionPayload))
       .send(requestBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
@@ -112,6 +185,8 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updateUser');
     await api
       .put(updateUserUrl)
+      .set('Authorization', apiKey)
+      .set('mock-session', JSON.stringify(validSessionPayload))
       .send(requestBody)
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
@@ -130,6 +205,8 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updateUser');
     await api
       .put(updateUserUrl)
+      .set('Authorization', apiKey)
+      .set('mock-session', JSON.stringify(validSessionPayload))
       .send(requestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -147,6 +224,8 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => serverError));
     await api
       .put(updateUserUrl)
+      .set('Authorization', apiKey)
+      .set('mock-session', JSON.stringify(validSessionPayload))
       .send(requestBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
@@ -165,6 +244,8 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.USER.YOUR_GENDER_INVALID))));
     await api
       .put(updateUserUrl)
+      .set('Authorization', apiKey)
+      .set('mock-session', JSON.stringify(validSessionPayload))
       .send(requestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -183,6 +264,8 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.USER.YOUR_POWER_INVALID))));
     await api
       .put(updateUserUrl)
+      .set('Authorization', apiKey)
+      .set('mock-session', JSON.stringify(validSessionPayload))
       .send(requestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -203,6 +286,8 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       );
     await api
       .put(updateUserUrl)
+      .set('Authorization', apiKey)
+      .set('mock-session', JSON.stringify(validSessionPayload))
       .send(requestBody)
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
@@ -221,6 +306,8 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .mockReturnValue(throwError(() => new UnauthorizedException(createMessage(messages.USER.PHONE_ALREADY_EXIST))));
     await api
       .put(updateUserUrl)
+      .set('Authorization', apiKey)
+      .set('mock-session', JSON.stringify(validSessionPayload))
       .send(requestBody)
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
