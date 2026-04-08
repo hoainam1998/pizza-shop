@@ -54,10 +54,6 @@ export type SignupUserPayloadType = {
   canSignup: boolean;
 };
 
-export type UserCreatedType = Pick<user, 'email'> & {
-  plain_password: string;
-};
-
 export type UserCreatedReturnType = user & {
   plain_password: string;
   reset_password_link: string;

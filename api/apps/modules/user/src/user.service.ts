@@ -64,8 +64,15 @@ export default class UserService {
     return this.updateUserSessionId(userId, null).then(() => null);
   }
 
-  checkSessionIdExist(sessionId: string): Promise<boolean> {
-    return this.userCachingService.checkExists(sessionId);
+  checkUserLogged(sessionId: string): Promise<boolean> {
+    return this.userCachingService.checkUserAlreadyLogged(sessionId).then((sessionString) => {
+      if (sessionString) {
+        return new LoginSessionPayload(JSON.parse(sessionString).user as LoginSessionPayload)
+          .validate()
+          .then((errors) => errors.length === 0);
+      }
+      return Promise.resolve(false);
+    });
   }
 
   @HandlePrismaError(messages.USER)

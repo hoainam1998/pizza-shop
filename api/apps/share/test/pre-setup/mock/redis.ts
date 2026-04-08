@@ -10,6 +10,7 @@ jest.mock('redis', () => {
       hmGet: jest.fn(),
       exists: jest.fn(),
       del: jest.fn(),
+      get: jest.fn(),
       set: jest.fn(),
       sAdd: jest.fn(),
       sMembers: jest.fn(),

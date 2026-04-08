@@ -17,6 +17,7 @@ import {
   deleteUserPattern,
 } from '@share/pattern';
 import type {
+  UserCreatedReturnType,
   UserDetailType,
   UserLoggedType,
   UserPaginationResponse,
@@ -55,15 +56,16 @@ export default class UserController {
   @MessagePattern(loginPattern)
   @HandleServiceError
   async login(loginInfo: LoginInfo): Promise<UserLoggedType> {
-    if (!(await this.userService.checkSessionIdExist(loginInfo.session_id))) {
-      return this.userService.login(loginInfo.email).then((user) => {
+    if (!(await this.userService.checkUserLogged(loginInfo.session_id))) {
+      return this.userService.login(loginInfo.email).then(async (user) => {
         if (user.session_id) {
           throw new UnauthorizedException(createMessage(messages.USER.ALREADY_LOGIN));
         } else {
           if (comparePassword(loginInfo.password, user.password)) {
-            return this.userService
-              .updateUserSessionId(user.user_id, loginInfo.session_id)
-              .then(() => omitFields(['password', 'session_id'], user) as UserLoggedType);
+            if (!user.reset_password_token) {
+              await this.userService.updateUserSessionId(user.user_id, loginInfo.session_id);
+            }
+            return omitFields(['password', 'session_id'], user) as UserLoggedType;
           }
           throw new UnauthorizedException(createMessage(messages.USER.PASSWORD_NOT_MATCH));
         }
@@ -81,8 +83,8 @@ export default class UserController {
       const isSame = payload.email === resetPasswordBody.email && payload.password === resetPasswordBody.oldPassword;
 
       if (isSame) {
-        return this.userService.getDetail(resetPasswordBody.email, { password: true }).then((user: user) => {
-          if (comparePassword(resetPasswordBody.oldPassword, user.password)) {
+        return this.userService.getDetail(resetPasswordBody.email, { password: true }).then((user: unknown) => {
+          if (comparePassword(resetPasswordBody.oldPassword, (user as user).password)) {
             return this.userService.resetPassword(resetPasswordBody);
           } else {
             throw new UnauthorizedException(createMessage(messages.USER.PASSWORD_NOT_MATCH));
