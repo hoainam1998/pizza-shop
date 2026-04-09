@@ -2,6 +2,7 @@ import { SessionData } from 'express-session';
 import { UserRequestType } from '@share/interfaces';
 import { autoGeneratePassword, signingAdminResetPasswordToken, signAdminApiKey } from '@share/utils';
 import { POWER_NUMERIC, SEX } from '@share/enums';
+import { user as userPrisma } from 'generated/prisma';
 const plainPassword = autoGeneratePassword();
 
 export const user: Required<UserRequestType> = {
@@ -27,7 +28,7 @@ export const sessionPayload: SessionData['user'] = {
   canSignup: false,
 };
 
-export const createUsers = (length: number): Partial<typeof user>[] => {
+export const createUsers = (length: number): Partial<userPrisma>[] => {
   return Array.apply(this, Array(length)).map(() => ({
     user_id: user.user_id,
     first_name: user.first_name,

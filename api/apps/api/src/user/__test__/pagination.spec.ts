@@ -13,7 +13,6 @@ import { ClientProxy } from '@nestjs/microservices';
 import TestAgent from 'supertest/lib/agent';
 import startUp from './pre-setup';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
-import { sessionPayload } from '@share/test/pre-setup/mock/data/user';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { paginationPattern } from '@share/pattern';
 import { createDescribeTest, createTestName, getMockModule } from '@share/test/helpers';
@@ -21,14 +20,13 @@ import UserService from '../user.service';
 import UserController from '../user.controller';
 import UserModule from '../user.module';
 import messages from '@share/constants/messages';
-import { HTTP_METHOD } from '@share/enums';
-import { createMessages } from '@share/utils';
-import { user, createUsers } from '@share/test/pre-setup/mock/data/user';
+import { HTTP_METHOD, POWER_NUMERIC } from '@share/enums';
+import { createMessage, createMessages } from '@share/utils';
+import { user, createUsers, sessionPayload } from '@share/test/pre-setup/mock/data/user';
 import { UserQuery } from '@share/dto/validators/user.dto';
 import { PaginationUserSerializer } from '@share/dto/serializer/user';
 import { UserRouter } from '@share/router';
 const paginationUserUrl: string = UserRouter.absolute.pagination;
-
 const MockUserModule = getMockModule(UserModule, {
   path: paginationUserUrl,
   method: RequestMethod.POST,
@@ -54,8 +52,9 @@ const responseData: any = {
   total: length,
 };
 const query = UserQuery.plain(paginationBody.query);
-const select = { ...paginationBody, query };
+const select = { ...paginationBody, query, requesterId: sessionPayload!.userId };
 const response = new PaginationUserSerializer(responseData);
+const invalidPowerSessionPayload = { ...sessionPayload, power: POWER_NUMERIC.SALE };
 
 let api: TestAgent;
 let clientProxy: ClientProxy;
@@ -79,22 +78,6 @@ afterEach(async () => {
 });
 
 describe(createDescribeTest(HTTP_METHOD.POST, paginationUserUrl), () => {
-  // it.skip(createTestName('pagination user failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
-  //   expect.hasAssertions();
-  //   const logError = jest.spyOn(userController as any, 'logError');
-  //   const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(responseData));
-  //   const paginationService = jest.spyOn(userService, 'pagination');
-  //   await api
-  //     .post(paginationUserUrl)
-  //     .send(paginationBody)
-  //     .expect(HttpStatus.UNAUTHORIZED)
-  //     .expect('Content-Type', /application\/json/)
-  //     .expect(createMessages(messages.USER.DID_NOT_LOGIN));
-  //   expect(paginationService).not.toHaveBeenCalled();
-  //   expect(send).not.toHaveBeenCalled();
-  //   expect(logError).not.toHaveBeenCalled();
-  // });
-
   it(createTestName('pagination user success', HttpStatus.OK), async () => {
     expect.hasAssertions();
     const logError = jest.spyOn(userController as any, 'logError');
@@ -114,6 +97,39 @@ describe(createDescribeTest(HTTP_METHOD.POST, paginationUserUrl), () => {
     expect(paginationService).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith(paginationPattern, select);
+    expect(logError).not.toHaveBeenCalled();
+  });
+
+  it(createTestName('pagination user failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const logError = jest.spyOn(userController as any, 'logError');
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(responseData));
+    const paginationService = jest.spyOn(userService, 'pagination');
+    await api
+      .post(paginationUserUrl)
+      .send(paginationBody)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.DID_NOT_LOGIN));
+    expect(paginationService).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+    expect(logError).not.toHaveBeenCalled();
+  });
+
+  it(createTestName('pagination user failed with user have not permission', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const logError = jest.spyOn(userController as any, 'logError');
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(responseData));
+    const paginationService = jest.spyOn(userService, 'pagination');
+    await api
+      .post(paginationUserUrl)
+      .set('mock-session', JSON.stringify(invalidPowerSessionPayload))
+      .send(paginationBody)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.DO_NOT_PERMISSION));
+    expect(paginationService).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
     expect(logError).not.toHaveBeenCalled();
   });
 
@@ -208,6 +224,27 @@ describe(createDescribeTest(HTTP_METHOD.POST, paginationUserUrl), () => {
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(new InternalServerErrorException().message));
+    expect(paginationService).toHaveBeenCalledTimes(1);
+    expect(paginationService).toHaveBeenCalledWith(select);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledWith(paginationPattern, select);
+    expect(logError).not.toHaveBeenCalled();
+  });
+
+  it(createTestName('pagination user failed with RPC unknown error', HttpStatus.BAD_REQUEST), async () => {
+    expect.hasAssertions();
+    const logError = jest.spyOn(userController as any, 'logError');
+    const send = jest
+      .spyOn(clientProxy, 'send')
+      .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.COMMON.COMMON_ERROR))));
+    const paginationService = jest.spyOn(userService, 'pagination');
+    await api
+      .post(paginationUserUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
+      .send(paginationBody)
+      .expect(HttpStatus.BAD_REQUEST)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.COMMON.COMMON_ERROR));
     expect(paginationService).toHaveBeenCalledTimes(1);
     expect(paginationService).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);

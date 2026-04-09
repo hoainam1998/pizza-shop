@@ -30,6 +30,7 @@ const query = {
 const paginationBody: any = {
   pageSize: 10,
   pageNumber: 1,
+  requesterId: user.user_id,
   query,
 };
 const length = 2;
@@ -68,13 +69,23 @@ describe('user pagination', () => {
       select: paginationBody.query,
       take: paginationBody.pageSize,
       skip,
-      where: {},
+      where: {
+        user_id: {
+          not: paginationBody.requesterId,
+        },
+      },
       orderBy: {
         user_id: 'desc',
       },
     });
     expect(countPrismaMethod).toHaveBeenCalledTimes(1);
-    expect(countPrismaMethod).toHaveBeenCalledWith({ where: {} });
+    expect(countPrismaMethod).toHaveBeenCalledWith({
+      where: {
+        user_id: {
+          not: paginationBody.requesterId,
+        },
+      },
+    });
   });
 
   it('user pagination was success with keyword', async () => {
@@ -117,6 +128,9 @@ describe('user pagination', () => {
             },
           },
         ],
+        user_id: {
+          not: paginationBody.requesterId,
+        },
       },
       orderBy: {
         user_id: 'desc',
@@ -137,6 +151,9 @@ describe('user pagination', () => {
             },
           },
         ],
+        user_id: {
+          not: paginationBody.requesterId,
+        },
       },
     });
   });
@@ -167,13 +184,23 @@ describe('user pagination', () => {
       select: paginationBody.query,
       take: paginationBody.pageSize,
       skip,
-      where: {},
+      where: {
+        user_id: {
+          not: paginationBody.requesterId,
+        },
+      },
       orderBy: {
         user_id: 'desc',
       },
     });
     expect(countPrismaMethod).toHaveBeenCalledTimes(1);
-    expect(countPrismaMethod).toHaveBeenCalledWith({ where: {} });
+    expect(countPrismaMethod).toHaveBeenCalledWith({
+      where: {
+        user_id: {
+          not: paginationBody.requesterId,
+        },
+      },
+    });
   });
 
   it('user pagination failed with unknown error', async () => {
@@ -200,13 +227,23 @@ describe('user pagination', () => {
       select: paginationBody.query,
       take: paginationBody.pageSize,
       skip,
-      where: {},
+      where: {
+        user_id: {
+          not: paginationBody.requesterId,
+        },
+      },
       orderBy: {
         user_id: 'desc',
       },
     });
     expect(countPrismaMethod).toHaveBeenCalledTimes(1);
-    expect(countPrismaMethod).toHaveBeenCalledWith({ where: {} });
+    expect(countPrismaMethod).toHaveBeenCalledWith({
+      where: {
+        user_id: {
+          not: paginationBody.requesterId,
+        },
+      },
+    });
   });
 
   it('user pagination failed with database disconnect error', async () => {
@@ -233,12 +270,22 @@ describe('user pagination', () => {
       select: paginationBody.query,
       take: paginationBody.pageSize,
       skip,
-      where: {},
+      where: {
+        user_id: {
+          not: paginationBody.requesterId,
+        },
+      },
       orderBy: {
         user_id: 'desc',
       },
     });
     expect(countPrismaMethod).toHaveBeenCalledTimes(1);
-    expect(countPrismaMethod).toHaveBeenCalledWith({ where: {} });
+    expect(countPrismaMethod).toHaveBeenCalledWith({
+      where: {
+        user_id: {
+          not: paginationBody.requesterId,
+        },
+      },
+    });
   });
 });

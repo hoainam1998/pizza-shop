@@ -24,7 +24,6 @@ import { CreateUser } from '@share/dto/validators/user.dto';
 import SendEmailService from '@share/libs/mailer/mailer.service';
 import { signupPattern } from '@share/pattern';
 const createUserUrl = UserRouter.absolute.create;
-
 const MockUserModule = getMockModule(UserModule, { path: createUserUrl, method: RequestMethod.POST });
 
 let api: TestAgent;
