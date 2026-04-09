@@ -19,7 +19,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { SkipThrottle } from '@nestjs/throttler';
 import express from 'express';
 import { map, Observable, tap } from 'rxjs';
-import { instanceToPlain, plainToInstance } from 'class-transformer';
+import { instanceToPlain } from 'class-transformer';
 import UserService from './user.service';
 import {
   CanSignupSerializer,
@@ -215,6 +215,8 @@ export default class UserController extends BaseController {
     );
   }
 
+  @Roles(POWER_NUMERIC.SUPER_ADMIN)
+  @UseGuards(RolesGuard, DoNotAllowUpdateSelfGuard)
   @HttpCode(HttpStatus.OK)
   @Post(UserRouter.relative.detail)
   @HandleHttpError
@@ -226,7 +228,7 @@ export default class UserController extends BaseController {
           this.logError(errors, this.getUserDetail.name);
           throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
         }
-        return instanceToPlain(plainToInstance(UserSerializer, user));
+        return UserSerializer.plain(user);
       }),
     );
   }
