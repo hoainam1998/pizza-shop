@@ -179,6 +179,8 @@ export default class UserController extends BaseController {
     );
   }
 
+  @Roles(POWER_NUMERIC.SUPER_ADMIN)
+  @UseGuards(RolesGuard, DoNotAllowUpdateSelfGuard)
   @HttpCode(HttpStatus.OK)
   @Delete(UserRouter.relative.delete)
   @HandleHttpError
