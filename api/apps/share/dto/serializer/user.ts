@@ -8,7 +8,7 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { Exclude, Expose, plainToInstance, Type } from 'class-transformer';
+import { Exclude, Expose, instanceToPlain, plainToInstance, Type } from 'class-transformer';
 import { user } from 'generated/prisma';
 import Validator from './validator';
 import { UserLoggedType, UserPaginationResponse, UserLoggedSerializerType } from '@share/interfaces';
@@ -74,6 +74,10 @@ export class UserSerializer extends Validator {
   constructor(target: Partial<user>) {
     super();
     Object.assign(this, target);
+  }
+
+  static plain(target: Record<string, any>): Record<string, any> {
+    return instanceToPlain(plainToInstance(this, target));
   }
 }
 
