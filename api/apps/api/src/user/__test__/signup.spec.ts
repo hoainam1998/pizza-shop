@@ -2,7 +2,6 @@ import {
   BadRequestException,
   HttpStatus,
   InternalServerErrorException,
-  MiddlewareConsumer,
   RequestMethod,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -17,28 +16,23 @@ import startUp from './pre-setup';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { HTTP_METHOD } from '@share/enums';
 import { user } from '@share/test/pre-setup/mock/data/user';
-import { createDescribeTest, createTestName, createMessagesTesting } from '@share/test/helpers';
+import { createDescribeTest, createTestName, createMessagesTesting, getMockModule } from '@share/test/helpers';
 import { signupPattern } from '@share/pattern';
 import { createMessage, createMessages } from '@share/utils';
 import messages from '@share/constants/messages';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { SignupDTO } from '@share/dto/validators/user.dto';
 import SendEmailService from '@share/libs/mailer/mailer.service';
-import { signupSession } from '@share/middleware';
 import ErrorCode from '@share/error-code';
 const signupUrl = UserRouter.absolute.signup;
-
-class MockUserModule extends UserModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(signupSession).forRoutes({ path: 'user/signup', method: RequestMethod.POST });
-  }
-}
+const MockUserModule = getMockModule(UserModule, { path: signupUrl, method: RequestMethod.POST });
 
 let api: TestAgent;
 let clientProxy: ClientProxy;
 let close: () => Promise<void>;
 let userService: UserService;
 let sendEmailService: SendEmailService;
+
 const requestBody = {
   firstName: user.first_name,
   lastName: user.last_name,
@@ -47,6 +41,7 @@ const requestBody = {
   sex: user.sex,
 };
 const signupUser = instanceToPlain(plainToInstance(SignupDTO, requestBody));
+const canSignupSessionPayload = { canSignup: true };
 
 beforeAll(async () => {
   const requestTest = await startUp(MockUserModule);
@@ -71,7 +66,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, signupUrl), () => {
     const signupService = jest.spyOn(userService, 'signup');
     await api
       .post(signupUrl)
-      .set('mock-session', JSON.stringify({ canSignup: true }))
+      .set('mock-session', JSON.stringify(canSignupSessionPayload))
       .send(requestBody)
       .expect(HttpStatus.CREATED)
       .expect('Content-Type', /application\/json/)
@@ -110,7 +105,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, signupUrl), () => {
     const signupService = jest.spyOn(userService, 'signup');
     await api
       .post(signupUrl)
-      .set('mock-session', JSON.stringify({ canSignup: true }))
+      .set('mock-session', JSON.stringify(canSignupSessionPayload))
       .send(requestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -129,7 +124,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, signupUrl), () => {
     const signupService = jest.spyOn(userService, 'signup');
     await api
       .post(signupUrl)
-      .set('mock-session', JSON.stringify({ canSignup: true }))
+      .set('mock-session', JSON.stringify(canSignupSessionPayload))
       .send(requestBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
@@ -148,7 +143,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, signupUrl), () => {
     const signupService = jest.spyOn(userService, 'signup');
     await api
       .post(signupUrl)
-      .set('mock-session', JSON.stringify({ canSignup: true }))
+      .set('mock-session', JSON.stringify(canSignupSessionPayload))
       .send(requestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -170,7 +165,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, signupUrl), () => {
     const signupService = jest.spyOn(userService, 'signup');
     await api
       .post(signupUrl)
-      .set('mock-session', JSON.stringify({ canSignup: true }))
+      .set('mock-session', JSON.stringify(canSignupSessionPayload))
       .send(requestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -190,7 +185,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, signupUrl), () => {
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => serverError));
     await api
       .post(signupUrl)
-      .set('mock-session', JSON.stringify({ canSignup: true }))
+      .set('mock-session', JSON.stringify(canSignupSessionPayload))
       .send(requestBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
@@ -211,7 +206,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, signupUrl), () => {
       .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.USER.YOUR_GENDER_INVALID))));
     await api
       .post(signupUrl)
-      .set('mock-session', JSON.stringify({ canSignup: true }))
+      .set('mock-session', JSON.stringify(canSignupSessionPayload))
       .send(requestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -232,7 +227,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, signupUrl), () => {
       .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.USER.YOUR_POWER_INVALID))));
     await api
       .post(signupUrl)
-      .set('mock-session', JSON.stringify({ canSignup: true }))
+      .set('mock-session', JSON.stringify(canSignupSessionPayload))
       .send(requestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -255,7 +250,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, signupUrl), () => {
       );
     await api
       .post(signupUrl)
-      .set('mock-session', JSON.stringify({ canSignup: true }))
+      .set('mock-session', JSON.stringify(canSignupSessionPayload))
       .send(requestBody)
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
@@ -276,7 +271,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, signupUrl), () => {
       .mockReturnValue(throwError(() => new UnauthorizedException(createMessage(messages.USER.PHONE_ALREADY_EXIST))));
     await api
       .post(signupUrl)
-      .set('mock-session', JSON.stringify({ canSignup: true }))
+      .set('mock-session', JSON.stringify(canSignupSessionPayload))
       .send(requestBody)
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
