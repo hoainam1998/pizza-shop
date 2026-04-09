@@ -21,7 +21,6 @@ import messages from '@share/constants/messages';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import UserModule from '../user.module';
 const logoutUrl = UserRouter.absolute.logout;
-
 const MockUserModule = getMockModule(UserModule, { path: logoutUrl, method: RequestMethod.GET });
 
 let api: TestAgent;

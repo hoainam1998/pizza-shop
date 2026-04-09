@@ -33,7 +33,6 @@ delete user.plain_password;
 delete user.session_id;
 delete user.reset_password_link;
 const getUserUrl: string = UserRouter.absolute.detail;
-
 const MockUserModule = getMockModule(UserModule, { path: getUserUrl, method: RequestMethod.POST });
 
 const getUserRequestBody = {

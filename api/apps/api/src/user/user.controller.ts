@@ -194,12 +194,15 @@ export default class UserController extends BaseController {
   }
 
   @SkipThrottle()
+  @Roles(POWER_NUMERIC.SUPER_ADMIN)
+  @UseGuards(RolesGuard)
   @HttpCode(HttpStatus.OK)
   @Post(UserRouter.relative.pagination)
   @HandleHttpError
-  pagination(@Body() select: UserPagination): Observable<Promise<Record<string, any>>> {
+  pagination(@Req() req: Express.Request, @Body() select: UserPagination): Observable<Promise<Record<string, any>>> {
     const query = UserQuery.plain(select.query);
-    return this.userService.pagination({ ...select, query }).pipe(
+    Object.assign(select, { query, requesterId: req.session.user!.userId });
+    return this.userService.pagination(select).pipe(
       map(async (result) => {
         const response = new PaginationUserSerializer(result);
         const errors = await response.validate();

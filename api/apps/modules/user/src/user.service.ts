@@ -134,6 +134,8 @@ export default class UserService {
         }
       : {};
 
+    Object.assign(condition, { user_id: { not: select.requesterId } });
+
     return this.prismaClient.$transaction([
       this.prismaClient.user.findMany({
         take: select.pageSize,

@@ -249,6 +249,9 @@ export class UserPagination extends Pagination {
   @IsString()
   search: string;
 
+  @Allow()
+  requesterId: string;
+
   @IsDefined()
   @Type(() => UserQuery)
   @ValidateNested({ each: true })
