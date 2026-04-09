@@ -13,25 +13,28 @@ import startUp from './pre-setup';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { deleteUserPattern } from '@share/pattern';
-import { user } from '@share/test/pre-setup/mock/data/user';
+import { user, apiKey } from '@share/test/pre-setup/mock/data/user';
 import { sessionPayload } from '@share/test/pre-setup/mock/data/user';
 import { createDescribeTest, createTestName, getMockModule } from '@share/test/helpers';
 import UserService from '../user.service';
 import UserModule from '../user.module';
 import messages from '@share/constants/messages';
-import { HTTP_METHOD } from '@share/enums';
+import { HTTP_METHOD, POWER_NUMERIC } from '@share/enums';
 import { createMessage, createMessages } from '@share/utils';
 import { UserRouter } from '@share/router';
 const deleteUserBaseUrl: string = UserRouter.absolute.delete;
 const userId = user.user_id;
 const deleteUserUrl: string = `${deleteUserBaseUrl}/${userId}`;
-
-const MockUserModule = getMockModule(UserModule, { path: deleteUserBaseUrl, method: RequestMethod.DELETE });
+const MockUserModule = getMockModule(UserModule, { path: `${deleteUserBaseUrl}/*`, method: RequestMethod.DELETE });
 
 let api: TestAgent;
 let clientProxy: ClientProxy;
 let close: () => Promise<void>;
 let userService: UserService;
+
+const invalidSessionPayload = sessionPayload;
+const validSessionPayload = { ...sessionPayload, userId: Date.now().toString() };
+const invalidPowerSessionPayload = { ...sessionPayload, power: POWER_NUMERIC.SALE };
 
 beforeAll(async () => {
   const requestTest = await startUp(MockUserModule);
@@ -54,7 +57,8 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     await api
       .delete(deleteUserUrl)
-      .set('mock-session', JSON.stringify(sessionPayload))
+      .set('Authorization', apiKey)
+      .set('mock-session', JSON.stringify(validSessionPayload))
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.DELETE_USER_SUCCESS));
@@ -64,15 +68,62 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     expect(send).toHaveBeenCalledWith(deleteUserPattern, userId);
   });
 
-  // it.skip(createTestName('delete user failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
-  //   expect.hasAssertions();
-  //   const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
-  //   const deleteUserService = jest.spyOn(userService, 'deleteUser');
-  //   await api
-  //     .delete(deleteUserUrl)
-  //     .expect(HttpStatus.UNAUTHORIZED)
-  //     .expect('Content-Type', /application\/json/);
-  // });
+  it(createTestName('delete user failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
+    const deleteUserService = jest.spyOn(userService, 'deleteUser');
+    await api
+      .delete(deleteUserUrl)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.DID_NOT_LOGIN));
+    expect(deleteUserService).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it(createTestName('delete user failed with API key not set', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
+    const deleteUserService = jest.spyOn(userService, 'deleteUser');
+    await api
+      .delete(deleteUserUrl)
+      .set('mock-session', JSON.stringify(validSessionPayload))
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.API_KEY_INVALID));
+    expect(deleteUserService).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it(createTestName('delete user failed when update self information', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
+    const deleteUserService = jest.spyOn(userService, 'deleteUser');
+    await api
+      .delete(deleteUserUrl)
+      .set('Authorization', apiKey)
+      .set('mock-session', JSON.stringify(invalidSessionPayload))
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.DO_NOT_CHANGE_YOURSELF));
+    expect(deleteUserService).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it(createTestName('delete user failed when user have not permission', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
+    const deleteUserService = jest.spyOn(userService, 'deleteUser');
+    await api
+      .delete(deleteUserUrl)
+      .set('Authorization', apiKey)
+      .set('mock-session', JSON.stringify(invalidPowerSessionPayload))
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.DO_NOT_PERMISSION));
+    expect(deleteUserService).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
 
   it(createTestName('delete user failed with not found error', HttpStatus.NOT_FOUND), async () => {
     expect.hasAssertions();
@@ -82,7 +133,8 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     await api
       .delete(deleteUserUrl)
-      .set('mock-session', JSON.stringify(sessionPayload))
+      .set('Authorization', apiKey)
+      .set('mock-session', JSON.stringify(validSessionPayload))
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.NOT_FOUND));
@@ -98,10 +150,30 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     await api
       .delete(deleteUserUrl)
-      .set('mock-session', JSON.stringify(sessionPayload))
+      .set('Authorization', apiKey)
+      .set('mock-session', JSON.stringify(validSessionPayload))
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(new InternalServerErrorException().message));
+    expect(deleteUserService).toHaveBeenCalledTimes(1);
+    expect(deleteUserService).toHaveBeenCalledWith(userId);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledWith(deleteUserPattern, userId);
+  });
+
+  it(createTestName('delete user failed with RPC unknown error', HttpStatus.BAD_REQUEST), async () => {
+    expect.hasAssertions();
+    const send = jest
+      .spyOn(clientProxy, 'send')
+      .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.COMMON.COMMON_ERROR))));
+    const deleteUserService = jest.spyOn(userService, 'deleteUser');
+    await api
+      .delete(deleteUserUrl)
+      .set('Authorization', apiKey)
+      .set('mock-session', JSON.stringify(validSessionPayload))
+      .expect(HttpStatus.BAD_REQUEST)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.COMMON.COMMON_ERROR));
     expect(deleteUserService).toHaveBeenCalledTimes(1);
     expect(deleteUserService).toHaveBeenCalledWith(userId);
     expect(send).toHaveBeenCalledTimes(1);
@@ -115,7 +187,8 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     await api
       .delete(deleteUserUrl)
-      .set('mock-session', JSON.stringify(sessionPayload))
+      .set('Authorization', apiKey)
+      .set('mock-session', JSON.stringify(validSessionPayload))
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(serverError.message));
@@ -131,7 +204,8 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     const response = await api
       .delete(`${deleteUserBaseUrl}/zyz`)
-      .set('mock-session', JSON.stringify(sessionPayload))
+      .set('Authorization', apiKey)
+      .set('mock-session', JSON.stringify(validSessionPayload))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
     expect(response.body).toEqual({ messages: expect.any(Array) });
@@ -147,7 +221,8 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     await api
       .delete(deleteUserUrl)
-      .set('mock-session', JSON.stringify(sessionPayload))
+      .set('Authorization', apiKey)
+      .set('mock-session', JSON.stringify(validSessionPayload))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
