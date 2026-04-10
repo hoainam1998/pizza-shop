@@ -140,7 +140,7 @@ export default class UserController {
 
   @MessagePattern(updatePowerPattern)
   @HandleServiceError
-  updatePower(payload: UpdatePower): Promise<UserWithOnlySessionIDType> {
+  updatePower(payload: UpdatePower): Promise<user> {
     return this.userService.updatePower(payload).then(async (user) => {
       await this.userService.logout(user.user_id);
       return user;
