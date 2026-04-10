@@ -10,7 +10,7 @@ import { user } from '@share/test/pre-setup/mock/data/user';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { createMessage } from '@share/utils';
 import messages from '@share/constants/messages';
-import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
+import { PrismaDisconnectError, PrismaNotFoundError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 
 let prismaService: PrismaClient;
 let loggerService: LoggingService;
@@ -106,6 +106,43 @@ describe('update user', () => {
     expect(logout).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
+  });
+
+  it('update user failed with not found error', async () => {
+    expect.hasAssertions();
+    const logMethod = jest.spyOn(loggerService, 'error');
+    const findUniqueOrThrow = jest.spyOn(prismaService.user, 'findUniqueOrThrow').mockResolvedValue(user);
+    const update = jest.spyOn(prismaService.user, 'update').mockResolvedValue(user);
+    const transaction = jest.spyOn(prismaService, '$transaction').mockRejectedValue(PrismaNotFoundError);
+    const logout = jest.spyOn(userService, 'logout');
+    const updateService = jest.spyOn(userService, 'update');
+    const updateController = jest.spyOn(userController, 'update');
+    await expect(userController.update(userInput)).rejects.toThrow(
+      new RpcException(new BadRequestException(createMessage(messages.USER.NOT_FOUND))),
+    );
+    expect(updateController).toHaveBeenCalledTimes(1);
+    expect(updateService).toHaveBeenCalledTimes(1);
+    expect(updateService).toHaveBeenCalledWith(userInput);
+    expect(findUniqueOrThrow).toHaveBeenCalledTimes(1);
+    expect(findUniqueOrThrow).toHaveBeenCalledWith({
+      where: {
+        user_id: user.user_id,
+      },
+      select: {
+        session_id: true,
+      },
+    });
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(update).toHaveBeenCalledWith({
+      data: userInput,
+      where: {
+        user_id: userInput.user_id,
+      },
+    });
+    expect(transaction).toHaveBeenCalledTimes(1);
+    expect(transaction).toHaveBeenCalledWith(expect.any(Array));
+    expect(logout).not.toHaveBeenCalled();
+    expect(logMethod).not.toHaveBeenCalled();
   });
 
   it('update user failed with database disconnect error', async () => {

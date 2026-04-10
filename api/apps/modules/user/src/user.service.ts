@@ -11,7 +11,7 @@ import type {
   UserWithOnlySessionIDType,
 } from '@share/interfaces';
 import { calcSkip } from '@share/utils';
-import { ResetPassword, UserPagination, LoginSessionPayload } from '@share/dto/validators/user.dto';
+import { ResetPassword, UserPagination, LoginSessionPayload, UpdatePower } from '@share/dto/validators/user.dto';
 import UserCachingService from '@share/libs/caching/user/user.service';
 import ProductCachingService from '@share/libs/caching/product/product.service';
 import ReportCachingService from '@share/libs/caching/report/report.service';
@@ -232,6 +232,18 @@ export default class UserService {
         user_id: user.user_id,
       },
       data: user,
+    });
+  }
+
+  @HandlePrismaError(messages.USER)
+  updatePower(payload: UpdatePower): Promise<user> {
+    return this.prismaClient.user.update({
+      where: {
+        user_id: payload.user_id,
+      },
+      data: {
+        power: payload.power,
+      },
     });
   }
 }
