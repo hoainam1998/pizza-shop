@@ -297,3 +297,28 @@ export class UserDelete {
   @Length(13)
   userId: string;
 }
+
+export class UpdatePower {
+  @IsInt()
+  @IsIn(power)
+  power: number;
+
+  @IsNumberString()
+  @Length(13)
+  userId: string;
+
+  @Expose({ toPlainOnly: true })
+  get user_id() {
+    return this.userId;
+  }
+
+  static plain(target: UpdatePower): Record<string, any> {
+    const updatePowerPlain = instanceToPlain(plainToInstance(UpdatePower, target));
+    return instanceToPlain(plainToInstance(UpdatePowerTransform, updatePowerPlain));
+  }
+}
+
+export class UpdatePowerTransform extends OmitType(UpdatePower, ['userId']) {
+  @Exclude()
+  userId: string;
+}

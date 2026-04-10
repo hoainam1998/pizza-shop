@@ -38,6 +38,7 @@ import {
   UpdateUser,
   UserDelete,
   UpdatePersonalInfo,
+  UpdatePower,
 } from '@share/dto/validators/user.dto';
 import { ImageTransformPipe } from '@share/pipes';
 import { createMessage } from '@share/utils';
@@ -267,5 +268,17 @@ export default class UserController extends BaseController {
     return this.userService
       .updatePersonalInfo(UpdatePersonalInfo.plain(personalInfo))
       .pipe(map(() => MessageSerializer.create(messages.USER.UPDATE_PERSONAL_INFO_SUCCESS)));
+  }
+
+  @Roles(POWER_NUMERIC.SUPER_ADMIN)
+  @UseGuards(RolesGuard, DoNotAllowUpdateSelfGuard)
+  @HttpCode(HttpStatus.CREATED)
+  @Put(UserRouter.relative.updatePower)
+  @HandleHttpError
+  updatePower(@Body() payload: UpdatePower): Observable<MessageSerializer> {
+    const updatePowerPayload = UpdatePower.plain(payload);
+    return this.userService
+      .updatePower(updatePowerPayload)
+      .pipe(map(() => MessageSerializer.create(messages.USER.UPDATE_USER_POWER_SUCCESS)));
   }
 }

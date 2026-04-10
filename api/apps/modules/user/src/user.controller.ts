@@ -13,6 +13,7 @@ import {
   paginationPattern,
   getUserDetailPattern,
   updateUserPattern,
+  updatePowerPattern,
   updatePersonalInfoPattern,
   deleteUserPattern,
 } from '@share/pattern';
@@ -24,7 +25,7 @@ import type {
   UserSignupType,
   UserWithOnlySessionIDType,
 } from '@share/interfaces';
-import { LoginInfo, ResetPassword, UserPagination } from '@share/dto/validators/user.dto';
+import { LoginInfo, ResetPassword, UpdatePower, UserPagination } from '@share/dto/validators/user.dto';
 import {
   checkArrayHaveValues,
   comparePassword,
@@ -135,6 +136,15 @@ export default class UserController {
   async delete(userId: string): Promise<UserWithOnlySessionIDType> {
     await this.userService.logout(userId);
     return this.userService.delete(userId);
+  }
+
+  @MessagePattern(updatePowerPattern)
+  @HandleServiceError
+  updatePower(payload: UpdatePower): Promise<user> {
+    return this.userService.updatePower(payload).then(async (user) => {
+      await this.userService.logout(user.user_id);
+      return user;
+    });
   }
 
   @MessagePattern(logoutPattern)
