@@ -1,32 +1,6 @@
-<template>
-  <LoginFrame title="reset password" class="reset-password">
-    <el-form :id="FORM_ID" ref="resetPasswordFormRef" :model="form" :rules="rules" label-position="top">
-      <el-form-item label="Email" prop="email" class="ps-mb-12">
-        <ps-email-input v-model="form.email" name="email" />
-      </el-form-item>
-      <el-form-item label="Old password" prop="oldPassword" class="ps-mb-12">
-        <ps-password-input v-model="form.oldPassword" name="oldPassword" />
-      </el-form-item>
-      <el-form-item label="Password" prop="password" class="ps-mb-12">
-        <ps-password-input v-model="form.password" name="password" />
-      </el-form-item>
-      <el-form-item label="Confirm password" prop="confirmPassword">
-        <ps-password-input v-model="form.confirmPassword" name="confirmPassword" />
-      </el-form-item>
-      <el-button class="ps-display-block ps-margin-auto ps-fw-bold ps-w-150px" type="primary" @click="onSubmit">
-        Save
-      </el-button>
-    </el-form>
-  </LoginFrame>
-</template>
-<script setup lang="ts">
-import { reactive, ref } from 'vue';
-import { onBeforeRouteLeave } from 'vue-router';
+import { ref, type Ref } from 'vue';
+import { useRoute } from 'vue-router';
 import type { FormInstance, FormRules } from 'element-plus';
-import LoginFrame from './common/login-frame.vue';
-import PsPasswordInput from '@/components/inputs/password.vue';
-import PsEmailInput from '@/components/inputs/email.vue';
-import SearchParams from '@/services/search-params';
 import constants from '@/constants';
 
 type ResetPasswordType = {
@@ -34,18 +8,18 @@ type ResetPasswordType = {
   oldPassword: string;
   password: string;
   confirmPassword: string;
+  token?: string;
 };
 
-const token: string | null = SearchParams.get('token');
+type ResetPasswordFormInformationType = {
+  form: ResetPasswordType;
+  rules: FormRules<ResetPasswordType>;
+  resetPasswordFormRef: Ref<FormInstance | undefined, FormInstance | undefined>;
+  disableSubmit: boolean;
+  resetForm: () => void;
+};
 
 const resetPasswordFormRef = ref<FormInstance>();
-
-const form = reactive<ResetPasswordType>({
-  email: '',
-  oldPassword: '',
-  password: '',
-  confirmPassword: '',
-});
 
 const validatePassword = (rule: any, value: any, callback: any): void => {
   if (value === '') {
@@ -71,9 +45,14 @@ const validateConfirmPassword = (rule: any, value: any, callback: any): void => 
   }
 };
 
-const FORM_ID = 'resetPasswordForm';
+const form: ResetPasswordType = {
+  email: '',
+  oldPassword: '',
+  password: '',
+  confirmPassword: '',
+};
 
-const rules = reactive<FormRules<ResetPasswordType>>({
+const rules: FormRules<ResetPasswordType> = {
   email: [
     {
       required: true, message: 'Email is required!', trigger: 'change',
@@ -112,22 +91,21 @@ const rules = reactive<FormRules<ResetPasswordType>>({
       validator: validateConfirmPassword, trigger: 'change',
     }
   ]
-});
+};
 
 const resetForm = (): void => {
   resetPasswordFormRef.value?.resetFields();
 };
 
-const onSubmit = async (): Promise<void> => {
-  if (resetPasswordFormRef.value) {
-    await resetPasswordFormRef.value.validate((valid) => {
-      if (valid) {
-        Object.assign(form, { token });
-        // TODO
-      }
-    });
-  }
-};
+export default (): ResetPasswordFormInformationType => {
+  const route = useRoute();
+  form.token = route.query.token as string;
 
-onBeforeRouteLeave(resetForm);
-</script>
+  return {
+    form,
+    rules,
+    resetPasswordFormRef,
+    disableSubmit: !form.token,
+    resetForm,
+  };
+};

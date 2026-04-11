@@ -29,13 +29,12 @@
     </el-form>
   </LoginFrame>
 </template>
-
 <script lang="ts" setup>
 import { reactive, ref } from 'vue';
 import { onBeforeRouteLeave } from 'vue-router';
 import type { AxiosResponse, AxiosError } from 'axios';
 import type { FormInstance, FormRules } from 'element-plus';
-import LoginFrame from './common/login-frame.vue';
+import LoginFrame from '@/components/common/login-frame/login-frame.vue';
 import PsEmailInput from '@/components/inputs/email.vue';
 import paths from '@/router/paths';
 import { SEX } from '@/enums';
@@ -107,9 +106,7 @@ const rules = reactive<FormRules<SignupModelType>>({
 });
 
 const resetForm = (): void => {
-  if (signupFormRef.value) {
-    signupFormRef.value.resetFields();
-  }
+  signupFormRef.value?.resetFields();
 };
 
 const onSubmit = async (): Promise<void> => {
