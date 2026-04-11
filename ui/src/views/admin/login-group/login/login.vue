@@ -31,7 +31,7 @@
 import { reactive, ref, onBeforeMount } from 'vue';
 import { onBeforeRouteLeave, RouterLink } from 'vue-router';
 import type { AxiosError, AxiosResponse } from 'axios';
-import LoginFrame from './common/login-frame.vue';
+import LoginFrame from '@/components/common/login-frame/login-frame.vue';
 import PsPasswordInput from '@/components/inputs/password.vue';
 import PsEmailInput from '@/components/inputs/email.vue';
 import paths from '@/router/paths';
@@ -46,8 +46,8 @@ const { push } = useWrapperRouter();
 const FORM_ID = 'loginForm';
 const canSignup = ref<boolean>();
 const { rules, form, loginFormRef } = loginFormInformation;
-const loginFormRules = reactive<typeof loginFormInformation['rules']>(rules);
-const loginFormModel = reactive<typeof loginFormInformation['form']>(form);
+const loginFormRules = reactive<typeof rules>(rules);
+const loginFormModel = reactive<typeof form>(form);
 
 const onSubmit = async (): Promise<void> => {
   if (loginFormRef.value) {

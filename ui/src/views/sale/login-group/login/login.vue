@@ -12,7 +12,8 @@
         ps-fw-bold
         ps-w-150px
         ps-bg-black
-        ps-text-color-white" @click="onSubmit">
+        ps-text-color-white"
+        @click="onSubmit">
         Save
       </el-button>
     </el-form>
@@ -21,15 +22,15 @@
 <script lang="ts" setup>
 import { reactive } from 'vue';
 import { onBeforeRouteLeave } from 'vue-router';
-import LoginFrame from '@/views/login-group/common/login-frame.vue';
+import LoginFrame from '@/components/common/login-frame/login-frame.vue';
 import PsPasswordInput from '@/components/inputs/password.vue';
 import PsEmailInput from '@/components/inputs/email.vue';
 import loginFormInformation from '@/composables/use-login-form';
 
 const FORM_ID = 'loginForm';
 const { rules, form, loginFormRef, resetForm } = loginFormInformation;
-const loginFormRules = reactive<typeof loginFormInformation['rules']>(rules);
-const loginFormModel = reactive<typeof loginFormInformation['form']>(form);
+const loginFormRules = reactive<typeof rules>(rules);
+const loginFormModel = reactive<typeof form>(form);
 
 const onSubmit = async (): Promise<void> => {
   if (loginFormRef.value) {

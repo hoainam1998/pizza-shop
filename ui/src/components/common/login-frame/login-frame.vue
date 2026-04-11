@@ -14,6 +14,5 @@ type LoginFramePropsType = {
 };
 
 const isSaleView = isSale;
-
 const { title } = defineProps<LoginFramePropsType>();
 </script>
