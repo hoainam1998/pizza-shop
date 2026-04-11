@@ -16,10 +16,6 @@ import Personal from '@/views/admin/personal/personal.vue';
 
 const adminRoutes: RouterOptions['routes'] = [
   {
-    path: `${paths.BASE}`,
-    redirect: 'login',
-  },
-  {
     path: `${paths.LOGIN}`,
     name: 'login',
     component: Login,

@@ -20,7 +20,6 @@ const defaultUser = {
 };
 
 const userLogged = reactive<UserLoggedType>(defaultUser);
-
 const token = userLoggedToken.getUserLoggedToken();
 
 const setUser = (token?: string): void => {
