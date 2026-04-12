@@ -4,8 +4,11 @@
       <BackButton />
       <PersonalForm ref="personalForm" @onSubmit="onSubmit" class="ps-border-color-f39c12">
         <template #default="{ onSubmit }">
-          <el-button @click="onSubmit" class="ps-w-100px ps-display-block ps-margin-auto"
-            type="success">Save</el-button>
+          <el-button class="ps-w-100px ps-display-block ps-margin-auto"
+          type="success"
+          @click="onSubmit">
+            Save
+          </el-button>
         </template>
       </PersonalForm>
     </div>
