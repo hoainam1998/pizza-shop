@@ -19,10 +19,10 @@ import { EMAIL_DOMAIN } from '@/enums';
 defineOptions({
   inheritAttrs: false,
 });
+
 const emailDomains = Object.entries(EMAIL_DOMAIN);
 const model = defineModel<string>({ default: '' });
 const select = ref<string>(EMAIL_DOMAIN.GMAIL);
-
 const attrsFallThrough = useAttrs();
 const attrs = Object.assign({ ...attrsFallThrough }, { type: 'email', autocomplete: 'off' });
 
