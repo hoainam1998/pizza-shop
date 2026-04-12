@@ -35,7 +35,7 @@ import { onBeforeRouteLeave } from 'vue-router';
 import type { AxiosResponse, AxiosError } from 'axios';
 import type { FormInstance, FormRules } from 'element-plus';
 import LoginFrame from '@/components/common/login-frame/login-frame.vue';
-import PsEmailInput from '@/components/inputs/email.vue';
+import PsEmailInput from '@/components/common/inputs/email.vue';
 import paths from '@/router/paths';
 import { SEX } from '@/enums';
 import { UserService } from '@/services';

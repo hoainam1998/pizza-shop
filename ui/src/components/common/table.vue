@@ -35,7 +35,6 @@
     </div>
   </div>
 </template>
-
 <script lang="ts" setup generic="T">
 import { useSlots, ref } from 'vue';
 import type { TableFieldType } from '@/interfaces';

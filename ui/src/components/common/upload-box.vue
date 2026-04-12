@@ -31,6 +31,10 @@ type UploadBoxPropsType = {
   name: string;
 };
 
+type UploadBoxExposeType = {
+  reset: () => void;
+};
+
 const uploadBox = useTemplateRef('uploadBox');
 const { name } = defineProps<UploadBoxPropsType>();
 const file = defineModel<(File | UploadRawFile | UploadFile)[]>('file');
@@ -66,7 +70,7 @@ const reset = (): void => {
   imageUrl.value = defaultImageUploadPlaceholder;
 };
 
-defineExpose({
+defineExpose<UploadBoxExposeType>({
   reset,
 });
 </script>

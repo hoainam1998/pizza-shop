@@ -8,7 +8,8 @@
     @change="paginationOnChange" />
 </template>
 <script setup lang="ts">
-import propsValidator from './props-validator';
+import propsValidator from './types';
+
 const currentPage = defineModel();
 const { pageSize, pagerCount, total } = defineProps(propsValidator);
 const emit = defineEmits<{

@@ -7,8 +7,8 @@ import { useAttrs } from 'vue';
 defineOptions({
   inheritAttrs: false,
 });
+
 const attrsFallThrough = useAttrs();
 const attrs = Object.assign({ ...attrsFallThrough }, { type: 'password', showPassword: true, autocomplete: 'off' });
-
-const model = defineModel();
+const model = defineModel<string>({ default: '' });
 </script>

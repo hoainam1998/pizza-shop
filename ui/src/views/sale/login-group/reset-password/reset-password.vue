@@ -36,8 +36,8 @@
 import { reactive } from 'vue';
 import { onBeforeRouteLeave } from 'vue-router';
 import LoginFrame from '@/components/common/login-frame/login-frame.vue';
-import PsPasswordInput from '@/components/inputs/password.vue';
-import PsEmailInput from '@/components/inputs/email.vue';
+import PsPasswordInput from '@/components/common/inputs/password.vue';
+import PsEmailInput from '@/components/common/inputs/email.vue';
 import useResetPasswordForm from '@/composables/use-reset-password-form';
 
 const FORM_ID = 'resetPasswordForm';

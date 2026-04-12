@@ -9,7 +9,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { onBeforeRouteUpdate , useRoute } from 'vue-router';
-import propsValidator from './props-validator';
+import propsValidator from './types';
 
 const { total } = defineProps(propsValidator);
 
