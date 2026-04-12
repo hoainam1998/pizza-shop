@@ -59,8 +59,13 @@ import UploadBox from '@/components/common/upload-box.vue';
 import { useUserForm } from '@/composables';
 import type { UserDetailModelType, UserDetailExposeType, UserPersonalInfoType } from '@/interfaces';
 import { convertBase64ToSingleFile } from '@/utils';
-const FORM_ID = 'personalForm';
 
+type PersonalFormExposeType = {
+  assignForm: (model: UserPersonalInfoType) => Promise<void>;
+  reset: () => void;
+};
+
+const FORM_ID = 'personalForm';
 const userFormRef = useTemplateRef<UserDetailExposeType>('userFormRef');
 const uploadImage = useTemplateRef('uploadImage');
 
@@ -96,14 +101,9 @@ const assignForm = async (data: UserPersonalInfoType): Promise<void> => {
 };
 
 const reset = (): void => {
-  if (userFormRef.value?.formInstance) {
-    (userFormRef.value?.formInstance as FormInstance).resetFields();
-    (userFormRef.value?.formInstance as FormInstance).clearValidate();
-  }
-
-  if (uploadImage.value) {
-    uploadImage.value.reset();
-  }
+  (userFormRef.value?.formInstance as FormInstance).resetFields();
+  (userFormRef.value?.formInstance as FormInstance).clearValidate();
+  uploadImage.value?.reset();
 };
 
 const onSubmit = (): void => {
@@ -115,10 +115,7 @@ const onSubmit = (): void => {
     .catch(() => {});
 };
 
-defineExpose<{
-  assignForm: (model: UserPersonalInfoType) => Promise<void>;
-  reset: () => void;
-}>({
+defineExpose<PersonalFormExposeType>({
   assignForm,
   reset,
 });

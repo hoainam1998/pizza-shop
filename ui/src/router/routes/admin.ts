@@ -4,22 +4,14 @@ import paths from '../paths';
 import Category from '@/views/admin/category-group/category.vue';
 import Home from '@/views/admin/home/home.vue';
 import Signup from '@/views/admin/login-group/signup/signup.vue';
-import ResetPassword from '@/views/admin/login-group/reset-password/reset-password.vue';
-import Login from '@/views/admin/login-group/login/login.vue';
 import ProductDetail from '@/views/admin/product-group/detail/detail.vue';
 import ProductList from '@/views/admin/product-group/list/list.vue';
 import IngredientList from '@/views/admin/ingredient-group/list/list.vue';
 import UserList from '@/views/admin/user-group/list/list.vue';
 import UserDetail from '@/views/admin/user-group/detail/detail.vue';
 import Report from '@/views/admin/report/report.vue';
-import Personal from '@/views/admin/personal/personal.vue';
 
 const adminRoutes: RouterOptions['routes'] = [
-  {
-    path: `${paths.LOGIN}`,
-    name: 'login',
-    component: Login,
-  },
   {
     path: `${paths.HOME}`,
     name: 'home',
@@ -107,17 +99,6 @@ const adminRoutes: RouterOptions['routes'] = [
     path: `${paths.SIGNUP}`,
     name: 'signup',
     component: Signup,
-  },
-  {
-    path: `${paths.RESET_PASSWORD}`,
-    name: 'reset_password',
-    component: ResetPassword,
-  },
-  {
-    path: `${paths.PERSONAL}`,
-    name: 'personal',
-    component: Personal,
-    meta: { requiresAuth: true },
   },
 ];
 
