@@ -20,6 +20,6 @@ class LocalStorage extends Storage {
   }
 }
 
-export const AlreadyLoginStorage = new LocalStorage('already-login');
 export const CurrentRouteStorage = new LocalStorage('current-route');
 export const UserLoggedTokenStorage = new LocalStorage('user-logged-token');
+export const ApiKeyStorage = new LocalStorage('api-key');

@@ -1,4 +1,4 @@
-import type { AxiosRequestConfig } from 'axios';
+import type { InternalAxiosRequestConfig } from 'axios';
 import type { FormInstance, UploadRawFile } from 'element-plus';
 import { CHART_MODE } from '@/enums';
 import type { Ref } from 'vue';
@@ -38,7 +38,7 @@ export type CategoryType = {
   avatar: string;
 };
 
-export type ExtraConfigs = AxiosRequestConfig & {
+export type ExtraConfigs = InternalAxiosRequestConfig<any> & {
   allowNotFound?: boolean;
   showSpinner?: boolean;
 };
@@ -47,6 +47,7 @@ export type LoginResponseType = {
   resetPasswordToken: string;
   isFirstTime: boolean;
   userLoggedToken: string;
+  apiKey: string | null;
 };
 
 export type ClientCartItemType = {

@@ -35,7 +35,7 @@ import LoginFrame from '@/components/common/login-frame/login-frame.vue';
 import PsPasswordInput from '@/components/common/inputs/password.vue';
 import PsEmailInput from '@/components/common/inputs/email.vue';
 import paths from '@/router/paths';
-import { auth as authStore, userLoggedToken as userLoggedTokenStore } from '@/store';
+import { auth as authStore } from '@/store';
 import useWrapperRouter from '@/composables/use-router';
 import { UserService } from '@/services';
 import { generateResetPasswordLink, showErrorNotification } from '@/utils';
@@ -58,8 +58,8 @@ const onSubmit = async (): Promise<void> => {
             if (response.data.isFirstTime) {
               push(generateResetPasswordLink(response.data.resetPasswordToken));
             } else {
-              authStore.setAlreadyLogin(true);
-              userLoggedTokenStore.setUserLoggedToken(response.data.userLoggedToken);
+              authStore.setUserLoggedToken(response.data.userLoggedToken);
+              authStore.setApiKey(response.data.apiKey!);
               push(`${paths.HOME}/${paths.HOME.CATEGORY}`);
             }
           }).catch((error: AxiosError<MessageResponseType>) => {

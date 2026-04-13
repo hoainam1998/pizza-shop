@@ -21,7 +21,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { userStore as user } from '@/store';
+import { auth as authStore  } from '@/store';
 import UserDefaultImage from '@/assets/images/user.png';
 import { UserService } from '@/services';
 import useWrapperRouter from '@/composables/use-router';
@@ -30,6 +30,7 @@ import { showErrorNotification } from '@/utils';
 import Storage from '@/storage/storage';
 
 const { push } = useWrapperRouter();
+const user = authStore.getUser();
 
 const logout = (): void => {
   UserService.get('logout')
