@@ -1,5 +1,5 @@
 <template>
-  <div class="ps-display-flex ps-flex-gap-5 ps-mt-5 ps-mb-5">
+  <div class="ps-display-flex ps-flex-gap-5 ps-mt-35 ps-mb-5">
     <el-button class="ps-bg-2ecc71 ps-text-color-white" @click="showDialog">New</el-button>
     <SearchBox ref="searchBox" v-model="keyword" @search="search" />
   </div>

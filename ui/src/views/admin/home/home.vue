@@ -1,6 +1,6 @@
 <template>
   <div class="admin-home ps-display-grid">
-    <section class="ps-w-200px">
+    <section>
       <div class="ps-position-fixed
       ps-display-flex
       ps-flex-direction-column
@@ -13,7 +13,7 @@
     </section>
     <section>
       <div class="ps-mb-25"><Breadcrumb :lastName="routerName.name" /></div>
-      <router-view class="ps-mt-30" />
+      <router-view class="ps-mt-25 ps-overflow-x-hidden" />
     </section>
   </div>
 </template>
@@ -40,7 +40,7 @@ onBeforeRouteLeave(() => routerName.setName(''));
 </script>
 <style lang="scss" scoped>
 .admin-home {
-  grid-template-columns: 200px calc(100vw - 200px - 14px);
+  grid-template-columns: 200px calc(100vw - 200px - 29px);
   grid-column-gap: 14px;
 }
 </style>

@@ -36,17 +36,20 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, useTemplateRef, type Component } from 'vue';
+import { onBeforeMount, onMounted, useTemplateRef, type Component, ref, type Ref, shallowRef } from 'vue';
 import { RouterLink, onBeforeRouteUpdate, useRoute } from 'vue-router';
 import { primaryColor, whiteColor } from '@/assets/scss/variables.module.scss';
 import { Document, Menu as IconMenu, Burger, Tickets, User } from '@element-plus/icons-vue';
 import List from '@/components/common/list.vue';
+import { auth as authStore } from '@/store';
 import paths from '@/router/paths';
+import { POWER } from '@/enums';
 import useWrapperRouter from '@/composables/use-router';
 
 const menuRef = useTemplateRef('menuRef');
 const { push } = useWrapperRouter();
 const route = useRoute();
+const userPower = authStore.getUserPower();
 
 type MenuItem = {
   icon: Component,
@@ -54,35 +57,38 @@ type MenuItem = {
   index: string;
 };
 
-const menuItems: MenuItem[] = [
+const userMenuItems: MenuItem[] = [
   {
-    title: 'category',
-    icon: IconMenu,
-    index: `${paths.HOME}/${paths.HOME.CATEGORY}`,
-  },
-  {
-    title: 'ingredient',
-    icon: Document,
-    index: `${paths.HOME}/${paths.HOME.INGREDIENT}`,
-  },
-  {
-    title: 'product',
-    icon: Burger,
-    index: `${paths.HOME}/${paths.HOME.PRODUCT}`,
-  },
-    {
     title: 'user',
-    icon: User,
+    icon: shallowRef(User),
     index: `${paths.HOME}/${paths.HOME.USER}`,
   },
   {
     title: 'report',
-    icon: Tickets,
+    icon: shallowRef(Tickets),
     index: `${paths.HOME}/${paths.HOME.REPORT}`,
   }
 ];
 
-const menuPaths: string[] = menuItems.map((item) => item.index);
+const menuItems: Ref<MenuItem[]> = ref([
+  {
+    title: 'category',
+    icon: shallowRef(IconMenu),
+    index: `${paths.HOME}/${paths.HOME.CATEGORY}`,
+  },
+  {
+    title: 'ingredient',
+    icon: shallowRef(Document),
+    index: `${paths.HOME}/${paths.HOME.INGREDIENT}`,
+  },
+  {
+    title: 'product',
+    icon: shallowRef(Burger),
+    index: `${paths.HOME}/${paths.HOME.PRODUCT}`,
+  }
+]);
+
+const menuPaths: string[] = menuItems.value.map((item) => item.index);
 
 const menuItemClick = (menuItemProps: MenuItem): void => {
   push(menuItemProps.index);
@@ -90,6 +96,12 @@ const menuItemClick = (menuItemProps: MenuItem): void => {
 
 onBeforeRouteUpdate((to) => {
   menuRef.value.updateActiveIndex(to.path);
+});
+
+onBeforeMount(() => {
+  if (userPower === POWER.SUPER_ADMIN) {
+    menuItems.value = menuItems.value.concat(userMenuItems);
+  }
 });
 
 onMounted(() => {

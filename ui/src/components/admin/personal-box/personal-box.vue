@@ -34,12 +34,11 @@ const user = authStore.getUser();
 
 const logout = (): void => {
   UserService.get('logout')
-    .then(() => {
-      push(paths.LOGIN);
-      Storage.clear();
-    })
     .catch((error) => {
       showErrorNotification('Logout', error.response.data.messages);
+    }).finally(() => {
+      push(paths.LOGIN);
+      Storage.clear();
     });
 };
 </script>
