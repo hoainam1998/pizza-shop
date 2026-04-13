@@ -7,30 +7,31 @@ import SaleResetPassword from '@/views/sale/login-group/reset-password/reset-pas
 import AdminPersonal from '@/views/admin/personal/personal.vue';
 import SalePersonal from '@/views/sale/personal/personal.vue';
 import paths from '@/router/paths';
+import names from '@/router/names';
 
 export default [
   {
     path: '/:pathMatch(.*)*',
-    name: 'not-found',
+    name: names.NotFound,
     component: NotFound,
   },
   {
     path: `${paths.BASE}`,
-    redirect: 'login',
+    redirect: names.Login,
   },
   {
     path: `${paths.LOGIN}`,
-    name: 'login',
+    name: names.Login,
     component: isSale ? SaleLogin : AdminLogin,
   },
   {
     path: `${paths.RESET_PASSWORD}`,
-    name: 'reset_password',
+    name: names.ResetPassword,
     component: isSale ? SaleResetPassword : AdminResetPassword,
   },
   {
     path: `${paths.PERSONAL}`,
-    name: 'personal',
+    name: names.Personal,
     component: isSale ? SalePersonal : AdminPersonal,
     meta: { requiresAuth: true },
   },

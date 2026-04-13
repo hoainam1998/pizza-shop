@@ -1,6 +1,7 @@
 import { RouterView } from 'vue-router';
 import type { RouterOptions } from 'vue-router';
-import paths from '../paths';
+import paths from '@/router/paths';
+import names from '@/router/names';
 import Category from '@/views/admin/category-group/category.vue';
 import Home from '@/views/admin/home/home.vue';
 import Signup from '@/views/admin/login-group/signup/signup.vue';
@@ -21,17 +22,17 @@ const adminRoutes: RouterOptions['routes'] = [
     children: [
       {
         path: `${paths.HOME.CATEGORY}`,
-        name: 'category',
+        name: names.Category,
         component: Category,
       },
       {
         path: `${paths.HOME.PRODUCT}`,
-        name: 'products',
+        name: names.Product,
         component: RouterView,
         children: [
           {
             path: '',
-            name: 'product_list',
+            name: names.ProductList,
             props: {
               notShowBreadcrumb: true,
             },
@@ -40,10 +41,11 @@ const adminRoutes: RouterOptions['routes'] = [
           {
             path: `${paths.HOME.PRODUCT.NEW}`,
             component: ProductDetail,
-            name: 'new',
+            name: names.ProductCreate,
           },
           {
             path: `${paths.ID}`,
+            name: names.ProductUpdate,
             component: ProductDetail,
           },
         ],
@@ -55,7 +57,7 @@ const adminRoutes: RouterOptions['routes'] = [
         children: [
           {
             path: '',
-            name: 'ingredient_list',
+            name: names.IngredientList,
             props: {
               notShowBreadcrumb: true,
             },
@@ -70,7 +72,7 @@ const adminRoutes: RouterOptions['routes'] = [
         children: [
           {
             path: '',
-            name: 'user_list',
+            name: names.UserList,
             props: {
               notShowBreadcrumb: true,
             },
@@ -78,26 +80,26 @@ const adminRoutes: RouterOptions['routes'] = [
           },
           {
             path: 'new',
-            name: 'user_create',
+            name: names.UserCreate,
             component: UserDetail,
           },
           {
             path: `${paths.HOME.USER.ID}`,
-            name: 'user_update',
+            name: names.UserUpdate,
             component: UserDetail,
           },
         ],
       },
       {
         path: `${paths.HOME.REPORT}`,
-        name: 'report',
+        name: names.Report,
         component: Report,
       },
     ],
   },
   {
     path: `${paths.SIGNUP}`,
-    name: 'signup',
+    name: names.Signup,
     component: Signup,
   },
 ];

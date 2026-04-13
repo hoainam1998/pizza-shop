@@ -3,21 +3,22 @@ import All from '@/views/sale/all/all.vue';
 import Cart from '@/views/sale/cart/cart.vue';
 import Home from '@/views/sale/home/home.vue';
 import paths from '@/router/paths';
+import names from '@/router/names';
 
 const saleRoutes: RouterOptions['routes'] = [
   {
     path: `${paths.HOME}`,
-    name: 'home',
+    name: names.Home,
     component: Home,
     children: [
       {
         path: '',
-        name: 'all',
+        name: names.AllProduct,
         component: All,
       },
       {
         path: `${paths.CART}`,
-        name: 'cart',
+        name: names.Cart,
         component: Cart,
       },
     ],

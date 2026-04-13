@@ -1,7 +1,8 @@
 import axios, { AxiosError, HttpStatusCode } from 'axios';
 import paths from './router/paths';
 import { showErrorNotification, sanitizeUserInput } from './utils';
-import { loading as loadingStore} from './store';
+import { loading as loadingStore, auth as authStore } from './store';
+import type { ExtraConfigs } from './interfaces';
 
 /**
  * Force logout.
@@ -45,10 +46,17 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use(
-  function (config: any) {
+  function (config: ExtraConfigs) {
+    const token = authStore.getApiKey();
+
     if (config.showSpinner !== false) {
       loadingStore.showLoading();
     }
+
+    if (token) {
+      config.headers.Authorization = token;
+    }
+
     sanitizeUserInput(config);
     return config;
   },
