@@ -1,7 +1,7 @@
-import type { InternalAxiosRequestConfig } from 'axios';
+import type { Ref } from 'vue';
+import type { AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
 import type { FormInstance, UploadRawFile } from 'element-plus';
 import { CHART_MODE } from '@/enums';
-import type { Ref } from 'vue';
 
 export type TableFieldType = {
   key: string;
@@ -38,10 +38,14 @@ export type CategoryType = {
   avatar: string;
 };
 
-export type ExtraConfigs = InternalAxiosRequestConfig<any> & {
+type CustomAxiosRequest = {
   allowNotFound?: boolean;
   showSpinner?: boolean;
 };
+
+export type AxiosExtraRequestConfigs = AxiosRequestConfig & CustomAxiosRequest;
+
+export type InternalAxiosExtraRequestConfig = InternalAxiosRequestConfig<any> & CustomAxiosRequest;
 
 export type LoginResponseType = {
   resetPasswordToken: string;

@@ -1,5 +1,5 @@
 <template>
-  <div class="ps-display-flex ps-flex-gap-5 ps-mt-30 ps-mb-5">
+  <div class="ps-display-flex ps-flex-gap-5 ps-mt-35 ps-mb-5">
     <NewButton @click="navigateToDetail()" />
     <SearchBox v-model="keyword" @search="search" />
   </div>

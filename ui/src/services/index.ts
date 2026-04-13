@@ -1,7 +1,7 @@
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import api from '@/axios';
 import { HandleNotFoundError } from '@/decorators';
-import type { ExtraConfigs } from '../interfaces';
+import type { AxiosExtraRequestConfigs } from '@/interfaces';
 import HandleUnknownAxiosError from '@/decorators/handle-unknown-axios-error';
 
 type RequestBody = {
@@ -32,7 +32,7 @@ class Services {
    */
   @HandleNotFoundError
   @HandleUnknownAxiosError
-  get(subUrl: string, config?: ExtraConfigs): Promise<AxiosResponse> {
+  get(subUrl: string, config?: AxiosExtraRequestConfigs): Promise<AxiosResponse> {
     return api.get(`${this._baseUrl}/${subUrl}`, config);
   }
 
@@ -46,7 +46,7 @@ class Services {
    */
   @HandleNotFoundError
   @HandleUnknownAxiosError
-  post(subUrl: string, body: RequestBody, config?: ExtraConfigs): Promise<AxiosResponse> {
+  post(subUrl: string, body: RequestBody, config?: AxiosExtraRequestConfigs): Promise<AxiosResponse> {
     return api.post(`${this._baseUrl}/${subUrl}`, body, config);
   }
 
