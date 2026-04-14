@@ -12,6 +12,7 @@ export default Object.freeze({
     THROTTLER_ERROR: 'Too many requests in a second!',
     EXECUTION_FAIL: 'Execution failed due to exceeding the time limit!',
     EXECUTION_SUCCESS: 'Execution action success at specific time!',
+    UNKNOWN_RESOURCE: 'This resource is not defined!',
   },
   CATEGORY: {
     NOT_FOUND: 'The category item requirement is not found!',
@@ -44,6 +45,8 @@ export default Object.freeze({
     API_KEY_INVALID: 'Your API key is invalid!',
     DO_NOT_PERMISSION: 'You do not permission to handle this process!',
     DO_NOT_CHANGE_YOURSELF: 'You can not change self information!',
+    NOT_ALLOW_SALE_LOGIN: 'Sale man can not access this resource!',
+    NOT_ALLOW_ADMIN_LOGIN: 'Admin can not access this resource!',
   },
   INGREDIENT: {
     CREATE_INGREDIENT_SUCCESS: 'Create ingredient was success!',

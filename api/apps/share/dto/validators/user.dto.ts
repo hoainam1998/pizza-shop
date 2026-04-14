@@ -18,9 +18,9 @@ import {
 import { OmitType } from '@nestjs/mapped-types';
 import constants from '@share/constants';
 import { UserRequestType } from '@share/interfaces';
-import Validator from '../serializer/validator';
-import { Pagination } from './common.dto';
-import { POWER_NUMERIC } from '@share/enums';
+import Validator from '@share/dto/serializer/validator';
+import { Pagination } from '@share/dto/validators/common.dto';
+import { APP_NAME, POWER_NUMERIC } from '@share/enums';
 const power: POWER_NUMERIC[] = [POWER_NUMERIC.ADMIN, POWER_NUMERIC.SALE];
 
 export class UserDTO {
@@ -115,6 +115,9 @@ export class LoginInfo {
 
   @Allow()
   session_id: string;
+
+  @Allow()
+  by?: APP_NAME;
 }
 
 export class UpdatePersonalInfo extends UserDTO {

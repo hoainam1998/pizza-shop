@@ -14,8 +14,8 @@ import UserService from '../user.service';
 import { LoginSerializer } from '@share/dto/serializer/user';
 import startUp from './pre-setup';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
-import { user } from '@share/test/pre-setup/mock/data/user';
-import { HTTP_METHOD } from '@share/enums';
+import { user as originUser } from '@share/test/pre-setup/mock/data/user';
+import { APP_NAME, HTTP_METHOD } from '@share/enums';
 import { createDescribeTest, createTestName } from '@share/test/helpers';
 import { loginPattern } from '@share/pattern';
 import { createMessage, createMessages, omitFields } from '@share/utils';
@@ -23,6 +23,10 @@ import messages from '@share/constants/messages';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { LoginInfo } from '@share/dto/validators/user.dto';
 import { UserLoggedType } from '@share/interfaces';
+const user: Omit<typeof originUser, 'reset_password_link'> & {
+  reset_password_link?: string;
+} = originUser;
+delete user.reset_password_link;
 const loginUrl = UserRouter.absolute.login;
 
 let api: TestAgent;
@@ -34,6 +38,7 @@ const loginInfo: LoginInfo = {
   email: user.email,
   password: user.password,
   session_id: expect.any(String),
+  by: expect.any(String),
 };
 
 const userExpected = omitFields(['password', 'plain_password', 'session_id'], {
@@ -70,6 +75,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
     const loginService = jest.spyOn(userService, 'login');
     const response = await api
       .post(loginUrl)
+      .set('Cookie', [`app=${APP_NAME.ADMIN}`])
       .send(loginInfo)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/);
@@ -96,6 +102,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
     const loginService = jest.spyOn(userService, 'login');
     const response = await api
       .post(loginUrl)
+      .set('Cookie', [`app=${APP_NAME.ADMIN}`])
       .send(loginInfo)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/);
@@ -107,6 +114,63 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
     expect(response.headers['set-cookie']).not.toBeDefined();
   });
 
+  it(createTestName('login failed with sale view and admin role', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const send = jest
+      .spyOn(clientProxy, 'send')
+      .mockReturnValue(throwError(() => new UnauthorizedException(createMessage(messages.USER.NOT_ALLOW_ADMIN_LOGIN))));
+    const loginService = jest.spyOn(userService, 'login');
+    await api
+      .post(loginUrl)
+      .set('Cookie', [`app=${APP_NAME.SALE}`])
+      .send(loginInfo)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.NOT_ALLOW_ADMIN_LOGIN));
+    expect(loginService).toHaveBeenCalledTimes(1);
+    expect(loginService).toHaveBeenCalledWith(loginInfo);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledWith(loginPattern, loginInfo);
+  });
+
+  it(createTestName('login failed with admin view and sale role', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const send = jest
+      .spyOn(clientProxy, 'send')
+      .mockReturnValue(throwError(() => new UnauthorizedException(createMessage(messages.USER.NOT_ALLOW_SALE_LOGIN))));
+    const loginService = jest.spyOn(userService, 'login');
+    await api
+      .post(loginUrl)
+      .set('Cookie', [`app=${APP_NAME.ADMIN}`])
+      .send(loginInfo)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.NOT_ALLOW_SALE_LOGIN));
+    expect(loginService).toHaveBeenCalledTimes(1);
+    expect(loginService).toHaveBeenCalledWith(loginInfo);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledWith(loginPattern, loginInfo);
+  });
+
+  it(createTestName('login failed when unknown resource', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const newLoginInfoExpect = { ...loginInfo, by: undefined };
+    const send = jest
+      .spyOn(clientProxy, 'send')
+      .mockReturnValue(throwError(() => new UnauthorizedException(createMessage(messages.COMMON.UNKNOWN_RESOURCE))));
+    const loginService = jest.spyOn(userService, 'login');
+    await api
+      .post(loginUrl)
+      .send(newLoginInfoExpect)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.COMMON.UNKNOWN_RESOURCE));
+    expect(loginService).toHaveBeenCalledTimes(1);
+    expect(loginService).toHaveBeenCalledWith(newLoginInfoExpect);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledWith(loginPattern, newLoginInfoExpect);
+  });
+
   it(createTestName('login failed with not found error', HttpStatus.NOT_FOUND), async () => {
     expect.hasAssertions();
     const send = jest
@@ -115,6 +179,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
     const loginService = jest.spyOn(userService, 'login');
     await api
       .post(loginUrl)
+      .set('Cookie', [`app=${APP_NAME.ADMIN}`])
       .send(loginInfo)
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
@@ -133,6 +198,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
     const loginService = jest.spyOn(userService, 'login');
     await api
       .post(loginUrl)
+      .set('Cookie', [`app=${APP_NAME.ADMIN}`])
       .send(loginInfo)
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
@@ -149,6 +215,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
     const loginService = jest.spyOn(userService, 'login');
     await api
       .post(loginUrl)
+      .set('Cookie', [`app=${APP_NAME.ADMIN}`])
       .send(loginInfo)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
@@ -167,6 +234,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
     const loginService = jest.spyOn(userService, 'login');
     await api
       .post(loginUrl)
+      .set('Cookie', [`app=${APP_NAME.ADMIN}`])
       .send(loginInfo)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -185,6 +253,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
     const loginService = jest.spyOn(userService, 'login');
     await api
       .post(loginUrl)
+      .set('Cookie', [`app=${APP_NAME.ADMIN}`])
       .send(loginInfo)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -202,6 +271,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => serverError));
     await api
       .post(loginUrl)
+      .set('Cookie', [`app=${APP_NAME.ADMIN}`])
       .send(loginInfo)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)

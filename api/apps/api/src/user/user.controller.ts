@@ -111,7 +111,7 @@ export default class UserController extends BaseController {
   @Post(UserRouter.relative.login)
   @HandleHttpError
   login(@Req() req: Express.Request, @Body() loginInfo: LoginInfo): Observable<Promise<UserLoggedSerializerType>> {
-    Object.assign(loginInfo, { session_id: req.sessionID });
+    Object.assign(loginInfo, { session_id: req.sessionID, by: req.cookies.app });
     return this.userService.login(loginInfo).pipe(
       map(async (user) => {
         const loginResult = new LoginSerializer(user);

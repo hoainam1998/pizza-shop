@@ -34,6 +34,7 @@ import {
   verifyAdminResetPasswordToken,
 } from '@share/utils';
 import messages from '@share/constants/messages';
+import { APP_NAME, POWER_NUMERIC } from '@share/enums';
 
 @Controller('user')
 export default class UserController {
@@ -59,6 +60,20 @@ export default class UserController {
   async login(loginInfo: LoginInfo): Promise<UserLoggedType> {
     if (!(await this.userService.checkUserLogged(loginInfo.session_id))) {
       return this.userService.login(loginInfo.email).then(async (user) => {
+        if (loginInfo.by) {
+          if (loginInfo.by === APP_NAME.ADMIN) {
+            if (user.power === POWER_NUMERIC.SALE) {
+              throw new UnauthorizedException(createMessage(messages.USER.NOT_ALLOW_SALE_LOGIN));
+            }
+          } else {
+            if (user.power === POWER_NUMERIC.ADMIN) {
+              throw new UnauthorizedException(createMessage(messages.USER.NOT_ALLOW_ADMIN_LOGIN));
+            }
+          }
+        } else {
+          throw new UnauthorizedException(createMessage(messages.COMMON.UNKNOWN_RESOURCE));
+        }
+
         if (user.session_id) {
           throw new UnauthorizedException(createMessage(messages.USER.ALREADY_LOGIN));
         } else {

@@ -16,6 +16,7 @@ declare global {
   export namespace Express {
     export interface Request {
       session: expressSession.Session & Partial<expressSession.SessionData>;
+      cookies: Record<string, string>;
     }
   }
 
