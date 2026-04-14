@@ -23,6 +23,11 @@ export enum VIEW {
   CLIENT = 'client',
 }
 
+export enum APP_NAME {
+  ADMIN = 'admin',
+  SALE = 'sale',
+}
+
 export enum SEX {
   MALE = 0,
   FEMALE = 1,

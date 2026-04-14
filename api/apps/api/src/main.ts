@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import helmet from 'helmet';
 import AppModule from './app.module';
@@ -21,6 +22,7 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(GlobalValidatePipe.getInstance());
   app.use(session(sessionConfig(redisClient.Client)));
+  app.use(cookieParser());
   await app.listen(port, () => Logger.log(`App started at ${port}`, 'App Bootstrap'));
 }
 bootstrap();

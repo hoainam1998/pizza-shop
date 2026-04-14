@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import session from 'express-session';
 import request from 'supertest';
+import cookieParser from 'cookie-parser';
 import { ClientProxy } from '@nestjs/microservices';
 import UserModule from '../user.module';
 import { USER_SERVICE, REDIS_CLIENT } from '@share/di-token';
@@ -34,6 +35,7 @@ const startUp = async (module = UserModule) => {
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(GlobalValidatePipe.getInstance());
   app.use(session(sessionConfig(redisClient.Client)));
+  app.use(cookieParser());
   await app.listen(0);
   const clientProxy = app.get<ClientProxy>(USER_SERVICE);
 
