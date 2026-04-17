@@ -1,11 +1,10 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { PrismaClient, type user } from 'generated/prisma';
+import { PrismaClient, type user, type Prisma } from 'generated/prisma';
 import { PRISMA_CLIENT } from '@share/di-token';
 import messages from '@share/constants/messages';
 import { HandlePrismaError } from '@share/decorators';
 import type {
   UserCreatedReturnType,
-  UserDetailType,
   UserPaginationPrismaResponse,
   UserSignupType,
   UserWithOnlySessionIDType,
@@ -105,16 +104,6 @@ export default class UserService {
   }
 
   @HandlePrismaError(messages.USER)
-  getDetail(email: string, select: Record<string, boolean>): Promise<unknown> {
-    return this.prismaClient.user.findUniqueOrThrow({
-      where: {
-        email,
-      },
-      select,
-    });
-  }
-
-  @HandlePrismaError(messages.USER)
   pagination(select: UserPagination): Promise<UserPaginationPrismaResponse> {
     const skip = calcSkip(select.pageSize, select.pageNumber);
     const condition = select.search
@@ -153,12 +142,10 @@ export default class UserService {
   }
 
   @HandlePrismaError(messages.USER)
-  getUser(select: UserDetailType): Promise<any> {
+  getUser(where: Prisma.userWhereUniqueInput, select: Record<string, boolean>): Promise<any> {
     return this.prismaClient.user.findUniqueOrThrow({
-      where: {
-        user_id: select.user_id,
-      },
-      select: select.query,
+      where,
+      select,
     });
   }
 

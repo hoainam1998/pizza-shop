@@ -7,7 +7,7 @@ import UserController from '../user.controller';
 import UserService from '../user.service';
 import { user } from '@share/test/pre-setup/mock/data/user';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
-import { createMessage, omitFields, autoGeneratePassword } from '@share/utils';
+import { createMessage, omitFields } from '@share/utils';
 import messages from '@share/constants/messages';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { LoginInfo } from '@share/dto/validators/user.dto';
@@ -22,7 +22,7 @@ const userAlreadyLogin = { ...user, reset_password_token: null };
 const loginInfo: LoginInfo = {
   email: user.email,
   password: user.password,
-  session_id: autoGeneratePassword(),
+  session_id: expect.any(String),
   by: APP_NAME.ADMIN,
 };
 

@@ -60,6 +60,7 @@
     "test:ut:user.signup": "jest --watch --testPathPatterns=apps/modules/user/src/__test__/signup.spec.ts",
     "test:ut:user.login-service": "jest --watch --testPathPatterns=apps/modules/user/src/__test__/login-service.spec.ts",
     "test:ut:user.login": "jest --watch --testPathPatterns=apps/modules/user/src/__test__/login.spec.ts",
+    "test:ut:user.reset-password-service": "jest --watch --testPathPatterns=apps/modules/user/src/__test__/reset-password-service.spec.ts",
     "test:ut:user.reset-password": "jest --watch --testPathPatterns=apps/modules/user/src/__test__/reset-password.spec.ts",
     "test:ut:user.pagination": "jest --watch --testPathPatterns=apps/modules/user/src/__test__/pagination.spec.ts",
     "test:ut:user.get-user": "jest --watch --testPathPatterns=apps/modules/user/src/__test__/get-user.spec.ts",

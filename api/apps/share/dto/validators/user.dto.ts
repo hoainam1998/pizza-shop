@@ -157,6 +157,9 @@ export class ResetPassword {
 
   @IsString()
   token: string;
+
+  @Allow()
+  by?: APP_NAME;
 }
 
 export class LoginSessionPayload extends Validator {

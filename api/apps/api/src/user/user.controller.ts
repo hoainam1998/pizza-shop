@@ -140,7 +140,8 @@ export default class UserController extends BaseController {
   @HttpCode(HttpStatus.OK)
   @Post(UserRouter.relative.resetPassword)
   @HandleHttpError
-  resetPassword(@Body() resetPasswordBody: ResetPassword): Observable<MessageSerializer> {
+  resetPassword(@Req() req: Express.Request, @Body() resetPasswordBody: ResetPassword): Observable<MessageSerializer> {
+    Object.assign(resetPasswordBody, { by: req.cookies.app });
     return this.userService
       .resetPassword(resetPasswordBody)
       .pipe(map(() => MessageSerializer.create(messages.USER.RESET_PASSWORD_SUCCESS)));
