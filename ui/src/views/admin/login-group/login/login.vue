@@ -26,7 +26,6 @@
     </template>
   </LoginFrame>
 </template>
-
 <script setup lang="ts">
 import { reactive, ref, onBeforeMount } from 'vue';
 import { onBeforeRouteLeave, RouterLink } from 'vue-router';
@@ -37,10 +36,10 @@ import PsEmailInput from '@/components/common/inputs/email.vue';
 import paths from '@/router/paths';
 import { auth as authStore } from '@/store';
 import useWrapperRouter from '@/composables/use-router';
+import loginFormInformation from '@/composables/use-login-form';
 import { UserService } from '@/services';
 import { generateResetPasswordLink, showErrorNotification } from '@/utils';
 import type { LoginResponseType, MessageResponseType } from '@/interfaces';
-import loginFormInformation from '@/composables/use-login-form';
 
 const { push } = useWrapperRouter();
 const FORM_ID = 'loginForm';
