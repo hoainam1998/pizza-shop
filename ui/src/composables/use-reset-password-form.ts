@@ -7,7 +7,7 @@ type ResetPasswordType = {
   email: string;
   oldPassword: string;
   password: string;
-  confirmPassword: string;
+  confirmPassword?: string;
   token?: string;
 };
 

@@ -12,6 +12,7 @@ import './indexed-db';
 globalThis.router = router;
 
 const app = createApp(isSale ? SaleApp : AdminApp);
+document.cookie = `app=${isSale ? 'sale' : 'admin'}`;
 
 app.use(router);
 app.use(ElementPlus);
