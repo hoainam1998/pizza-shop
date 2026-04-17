@@ -36,6 +36,26 @@ import {
 import messages from '@share/constants/messages';
 import { APP_NAME, POWER_NUMERIC } from '@share/enums';
 
+type RequesterFromType = {
+  by?: APP_NAME;
+};
+
+const validateUserPermission = (requestPayload: RequesterFromType, user: Pick<user, 'power'>): void => {
+  if (requestPayload.by) {
+    if (requestPayload.by === APP_NAME.ADMIN) {
+      if (user.power === POWER_NUMERIC.SALE) {
+        throw new UnauthorizedException(createMessage(messages.USER.NOT_ALLOW_SALE_LOGIN));
+      }
+    } else {
+      if (user.power === POWER_NUMERIC.ADMIN) {
+        throw new UnauthorizedException(createMessage(messages.USER.NOT_ALLOW_ADMIN_LOGIN));
+      }
+    }
+  } else {
+    throw new UnauthorizedException(createMessage(messages.COMMON.UNKNOWN_RESOURCE));
+  }
+};
+
 @Controller('user')
 export default class UserController {
   constructor(
@@ -60,20 +80,7 @@ export default class UserController {
   async login(loginInfo: LoginInfo): Promise<UserLoggedType> {
     if (!(await this.userService.checkUserLogged(loginInfo.session_id))) {
       return this.userService.login(loginInfo.email).then(async (user) => {
-        if (loginInfo.by) {
-          if (loginInfo.by === APP_NAME.ADMIN) {
-            if (user.power === POWER_NUMERIC.SALE) {
-              throw new UnauthorizedException(createMessage(messages.USER.NOT_ALLOW_SALE_LOGIN));
-            }
-          } else {
-            if (user.power === POWER_NUMERIC.ADMIN) {
-              throw new UnauthorizedException(createMessage(messages.USER.NOT_ALLOW_ADMIN_LOGIN));
-            }
-          }
-        } else {
-          throw new UnauthorizedException(createMessage(messages.COMMON.UNKNOWN_RESOURCE));
-        }
-
+        validateUserPermission(loginInfo, user);
         if (user.session_id) {
           throw new UnauthorizedException(createMessage(messages.USER.ALREADY_LOGIN));
         } else {
@@ -99,13 +106,16 @@ export default class UserController {
       const isSame = payload.email === resetPasswordBody.email && payload.password === resetPasswordBody.oldPassword;
 
       if (isSame) {
-        return this.userService.getDetail(resetPasswordBody.email, { password: true }).then((user: unknown) => {
-          if (comparePassword(resetPasswordBody.oldPassword, (user as user).password)) {
-            return this.userService.resetPassword(resetPasswordBody);
-          } else {
-            throw new UnauthorizedException(createMessage(messages.USER.PASSWORD_NOT_MATCH));
-          }
-        });
+        return this.userService
+          .getUser({ email: resetPasswordBody.email }, { password: true, power: true })
+          .then((user: user) => {
+            validateUserPermission(resetPasswordBody, user);
+            if (comparePassword(resetPasswordBody.oldPassword, user.password)) {
+              return this.userService.resetPassword(resetPasswordBody);
+            } else {
+              throw new UnauthorizedException(createMessage(messages.USER.PASSWORD_NOT_MATCH));
+            }
+          });
       }
       throw new UnauthorizedException(createMessage(messages.USER.NOT_FOUND));
     } else {
@@ -134,7 +144,7 @@ export default class UserController {
   @MessagePattern(getUserDetailPattern)
   @HandleServiceError
   getUser(select: UserDetailType): Promise<user> {
-    return this.userService.getUser(select);
+    return this.userService.getUser({ user_id: select.user_id }, select.query);
   }
 
   @MessagePattern(updateUserPattern)

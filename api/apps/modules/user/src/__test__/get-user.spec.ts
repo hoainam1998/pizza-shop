@@ -34,6 +34,10 @@ const getUserBody: UserDetailType = {
   query,
 };
 
+const where = {
+  user_id: getUserBody.user_id,
+};
+
 beforeAll(async () => {
   const moduleRef = await startUp();
   userService = moduleRef.get(UserService);
@@ -46,18 +50,16 @@ describe('get user', () => {
   it('get user was success', async () => {
     expect.hasAssertions();
     const findUniqueOrThrowPrismaMethod = jest.spyOn(prismaService.user, 'findUniqueOrThrow').mockResolvedValue(user);
-    const getDetailServiceMethod = jest.spyOn(userService, 'getUser');
-    const getAllControllerMethod = jest.spyOn(userController, 'getUser');
+    const getUserServiceMethod = jest.spyOn(userService, 'getUser');
+    const getUserControllerMethod = jest.spyOn(userController, 'getUser');
     await expect(userController.getUser(getUserBody)).resolves.toBe(user);
-    expect(getAllControllerMethod).toHaveBeenCalledTimes(1);
-    expect(getAllControllerMethod).toHaveBeenCalledWith(getUserBody);
-    expect(getDetailServiceMethod).toHaveBeenCalledTimes(1);
-    expect(getDetailServiceMethod).toHaveBeenCalledWith(getUserBody);
+    expect(getUserControllerMethod).toHaveBeenCalledTimes(1);
+    expect(getUserControllerMethod).toHaveBeenCalledWith(getUserBody);
+    expect(getUserServiceMethod).toHaveBeenCalledTimes(1);
+    expect(getUserServiceMethod).toHaveBeenCalledWith(where, getUserBody.query);
     expect(findUniqueOrThrowPrismaMethod).toHaveBeenCalledTimes(1);
     expect(findUniqueOrThrowPrismaMethod).toHaveBeenLastCalledWith({
-      where: {
-        user_id: getUserBody.user_id,
-      },
+      where,
       select: getUserBody.query,
     });
   });
@@ -68,21 +70,19 @@ describe('get user', () => {
       .spyOn(prismaService.user, 'findUniqueOrThrow')
       .mockRejectedValue(PrismaNotFoundError);
     const logMethod = jest.spyOn(loggerService, 'error');
-    const getDetailServiceMethod = jest.spyOn(userService, 'getUser');
-    const getAllControllerMethod = jest.spyOn(userController, 'getUser');
+    const getUserServiceMethod = jest.spyOn(userService, 'getUser');
+    const getUserControllerMethod = jest.spyOn(userController, 'getUser');
     await expect(userController.getUser(getUserBody)).rejects.toThrow(
       new RpcException(new NotFoundException(messages.USER.NOT_FOUND)),
     );
-    expect(getAllControllerMethod).toHaveBeenCalledTimes(1);
-    expect(getAllControllerMethod).toHaveBeenCalledWith(getUserBody);
+    expect(getUserControllerMethod).toHaveBeenCalledTimes(1);
+    expect(getUserControllerMethod).toHaveBeenCalledWith(getUserBody);
     expect(logMethod).not.toHaveBeenCalled();
-    expect(getDetailServiceMethod).toHaveBeenCalledTimes(1);
-    expect(getDetailServiceMethod).toHaveBeenCalledWith(getUserBody);
+    expect(getUserServiceMethod).toHaveBeenCalledTimes(1);
+    expect(getUserServiceMethod).toHaveBeenCalledWith(where, getUserBody.query);
     expect(findUniqueOrThrowPrismaMethod).toHaveBeenCalledTimes(1);
     expect(findUniqueOrThrowPrismaMethod).toHaveBeenLastCalledWith({
-      where: {
-        user_id: getUserBody.user_id,
-      },
+      where,
       select: getUserBody.query,
     });
   });
@@ -93,21 +93,19 @@ describe('get user', () => {
       .spyOn(prismaService.user, 'findUniqueOrThrow')
       .mockRejectedValue(UnknownError);
     const logMethod = jest.spyOn(loggerService, 'error');
-    const getDetailServiceMethod = jest.spyOn(userService, 'getUser');
-    const getAllControllerMethod = jest.spyOn(userController, 'getUser');
+    const getUserServiceMethod = jest.spyOn(userService, 'getUser');
+    const getUserControllerMethod = jest.spyOn(userController, 'getUser');
     await expect(userController.getUser(getUserBody)).rejects.toThrow(
       new RpcException(new BadRequestException(createMessage(messages.COMMON.COMMON_ERROR))),
     );
-    expect(getAllControllerMethod).toHaveBeenCalledTimes(1);
-    expect(getAllControllerMethod).toHaveBeenCalledWith(getUserBody);
+    expect(getUserControllerMethod).toHaveBeenCalledTimes(1);
+    expect(getUserControllerMethod).toHaveBeenCalledWith(getUserBody);
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
-    expect(getDetailServiceMethod).toHaveBeenCalledTimes(1);
-    expect(getDetailServiceMethod).toHaveBeenCalledWith(getUserBody);
+    expect(getUserServiceMethod).toHaveBeenCalledTimes(1);
+    expect(getUserServiceMethod).toHaveBeenCalledWith(where, getUserBody.query);
     expect(findUniqueOrThrowPrismaMethod).toHaveBeenCalledTimes(1);
     expect(findUniqueOrThrowPrismaMethod).toHaveBeenLastCalledWith({
-      where: {
-        user_id: getUserBody.user_id,
-      },
+      where,
       select: getUserBody.query,
     });
   });
@@ -118,21 +116,19 @@ describe('get user', () => {
       .spyOn(prismaService.user, 'findUniqueOrThrow')
       .mockRejectedValue(PrismaDisconnectError);
     const logMethod = jest.spyOn(loggerService, 'error');
-    const getDetailServiceMethod = jest.spyOn(userService, 'getUser');
-    const getAllControllerMethod = jest.spyOn(userController, 'getUser');
+    const getUserServiceMethod = jest.spyOn(userService, 'getUser');
+    const getUserControllerMethod = jest.spyOn(userController, 'getUser');
     await expect(userController.getUser(getUserBody)).rejects.toThrow(
       new RpcException(new BadRequestException(createMessage(PrismaDisconnectError.message))),
     );
-    expect(getAllControllerMethod).toHaveBeenCalledTimes(1);
-    expect(getAllControllerMethod).toHaveBeenCalledWith(getUserBody);
+    expect(getUserControllerMethod).toHaveBeenCalledTimes(1);
+    expect(getUserControllerMethod).toHaveBeenCalledWith(getUserBody);
     expect(logMethod).toHaveBeenCalledWith(PrismaDisconnectError.message, expect.any(String));
-    expect(getDetailServiceMethod).toHaveBeenCalledTimes(1);
-    expect(getDetailServiceMethod).toHaveBeenCalledWith(getUserBody);
+    expect(getUserServiceMethod).toHaveBeenCalledTimes(1);
+    expect(getUserServiceMethod).toHaveBeenCalledWith(where, getUserBody.query);
     expect(findUniqueOrThrowPrismaMethod).toHaveBeenCalledTimes(1);
     expect(findUniqueOrThrowPrismaMethod).toHaveBeenLastCalledWith({
-      where: {
-        user_id: getUserBody.user_id,
-      },
+      where,
       select: getUserBody.query,
     });
   });

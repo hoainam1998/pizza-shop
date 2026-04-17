@@ -14,7 +14,7 @@ import UserService from '../user.service';
 import { LoginSerializer } from '@share/dto/serializer/user';
 import startUp from './pre-setup';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
-import { user as originUser } from '@share/test/pre-setup/mock/data/user';
+import { user as originUser, resetPasswordToken } from '@share/test/pre-setup/mock/data/user';
 import { APP_NAME, HTTP_METHOD } from '@share/enums';
 import { createDescribeTest, createTestName } from '@share/test/helpers';
 import { loginPattern } from '@share/pattern';
@@ -34,9 +34,13 @@ let clientProxy: ClientProxy;
 let close: () => Promise<void>;
 let userService: UserService;
 
-const loginInfo: LoginInfo = {
+const loginInfo: any = {
   email: user.email,
   password: user.password,
+};
+
+const loginPayload: LoginInfo = {
+  ...loginInfo,
   session_id: expect.any(String),
   by: expect.any(String),
 };
@@ -81,15 +85,18 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
       .expect('Content-Type', /application\/json/);
     expect(response.body).toEqual(userSerializer);
     expect(loginService).toHaveBeenCalledTimes(1);
-    expect(loginService).toHaveBeenCalledWith(loginInfo);
+    expect(loginService).toHaveBeenCalledWith(loginPayload);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(loginPattern, loginInfo);
+    expect(send).toHaveBeenCalledWith(loginPattern, loginPayload);
     expect(response.headers['set-cookie']).toEqual([expect.any(String)]);
   });
 
   it(createTestName('login success for first time', HttpStatus.OK), async () => {
     expect.hasAssertions();
-    const userExpected = omitFields(['password', 'plain_password', 'session_id'], user) as UserLoggedType;
+    const userExpected = omitFields(['password', 'plain_password', 'session_id'], {
+      ...user,
+      reset_password_token: resetPasswordToken,
+    }) as UserLoggedType;
     const loginSerializer = new LoginSerializer(userExpected);
     const userPlain = instanceToPlain(loginSerializer);
     const userSerializer = {
@@ -108,9 +115,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
       .expect('Content-Type', /application\/json/);
     expect(response.body).toEqual(userSerializer);
     expect(loginService).toHaveBeenCalledTimes(1);
-    expect(loginService).toHaveBeenCalledWith(loginInfo);
+    expect(loginService).toHaveBeenCalledWith(loginPayload);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(loginPattern, loginInfo);
+    expect(send).toHaveBeenCalledWith(loginPattern, loginPayload);
     expect(response.headers['set-cookie']).not.toBeDefined();
   });
 
@@ -128,9 +135,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.NOT_ALLOW_ADMIN_LOGIN));
     expect(loginService).toHaveBeenCalledTimes(1);
-    expect(loginService).toHaveBeenCalledWith(loginInfo);
+    expect(loginService).toHaveBeenCalledWith(loginPayload);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(loginPattern, loginInfo);
+    expect(send).toHaveBeenCalledWith(loginPattern, loginPayload);
   });
 
   it(createTestName('login failed with admin view and sale role', HttpStatus.UNAUTHORIZED), async () => {
@@ -147,21 +154,21 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.NOT_ALLOW_SALE_LOGIN));
     expect(loginService).toHaveBeenCalledTimes(1);
-    expect(loginService).toHaveBeenCalledWith(loginInfo);
+    expect(loginService).toHaveBeenCalledWith(loginPayload);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(loginPattern, loginInfo);
+    expect(send).toHaveBeenCalledWith(loginPattern, loginPayload);
   });
 
   it(createTestName('login failed when unknown resource', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
-    const newLoginInfoExpect = { ...loginInfo, by: undefined };
+    const newLoginInfoExpect = { ...loginPayload, by: undefined };
     const send = jest
       .spyOn(clientProxy, 'send')
       .mockReturnValue(throwError(() => new UnauthorizedException(createMessage(messages.COMMON.UNKNOWN_RESOURCE))));
     const loginService = jest.spyOn(userService, 'login');
     await api
       .post(loginUrl)
-      .send(newLoginInfoExpect)
+      .send(loginInfo)
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.UNKNOWN_RESOURCE));
@@ -185,9 +192,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.NOT_FOUND));
     expect(loginService).toHaveBeenCalledTimes(1);
-    expect(loginService).toHaveBeenCalledWith(loginInfo);
+    expect(loginService).toHaveBeenCalledWith(loginPayload);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(loginPattern, loginInfo);
+    expect(send).toHaveBeenCalledWith(loginPattern, loginPayload);
   });
 
   it(createTestName('login failed when password not match', HttpStatus.UNAUTHORIZED), async () => {
@@ -204,9 +211,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.PASSWORD_NOT_MATCH));
     expect(loginService).toHaveBeenCalledTimes(1);
-    expect(loginService).toHaveBeenCalledWith(loginInfo);
+    expect(loginService).toHaveBeenCalledWith(loginPayload);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(loginPattern, loginInfo);
+    expect(send).toHaveBeenCalledWith(loginPattern, loginPayload);
   });
 
   it(createTestName('login failed with unknown error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
@@ -221,9 +228,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(new InternalServerErrorException().message));
     expect(loginService).toHaveBeenCalledTimes(1);
-    expect(loginService).toHaveBeenCalledWith(loginInfo);
+    expect(loginService).toHaveBeenCalledWith(loginPayload);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(loginPattern, loginInfo);
+    expect(send).toHaveBeenCalledWith(loginPattern, loginPayload);
   });
 
   it(createTestName('login failed with rpc unknown error', HttpStatus.BAD_REQUEST), async () => {
@@ -240,9 +247,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.COMMON_ERROR));
     expect(loginService).toHaveBeenCalledTimes(1);
-    expect(loginService).toHaveBeenCalledWith(loginInfo);
+    expect(loginService).toHaveBeenCalledWith(loginPayload);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(loginPattern, loginInfo);
+    expect(send).toHaveBeenCalledWith(loginPattern, loginPayload);
   });
 
   it(createTestName('login failed with database disconnect error', HttpStatus.BAD_REQUEST), async () => {
@@ -259,9 +266,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
     expect(loginService).toHaveBeenCalledTimes(1);
-    expect(loginService).toHaveBeenCalledWith(loginInfo);
+    expect(loginService).toHaveBeenCalledWith(loginPayload);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(loginPattern, loginInfo);
+    expect(send).toHaveBeenCalledWith(loginPattern, loginPayload);
   });
 
   it(createTestName('login failed with server error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
@@ -277,8 +284,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(serverError.message));
     expect(loginService).toHaveBeenCalledTimes(1);
-    expect(loginService).toHaveBeenCalledWith(loginInfo);
+    expect(loginService).toHaveBeenCalledWith(loginPayload);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(loginPattern, loginInfo);
+    expect(send).toHaveBeenCalledWith(loginPattern, loginPayload);
   });
 });

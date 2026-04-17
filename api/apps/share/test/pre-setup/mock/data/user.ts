@@ -17,7 +17,7 @@ export const user: Required<UserRequestType> = {
   power: POWER_NUMERIC.SUPER_ADMIN,
   plain_password: plainPassword,
   session_id: null,
-  reset_password_token: signingAdminResetPasswordToken({ email: 'myemail@gmail.com', password: plainPassword }),
+  reset_password_token: expect.any(String),
   reset_password_link: expect.any(String),
 };
 
@@ -27,6 +27,11 @@ export const sessionPayload: SessionData['user'] = {
   userId: user.user_id,
   canSignup: false,
 };
+
+export const resetPasswordToken = signingAdminResetPasswordToken({
+  email: 'myemail@gmail.com',
+  password: plainPassword,
+});
 
 export const createUsers = (length: number): Partial<userPrisma>[] => {
   return Array.apply(this, Array(length)).map(() => ({
