@@ -35,11 +35,18 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
 import { onBeforeRouteLeave } from 'vue-router';
+import type { AxiosError, AxiosResponse } from 'axios';
 import LoginFrame from '@/components/common/login-frame/login-frame.vue';
 import PsPasswordInput from '@/components/common/inputs/password.vue';
 import PsEmailInput from '@/components/common/inputs/email.vue';
 import useResetPasswordForm from '@/composables/use-reset-password-form';
+import useWrapperRouter from '@/composables/use-router';
+import paths from '@/router/paths';
+import { UserService } from '@/services';
+import { showErrorNotification, showSuccessNotification } from '@/utils';
+import type { MessageResponseType } from '@/interfaces';
 
+const { push } = useWrapperRouter();
 const FORM_ID = 'resetPasswordForm';
 const { form, rules, resetForm, resetPasswordFormRef, disableSubmit } = useResetPasswordForm();
 const resetPasswordFormModel = reactive<typeof form>(form);
@@ -49,7 +56,15 @@ const onSubmit = async (): Promise<void> => {
   if (resetPasswordFormRef.value) {
     await resetPasswordFormRef.value.validate((valid) => {
       if (valid) {
-        // TODO
+        const resetPasswordPayload = { ...resetPasswordFormModel };
+        delete resetPasswordPayload.confirmPassword;
+        UserService.post('reset-password', resetPasswordPayload)
+          .then((response: AxiosResponse<MessageResponseType>) => {
+            showSuccessNotification('Reset password', response.data.messages);
+            push(paths.LOGIN);
+          }).catch((error: AxiosError<MessageResponseType>) => {
+            showErrorNotification('Reset password', error.response?.data.messages);
+          }).catch(resetForm);
       }
     });
   }
