@@ -17,11 +17,15 @@
       <img src="@/assets/images/logo.png" class="ps-box-shadow-1" height="30" width="30" />
     </RouterLink>
     <SearchBox />
-    <Cart />
+    <div class="ps-display-flex ps-flex-gap-5">
+      <PersonalBox />
+      <Cart />
+    </div>
   </header>
 </template>
 <script setup lang="ts">
 import paths from '@/router/paths';
 import Cart from '@/components/sale/cart/cart.vue';
 import SearchBox from '@/components/sale/search-box/search-box.vue';
+import PersonalBox from '@/components/sale/personal-box/personal-box.vue';
 </script>
