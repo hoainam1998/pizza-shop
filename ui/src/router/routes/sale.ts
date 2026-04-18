@@ -10,6 +10,7 @@ const saleRoutes: RouterOptions['routes'] = [
     path: `${paths.HOME}`,
     name: names.Home,
     component: Home,
+    meta: { requiresAuth: true },
     children: [
       {
         path: '',
