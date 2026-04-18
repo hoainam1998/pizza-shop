@@ -11,7 +11,7 @@ import { onMounted, useTemplateRef, onBeforeUnmount } from 'vue';
 import Chart from 'chart.js/auto';
 import config from './config';
 import { useSizeChart } from '@/composables';
-import chartPropsValidator from '../props-validator';
+import chartPropsValidator from '@/components/admin/charts/types';
 import { type RealTimeShoppingChartPropsType } from '@/interfaces';
 
 const { height, width } = defineProps(chartPropsValidator);

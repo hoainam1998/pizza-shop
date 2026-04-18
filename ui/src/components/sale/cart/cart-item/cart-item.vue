@@ -90,7 +90,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import { Close, Plus, Minus, Refresh } from '@element-plus/icons-vue';
-import List from '@/components/common/list.vue';
+import List from '@/components/common/list/list.vue';
 import DeleteDialog from '../delete-dialog.vue';
 import type { CartItemPropsType } from './props-validator';
 

@@ -30,7 +30,7 @@ import Chart from 'chart.js/auto';
 import { CHART_MODE } from '@/enums';
 import config, { createDataSet } from './config';
 import { useSizeChart } from '@/composables';
-import chartPropsValidator from '../props-validator';
+import chartPropsValidator from '@/components/admin/charts/types';
 import type { BestSellingProductsChartPropsType, ChartPayloadType } from '@/interfaces';
 
 const size = defineProps(chartPropsValidator);

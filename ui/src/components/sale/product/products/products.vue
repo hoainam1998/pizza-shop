@@ -42,7 +42,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import ProductItem from '../product-item/product-item.vue';
-import List from '@/components/common/list.vue';
+import List from '@/components/common/list/list.vue';
 import Pagination from '@/components/common/pagination/pagination.vue';
 import ResultSearch from '@/components/sale/product/result-search/result-search.vue';
 import EmptyLogo from '@/assets/images/empty.png';

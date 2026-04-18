@@ -61,7 +61,7 @@
 import { computed, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
 import CartItem from '@/components/sale/cart/cart-item/cart-item.vue';
 import BillItem from '@/components/sale/cart/bill-item.vue';
-import List from '@/components/common/list.vue';
+import List from '@/components/common/list/list.vue';
 import BackButton from '@/components/common/buttons/back-button/back-button.vue';
 import SocketService from '@/socket';
 import IndexedDb from '@/indexed-db';

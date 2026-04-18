@@ -46,8 +46,8 @@
 <script setup lang="ts">
 import { onBeforeMount, ref, useTemplateRef, type Ref } from 'vue';
 import type { AxiosResponse } from 'axios';
-import Table from '@/components/common/table.vue';
-import SearchBox from '@/components/admin/search-box.vue';
+import Table from '@/components/common/table/table.vue';
+import SearchBox from '@/components/admin/search-box/search-box.vue';
 import NewButton from '@/components/common/buttons/new-button/new-button.vue';
 import type { TableFieldType } from '@/interfaces';
 import constants from '@/constants';

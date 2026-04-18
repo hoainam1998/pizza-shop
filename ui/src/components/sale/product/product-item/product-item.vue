@@ -54,7 +54,7 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import List from '@/components/common/list.vue';
+import List from '@/components/common/list/list.vue';
 import { type ProductItemsPropsType } from './props-validator';
 import { useProductsInCart } from '@/composables';
 import IndexedDb from '@/indexed-db';

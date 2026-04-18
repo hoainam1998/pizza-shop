@@ -40,7 +40,7 @@ import { onBeforeMount, onMounted, useTemplateRef, type Component, ref, type Ref
 import { RouterLink, onBeforeRouteUpdate, useRoute } from 'vue-router';
 import { primaryColor, whiteColor } from '@/assets/scss/variables.module.scss';
 import { Document, Menu as IconMenu, Burger, Tickets, User } from '@element-plus/icons-vue';
-import List from '@/components/common/list.vue';
+import List from '@/components/common/list/list.vue';
 import { auth as authStore } from '@/store';
 import paths from '@/router/paths';
 import { POWER } from '@/enums';
