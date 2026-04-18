@@ -15,13 +15,13 @@
     </h5>
     <hr class="ps-mt-7" />
     <div class="ps-mt-7 ps-text-align-center">
-      <el-button size="small" type="primary" class="ps-fw-bold">Personal</el-button>
+      <el-button size="small" type="primary" class="ps-fw-bold" @click="goToPersonal">Personal</el-button>
       <el-button size="small" type="danger" class="ps-fw-bold" @click="logout">Logout</el-button>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { auth as authStore  } from '@/store';
+import { auth as authStore } from '@/store';
 import UserDefaultImage from '@/assets/images/user.png';
 import { UserService } from '@/services';
 import useWrapperRouter from '@/composables/use-router';
@@ -31,6 +31,8 @@ import Storage from '@/storage/storage';
 
 const { push } = useWrapperRouter();
 const user = authStore.getUser();
+
+const goToPersonal = () => push(paths.PERSONAL);
 
 const logout = (): void => {
   UserService.get('logout')
