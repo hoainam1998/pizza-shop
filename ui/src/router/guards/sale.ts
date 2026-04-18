@@ -1,6 +1,6 @@
 import type { NavigationGuardNext, RouteLocationNormalized, RouteLocationNormalizedLoaded } from 'vue-router';
 import { auth as authStore, currentRoute as currentRouteStorage } from '@/store';
-import paths from '@/router/paths';;
+import paths from '@/router/paths';
 
 const defaultPath: string = paths.HOME.Path;
 
