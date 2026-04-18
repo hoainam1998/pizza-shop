@@ -66,7 +66,7 @@ import type { AxiosError, AxiosResponse } from 'axios';
 import { POWER } from '@/enums';
 import type { FormInstance, FormRules } from 'element-plus';
 import UserDetailForm from '@/components/admin/user-detail-form/user-detail-form.vue';
-import PsEmailInput from '@/components/common/inputs/email.vue';
+import PsEmailInput from '@/components/common/inputs/email/email.vue';
 import { useUserForm } from '@/composables';
 import type { MessageResponseType, UserDetailModelType, UserDetailExposeType } from '@/interfaces';
 import { UserService } from '@/services';

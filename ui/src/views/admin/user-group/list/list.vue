@@ -39,9 +39,9 @@
 <script setup lang="ts">
 import { ref, type Ref, onBeforeMount, useTemplateRef } from 'vue';
 import type { AxiosError, AxiosResponse } from 'axios';
-import Table from '@/components/common/table.vue';
+import Table from '@/components/common/table/table.vue';
 import NewButton from '@/components/common/buttons/new-button/new-button.vue';
-import SearchBox from '@/components/admin/search-box.vue';
+import SearchBox from '@/components/admin/search-box/search-box.vue';
 import UserDetail from '@/views/admin/user-group/detail/detail.vue';
 import UserDefaultImage from '@/assets/images/user.png';
 import type { MessageResponseType, TableFieldType } from '@/interfaces';

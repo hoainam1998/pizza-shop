@@ -39,7 +39,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import List from '@/components/common/list.vue';
+import List from '@/components/common/list/list.vue';
 import paths from '@/router/paths';
 import breakPoint from '@/assets/js/break-points.js';
 import { vSelect } from './directives';

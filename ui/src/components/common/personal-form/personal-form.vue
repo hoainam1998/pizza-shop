@@ -54,8 +54,8 @@
 import { reactive, useTemplateRef } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import UserDetailForm from '@/components/admin/user-detail-form/user-detail-form.vue';
-import PsEmailInput from '@/components/common/inputs/email.vue';
-import UploadBox from '@/components/common/upload-box.vue';
+import PsEmailInput from '@/components/common/inputs/email/email.vue';
+import UploadBox from '@/components/common/upload-box/upload-box.vue';
 import { useUserForm } from '@/composables';
 import type { UserDetailModelType, UserDetailExposeType, UserPersonalInfoType } from '@/interfaces';
 import { convertBase64ToSingleFile } from '@/utils';

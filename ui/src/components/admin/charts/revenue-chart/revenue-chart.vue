@@ -17,7 +17,7 @@ import ChartControl from '../chart-control/chart-control.vue';
 import Chart from 'chart.js/auto';
 import { CHART_MODE } from '@/enums';
 import config from './config';
-import chartPropsValidator from '../props-validator';
+import chartPropsValidator from '@/components/admin/charts/types';
 import { useSizeChart } from '@/composables';
 import type { RevenueChartPropsType, ChartPayloadType } from '@/interfaces';
 

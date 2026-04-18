@@ -27,11 +27,13 @@ const attrsFallThrough = useAttrs();
 const attrs = Object.assign({ ...attrsFallThrough }, { type: 'email', autocomplete: 'off' });
 
 const onCompleteInput = (): void => {
-  const pattern = /@(\w|\.)+/;
-  if (pattern.test(model.value)) {
-    model.value = model.value.replace(pattern, select.value);
-  } else {
-    model.value = `${model.value}${select.value}`;
+  if (!!model.value.trim()) {
+    const pattern = /@(\w|\.)+/;
+    if (pattern.test(model.value)) {
+      model.value = model.value.replace(pattern, select.value);
+    } else {
+      model.value = `${model.value}${select.value}`;
+    }
   }
 };
 </script>

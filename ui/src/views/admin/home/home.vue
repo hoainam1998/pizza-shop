@@ -23,7 +23,7 @@ import { reactive, provide } from 'vue';
 import { RouterView, onBeforeRouteUpdate, onBeforeRouteLeave } from 'vue-router';
 import Menu from '@/components/admin/menu/menu.vue';
 import PersonalBox from '@/components/admin/personal-box/personal-box.vue';
-import Breadcrumb from '@/components/admin/breadcrumb.vue';
+import Breadcrumb from '@/components/admin/breadcrumb/breadcrumb.vue';
 import { ROUTE_NAME } from '@/di-token';
 
 const routerName = reactive({

@@ -21,7 +21,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import List from '@/components/common/list.vue';
+import List from '@/components/common/list/list.vue';
 import { CHART_MODE } from '@/enums';
 
 const mode = defineModel('mode', { default: CHART_MODE.DAY });
