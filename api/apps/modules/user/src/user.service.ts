@@ -40,13 +40,10 @@ export default class UserService {
   }
 
   @HandlePrismaError(messages.USER)
-  login(email: string): Promise<Omit<user, 'phone'>> {
+  login(email: string): Promise<user> {
     return this.prismaClient.user.findUniqueOrThrow({
       where: {
         email,
-      },
-      omit: {
-        phone: true,
       },
     });
   }

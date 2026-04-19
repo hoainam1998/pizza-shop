@@ -238,6 +238,7 @@ export default class UserController extends BaseController {
     );
   }
 
+  @SkipThrottle()
   @HttpCode(HttpStatus.NO_CONTENT)
   @Get(UserRouter.relative.logout)
   @HandleHttpError
