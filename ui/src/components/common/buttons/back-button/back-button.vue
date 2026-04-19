@@ -9,11 +9,9 @@
 <script setup lang="ts">
 import { Back } from '@element-plus/icons-vue';
 import useWrapperRouter from '@/composables/use-router';
-import { currentRoute as currentRouteStorage } from '@/store';
 import paths from '@/router/paths';
+
 const { push } = useWrapperRouter();
-
-const path = currentRouteStorage.getCurrentRoute() || paths.BASE.Path;
-
+const path = isSale ? paths.HOME.Path : `${paths.HOME.Path}/${paths.HOME.CATEGORY.Path}`;
 const backToHome = () => push(path);
 </script>

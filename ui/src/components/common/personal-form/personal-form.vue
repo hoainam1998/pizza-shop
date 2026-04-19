@@ -90,14 +90,16 @@ const form = reactive<UserDetailModelType>(model);
 const userFormRules = reactive<FormRules<UserDetailModelType>>(rules);
 
 const assignForm = async (data: UserPersonalInfoType): Promise<void> => {
-  const name = `${data.firstName}-${data.lastName}`;
-  const file = await convertBase64ToSingleFile(data.avatar as string, name);
-  model.avatar = [file as File];
-  model.firstName = data.firstName;
-  model.lastName = data.lastName;
-  model.email = data.email;
-  model.phone = data.phone;
-  model.sex = data.sex;
+  if (data.avatar) {
+    const name = `${data.firstName}-${data.lastName}`;
+    const file = await convertBase64ToSingleFile(data.avatar as string, name);
+    form.avatar = [file as File];
+  }
+  form.firstName = data.firstName;
+  form.lastName = data.lastName;
+  form.email = data.email;
+  form.phone = data.phone;
+  form.sex = data.sex;
 };
 
 const reset = (): void => {
