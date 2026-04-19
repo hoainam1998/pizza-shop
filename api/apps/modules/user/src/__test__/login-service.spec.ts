@@ -31,9 +31,6 @@ describe('login service', () => {
       where: {
         email: user.email,
       },
-      omit: {
-        phone: true,
-      },
     });
   });
 
@@ -47,9 +44,6 @@ describe('login service', () => {
     expect(findUniqueOrThrow).toHaveBeenCalledWith({
       where: {
         email: user.email,
-      },
-      omit: {
-        phone: true,
       },
     });
   });
@@ -69,9 +63,6 @@ describe('login service', () => {
       where: {
         email: user.email,
       },
-      omit: {
-        phone: true,
-      },
     });
   });
 
@@ -90,9 +81,6 @@ describe('login service', () => {
     expect(findUniqueOrThrow).toHaveBeenCalledWith({
       where: {
         email: user.email,
-      },
-      omit: {
-        phone: true,
       },
     });
   });

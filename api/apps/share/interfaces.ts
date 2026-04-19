@@ -143,7 +143,7 @@ export type UserDetailType = {
 
 export type UserWithOnlySessionIDType = Pick<user, 'session_id'>;
 
-export type UserLoggedType = Omit<user, 'password' | 'phone' | 'session_id'>;
+export type UserLoggedType = Omit<user, 'password' | 'session_id'>;
 
 export type UserLoggedSerializerType = {
   resetPasswordToken: string | null;
