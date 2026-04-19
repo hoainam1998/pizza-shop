@@ -23,24 +23,13 @@
 <script setup lang="ts">
 import { auth as authStore } from '@/store';
 import UserDefaultImage from '@/assets/images/user.png';
-import { UserService } from '@/services';
 import useWrapperRouter from '@/composables/use-router';
+import useLogout from '@/composables/use-logout';
 import paths from '@/router/paths';
-import { showErrorNotification } from '@/utils';
-import Storage from '@/storage/storage';
 
 const { push } = useWrapperRouter();
 const user = authStore.getUser();
+const logout = useLogout();
 
 const goToPersonal = () => push(paths.PERSONAL);
-
-const logout = (): void => {
-  UserService.get('logout')
-    .catch((error) => {
-      showErrorNotification('Logout', error.response.data.messages);
-    }).finally(() => {
-      push(paths.LOGIN);
-      Storage.clear();
-    });
-};
 </script>
