@@ -21,8 +21,9 @@ import UserService from '../user.service';
 import UserController from '../user.controller';
 import UserModule from '../user.module';
 import messages from '@share/constants/messages';
+import constants from '@share/constants';
 import { HTTP_METHOD, POWER_NUMERIC } from '@share/enums';
-import { createMessage, createMessages } from '@share/utils';
+import { createMessage, createMessages, signApiKey } from '@share/utils';
 import { UserRouter } from '@share/router';
 import { UserDetail } from '@share/dto/validators/user.dto';
 import { UserSerializer } from '@share/dto/serializer/user';
@@ -49,9 +50,8 @@ const getUserRequestBody = {
 };
 const select = UserDetail.plain(getUserRequestBody);
 const userPlain = UserSerializer.plain(user);
-const invalidSessionPayload = sessionPayload;
-const validSessionPayload = { ...sessionPayload, userId: Date.now().toString() };
 const invalidPowerSessionPayload = { ...sessionPayload, power: POWER_NUMERIC.SALE };
+const missMatchUserIdApiKey = signApiKey({ userId: Date.now().toString(), email: user.email, power: user.power });
 
 let api: TestAgent;
 let clientProxy: ClientProxy;
@@ -81,8 +81,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
     const getUserService = jest.spyOn(userService, 'getUserDetail');
     await api
       .post(getUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getUserRequestBody)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
@@ -113,7 +113,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
     const getUserService = jest.spyOn(userService, 'getUserDetail');
     await api
       .post(getUserUrl)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getUserRequestBody)
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
@@ -128,8 +128,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
     const getUserService = jest.spyOn(userService, 'getUserDetail');
     await api
       .post(getUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(invalidSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getUserRequestBody)
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
@@ -144,7 +144,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
     const getUserService = jest.spyOn(userService, 'getUserDetail');
     await api
       .post(getUserUrl)
-      .set('Authorization', apiKey)
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
       .set('mock-session', JSON.stringify(invalidPowerSessionPayload))
       .send(getUserRequestBody)
       .expect(HttpStatus.UNAUTHORIZED)
@@ -163,8 +163,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
     const getUserService = jest.spyOn(userService, 'getUserDetail');
     await api
       .post(getUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getUserRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -185,8 +185,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
     const getUserService = jest.spyOn(userService, 'getUserDetail');
     await api
       .post(getUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getUserRequestBody)
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
@@ -203,8 +203,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
     const getUserService = jest.spyOn(userService, 'getUserDetail');
     await api
       .post(getUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getUserRequestBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
@@ -223,8 +223,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
     const getUserService = jest.spyOn(userService, 'getUserDetail');
     await api
       .post(getUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getUserRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -242,8 +242,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
     const getUserService = jest.spyOn(userService, 'getUserDetail');
     await api
       .post(getUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getUserRequestBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
@@ -263,8 +263,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
     const getUserService = jest.spyOn(userService, 'getUserDetail');
     const response = await api
       .post(getUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(missingQueryFieldBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
@@ -283,8 +283,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
     const getUserService = jest.spyOn(userService, 'getUserDetail');
     const response = await api
       .post(getUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(undefinedFieldBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
@@ -303,8 +303,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
     const getUserService = jest.spyOn(userService, 'getUserDetail');
     await api
       .post(getUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(queryFieldEmptyBody)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/);
@@ -322,8 +322,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
     const getUserService = jest.spyOn(userService, 'getUserDetail');
     await api
       .post(getUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(getUserRequestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
