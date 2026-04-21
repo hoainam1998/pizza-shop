@@ -17,8 +17,9 @@ import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { HTTP_METHOD, POWER_NUMERIC } from '@share/enums';
 import { user, sessionPayload, apiKey } from '@share/test/pre-setup/mock/data/user';
 import { createDescribeTest, createTestName, getMockModule } from '@share/test/helpers';
-import { createMessage, createMessages } from '@share/utils';
+import { createMessage, createMessages, signApiKey } from '@share/utils';
 import messages from '@share/constants/messages';
+import constants from '@share/constants';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { UpdateUser } from '@share/dto/validators/user.dto';
 import { updateUserPattern } from '@share/pattern';
@@ -40,9 +41,8 @@ const requestBody = {
   power: POWER_NUMERIC.ADMIN,
 };
 const userUpdate = UpdateUser.plain(requestBody);
-const invalidSessionPayload = sessionPayload;
-const validSessionPayload = { ...sessionPayload, userId: Date.now().toString() };
 const invalidPowerSessionPayload = { ...sessionPayload, power: POWER_NUMERIC.SALE };
+const missMatchUserIdApiKey = signApiKey({ userId: Date.now().toString(), email: user.email, power: user.power });
 
 beforeAll(async () => {
   const requestTest = await startUp(MockUserModule);
@@ -65,8 +65,8 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updateUser');
     await api
       .put(updateUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
       .expect(HttpStatus.CREATED)
       .expect('Content-Type', /application\/json/)
@@ -83,7 +83,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updateUser');
     await api
       .put(updateUserUrl)
-      .set('Authorization', apiKey)
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
       .send(requestBody)
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
@@ -98,7 +98,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updateUser');
     await api
       .put(updateUserUrl)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
@@ -113,8 +113,8 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updateUser');
     await api
       .put(updateUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(invalidSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
@@ -129,7 +129,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updateUser');
     await api
       .put(updateUserUrl)
-      .set('Authorization', apiKey)
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
       .set('mock-session', JSON.stringify(invalidPowerSessionPayload))
       .send(requestBody)
       .expect(HttpStatus.UNAUTHORIZED)
@@ -147,8 +147,8 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updateUser');
     await api
       .put(updateUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -165,8 +165,8 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updateUser');
     await api
       .put(updateUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
@@ -185,8 +185,8 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updateUser');
     await api
       .put(updateUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
@@ -205,8 +205,8 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updateUser');
     await api
       .put(updateUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -224,8 +224,8 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => serverError));
     await api
       .put(updateUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
@@ -244,8 +244,8 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.USER.YOUR_GENDER_INVALID))));
     await api
       .put(updateUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -264,8 +264,8 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.USER.YOUR_POWER_INVALID))));
     await api
       .put(updateUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
@@ -286,8 +286,8 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       );
     await api
       .put(updateUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
@@ -306,8 +306,8 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .mockReturnValue(throwError(() => new UnauthorizedException(createMessage(messages.USER.PHONE_ALREADY_EXIST))));
     await api
       .put(updateUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
