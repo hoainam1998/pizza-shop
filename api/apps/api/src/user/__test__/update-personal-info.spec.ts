@@ -17,8 +17,9 @@ import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { HTTP_METHOD } from '@share/enums';
 import { user, sessionPayload, apiKey } from '@share/test/pre-setup/mock/data/user';
 import { createDescribeTest, createTestName, getMockModule, getStaticFile } from '@share/test/helpers';
-import { createMessage, createMessages } from '@share/utils';
+import { createMessage, createMessages, signApiKey } from '@share/utils';
 import messages from '@share/constants/messages';
+import constants from '@share/constants';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { UpdatePersonalInfo } from '@share/dto/validators/user.dto';
 import { updatePersonalInfoPattern } from '@share/pattern';
@@ -41,6 +42,7 @@ const requestBody: any = {
 
 const userUpdate = UpdatePersonalInfo.plain(requestBody);
 Object.assign(userUpdate, { avatar: expect.any(String) });
+const missMatchUserIdApiKey = signApiKey({ userId: Date.now().toString(), email: user.email, power: user.power });
 
 beforeAll(async () => {
   const requestTest = await startUp(MockUserModule);
@@ -63,7 +65,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
     await api
       .put(updatePersonalInfoUrl)
-      .set('Authorization', apiKey)
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -131,8 +133,8 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
     await api
       .put(updatePersonalInfoUrl)
       .set('Connection', 'keep-alive')
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify({ ...sessionPayload, userId: Date.now().toString() }))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .field('userIds', user.user_id)
       .field('firstName', user.first_name)
       .field('lastName', user.last_name)
@@ -153,7 +155,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
     const response = await api
       .put(updatePersonalInfoUrl)
-      .set('Authorization', apiKey)
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userIds', user.user_id)
       .field('firstName', user.first_name)
@@ -178,7 +180,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
     await api
       .put(updatePersonalInfoUrl)
-      .set('Authorization', apiKey)
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -200,7 +202,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
     await api
       .put(updatePersonalInfoUrl)
-      .set('Authorization', apiKey)
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -222,7 +224,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
     const response = await api
       .put(updatePersonalInfoUrl)
-      .set('Authorization', apiKey)
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -243,7 +245,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
     const response = await api
       .put(updatePersonalInfoUrl)
-      .set('Authorization', apiKey)
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('firstName', user.first_name)
       .field('lastName', user.last_name)
@@ -265,7 +267,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
     await api
       .put(updatePersonalInfoUrl)
-      .set('Authorization', apiKey)
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -289,7 +291,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
     await api
       .put(updatePersonalInfoUrl)
-      .set('Authorization', apiKey)
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -315,7 +317,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
     await api
       .put(updatePersonalInfoUrl)
-      .set('Authorization', apiKey)
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -341,7 +343,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
     const updateUserService = jest.spyOn(userService, 'updatePersonalInfo');
     await api
       .put(updatePersonalInfoUrl)
-      .set('Authorization', apiKey)
+      .set('Cookie', [`impact_user_api_key=${apiKey}`])
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -366,7 +368,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => serverError));
     await api
       .put(updatePersonalInfoUrl)
-      .set('Authorization', apiKey)
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -392,7 +394,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
       .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.USER.YOUR_GENDER_INVALID))));
     await api
       .put(updatePersonalInfoUrl)
-      .set('Authorization', apiKey)
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -418,7 +420,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
       .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.USER.YOUR_POWER_INVALID))));
     await api
       .put(updatePersonalInfoUrl)
-      .set('Authorization', apiKey)
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -446,7 +448,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
       );
     await api
       .put(updatePersonalInfoUrl)
-      .set('Authorization', apiKey)
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
@@ -472,7 +474,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updatePersonalInfoUrl), () => {
       .mockReturnValue(throwError(() => new UnauthorizedException(createMessage(messages.USER.PHONE_ALREADY_EXIST))));
     await api
       .put(updatePersonalInfoUrl)
-      .set('Authorization', apiKey)
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('userId', user.user_id)
       .field('firstName', user.first_name)
