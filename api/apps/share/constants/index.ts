@@ -8,4 +8,5 @@ export default Object.freeze({
     REPORT_VIEWER: 'report_viewer',
   },
   PASSWORD_PATTERN: /[A-Za-z0-9@$#%!^&*()]{8}/,
+  IMPACT_USER_API_KEY: 'impact_user_api_key',
 });
