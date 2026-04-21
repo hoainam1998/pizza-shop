@@ -88,6 +88,7 @@ model user {
   email                String  @unique @db.VarChar(100)
   session_id           String? @unique @db.VarChar(100)
   reset_password_token String? @db.Text
+  api_key              String? @db.Text
   bill                 bill[]
 
   @@index([user_id, last_name, email])

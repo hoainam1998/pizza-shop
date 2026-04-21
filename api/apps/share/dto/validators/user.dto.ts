@@ -210,6 +210,10 @@ export class UserQuery {
   @IsBoolean()
   power: boolean;
 
+  @IsOptional()
+  @IsBoolean()
+  apiKey: boolean;
+
   @Expose({ toPlainOnly: true })
   get last_name() {
     return this.lastName;
@@ -218,6 +222,11 @@ export class UserQuery {
   @Expose({ toPlainOnly: true })
   get first_name() {
     return this.firstName;
+  }
+
+  @Expose({ toPlainOnly: true })
+  get api_key() {
+    return this.apiKey;
   }
 
   @Expose({ toPlainOnly: true })
@@ -230,6 +239,7 @@ export class UserQuery {
       target.avatar = true;
       target.firstName = true;
       target.lastName = true;
+      target.apiKey = true;
       target.email = true;
       target.phone = true;
       target.sex = true;
@@ -242,12 +252,15 @@ export class UserQuery {
   }
 }
 
-export class UserQueryTransform extends OmitType(UserQuery, ['firstName', 'lastName']) {
+export class UserQueryTransform extends OmitType(UserQuery, ['firstName', 'lastName', 'apiKey']) {
   @Exclude()
   firstName: boolean;
 
   @Exclude()
   lastName: boolean;
+
+  @Exclude()
+  apiKey: boolean;
 }
 
 export class UserPagination extends Pagination {

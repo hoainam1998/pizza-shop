@@ -12,7 +12,7 @@ import { Exclude, Expose, instanceToPlain, plainToInstance, Type } from 'class-t
 import { user } from 'generated/prisma';
 import Validator from './validator';
 import { UserLoggedType, UserPaginationResponse, UserLoggedSerializerType } from '@share/interfaces';
-import { signUserLoggedToken, signAdminApiKey } from '@share/utils';
+import { signUserLoggedToken } from '@share/utils';
 
 export class CanSignupSerializer extends Validator {
   @IsBoolean()
@@ -56,6 +56,11 @@ export class UserSerializer extends Validator {
   @IsInt()
   power: number;
 
+  @IsOptional()
+  @Exclude({ toPlainOnly: true })
+  @IsString()
+  api_key: string;
+
   @Expose({ toPlainOnly: true })
   get userId() {
     return this.user_id;
@@ -69,6 +74,12 @@ export class UserSerializer extends Validator {
   @Expose({ toPlainOnly: true })
   get lastName() {
     return this.last_name;
+  }
+
+  @IsOptional()
+  @Expose({ toPlainOnly: true })
+  get apiKey() {
+    return this.api_key;
   }
 
   constructor(target: Partial<user>) {
@@ -103,9 +114,7 @@ export class LoginSerializer extends UserSerializer {
       isFirstTime: plain.isFirstTime,
       resetPasswordToken: plain.resetPasswordToken,
       userLoggedToken: plain.isFirstTime ? null : signUserLoggedToken(plain),
-      apiKey: plain.isFirstTime
-        ? null
-        : signAdminApiKey({ userId: plain.userId, email: plain.email, power: plain.power }),
+      apiKey: plain.isFirstTime ? null : plain.apiKey,
     };
   }
 

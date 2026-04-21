@@ -14,7 +14,7 @@ import UserService from '../user.service';
 import { LoginSerializer } from '@share/dto/serializer/user';
 import startUp from './pre-setup';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
-import { user as originUser, resetPasswordToken } from '@share/test/pre-setup/mock/data/user';
+import { apiKey, user as originUser, resetPasswordToken } from '@share/test/pre-setup/mock/data/user';
 import { APP_NAME, HTTP_METHOD } from '@share/enums';
 import { createDescribeTest, createTestName } from '@share/test/helpers';
 import { loginPattern } from '@share/pattern';
@@ -25,7 +25,7 @@ import { LoginInfo } from '@share/dto/validators/user.dto';
 import { UserLoggedType } from '@share/interfaces';
 const user: Omit<typeof originUser, 'reset_password_link'> & {
   reset_password_link?: string;
-} = originUser;
+} = { ...originUser, api_key: apiKey };
 delete user.reset_password_link;
 const loginUrl = UserRouter.absolute.login;
 

@@ -7,6 +7,7 @@ import {
   passwordHashing,
   signingAdminResetPasswordToken,
   getResetPasswordLink,
+  signApiKey,
 } from '@share/utils';
 import { type UserCreatedReturnType } from '@share/interfaces';
 import { POWER_NUMERIC, SEX } from '@share/enums';
@@ -69,10 +70,12 @@ export default (prisma: PrismaClient) => ({
     }
 
     const password = await passwordHashing(firstTimePassword);
+    const userId = Date.now().toString();
 
     args.data = {
-      user_id: Date.now().toString(),
+      user_id: userId,
       ...args.data,
+      api_key: signApiKey({ userId: userId, email: args.data.email, power: args.data.power }),
       password,
       reset_password_token: signingAdminResetPasswordToken({ email: args.data.email, password: firstTimePassword }),
     };
@@ -148,6 +151,15 @@ export default (prisma: PrismaClient) => ({
 
     const user = await query(args);
 
-    return user;
+    const result = await prisma.user.update({
+      where: {
+        user_id: user.user_id,
+      },
+      data: {
+        api_key: signApiKey({ userId: user.user_id, email: user.email, power: user.power }),
+      },
+    });
+
+    return result;
   },
 });

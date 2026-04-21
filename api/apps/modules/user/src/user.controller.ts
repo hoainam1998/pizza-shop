@@ -84,11 +84,12 @@ export default class UserController {
         if (user.session_id) {
           throw new UnauthorizedException(createMessage(messages.USER.ALREADY_LOGIN));
         } else {
+          let finalUser = user;
           if (comparePassword(loginInfo.password, user.password)) {
             if (!user.reset_password_token) {
-              await this.userService.updateUserSessionId(user.user_id, loginInfo.session_id);
+              finalUser = await this.userService.updateUserSessionId(user.user_id, loginInfo.session_id);
             }
-            return omitFields(['password', 'session_id'], user) as UserLoggedType;
+            return omitFields(['password', 'session_id'], finalUser) as UserLoggedType;
           }
           throw new UnauthorizedException(createMessage(messages.USER.PASSWORD_NOT_MATCH));
         }
