@@ -1,6 +1,6 @@
 import { SessionData } from 'express-session';
 import { UserRequestType } from '@share/interfaces';
-import { autoGeneratePassword, signingAdminResetPasswordToken, signAdminApiKey } from '@share/utils';
+import { autoGeneratePassword, signingAdminResetPasswordToken, signApiKey } from '@share/utils';
 import { POWER_NUMERIC, SEX } from '@share/enums';
 import { user as userPrisma } from 'generated/prisma';
 const plainPassword = autoGeneratePassword();
@@ -17,6 +17,7 @@ export const user: Required<UserRequestType> = {
   power: POWER_NUMERIC.SUPER_ADMIN,
   plain_password: plainPassword,
   session_id: null,
+  api_key: expect.any(String),
   reset_password_token: expect.any(String),
   reset_password_link: expect.any(String),
 };
@@ -46,4 +47,4 @@ export const createUsers = (length: number): Partial<userPrisma>[] => {
   }));
 };
 
-export const apiKey = signAdminApiKey({ userId: user.user_id, email: user.email, power: user.power });
+export const apiKey = signApiKey({ userId: user.user_id, email: user.email, power: user.power });

@@ -121,7 +121,7 @@ const verifyUserLoggedToken = (userLoggedToken: string): jwt.JwtPayload =>
  * @param {Record<string, any>} payload - The user data.
  * @return {string} - The api key.
  */
-const signAdminApiKey = (payload: Record<string, any>): string => jwt.sign(payload, process.env.API_KEY!);
+const signApiKey = (payload: Record<string, any>): string => jwt.sign(payload, process.env.API_KEY!);
 
 /**
  * Verify api key.
@@ -129,7 +129,7 @@ const signAdminApiKey = (payload: Record<string, any>): string => jwt.sign(paylo
  * @param {string} api key - The api key.
  * @return {object} - The data decoded.
  */
-const verifyAdminApiKey = (userLoggedToken: string): jwt.JwtPayload =>
+const verifyApiKey = (userLoggedToken: string): jwt.JwtPayload =>
   jwt.verify(userLoggedToken, process.env.API_KEY!) as jwt.JwtPayload;
 
 /**
@@ -204,8 +204,8 @@ export {
   verifyClientResetPasswordToken,
   signLoginToken,
   verifyLoginToken,
-  signAdminApiKey,
-  verifyAdminApiKey,
+  signApiKey,
+  verifyApiKey,
   verifyClientLoginToken,
   getResetPasswordLink,
   comparePassword,

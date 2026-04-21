@@ -61,9 +61,7 @@ describe('login', () => {
     const login = jest.spyOn(userService, 'login').mockResolvedValue(userAlreadyLogin);
     const updateUserSessionId = jest.spyOn(userService, 'updateUserSessionId').mockResolvedValue(user);
     const loginController = jest.spyOn(userController, 'login');
-    await expect(userController.login(loginInfo)).resolves.toEqual(
-      omitFields(['password', 'session_id'], userAlreadyLogin),
-    );
+    await expect(userController.login(loginInfo)).resolves.toEqual(omitFields(['password', 'session_id'], user));
     expect(loginController).toHaveBeenCalledTimes(1);
     expect(checkUserLogged).toHaveBeenCalledTimes(1);
     expect(checkUserLogged).toHaveBeenCalledWith(loginInfo.session_id);
