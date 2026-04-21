@@ -19,8 +19,9 @@ import { createDescribeTest, createTestName, getMockModule } from '@share/test/h
 import UserService from '../user.service';
 import UserModule from '../user.module';
 import messages from '@share/constants/messages';
+import constants from '@share/constants';
 import { HTTP_METHOD, POWER_NUMERIC } from '@share/enums';
-import { createMessage, createMessages } from '@share/utils';
+import { createMessage, createMessages, signApiKey } from '@share/utils';
 import { UserRouter } from '@share/router';
 const deleteUserBaseUrl: string = UserRouter.absolute.delete;
 const userId = user.user_id;
@@ -32,9 +33,8 @@ let clientProxy: ClientProxy;
 let close: () => Promise<void>;
 let userService: UserService;
 
-const invalidSessionPayload = sessionPayload;
-const validSessionPayload = { ...sessionPayload, userId: Date.now().toString() };
 const invalidPowerSessionPayload = { ...sessionPayload, power: POWER_NUMERIC.SALE };
+const missMatchUserIdApiKey = signApiKey({ userId: Date.now().toString(), email: user.email, power: user.power });
 
 beforeAll(async () => {
   const requestTest = await startUp(MockUserModule);
@@ -57,8 +57,8 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     await api
       .delete(deleteUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.DELETE_USER_SUCCESS));
@@ -87,7 +87,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     await api
       .delete(deleteUserUrl)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.API_KEY_INVALID));
@@ -101,8 +101,8 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     await api
       .delete(deleteUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(invalidSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.DO_NOT_CHANGE_YOURSELF));
@@ -116,7 +116,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     await api
       .delete(deleteUserUrl)
-      .set('Authorization', apiKey)
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
       .set('mock-session', JSON.stringify(invalidPowerSessionPayload))
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
@@ -133,8 +133,8 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     await api
       .delete(deleteUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.NOT_FOUND));
@@ -150,8 +150,8 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     await api
       .delete(deleteUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(new InternalServerErrorException().message));
@@ -169,8 +169,8 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     await api
       .delete(deleteUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.COMMON_ERROR));
@@ -187,8 +187,8 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     await api
       .delete(deleteUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(serverError.message));
@@ -204,8 +204,8 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     const response = await api
       .delete(`${deleteUserBaseUrl}/zyz`)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
     expect(response.body).toEqual({ messages: expect.any(Array) });
@@ -221,8 +221,8 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     await api
       .delete(deleteUserUrl)
-      .set('Authorization', apiKey)
-      .set('mock-session', JSON.stringify(validSessionPayload))
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
