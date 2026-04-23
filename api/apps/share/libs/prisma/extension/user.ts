@@ -9,8 +9,11 @@ import {
   getResetPasswordLink,
   signApiKey,
 } from '@share/utils';
+import constants from '@share/constants';
 import { type UserCreatedReturnType } from '@share/interfaces';
 import { POWER_NUMERIC, SEX } from '@share/enums';
+import RedisClient from '@share/libs/redis-client/redis';
+const REDIS_PREFIX_USER = constants.REDIS_PREFIX.USER;
 
 type PrismaUserCreateParameter = {
   args: Omit<Prisma.userCreateArgs, 'data'> & {
@@ -82,84 +85,98 @@ export default (prisma: PrismaClient) => ({
 
     const user = await query(args);
 
+    await RedisClient.Instance.Client.hSet(REDIS_PREFIX_USER, user.user_id, user.api_key!);
+
     return {
       ...user,
       reset_password_link: getResetPasswordLink(args.data.reset_password_token!, args.data.power!),
       plain_password: firstTimePassword,
     };
   },
-  update: async ({ args, query }: PrismaUserUpdateParameter): Promise<user> => {
-    if (Object.hasOwn(args.data, 'sex')) {
-      if (!SEX_VALID.includes(args.data.sex! as number)) {
-        throw new BadRequestException(createMessage(USER.YOUR_GENDER_INVALID));
-      }
-    }
-
-    if (Object.hasOwn(args.data, 'power')) {
-      if (!POWER_VALID.includes(args.data.power! as number)) {
-        throw new BadRequestException(createMessage(USER.YOUR_POWER_INVALID));
-      }
-    }
-
-    if (Object.hasOwn(args.data, 'email')) {
-      const userIdFilter = {};
+  update: async ({ args }: PrismaUserUpdateParameter): Promise<user> => {
+    return prisma.$transaction(async (pm) => {
       if (args.where.user_id) {
-        Object.assign(userIdFilter, { user_id: { not: args.where.user_id } });
+        await pm.$executeRaw`SELECT * FROM USER WHERE USER_ID = ${args.where.user_id} FOR UPDATE`;
+      } else {
+        if (args.where.email) {
+          await pm.$executeRaw`SELECT * FROM USER WHERE EMAIL = ${args.where.email} FOR UPDATE`;
+        }
       }
 
-      const count = await prisma.user.count({
+      if (Object.hasOwn(args.data, 'sex')) {
+        if (!SEX_VALID.includes(args.data.sex! as number)) {
+          throw new BadRequestException(createMessage(USER.YOUR_GENDER_INVALID));
+        }
+      }
+
+      if (Object.hasOwn(args.data, 'power')) {
+        if (!POWER_VALID.includes(args.data.power! as number)) {
+          throw new BadRequestException(createMessage(USER.YOUR_POWER_INVALID));
+        }
+      }
+
+      if (Object.hasOwn(args.data, 'email')) {
+        const userIdFilter = {};
+        if (args.where.user_id) {
+          Object.assign(userIdFilter, { user_id: { not: args.where.user_id } });
+        }
+
+        const count = await pm.user.count({
+          where: {
+            email: args.data.email as string,
+            ...userIdFilter,
+          },
+        });
+
+        if (count > 0) {
+          throw new UnauthorizedException(createMessage(USER.EMAIL_REGIS_ALREADY_EXIST));
+        }
+      }
+
+      if (Object.hasOwn(args.data, 'phone')) {
+        const userIdFilter = {};
+        if (args.where.user_id) {
+          Object.assign(userIdFilter, { user_id: { not: args.where.user_id } });
+        }
+
+        const count = await pm.user.count({
+          where: {
+            phone: args.data.phone as string,
+            ...userIdFilter,
+          },
+        });
+
+        if (count > 0) {
+          throw new UnauthorizedException(createMessage(USER.PHONE_ALREADY_EXIST));
+        }
+      }
+
+      let password = '';
+      if (args.data.password) {
+        password = await passwordHashing(args.data.password as string);
+      }
+
+      if (password) {
+        args.data = {
+          ...args.data,
+          password,
+        };
+      }
+
+      const user = await pm.user.update(args);
+
+      const result = await pm.user.update({
         where: {
-          email: args.data.email as string,
-          ...userIdFilter,
+          user_id: user.user_id,
+        },
+        data: {
+          api_key: signApiKey({ userId: user.user_id, email: user.email, power: user.power }),
         },
       });
 
-      if (count > 0) {
-        throw new UnauthorizedException(createMessage(USER.EMAIL_REGIS_ALREADY_EXIST));
-      }
-    }
+      await RedisClient.Instance.Client.hSet(REDIS_PREFIX_USER, user.user_id, user.api_key!);
 
-    if (Object.hasOwn(args.data, 'phone')) {
-      const userIdFilter = {};
-      if (args.where.user_id) {
-        Object.assign(userIdFilter, { user_id: { not: args.where.user_id } });
-      }
-
-      const count = await prisma.user.count({
-        where: {
-          phone: args.data.phone as string,
-          ...userIdFilter,
-        },
-      });
-
-      if (count > 0) {
-        throw new UnauthorizedException(createMessage(USER.PHONE_ALREADY_EXIST));
-      }
-    }
-
-    let password = '';
-    if (args.data.password) {
-      password = await passwordHashing(args.data.password as string);
-    }
-
-    if (password) {
-      args.data = {
-        ...args.data,
-        password,
-      };
-    }
-
-    const user = await query(args);
-
-    const result = await prisma.user.update({
-      where: {
-        user_id: user.user_id,
-      },
-      data: {
-        api_key: signApiKey({ userId: user.user_id, email: user.email, power: user.power }),
-      },
+      return result;
     });
-
-    return result;
   },
 });

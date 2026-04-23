@@ -1,4 +1,4 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { PrismaClient, type user, type Prisma } from 'generated/prisma';
 import { PRISMA_CLIENT } from '@share/di-token';
 import messages from '@share/constants/messages';
@@ -9,7 +9,7 @@ import type {
   UserSignupType,
   UserWithOnlySessionIDType,
 } from '@share/interfaces';
-import { calcSkip } from '@share/utils';
+import { calcSkip, createMessage } from '@share/utils';
 import { ResetPassword, UserPagination, LoginSessionPayload, UpdatePower } from '@share/dto/validators/user.dto';
 import UserCachingService from '@share/libs/caching/user/user.service';
 import ProductCachingService from '@share/libs/caching/product/product.service';
@@ -221,13 +221,24 @@ export default class UserService {
 
   @HandlePrismaError(messages.USER)
   updatePower(payload: UpdatePower): Promise<user> {
-    return this.prismaClient.user.update({
-      where: {
-        user_id: payload.user_id,
-      },
-      data: {
-        power: payload.power,
-      },
-    });
+    return this.prismaClient.user
+      .findUniqueOrThrow({
+        where: {
+          user_id: payload.user_id,
+        },
+      })
+      .then(async (userFound) => {
+        if (!userFound.reset_password_token) {
+          return await this.prismaClient.user.update({
+            where: {
+              user_id: payload.user_id,
+            },
+            data: {
+              power: payload.power,
+            },
+          });
+        }
+        throw new BadRequestException(createMessage(messages.USER.NOT_UPDATE_POWER_WHO_HAVE_FIRST_LOGIN));
+      });
   }
 }
