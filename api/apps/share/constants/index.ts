@@ -4,6 +4,7 @@ export default Object.freeze({
     CATEGORIES: 'categories',
     INGREDIENTS: 'ingredients',
     PRODUCT: 'product:',
+    USER: 'user',
     USER_PRODUCT: 'user_product:',
     REPORT_VIEWER: 'report_viewer',
   },

@@ -9,9 +9,11 @@ import {
   getResetPasswordLink,
   signApiKey,
 } from '@share/utils';
+import constants from '@share/constants';
 import { type UserCreatedReturnType } from '@share/interfaces';
 import { POWER_NUMERIC, SEX } from '@share/enums';
 import RedisClient from '@share/libs/redis-client/redis';
+const REDIS_PREFIX_USER = constants.REDIS_PREFIX.USER;
 
 type PrismaUserCreateParameter = {
   args: Omit<Prisma.userCreateArgs, 'data'> & {
@@ -83,7 +85,7 @@ export default (prisma: PrismaClient) => ({
 
     const user = await query(args);
 
-    await RedisClient.Instance.Client.hSet('user', user.user_id, user.api_key!);
+    await RedisClient.Instance.Client.hSet(REDIS_PREFIX_USER, user.user_id, user.api_key!);
 
     return {
       ...user,
@@ -172,7 +174,7 @@ export default (prisma: PrismaClient) => ({
         },
       });
 
-      await RedisClient.Instance.Client.hSet('user', user.user_id, user.api_key!);
+      await RedisClient.Instance.Client.hSet(REDIS_PREFIX_USER, user.user_id, user.api_key!);
 
       return result;
     });
