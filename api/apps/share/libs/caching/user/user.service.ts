@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import CachingService from '../caching';
 import { getRedisSessionId } from '@share/utils';
+import constants from '@share/constants';
+const REDIS_PREFIX_USER = constants.REDIS_PREFIX.USER;
 
 @Injectable()
 export default class UserCachingService extends CachingService {
@@ -10,5 +12,9 @@ export default class UserCachingService extends CachingService {
 
   checkUserAlreadyLogged(sessionId: string): Promise<string | null> {
     return this.RedisClientInstance.get(getRedisSessionId(sessionId));
+  }
+
+  getUserApiKey(userId: string): Promise<string | null> {
+    return this.RedisClientInstance.hGet(REDIS_PREFIX_USER, userId);
   }
 }
