@@ -47,6 +47,8 @@ export default Object.freeze({
     DO_NOT_CHANGE_YOURSELF: 'You can not change self information!',
     NOT_ALLOW_SALE_LOGIN: 'Sale man can not access this resource!',
     NOT_ALLOW_ADMIN_LOGIN: 'Admin can not access this resource!',
+    NOT_UPDATE_POWER_WHO_HAVE_FIRST_LOGIN: 'You can not update power who have not reset password!',
+    USER_INFO_OUT_OF_DATE: 'Some thing broken!. Your information do not match with record in database!',
   },
   INGREDIENT: {
     CREATE_INGREDIENT_SUCCESS: 'Create ingredient was success!',
