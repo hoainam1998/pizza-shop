@@ -4,7 +4,7 @@ import SendEmailModule from './libs/mailer/mailer.module';
 import CachingModule from './libs/caching/caching.module';
 import LoggingModule from './libs/logging/logging.module';
 import SchedulerModule from './libs/scheduler/scheduler.module';
-import { redisClient, prismaClient } from './providers';
+import { redisClient, prismaClient, allowValidApiKeyGuard } from './providers';
 
 @Global()
 @Module({
@@ -15,7 +15,7 @@ import { redisClient, prismaClient } from './providers';
     LoggingModule,
     SchedulerModule,
   ],
-  providers: [prismaClient, redisClient],
-  exports: [prismaClient, redisClient, SendEmailModule, CachingModule, SchedulerModule],
+  providers: [prismaClient, redisClient, allowValidApiKeyGuard],
+  exports: [prismaClient, redisClient, allowValidApiKeyGuard, SendEmailModule, CachingModule, SchedulerModule],
 })
 export default class ShareModule {}
