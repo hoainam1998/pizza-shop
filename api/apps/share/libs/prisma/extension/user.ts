@@ -32,6 +32,7 @@ type PrismaUserUpdateParameter = {
 const USER = messages.USER;
 const SEX_VALID = Object.values(SEX);
 const POWER_VALID = Object.values(POWER_NUMERIC);
+const POWER_UPDATE_VALID = [POWER_NUMERIC.ADMIN, POWER_NUMERIC.SALE];
 
 export default (prisma: PrismaClient) => ({
   create: async ({ args, query }: PrismaUserCreateParameter): Promise<UserCreatedReturnType> => {
@@ -110,7 +111,7 @@ export default (prisma: PrismaClient) => ({
       }
 
       if (Object.hasOwn(args.data, 'power')) {
-        if (!POWER_VALID.includes(args.data.power! as number)) {
+        if (!POWER_UPDATE_VALID.includes(args.data.power! as number)) {
           throw new BadRequestException(createMessage(USER.YOUR_POWER_INVALID));
         }
       }

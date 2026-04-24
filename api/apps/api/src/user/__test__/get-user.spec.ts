@@ -27,7 +27,8 @@ import { createMessage, createMessages, signApiKey } from '@share/utils';
 import { UserRouter } from '@share/router';
 import { UserDetail } from '@share/dto/validators/user.dto';
 import { UserSerializer } from '@share/dto/serializer/user';
-const user: Partial<typeof originUser> = Object.assign({}, originUser);
+import UserCachingService from '@share/libs/caching/user/user.service';
+const user: Partial<typeof originUser> = { ...originUser, api_key: apiKey };
 delete user.reset_password_token;
 delete user.password;
 delete user.plain_password;
@@ -46,6 +47,7 @@ const getUserRequestBody = {
     power: true,
     sex: true,
     avatar: true,
+    apiKey: true,
   },
 };
 const select = UserDetail.plain(getUserRequestBody);
@@ -58,6 +60,7 @@ let clientProxy: ClientProxy;
 let close: () => Promise<void>;
 let userService: UserService;
 let userController: UserController;
+let userCachingService: UserCachingService;
 
 beforeAll(async () => {
   const requestTest = await startUp(MockUserModule);
@@ -66,6 +69,7 @@ beforeAll(async () => {
   close = () => requestTest.app.close();
   userService = requestTest.app.get(UserService);
   userController = requestTest.app.get(UserController);
+  userCachingService = requestTest.app.get(UserCachingService);
 });
 
 afterEach(async () => {
@@ -77,6 +81,7 @@ afterEach(async () => {
 describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
   it(createTestName('get user detail success', HttpStatus.OK), async () => {
     expect.hasAssertions();
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const getUserService = jest.spyOn(userService, 'getUserDetail');
     await api
@@ -124,6 +129,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
 
   it(createTestName('get user detail failed when update self information', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(apiKey);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const getUserService = jest.spyOn(userService, 'getUserDetail');
     await api
@@ -140,6 +146,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
 
   it(createTestName('get user detail failed when user have not permission', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const getUserService = jest.spyOn(userService, 'getUserDetail');
     await api
@@ -158,6 +165,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
     expect.hasAssertions();
     const validatorErrors = [new ValidationError()];
     const logError = jest.spyOn(userController as any, 'logError').mockImplementation(() => jest.fn());
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     jest.spyOn(UserSerializer.prototype, 'validate').mockResolvedValue(validatorErrors);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const getUserService = jest.spyOn(userService, 'getUserDetail');
@@ -179,6 +187,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
 
   it(createTestName('get user detail failed with not found error', HttpStatus.NOT_FOUND), async () => {
     expect.hasAssertions();
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest
       .spyOn(clientProxy, 'send')
       .mockReturnValue(throwError(() => new NotFoundException(createMessage(messages.USER.NOT_FOUND))));
@@ -199,6 +208,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
 
   it(createTestName('get user detail failed with unknown error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
     const getUserService = jest.spyOn(userService, 'getUserDetail');
     await api
@@ -217,6 +227,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
 
   it(createTestName('get user detail failed with RPC unknown error', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest
       .spyOn(clientProxy, 'send')
       .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.COMMON.COMMON_ERROR))));
@@ -237,6 +248,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
 
   it(createTestName('get user detail failed with server error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const serverError = new InternalServerErrorException();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => serverError));
     const getUserService = jest.spyOn(userService, 'getUserDetail');
@@ -256,6 +268,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
 
   it(createTestName('get user detail failed with missing field', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const missingQueryFieldBody = {
       userId: getUserRequestBody.userId,
     };
@@ -275,6 +288,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
 
   it(createTestName('get user detail failed with undefined field', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const undefinedFieldBody = {
       ...getUserRequestBody,
       userIds: [Date.now().toString()],
@@ -295,6 +309,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
 
   it(createTestName('get user detail success with empty query field', HttpStatus.OK), async () => {
     expect.hasAssertions();
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const queryFieldEmptyBody = {
       userId: getUserRequestBody.userId,
       query: {},
@@ -316,6 +331,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
 
   it(createTestName('get user failed with database disconnect', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest
       .spyOn(clientProxy, 'send')
       .mockReturnValue(throwError(() => new BadRequestException(PrismaDisconnectError.message)));
