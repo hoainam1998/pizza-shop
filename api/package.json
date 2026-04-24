@@ -126,7 +126,7 @@
     "test:e2e:ingredient.get-ingredient": "jest --watch apps/api/src/ingredient/__test__/get-ingredient.spec.ts",
     "test:e2e:user.can-signup": "jest --watch apps/api/src/user/__test__/can-signup.spec.ts",
     "test:e2e:user.signup": "jest --watch apps/api/src/user/__test__/signup.spec.ts",
-    "test:e2e:user.create": "jest --watch apps/api/src/user/__test__/create-user.spec.ts",
+    "test:e2e:user.create-user": "jest --watch apps/api/src/user/__test__/create-user.spec.ts",
     "test:e2e:user.login": "jest --watch apps/api/src/user/__test__/login.spec.ts",
     "test:e2e:user.logout": "jest --watch apps/api/src/user/__test__/logout.spec.ts",
     "test:e2e:user.reset-password": "jest --watch apps/api/src/user/__test__/reset-password.spec.ts",

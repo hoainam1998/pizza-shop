@@ -110,6 +110,24 @@ describe(createDescribeTest(HTTP_METHOD.POST, createUserUrl), () => {
     expect(sendPassword).not.toHaveBeenCalled();
   });
 
+  it(createTestName('create user failed with super admin role', HttpStatus.BAD_REQUEST), async () => {
+    expect.hasAssertions();
+    const requestBodyWithSuperAdmin = { ...requestBody, power: POWER_NUMERIC.SUPER_ADMIN };
+    const sendPassword = jest.spyOn(sendEmailService, 'sendPassword').mockResolvedValue({});
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
+    const createUserService = jest.spyOn(userService, 'signup');
+    const response = await api
+      .post(createUserUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
+      .send(requestBodyWithSuperAdmin)
+      .expect(HttpStatus.BAD_REQUEST)
+      .expect('Content-Type', /application\/json/);
+    expect(response.body).toEqual({ messages: [expect.any(String)] });
+    expect(createUserService).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+    expect(sendPassword).not.toHaveBeenCalled();
+  });
+
   it(createTestName('create user failed with rpc unknown error', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const sendPassword = jest.spyOn(sendEmailService, 'sendPassword');

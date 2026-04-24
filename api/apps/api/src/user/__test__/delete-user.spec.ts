@@ -23,6 +23,7 @@ import constants from '@share/constants';
 import { HTTP_METHOD, POWER_NUMERIC } from '@share/enums';
 import { createMessage, createMessages, signApiKey } from '@share/utils';
 import { UserRouter } from '@share/router';
+import UserCachingService from '@share/libs/caching/user/user.service';
 const deleteUserBaseUrl: string = UserRouter.absolute.delete;
 const userId = user.user_id;
 const deleteUserUrl: string = `${deleteUserBaseUrl}/${userId}`;
@@ -32,6 +33,7 @@ let api: TestAgent;
 let clientProxy: ClientProxy;
 let close: () => Promise<void>;
 let userService: UserService;
+let userCachingService: UserCachingService;
 
 const invalidPowerSessionPayload = { ...sessionPayload, power: POWER_NUMERIC.SALE };
 const missMatchUserIdApiKey = signApiKey({ userId: Date.now().toString(), email: user.email, power: user.power });
@@ -42,6 +44,7 @@ beforeAll(async () => {
   clientProxy = requestTest.clientProxy;
   close = () => requestTest.app.close();
   userService = requestTest.app.get(UserService);
+  userCachingService = requestTest.app.get(UserCachingService);
 });
 
 afterEach(async () => {
@@ -53,6 +56,7 @@ afterEach(async () => {
 describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
   it(createTestName('delete user success', HttpStatus.OK), async () => {
     expect.hasAssertions();
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     await api
@@ -95,8 +99,25 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
     expect(send).not.toHaveBeenCalled();
   });
 
+  it(createTestName('delete user failed when API key do not match', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(null);
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
+    const deleteUserService = jest.spyOn(userService, 'deleteUser');
+    await api
+      .delete(deleteUserUrl)
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.USER_INFO_OUT_OF_DATE));
+    expect(deleteUserService).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
   it(createTestName('delete user failed when update self information', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(apiKey);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     await api
@@ -112,6 +133,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
 
   it(createTestName('delete user failed when user have not permission', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(apiKey);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     await api
@@ -127,6 +149,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
 
   it(createTestName('delete user failed with not found error', HttpStatus.NOT_FOUND), async () => {
     expect.hasAssertions();
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest
       .spyOn(clientProxy, 'send')
       .mockReturnValue(throwError(() => new NotFoundException(createMessage(messages.USER.NOT_FOUND))));
@@ -146,6 +169,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
 
   it(createTestName('delete user failed with unknown error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     await api
@@ -163,6 +187,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
 
   it(createTestName('delete user failed with RPC unknown error', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest
       .spyOn(clientProxy, 'send')
       .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.COMMON.COMMON_ERROR))));
@@ -182,6 +207,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
 
   it(createTestName('delete user failed with server error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const serverError = new InternalServerErrorException();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => serverError));
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
@@ -200,6 +226,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
 
   it(createTestName('delete user failed with invalid userId field', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest.spyOn(clientProxy, 'send');
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     const response = await api
@@ -215,6 +242,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
 
   it(createTestName('delete user failed with database disconnect', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest
       .spyOn(clientProxy, 'send')
       .mockReturnValue(throwError(() => new BadRequestException(PrismaDisconnectError.message)));
