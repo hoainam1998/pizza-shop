@@ -7,12 +7,13 @@ import SaleApp from './views/sale/app/app.vue';
 import router from './router';
 import plugin from './plugin';
 import 'element-plus/dist/index.css';
+import { cookie as cookieStore } from './store';
 import './socket';
 import './indexed-db';
 globalThis.router = router;
 
 const app = createApp(isSale ? SaleApp : AdminApp);
-document.cookie = `app=${isSale ? 'sale' : 'admin'}`;
+cookieStore.setAppName();
 
 app.use(router);
 app.use(ElementPlus);

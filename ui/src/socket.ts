@@ -1,5 +1,6 @@
 import { io, Socket } from 'socket.io-client';
 import { SOCKET_EVENT_NAME } from './enums';
+import { auth as authStore } from '@/store';
 
 /**
  * Socket service class.
@@ -10,9 +11,14 @@ export default class SocketService {
   private _io: Socket;
 
   constructor() {
-    this._io = io(process.env.SOCKET_URL);
-    this._io.on('connect', () => {
-      this._io.emit('connected', { userId: '1764900213623', view: isSale ? 'client' : 'admin' });
+    this._io = io(process.env.SOCKET_URL, {
+      reconnection: false,
+      auth: { token: authStore.getApiKey() },
+    });
+
+    this._io.on('connect_error', (err) => {
+      this._io.disconnect();
+      console.warn(`[Socket] ${err.message}`);
     });
   }
 
