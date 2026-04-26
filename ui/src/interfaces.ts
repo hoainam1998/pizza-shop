@@ -95,6 +95,7 @@ export type UserDetailModelType = {
   sex: number;
   power: number | null;
   avatar?: (UploadRawFile | File)[];
+  apiKey: string;
 };
 
 export type UserPersonalInfoType = {

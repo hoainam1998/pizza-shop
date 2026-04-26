@@ -17,6 +17,7 @@ const defaultUser = {
   email: '',
   sex: SEX.MALE,
   power: POWER.SALE,
+  apiKey: '',
 };
 
 const userLogged = reactive<UserLoggedType>(defaultUser);
@@ -54,6 +55,9 @@ export default {
   },
   getUser(): UserLoggedType {
     return userLogged;
+  },
+  getUserId(): string | undefined {
+    return userLogged.userId;
   },
 };
 

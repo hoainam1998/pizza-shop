@@ -3,6 +3,7 @@ import { showErrorNotification } from '@/utils';
 import useWrapperRouter from '@/composables/use-router';
 import paths from '@/router/paths';
 import Storage from '@/storage/storage';
+import { cookie as cookieStore } from '@/store';
 
 export default (): () => void => {
   const { push } = useWrapperRouter();
@@ -15,6 +16,7 @@ export default (): () => void => {
       .finally(() => {
         push(paths.LOGIN);
         Storage.clear();
+        cookieStore.clearApiKey();
       });
   };
 };

@@ -71,12 +71,14 @@ import { useUserForm } from '@/composables';
 import type { MessageResponseType, UserDetailModelType, UserDetailExposeType } from '@/interfaces';
 import { UserService } from '@/services';
 import { showErrorNotification, showSuccessNotification } from '@/utils';
+import { cookie as cookieStore } from '@/store';
 
 type UserFormExposeType = {
   assignForm: (data: UserDetailModelType) => void;
 };
 
 const userFormRef = useTemplateRef<UserDetailExposeType>('userFormRef');
+let userApiKey: string;
 const dialogVisible = defineModel<boolean>();
 const emit = defineEmits<{
   (e: 'refresh'): void;
@@ -104,6 +106,7 @@ const reset = (): void => {
 };
 
 const assignForm = (data: UserDetailModelType): void => {
+  userApiKey = data.apiKey;
   userDetailFormModel.userId = data.userId;
   userDetailFormModel.firstName = data.firstName;
   userDetailFormModel.lastName = data.lastName;
@@ -121,12 +124,13 @@ const onSubmit = (): void => {
       let toastTitle: string;
 
       if (userDetailFormModel.userId) {
-        toastTitle = 'Update user';
+        cookieStore.setImpactUserApiKey(userApiKey);
+        toastTitle = 'Update user!';
         promiseResult = UserService.put('update', userDetailFormModel);
       } else {
         const userData = { ...userDetailFormModel };
         delete userData.userId;
-        toastTitle = 'Create user';
+        toastTitle = 'Create user!';
         promiseResult = UserService.post('create', userData);
       }
 

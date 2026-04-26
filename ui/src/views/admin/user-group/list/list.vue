@@ -25,10 +25,10 @@
     </template>
     <template #operation="props">
       <div class="ps-text-align-center">
-        <el-button size="small" class="ps-fw-bold" type="success" @click="getUserDetail(props.row.userId)">
+        <el-button size="small" class="ps-fw-bold" type="success" @click="getUserDetail(props.row)">
           Update
         </el-button>
-        <el-button size="small" class="ps-fw-bold" type="danger" @click="deleteUser(props.row.userId)">
+        <el-button size="small" class="ps-fw-bold" type="danger" @click="deleteUser(props.row)">
           Delete
         </el-button>
       </div>
@@ -49,6 +49,7 @@ import constants from '@/constants';
 import { UserService } from '@/services';
 import { SEX, POWER } from '@/enums';
 import { showErrorNotification, showSuccessNotification } from '@/utils';
+import { cookie as cookieStore } from '@/store';
 const PAGE_SIZE = constants.PAGINATION.PAGE_SIZE;
 const PAGE_NUMBER = constants.PAGINATION.PAGE_NUMBER;
 
@@ -64,6 +65,7 @@ type UserType = {
   phone: string;
   sex: number;
   power: number;
+  apiKey: string;
 };
 
 const userTableRef = useTemplateRef('userTable');
@@ -111,9 +113,10 @@ const fields: TableFieldType[] = [
 
 const showCreateUserDialog = () => dialogVisible.value = true;
 
-const getUserDetail = (userId: string): void => {
+const getUserDetail = (user: UserType): void => {
+  cookieStore.setImpactUserApiKey(user.apiKey);
   UserService.post('detail', {
-    userId,
+    userId: user.userId,
     query: {
       firstName: true,
       lastName: true,
@@ -122,19 +125,21 @@ const getUserDetail = (userId: string): void => {
       sex: true,
     },
   }).then((response: AxiosResponse) => {
-    userDetailRef.value?.assignForm(response.data);
+    userDetailRef.value?.assignForm({ ...response.data, apiKey: user.apiKey });
     showCreateUserDialog();
+  }).catch((error: AxiosError<MessageResponseType>) => {
+    showErrorNotification('Get user!', error.response?.data.messages);
   });
-
 };
 
-const deleteUser = (userId: string): void => {
-  UserService.delete(`delete/${userId}`)
+const deleteUser = (user: UserType): void => {
+  cookieStore.setImpactUserApiKey(user.apiKey);
+  UserService.delete(`delete/${user.userId}`)
     .then((response: AxiosResponse<MessageResponseType>) => {
-      showSuccessNotification('Delete user', response.data.messages);
+      showSuccessNotification('Delete user!', response.data.messages);
       search();
     }).catch((error: AxiosError<MessageResponseType>) => {
-      showErrorNotification('Delete user', error.response!.data.messages);
+      showErrorNotification('Delete user!', error.response!.data.messages);
     });
 };
 
@@ -155,6 +160,7 @@ const fetchUsers = (pageSize: number, pageNumber: number): void => {
       phone: true,
       sex: true,
       power: true,
+      apiKey: true,
     }
   }, { allowNotFound: true }).then((response) => {
     data.value = response.data.list;

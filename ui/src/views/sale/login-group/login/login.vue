@@ -30,7 +30,7 @@ import loginFormInformation from '@/composables/use-login-form';
 import useWrapperRouter from '@/composables/use-router';
 import { UserService } from '@/services';
 import paths from '@/router/paths';
-import { auth as authStore } from '@/store';
+import { auth as authStore, cookie as cookieStore } from '@/store';
 import { generateResetPasswordLink, showErrorNotification } from '@/utils';
 import type { LoginResponseType, MessageResponseType } from '@/interfaces';
 
@@ -51,11 +51,12 @@ const onSubmit = async (): Promise<void> => {
             } else {
               authStore.setUserLoggedToken(response.data.userLoggedToken);
               authStore.setApiKey(response.data.apiKey!);
+              cookieStore.setImpactUserApiKey(response.data.apiKey!);
               push(paths.HOME);
             }
           }).catch((error: AxiosError<MessageResponseType>) => {
             showErrorNotification('Admin login!', error.response?.data.messages);
-          });
+          }).finally(resetForm);
       }
     });
   }
