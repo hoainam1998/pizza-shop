@@ -47,3 +47,4 @@ export const loadDataPurchaseVolumeChartPattern = createMicroserviceEvent('load_
 // socket
 export const addDataChartEventPattern = 'add_data_chart';
 export const refreshProductInfoPattern = 'refresh_product_info';
+export const updateUserCompletePattern = 'update_user_complete';

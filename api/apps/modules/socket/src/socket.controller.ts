@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { EventPattern } from '@nestjs/microservices';
 import SocketService from './socket.service';
-import { addDataChartEventPattern, refreshProductInfoPattern } from '@share/pattern';
+import { addDataChartEventPattern, refreshProductInfoPattern, updateUserCompletePattern } from '@share/pattern';
 import type { DataChartAddedType } from '@share/interfaces';
 
 @Controller()
@@ -16,5 +16,10 @@ export default class SocketController {
   @EventPattern(refreshProductInfoPattern)
   refreshProductInfo(userId: string): void {
     this.socketService.refreshProductInfo(userId);
+  }
+
+  @EventPattern(updateUserCompletePattern)
+  updateUserComplete(userId: string): void {
+    this.socketService.updateUserComplete(userId);
   }
 }

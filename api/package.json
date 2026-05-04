@@ -73,6 +73,7 @@
     "test:ut:user.logout": "jest --watch --testPathPatterns=apps/modules/user/src/__test__/logout.spec.ts",
     "test:ut:socket.add-data-chart": "jest --watch --testPathPatterns=apps/modules/socket/src/__test__/add-data-chart.spec.ts",
     "test:ut:socket.refresh-product-info": "jest --watch --testPathPatterns=apps/modules/socket/src/__test__/refresh-product-info.spec.ts",
+    "test:ut:socket.update-user-complete": "jest --watch --testPathPatterns=apps/modules/socket/src/__test__/update-user-complete.spec.ts",
     "test:ut:caching.ingredient.delete-all-ingredients": "jest --watch apps/share/libs/caching/ingredient/__test__/delete-all-ingredients.spec.ts",
     "test:ut:caching.ingredient.delete-all-product-ingredients": "jest --watch apps/share/libs/caching/ingredient/__test__/delete-all-product-ingredients.spec.ts",
     "test:ut:caching.ingredient.get-product-ingredients-stored": "jest --watch apps/share/libs/caching/ingredient/__test__/get-product-ingredients-stored.spec.ts",
