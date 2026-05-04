@@ -1,5 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 import { user, category, product, ingredient } from 'generated/prisma';
+import { Socket } from 'socket.io';
 import { Carts, GetProductsInCart, ProductPagination } from './dto/validators/product.dto';
 import { UserDetail } from './dto/validators/user.dto';
 import { VIEW } from './enums';
@@ -154,4 +155,8 @@ export type UserLoggedSerializerType = {
 
 export type LoggerIncludeType = {
   logger: LoggingService;
+};
+
+export type SocketExtended = Socket & {
+  requester: Record<string, any>;
 };
