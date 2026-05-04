@@ -5,6 +5,10 @@ import RedisClient from '@share/libs/redis-client/redis';
 export default abstract class {
   constructor(@Inject(REDIS_CLIENT) private readonly redisClient: RedisClient) {}
 
+  protected get RedisInstance() {
+    return this.redisClient;
+  }
+
   protected get RedisClientInstance() {
     return this.redisClient.Client;
   }

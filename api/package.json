@@ -93,6 +93,8 @@
     "test:ut:caching.user.check-exists": "jest --watch apps/share/libs/caching/user/__test__/check-exists.spec.ts",
     "test:ut:caching.user.check-user-already-logged": "jest --watch apps/share/libs/caching/user/__test__/check-user-already-logged.spec.ts",
     "test:ut:caching.user.get-user-api-key": "jest --watch apps/share/libs/caching/user/__test__/get-user-api-key.spec.ts",
+    "test:ut:caching.logout-subscribe": "jest --watch apps/share/libs/caching/user/__test__/logout-subscribe.spec.ts",
+    "test:ut:caching.logout-publish": "jest --watch apps/share/libs/caching/user/__test__/logout-publish.spec.ts",
     "test:ut:scheduler.update-state-expired": "jest --watch --testPathPatterns=apps/share/libs/scheduler/__test__/update-state-expired.spec.ts",
     "test:ut:scheduler.take-action-at-specific-time": "jest --watch --testPathPatterns=apps/share/libs/scheduler/__test__/take-action-at-specific-time.spec.ts",
     "test:ut:scheduler.delete-scheduler": "jest --watch --testPathPatterns=apps/share/libs/scheduler/__test__/delete-scheduler.spec.ts",
