@@ -2,6 +2,9 @@ jest.mock('redis', () => {
   return {
     createClient: jest.fn().mockImplementation(() => ({
       connect: jest.fn().mockResolvedValue({}),
+      publish: jest.fn().mockResolvedValue({}),
+      subscribe: jest.fn(),
+      duplicate: jest.fn(),
       json: {
         set: jest.fn(),
         get: jest.fn(),

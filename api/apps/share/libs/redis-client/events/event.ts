@@ -1,3 +1,5 @@
+import { REDIS_SUBSCRIBE_NAME } from '@share/enums';
+
 type RedisDataJson = {
   senderId: string;
   payload: any;
@@ -8,18 +10,18 @@ type RedisDataJson = {
  * @class
  */
 class Event {
-  _eventName: string;
+  _eventName: REDIS_SUBSCRIBE_NAME;
   _payload: any;
   _senderId: string;
 
   /**
    * Create new RedisClient instance.
    * @constructor
-   * @param {string} eventName - The event name.
+   * @param {REDIS_SUBSCRIBE_NAME} eventName - The event name.
    * @param {object} payload - The redis subscribe payload.
    * @param {string} senderId - The senderId.
    */
-  constructor(eventName: string, payload: any, senderId: string) {
+  private constructor(eventName: REDIS_SUBSCRIBE_NAME, payload: any, senderId: string) {
     this._eventName = eventName;
     this._payload = JSON.stringify(payload);
     this._senderId = senderId;
@@ -47,12 +49,13 @@ class Event {
   /**
    * Create new event.
    * @static
+   * @param {REDIS_SUBSCRIBE_NAME} eventName - The event name.
    * @param {object} payload - The payload.
    * @param {string} senderId - The senderId.
    * @returns {Event} The new event.
    */
-  static createEvent(payload: any, senderId: string): Event {
-    return new Event((this as any).eventName, payload, senderId);
+  static createEvent(eventName: REDIS_SUBSCRIBE_NAME, payload: any, senderId: string): Event {
+    return new Event(eventName, payload, senderId);
   }
 
   /**

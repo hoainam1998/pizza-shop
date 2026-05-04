@@ -38,3 +38,7 @@ export enum POWER_NUMERIC {
   ADMIN = 1,
   SALE = 2,
 }
+
+export enum REDIS_SUBSCRIBE_NAME {
+  LOGOUT = 'logout',
+}
