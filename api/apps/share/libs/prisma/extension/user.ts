@@ -175,7 +175,7 @@ export default (prisma: PrismaClient) => ({
         },
       });
 
-      await RedisClient.Instance.Client.hSet(REDIS_PREFIX_USER, user.user_id, user.api_key!);
+      await RedisClient.Instance.Client.hSet(REDIS_PREFIX_USER, result.user_id, result.api_key!);
 
       return result;
     });

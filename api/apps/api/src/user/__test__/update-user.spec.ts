@@ -40,7 +40,6 @@ const requestBody = {
   email: user.email,
   phone: user.phone,
   sex: user.sex,
-  power: POWER_NUMERIC.ADMIN,
 };
 const userUpdate = UpdateUser.plain(requestBody);
 const invalidPowerSessionPayload = { ...sessionPayload, power: POWER_NUMERIC.SALE };
@@ -243,6 +242,48 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
     expect(send).toHaveBeenCalledWith(updateUserPattern, userUpdate);
   });
 
+  it(createTestName('update user failed when missing field error', HttpStatus.BAD_REQUEST), async () => {
+    expect.hasAssertions();
+    const requestBodyWithoutUserId: Partial<typeof requestBody> = {
+      ...requestBody,
+    };
+    delete requestBodyWithoutUserId.userId;
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
+    const updateUserService = jest.spyOn(userService, 'updateUser');
+    const response = await api
+      .put(updateUserUrl)
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
+      .send(requestBodyWithoutUserId)
+      .expect(HttpStatus.BAD_REQUEST)
+      .expect('Content-Type', /application\/json/);
+    expect(response.body).toEqual({ messages: expect.any(Array) });
+    expect(updateUserService).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it(createTestName('update user failed when adding power field', HttpStatus.BAD_REQUEST), async () => {
+    expect.hasAssertions();
+    const requestBodyWithPower = {
+      ...requestBody,
+      power: POWER_NUMERIC.ADMIN,
+    };
+    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
+    const updateUserService = jest.spyOn(userService, 'updateUser');
+    const response = await api
+      .put(updateUserUrl)
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
+      .send(requestBodyWithPower)
+      .expect(HttpStatus.BAD_REQUEST)
+      .expect('Content-Type', /application\/json/);
+    expect(response.body).toEqual({ messages: expect.any(Array) });
+    expect(updateUserService).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
   it(createTestName('update user failed with database disconnect error', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
@@ -299,27 +340,6 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.YOUR_GENDER_INVALID));
-    expect(updateUserService).toHaveBeenCalledTimes(1);
-    expect(updateUserService).toHaveBeenCalledWith(userUpdate);
-    expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(updateUserPattern, userUpdate);
-  });
-
-  it(createTestName('update user failed with power invalid', HttpStatus.BAD_REQUEST), async () => {
-    expect.hasAssertions();
-    jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
-    const updateUserService = jest.spyOn(userService, 'updateUser');
-    const send = jest
-      .spyOn(clientProxy, 'send')
-      .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.USER.YOUR_POWER_INVALID))));
-    await api
-      .put(updateUserUrl)
-      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${missMatchUserIdApiKey}`])
-      .set('mock-session', JSON.stringify(sessionPayload))
-      .send(requestBody)
-      .expect(HttpStatus.BAD_REQUEST)
-      .expect('Content-Type', /application\/json/)
-      .expect(createMessages(messages.USER.YOUR_POWER_INVALID));
     expect(updateUserService).toHaveBeenCalledTimes(1);
     expect(updateUserService).toHaveBeenCalledWith(userUpdate);
     expect(send).toHaveBeenCalledTimes(1);

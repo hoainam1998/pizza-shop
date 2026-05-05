@@ -79,7 +79,7 @@ export class CreateUser extends UserDTO {
   }
 }
 
-export class UpdateUser extends CreateUser {
+export class UpdateUser extends UserDTO {
   @IsNumberString()
   @Length(13)
   userId: string;
