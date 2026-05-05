@@ -14,6 +14,7 @@ import { ResetPassword, UserPagination, LoginSessionPayload, UpdatePower } from 
 import UserCachingService from '@share/libs/caching/user/user.service';
 import ProductCachingService from '@share/libs/caching/product/product.service';
 import ReportCachingService from '@share/libs/caching/report/report.service';
+import Event from '@share/libs/redis-client/events/event';
 
 @Injectable()
 export default class UserService {
@@ -22,7 +23,13 @@ export default class UserService {
     private readonly userCachingService: UserCachingService,
     private readonly productCachingService: ProductCachingService,
     private readonly reportCachingService: ReportCachingService,
-  ) {}
+  ) {
+    userCachingService.logoutSubscribe((payloadString: string) => {
+      const response = Event.fromJson(payloadString);
+      const userId = response.senderId;
+      void this.logout(userId);
+    });
+  }
 
   @HandlePrismaError(messages.USER)
   canSignup(): Promise<number> {
@@ -148,24 +155,25 @@ export default class UserService {
 
   @HandlePrismaError(messages.USER)
   update(user: user): Promise<UserWithOnlySessionIDType> {
-    return this.prismaClient
-      .$transaction([
-        this.prismaClient.user.findUniqueOrThrow({
-          where: {
-            user_id: user.user_id,
-          },
-          select: {
-            session_id: true,
-          },
-        }),
-        this.prismaClient.user.update({
-          where: {
-            user_id: user.user_id,
-          },
-          data: user,
-        }),
-      ])
-      .then((results) => results[0]);
+    return this.prismaClient.user
+      .findUniqueOrThrow({
+        where: {
+          user_id: user.user_id,
+        },
+        select: {
+          session_id: true,
+        },
+      })
+      .then((userFound) => {
+        return this.prismaClient.user
+          .update({
+            where: {
+              user_id: user.user_id,
+            },
+            data: user,
+          })
+          .then(() => userFound);
+      });
   }
 
   @HandlePrismaError(messages.USER)

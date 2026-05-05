@@ -1,3 +1,4 @@
+import { ValidationError } from 'class-validator';
 import startUp from './pre-setup';
 import UserService from '../user.service';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
@@ -5,7 +6,6 @@ import { autoGeneratePassword } from '@share/utils';
 import { user } from '@share/test/pre-setup/mock/data/user';
 import UserCachingService from '@share/libs/caching/user/user.service';
 import { LoginSessionPayload } from '@share/dto/validators/user.dto';
-import { ValidationError } from 'class-validator';
 
 let userService: UserService;
 let userCachingService: UserCachingService;

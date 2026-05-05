@@ -1,6 +1,6 @@
-import { Controller, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Controller, Inject, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { type user } from 'generated/prisma';
-import { MessagePattern } from '@nestjs/microservices';
+import { ClientProxy, MessagePattern } from '@nestjs/microservices';
 import UsersService from './user.service';
 import LoggingService from '@share/libs/logging/logging.service';
 import { HandleServiceError, HandleJwtVerifyError } from '@share/decorators';
@@ -16,6 +16,7 @@ import {
   updatePowerPattern,
   updatePersonalInfoPattern,
   deleteUserPattern,
+  updateUserCompletePattern,
 } from '@share/pattern';
 import type {
   UserCreatedReturnType,
@@ -35,6 +36,7 @@ import {
 } from '@share/utils';
 import messages from '@share/constants/messages';
 import { APP_NAME, POWER_NUMERIC } from '@share/enums';
+import { SOCKET_SERVICE } from '@share/di-token';
 
 type RequesterFromType = {
   by?: APP_NAME;
@@ -59,6 +61,7 @@ const validateUserPermission = (requestPayload: RequesterFromType, user: Pick<us
 @Controller('user')
 export default class UserController {
   constructor(
+    @Inject(SOCKET_SERVICE) private readonly socketService: ClientProxy,
     private readonly userService: UsersService,
     private readonly logger: LoggingService,
   ) {}
@@ -153,6 +156,7 @@ export default class UserController {
   update(user: user): Promise<UserWithOnlySessionIDType> {
     return this.userService.update(user).then(async (userResult) => {
       await this.userService.logout(user.user_id);
+      this.socketService.emit(updateUserCompletePattern, user.user_id);
       return userResult;
     });
   }
