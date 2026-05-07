@@ -4,7 +4,7 @@ import {
   showInfoNotification,
   confirmDeleteMessageBox,
 } from './show-notification';
-import { generateResetPasswordLink } from './auth';
+import { generateResetPasswordLink, forceLogout } from './auth';
 import { formatDateHyphen, formatDateSlash } from './format-date';
 import setTimeout from './set-timeout';
 import sanitizeUserInput from './sanitize-data';
@@ -51,6 +51,7 @@ export {
   formatVNDCurrency,
   confirmDeleteMessageBox,
   generateResetPasswordLink,
+  forceLogout,
   replaceThousand,
   sanitizeUserInput,
   setTimeout,

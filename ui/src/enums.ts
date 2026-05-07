@@ -12,6 +12,10 @@ export enum SOCKET_EVENT_NAME {
   REFRESH = 'refresh',
   REMOVE_REPORT_VIEWER = 'remove_report_viewer',
   ADD_DATA_CHART = 'add_data_chart',
+  UPDATE_USER_STATUS = 'update_user_status',
+  UPDATE_USER_POWER = 'update_user_power',
+  UPDATE_USER_INFO = 'update_user_info',
+  LOGOUT = 'logout',
 }
 
 export enum ERROR_PRODUCT_STATE {
@@ -35,4 +39,9 @@ export enum POWER {
 export enum SEX {
   FEMALE = 1,
   MALE = 0,
+}
+
+export enum USER_FORM_PURPOSE  {
+  CREATE = 'create',
+  UPDATE = 'update',
 }
