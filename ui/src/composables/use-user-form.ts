@@ -1,5 +1,5 @@
 import type { FormRules } from 'element-plus';
-import { POWER, SEX } from '@/enums';
+import { SEX } from '@/enums';
 import type { UserDetailModelType } from '@/interfaces';
 
 type ResetUserType = {
@@ -13,7 +13,7 @@ const originUserInfo: UserDetailModelType = {
   email: '',
   phone: '',
   sex: SEX.MALE,
-  power: POWER.SALE,
+  apiKey: '',
 };
 
 const defaultUserInfo: UserDetailModelType & ResetUserType = {

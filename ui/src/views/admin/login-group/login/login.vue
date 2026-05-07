@@ -37,8 +37,10 @@ import paths from '@/router/paths';
 import { auth as authStore, cookie as cookieStore } from '@/store';
 import useWrapperRouter from '@/composables/use-router';
 import loginFormInformation from '@/composables/use-login-form';
+import socketRegister from '@/composables/use-register-socket-event';
 import { UserService } from '@/services';
 import { generateResetPasswordLink, showErrorNotification } from '@/utils';
+import SocketService from '@/socket';
 import type { LoginResponseType, MessageResponseType } from '@/interfaces';
 
 const { push } = useWrapperRouter();
@@ -60,6 +62,8 @@ const onSubmit = async (): Promise<void> => {
               authStore.setUserLoggedToken(response.data.userLoggedToken);
               authStore.setApiKey(response.data.apiKey!);
               cookieStore.setImpactUserApiKey(response.data.apiKey!);
+              socketRegister();
+              SocketService.connect();
               push(`${paths.HOME}/${paths.HOME.CATEGORY}`);
             }
           }).catch((error: AxiosError<MessageResponseType>) => {

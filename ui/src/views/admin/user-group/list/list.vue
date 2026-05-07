@@ -34,7 +34,7 @@
       </div>
     </template>
   </Table>
-  <UserDetail ref="userDetail" v-model="dialogVisible" @refresh="search" />
+  <UserDetail ref="userDetail" @search="search" />
 </template>
 <script setup lang="ts">
 import { ref, type Ref, onBeforeMount, useTemplateRef } from 'vue';
@@ -47,8 +47,8 @@ import UserDefaultImage from '@/assets/images/user.png';
 import type { MessageResponseType, TableFieldType } from '@/interfaces';
 import constants from '@/constants';
 import { UserService } from '@/services';
-import { SEX, POWER } from '@/enums';
-import { showErrorNotification, showSuccessNotification } from '@/utils';
+import { SEX, POWER, USER_FORM_PURPOSE } from '@/enums';
+import { confirmDeleteMessageBox, showErrorNotification } from '@/utils';
 import { cookie as cookieStore } from '@/store';
 const PAGE_SIZE = constants.PAGINATION.PAGE_SIZE;
 const PAGE_NUMBER = constants.PAGINATION.PAGE_NUMBER;
@@ -68,9 +68,13 @@ type UserType = {
   apiKey: string;
 };
 
+const showDeleteUserDialog = confirmDeleteMessageBox(
+  'Delete user!',
+  'This user and all information relative will be delete! Are you sure to be continue?',
+  'Delete user request was cancel!');
+
 const userTableRef = useTemplateRef('userTable');
 const userDetailRef = useTemplateRef('userDetail');
-const dialogVisible = ref<boolean>(false);
 const data: Ref<UserType[]> = ref([]);
 const total: Ref<number> = ref(0);
 const keyword: Ref<string> = ref('');
@@ -111,7 +115,13 @@ const fields: TableFieldType[] = [
   }
 ];
 
-const showCreateUserDialog = () => dialogVisible.value = true;
+const showCreateUserDialog = (purpose: USER_FORM_PURPOSE = USER_FORM_PURPOSE.CREATE): void => {
+  userDetailRef.value?.showCreateUserDialog(purpose);
+};
+
+const assignForm = (data: Record<string, any>): void => {
+  userDetailRef.value?.assignForm(data);
+};
 
 const getUserDetail = (user: UserType): void => {
   cookieStore.setImpactUserApiKey(user.apiKey);
@@ -125,22 +135,23 @@ const getUserDetail = (user: UserType): void => {
       sex: true,
     },
   }).then((response: AxiosResponse) => {
-    userDetailRef.value?.assignForm({ ...response.data, apiKey: user.apiKey });
-    showCreateUserDialog();
+    showCreateUserDialog(USER_FORM_PURPOSE.UPDATE);
+    assignForm({ ...response.data, apiKey: user.apiKey });
   }).catch((error: AxiosError<MessageResponseType>) => {
     showErrorNotification('Get user!', error.response?.data.messages);
   });
 };
 
 const deleteUser = (user: UserType): void => {
-  cookieStore.setImpactUserApiKey(user.apiKey);
-  UserService.delete(`delete/${user.userId}`)
-    .then((response: AxiosResponse<MessageResponseType>) => {
-      showSuccessNotification('Delete user!', response.data.messages);
+  const deleteUserService = (): Promise<AxiosResponse> => {
+    cookieStore.setImpactUserApiKey(user.apiKey);
+    return UserService.delete(`delete/${user.userId}`).then((response) => {
       search();
-    }).catch((error: AxiosError<MessageResponseType>) => {
-      showErrorNotification('Delete user!', error.response!.data.messages);
+      return response;
     });
+  };
+
+  showDeleteUserDialog(deleteUserService);
 };
 
 const search = (): void => {

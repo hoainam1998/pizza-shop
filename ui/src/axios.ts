@@ -1,6 +1,5 @@
 import axios, { AxiosError, HttpStatusCode } from 'axios';
-import paths from '@/router/paths';
-import { showErrorNotification, sanitizeUserInput } from '@/utils';
+import { showErrorNotification, sanitizeUserInput, forceLogout } from '@/utils';
 import { loading as loadingStore, auth as authStore, cookie as cookieStore } from '@/store';
 import type { InternalAxiosExtraRequestConfig } from '@/interfaces';
 
@@ -15,37 +14,28 @@ const setApiKeyToCookie = (): void => {
 };
 
 /**
- * Force logout.
- */
-const forceLogout = (): void => {
-  globalThis.router.push(`${paths.LOGIN}`);
-};
-
-/**
  * Handle axios request errors.
  *
  * @param {AxiosError} error - The axios error.
  */
-const handleRequestError = (error: AxiosError<any, any>): void=> {
+const handleRequestError = (error: AxiosError<any, any>): void => {
   switch (error.code) {
     case AxiosError.ERR_BAD_REQUEST:
       switch (error.request.status) {
-        case HttpStatusCode.Unauthorized: {
+        case HttpStatusCode.Unauthorized:;
           forceLogout();
-        };
-        break;
-        default: break;
+          break;
+        default:
+          break;
       }
       break;
-    case AxiosError.ERR_NETWORK: {
+    case AxiosError.ERR_NETWORK:
       showErrorNotification(error.code || '', error.message);
       forceLogout();
-    };
-    break;
-    default: {
+      break;
+    default:
       showErrorNotification(error.code || '', error.message);
-    };
-    break;
+      break;
   }
 };
 

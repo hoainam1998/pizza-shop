@@ -93,9 +93,9 @@ export type UserDetailModelType = {
   email: string;
   phone: string;
   sex: number;
-  power: number | null;
+  power?: number | null;
   avatar?: (UploadRawFile | File)[];
-  apiKey: string;
+  apiKey?: string;
 };
 
 export type UserPersonalInfoType = {
@@ -111,4 +111,10 @@ export type UserPersonalInfoType = {
 export type UserDetailExposeType = {
   validate: () => Promise<boolean>;
   formInstance: Ref<FormInstance | undefined, FormInstance | undefined> | FormInstance | undefined;
+};
+
+export type UserFormExposeType = {
+  assignForm: (data: UserDetailModelType) => void;
+  onSubmit: () => void;
+  reset: () => void;
 };

@@ -2,35 +2,48 @@ import { io, Socket } from 'socket.io-client';
 import { SOCKET_EVENT_NAME } from './enums';
 import { auth as authStore } from '@/store';
 
+type Subscriber = {
+  name: SOCKET_EVENT_NAME;
+  callback: (payload: any) => void;
+};
+
+const createSubscriber = (
+  name: SOCKET_EVENT_NAME,
+  callback: Subscriber['callback'],
+): Subscriber => ({ name, callback });
+
 /**
  * Socket service class.
  * @class
  */
 export default class SocketService {
-  private static socket: SocketService;
-  private _io: Socket;
-
-  constructor() {
-    this._io = io(process.env.SOCKET_URL, {
-      reconnection: false,
-      auth: { token: authStore.getApiKey() },
-    });
-
-    this._io.on('connect_error', (err) => {
-      this._io.disconnect();
-      console.warn(`[Socket] ${err.message}`);
-    });
-  }
+  private static _io: Socket | null;
+  private static subscribers: Subscriber[] = [];
 
   /**
-   * Create socket service.
-   * @returns {SocketService} - The socket service.
+   * Socket connect.
    */
-  static create() {
-    if (!SocketService.socket) {
-      SocketService.socket = new SocketService();
+  static connect(): void {
+    if (!this._io?.connected) {
+      this._io = io(process.env.SOCKET_URL, {
+        reconnection: false,
+        auth: { token: authStore.getApiKey() },
+      });
+
+      this._io.on('connect', () => {
+        while (this.subscribers.length) {
+          const subscriber = this.subscribers.shift();
+          if (subscriber) {
+            this._io?.on(subscriber?.name, subscriber?.callback);
+          }
+        }
+      });
+
+      this._io.on('connect_error', (err) => {
+        this.disconnect();
+        console.warn(`[Socket] ${err.message}`);
+      });
     }
-    return SocketService.socket;
   }
 
   /**
@@ -39,7 +52,7 @@ export default class SocketService {
    * @param {(payload: any) => void} callback - The callback event.
    */
   static subscribe(eventName: SOCKET_EVENT_NAME, callback: (payload: any) => void): void {
-    this.create()._io.on(eventName, callback);
+    this.subscribers.push(createSubscriber(eventName, callback));
   }
 
   /**
@@ -47,7 +60,9 @@ export default class SocketService {
    * @param {SOCKET_EVENT_NAME} eventName - The socket event name.
    */
   static unsubscribe(eventName: SOCKET_EVENT_NAME): void {
-    this.create()._io.removeAllListeners(eventName);
+    if (this._io?.connected) {
+      this._io.removeAllListeners(eventName);
+    }
   }
 
   /**
@@ -55,14 +70,19 @@ export default class SocketService {
    * @param {SOCKET_EVENT_NAME} eventName - The socket event name.
    * @param {*} payload - The payload data.
    */
-  static emit(eventName: SOCKET_EVENT_NAME, payload: any): void {
-    this.create()._io.emit(eventName, payload);
+  static emit(eventName: SOCKET_EVENT_NAME, payload?: any): void {
+    if (this._io?.connected) {
+      this._io.emit(eventName, payload);
+    }
   }
 
   /**
    * Ws disconnect.
    */
   static disconnect(): void {
-    this.create()._io.disconnect();
+    if (this._io?.connected) {
+      this._io.disconnect();
+      this._io = null;
+    }
   }
 }
