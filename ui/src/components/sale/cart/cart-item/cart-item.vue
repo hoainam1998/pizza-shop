@@ -91,8 +91,8 @@
 import { reactive, ref } from 'vue';
 import { Close, Plus, Minus, Refresh } from '@element-plus/icons-vue';
 import List from '@/components/common/list/list.vue';
-import DeleteDialog from '../delete-dialog.vue';
-import type { CartItemPropsType } from './props-validator';
+import DeleteDialog from '@/components/sale/cart/delete-dialog/delete-dialog.vue';
+import type { CartItemPropsType } from './types';
 
 const deleteDialogVisible = ref<boolean>(false);
 
