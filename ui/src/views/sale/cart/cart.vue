@@ -60,7 +60,7 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
 import CartItem from '@/components/sale/cart/cart-item/cart-item.vue';
-import BillItem from '@/components/sale/cart/bill-item.vue';
+import BillItem from '@/components/sale/cart/bill-item/bill-item.vue';
 import List from '@/components/common/list/list.vue';
 import BackButton from '@/components/common/buttons/back-button/back-button.vue';
 import SocketService from '@/socket';
@@ -71,37 +71,15 @@ import { useProductsInCart } from '@/composables';
 import { grayColor } from '@/assets/scss/variables.module.scss';
 import { type ClientCartItemType } from '@/interfaces';
 import { showSuccessNotification } from '@/utils';
-import type { CartItemInfoType } from '@/components/sale/cart/cart-item/props-validator';
-
-type ServerCartItemType = {
-  productId: string;
-  name: string;
-  avatar: string;
-  count: number;
-  price: number;
-};
-
-type ErrorCartItemType = {
-  productId: string;
-  errorCode: string;
-  messages: string[];
-};
-
-type ClientErrorCartItemType = {
-  isFresh?: boolean;
-  isDisable?: boolean;
-  messages: string[];
-};
-
-type NeededCartItemType = Omit<ClientCartItemType, 'productId' | 'quantity' | 'total'>;
-
-type BillItemType = Pick<ClientCartItemType, 'productId' | 'price' | 'quantity' | 'total'>;
-
-type PaymentErrorType = {
-  errors: ErrorCartItemType[];
-  totalErrorMessage: string | null;
-  validateResult: boolean;
-};
+import type { CartItemInfoType } from '@/components/sale/cart/cart-item/types';
+import type {
+  ServerCartItemType,
+  ErrorCartItemType,
+  ClientErrorCartItemType,
+  NeededCartItemType,
+  BillItemType,
+  PaymentErrorType
+} from '@/views/sale/cart/types';
 
 const cart = useProductsInCart();
 const clientCartItems = ref<ClientCartItemType[]>([]);

@@ -14,5 +14,5 @@
 </template>
 <script setup lang="ts">
 import { RouterView } from 'vue-router';
-import Header from '@/components/sale/header/header.vue';
+import Header from '@/layouts/sale/header/header.vue';
 </script>

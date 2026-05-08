@@ -4,7 +4,8 @@
   ps-border-width-2
   ps-border-style-solid
   ps-py-10
-  ps-mb-30
+  ps-mb-20
+  ps-mt-20
   ps-mx-5">
     <el-image
     :src="user.avatar || UserDefaultImage"
@@ -30,6 +31,5 @@ import paths from '@/router/paths';
 const { push } = useWrapperRouter();
 const user = authStore.getUser();
 const logout = useLogout();
-
 const goToPersonal = () => push(paths.PERSONAL);
 </script>

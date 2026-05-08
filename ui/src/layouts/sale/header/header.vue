@@ -19,13 +19,13 @@
     <SearchBox />
     <div class="ps-display-flex ps-flex-gap-5">
       <PersonalBox />
-      <Cart />
+      <CartNotification />
     </div>
   </header>
 </template>
 <script setup lang="ts">
 import paths from '@/router/paths';
-import Cart from '@/components/sale/cart/cart.vue';
-import SearchBox from '@/components/sale/search-box/search-box.vue';
-import PersonalBox from '@/components/sale/personal-box/personal-box.vue';
+import CartNotification from '@/layouts/sale/cart-notification/cart-notification.vue';
+import SearchBox from '@/layouts/sale/search-box/search-box.vue';
+import PersonalBox from '@/layouts/sale/personal-box/personal-box.vue';
 </script>

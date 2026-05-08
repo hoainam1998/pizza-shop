@@ -23,14 +23,8 @@
     </div>
 </template>
 <script setup lang="ts">
-const { cart } = defineProps<{
-  cart: {
-    name: string;
-    quantity: number;
-    total: number;
-    price: number;
-    noExist: boolean;
-  };
-}>();
+import propsValidator, { type PropsType } from './types';
+
+const { cart } = defineProps(propsValidator) as PropsType;
 </script>
 

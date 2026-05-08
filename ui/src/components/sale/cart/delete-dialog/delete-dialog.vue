@@ -17,7 +17,7 @@ const emit = defineEmits<{
   (e: 'confirm'): void;
 }>();
 
-const close = () => {
+const close = (): void => {
   deleteDialogVisible.value = false;
 };
 

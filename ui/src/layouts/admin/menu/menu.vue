@@ -1,7 +1,6 @@
 <template>
   <div class="menu-wrapper
   ps-w-200px
-  ps-h-75vh
   ps-display-flex
   ps-flex-direction-column
   ps-justify-content-space-between">
@@ -13,7 +12,7 @@
       </RouterLink>
       <el-menu
         ref="menuRef"
-        :default-active="`${paths.HOME}/${paths.HOME.CATEGORY}`"
+        :default-active="defaultPath"
         :router="true"
         :background-color="primaryColor"
         :active-text-color="primaryColor"
@@ -50,6 +49,7 @@ const menuRef = useTemplateRef('menuRef');
 const { push } = useWrapperRouter();
 const route = useRoute();
 const userPower = authStore.getUserPower();
+const defaultPath = `${paths.HOME}/${paths.HOME.CATEGORY}`;
 
 type MenuItem = {
   icon: Component,
@@ -119,7 +119,7 @@ onMounted(() => {
   }
 
   .menu-items {
-    height: calc(75vh - 50px);
+    height: calc(100vh - 60px - 200px);
   }
 }
 </style>
