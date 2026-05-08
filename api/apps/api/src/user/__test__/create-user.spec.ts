@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  HttpStatus,
-  InternalServerErrorException,
-  RequestMethod,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, HttpStatus, InternalServerErrorException, RequestMethod } from '@nestjs/common';
 import { of, throwError } from 'rxjs';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { UserRouter } from '@share/router';
@@ -271,20 +265,20 @@ describe(createDescribeTest(HTTP_METHOD.POST, createUserUrl), () => {
     expect(sendPassword).not.toHaveBeenCalled();
   });
 
-  it(createTestName('create user failed with email was already exist', HttpStatus.UNAUTHORIZED), async () => {
+  it(createTestName('create user failed with email was already exist', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const sendPassword = jest.spyOn(sendEmailService, 'sendPassword');
     const createUserService = jest.spyOn(userService, 'signup');
     const send = jest
       .spyOn(clientProxy, 'send')
       .mockReturnValue(
-        throwError(() => new UnauthorizedException(createMessage(messages.USER.EMAIL_REGIS_ALREADY_EXIST))),
+        throwError(() => new BadRequestException(createMessage(messages.USER.EMAIL_REGIS_ALREADY_EXIST))),
       );
     await api
       .post(createUserUrl)
       .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
-      .expect(HttpStatus.UNAUTHORIZED)
+      .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.EMAIL_REGIS_ALREADY_EXIST));
     expect(createUserService).toHaveBeenCalledTimes(1);
@@ -294,18 +288,18 @@ describe(createDescribeTest(HTTP_METHOD.POST, createUserUrl), () => {
     expect(sendPassword).not.toHaveBeenCalled();
   });
 
-  it(createTestName('create user failed with phone was already exist', HttpStatus.UNAUTHORIZED), async () => {
+  it(createTestName('create user failed with phone was already exist', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const sendPassword = jest.spyOn(sendEmailService, 'sendPassword');
     const createUserService = jest.spyOn(userService, 'signup');
     const send = jest
       .spyOn(clientProxy, 'send')
-      .mockReturnValue(throwError(() => new UnauthorizedException(createMessage(messages.USER.PHONE_ALREADY_EXIST))));
+      .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.USER.PHONE_ALREADY_EXIST))));
     await api
       .post(createUserUrl)
       .set('mock-session', JSON.stringify(sessionPayload))
       .send(requestBody)
-      .expect(HttpStatus.UNAUTHORIZED)
+      .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.PHONE_ALREADY_EXIST));
     expect(createUserService).toHaveBeenCalledTimes(1);

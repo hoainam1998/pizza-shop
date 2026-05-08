@@ -1,6 +1,6 @@
 import { PrismaClient, Prisma, PrismaPromise, user } from 'generated/prisma';
 import messages from '@share/constants/messages';
-import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, HttpException, UnauthorizedException } from '@nestjs/common';
 import {
   createMessage,
   autoGeneratePassword,
@@ -34,9 +34,33 @@ const SEX_VALID = Object.values(SEX);
 const POWER_VALID = Object.values(POWER_NUMERIC);
 const POWER_UPDATE_VALID = [POWER_NUMERIC.ADMIN, POWER_NUMERIC.SALE];
 
+/**
+ * @callback createExceptionCallback
+ * @param {string} message - The exception message.
+ * @returns {HttpException} - The exception.
+ */
+
+/**
+ * Create valid exception.
+ * @param {boolean} isSignup - When user power is super admin then flag is true, otherwise is false.
+ * @returns {createExceptionCallback} - Create exception callback.
+ */
+const createValidException =
+  (isSignup: boolean) =>
+  (message: string): HttpException => {
+    const messageObj = createMessage(message);
+    if (isSignup) {
+      return new UnauthorizedException(messageObj);
+    }
+    return new BadRequestException(messageObj);
+  };
+
 export default (prisma: PrismaClient) => ({
   create: async ({ args, query }: PrismaUserCreateParameter): Promise<UserCreatedReturnType> => {
     const firstTimePassword = autoGeneratePassword();
+    const isSignUp = args.data.power === POWER_NUMERIC.SUPER_ADMIN;
+    const createException = createValidException(isSignUp);
+
     if (Object.hasOwn(args.data, 'sex')) {
       if (!SEX_VALID.includes(args.data.sex!)) {
         throw new BadRequestException(createMessage(USER.YOUR_GENDER_INVALID));
@@ -57,7 +81,7 @@ export default (prisma: PrismaClient) => ({
       });
 
       if (count > 0) {
-        throw new UnauthorizedException(createMessage(USER.EMAIL_REGIS_ALREADY_EXIST));
+        throw createException(USER.EMAIL_REGIS_ALREADY_EXIST);
       }
     }
 
@@ -69,7 +93,7 @@ export default (prisma: PrismaClient) => ({
       });
 
       if (count > 0) {
-        throw new UnauthorizedException(createMessage(USER.PHONE_ALREADY_EXIST));
+        throw createException(USER.PHONE_ALREADY_EXIST);
       }
     }
 
@@ -86,7 +110,7 @@ export default (prisma: PrismaClient) => ({
 
     const user = await query(args);
 
-    await RedisClient.Instance.Client.hSet(REDIS_PREFIX_USER, user.user_id, user.api_key!);
+    await RedisClient.Instance.Client.hSet(REDIS_PREFIX_USER, userId, args.data.api_key!);
 
     return {
       ...user,
