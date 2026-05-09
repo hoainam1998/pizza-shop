@@ -27,4 +27,3 @@ import propsValidator, { type PropsType } from './types';
 
 const { cart } = defineProps(propsValidator) as PropsType;
 </script>
-

@@ -6,9 +6,9 @@ export default {
   },
   setImpactUserApiKey(apiKey: string): void {
     this.clearApiKey();
-    document.cookie = `${constants.IMPACT_USER_API_KEY}=${apiKey}`;
+    document.cookie = `${constants.IMPACT_USER_API_KEY}=${apiKey}; path=/;`;
   },
   clearApiKey(): void {
-    document.cookie = `${constants.IMPACT_USER_API_KEY}=; max-age=0`;
+    document.cookie = `${constants.IMPACT_USER_API_KEY}=; max-age=0; path=/;`;
   },
 };
