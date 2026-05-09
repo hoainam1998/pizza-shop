@@ -21,7 +21,7 @@ const close = (): void => {
   deleteDialogVisible.value = false;
 };
 
-const confirm = () => {
+const confirm = (): void => {
   emit('confirm');
   close();
 };

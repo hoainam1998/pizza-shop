@@ -31,6 +31,15 @@
         <el-button size="small" class="ps-fw-bold" type="danger" @click="deleteUser(props.row)">
           Delete
         </el-button>
+        <el-button
+          v-if="!props.row.isFirstTime"
+          size="small"
+          class="ps-fw-bold"
+          type="primary"
+          plain
+          @click="updatePower(props.row)">
+          {{ props.row.power === POWER.SALE ? 'To admin role' : 'To sale role' }}
+        </el-button>
       </div>
     </template>
   </Table>
@@ -48,7 +57,7 @@ import type { MessageResponseType, TableFieldType } from '@/interfaces';
 import constants from '@/constants';
 import { UserService } from '@/services';
 import { SEX, POWER, USER_FORM_PURPOSE } from '@/enums';
-import { confirmDeleteMessageBox, showErrorNotification } from '@/utils';
+import { confirmDeleteMessageBox, showErrorNotification, showSuccessNotification } from '@/utils';
 import { cookie as cookieStore } from '@/store';
 const PAGE_SIZE = constants.PAGINATION.PAGE_SIZE;
 const PAGE_NUMBER = constants.PAGINATION.PAGE_NUMBER;
@@ -66,6 +75,7 @@ type UserType = {
   sex: number;
   power: number;
   apiKey: string;
+  isFirstTime: boolean;
 };
 
 const showDeleteUserDialog = confirmDeleteMessageBox(
@@ -154,6 +164,20 @@ const deleteUser = (user: UserType): void => {
   showDeleteUserDialog(deleteUserService);
 };
 
+const updatePower = (user: UserType): void => {
+  cookieStore.setImpactUserApiKey(user.apiKey);
+  const power = user.power === POWER.SALE ? POWER.ADMIN : POWER.SALE;
+  UserService.put('update-power', {
+    userId: user.userId,
+    power,
+  }).then((response: AxiosResponse<MessageResponseType>) => {
+    search();
+    showSuccessNotification('Update power!', response.data.messages);
+  }).catch((error: AxiosError<MessageResponseType>) => {
+    showErrorNotification('Update power!', error.response?.data.messages);
+  });
+};
+
 const search = (): void => {
   fetchUsers(userTableRef.value?.pageSize || PAGE_SIZE, PAGE_NUMBER);
 };
@@ -172,6 +196,7 @@ const fetchUsers = (pageSize: number, pageNumber: number): void => {
       sex: true,
       power: true,
       apiKey: true,
+      isFirstTime: true,
     }
   }, { allowNotFound: true }).then((response) => {
     data.value = response.data.list;
