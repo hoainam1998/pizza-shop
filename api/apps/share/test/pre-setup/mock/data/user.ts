@@ -34,7 +34,9 @@ export const resetPasswordToken = signingAdminResetPasswordToken({
   password: plainPassword,
 });
 
-export const createUsers = (length: number): Partial<userPrisma>[] => {
+export const mockApiKey = signApiKey({ userId: user.user_id, email: user.email, power: user.power });
+
+export const createUsers = (length: number, addedFields?: Record<string, any>): Partial<userPrisma>[] => {
   return Array.apply(this, Array(length)).map(() => ({
     user_id: user.user_id,
     first_name: user.first_name,
@@ -44,6 +46,7 @@ export const createUsers = (length: number): Partial<userPrisma>[] => {
     avatar: user.avatar,
     sex: user.sex,
     power: user.power,
+    ...addedFields,
   }));
 };
 

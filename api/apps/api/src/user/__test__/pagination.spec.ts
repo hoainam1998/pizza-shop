@@ -22,7 +22,13 @@ import UserModule from '../user.module';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD, POWER_NUMERIC } from '@share/enums';
 import { createMessage, createMessages } from '@share/utils';
-import { user, createUsers, sessionPayload } from '@share/test/pre-setup/mock/data/user';
+import {
+  user,
+  createUsers,
+  sessionPayload,
+  resetPasswordToken,
+  mockApiKey,
+} from '@share/test/pre-setup/mock/data/user';
 import { UserQuery } from '@share/dto/validators/user.dto';
 import { PaginationUserSerializer } from '@share/dto/serializer/user';
 import { UserRouter } from '@share/router';
@@ -43,12 +49,14 @@ const paginationBody: Record<string, any> = {
     email: true,
     sex: true,
     power: true,
+    apiKey: true,
+    isFirstTime: true,
   },
 };
 
 const length: number = 2;
 const responseData: any = {
-  list: createUsers(length),
+  list: createUsers(length, { reset_password_token: resetPasswordToken, api_key: mockApiKey }),
   total: length,
 };
 const query = UserQuery.plain(paginationBody.query);

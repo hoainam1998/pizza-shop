@@ -214,6 +214,10 @@ export class UserQuery {
   @IsBoolean()
   apiKey: boolean;
 
+  @IsOptional()
+  @IsBoolean()
+  isFirstTime: boolean;
+
   @Expose({ toPlainOnly: true })
   get last_name() {
     return this.lastName;
@@ -227,6 +231,11 @@ export class UserQuery {
   @Expose({ toPlainOnly: true })
   get api_key() {
     return this.apiKey;
+  }
+
+  @Expose({ toPlainOnly: true })
+  get reset_password_token() {
+    return this.isFirstTime;
   }
 
   @Expose({ toPlainOnly: true })
@@ -244,6 +253,7 @@ export class UserQuery {
       target.phone = true;
       target.sex = true;
       target.power = true;
+      target.isFirstTime = true;
     }
     const query = instanceToPlain(plainToInstance(UserQuery, target));
     return instanceToPlain(plainToInstance(UserQueryTransform, query), {
@@ -252,7 +262,7 @@ export class UserQuery {
   }
 }
 
-export class UserQueryTransform extends OmitType(UserQuery, ['firstName', 'lastName', 'apiKey']) {
+export class UserQueryTransform extends OmitType(UserQuery, ['firstName', 'lastName', 'apiKey', 'isFirstTime']) {
   @Exclude()
   firstName: boolean;
 
@@ -261,6 +271,9 @@ export class UserQueryTransform extends OmitType(UserQuery, ['firstName', 'lastN
 
   @Exclude()
   apiKey: boolean;
+
+  @Exclude()
+  isFirstTime: boolean;
 }
 
 export class UserPagination extends Pagination {
