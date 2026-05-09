@@ -56,10 +56,15 @@ export class UserSerializer extends Validator {
   @IsInt()
   power: number;
 
-  @IsOptional()
   @Exclude({ toPlainOnly: true })
+  @IsOptional()
   @IsString()
   api_key: string;
+
+  @Exclude({ toPlainOnly: true })
+  @IsOptional()
+  @IsString()
+  reset_password_token: string;
 
   @Expose({ toPlainOnly: true })
   get userId() {
@@ -82,6 +87,18 @@ export class UserSerializer extends Validator {
     return this.api_key;
   }
 
+  @IsOptional()
+  @Expose({ toPlainOnly: true })
+  get isFirstTime() {
+    return !!this.reset_password_token;
+  }
+
+  @IsOptional()
+  @Expose({ toPlainOnly: true })
+  get resetPasswordToken() {
+    return this.reset_password_token;
+  }
+
   constructor(target: Partial<user>) {
     super();
     Object.assign(this, target);
@@ -93,22 +110,6 @@ export class UserSerializer extends Validator {
 }
 
 export class LoginSerializer extends UserSerializer {
-  @Exclude({ toPlainOnly: true })
-  @IsOptional()
-  @IsString()
-  reset_password_token: string;
-
-  @IsOptional()
-  @Expose({ toPlainOnly: true })
-  get resetPasswordToken() {
-    return this.reset_password_token;
-  }
-
-  @Expose({ toPlainOnly: true })
-  get isFirstTime() {
-    return !!this.reset_password_token;
-  }
-
   static serializer(plain: Record<string, any>): UserLoggedSerializerType {
     return {
       isFirstTime: plain.isFirstTime,

@@ -25,6 +25,7 @@ const query = {
   email: true,
   sex: true,
   power: true,
+  reset_password_token: true,
 };
 
 const paginationBody: any = {
