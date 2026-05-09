@@ -25,6 +25,7 @@ const query = {
   email: true,
   sex: true,
   power: true,
+  api_key: true,
   reset_password_token: true,
 };
 
