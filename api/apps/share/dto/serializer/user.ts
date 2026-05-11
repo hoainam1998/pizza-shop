@@ -2,6 +2,7 @@ import {
   IsArray,
   IsBoolean,
   IsDefined,
+  IsIn,
   IsInt,
   IsOptional,
   IsPhoneNumber,
@@ -13,6 +14,10 @@ import { user } from 'generated/prisma';
 import Validator from './validator';
 import { UserLoggedType, UserPaginationResponse, UserLoggedSerializerType } from '@share/interfaces';
 import { signUserLoggedToken } from '@share/utils';
+import { POWER_NUMERIC, STATUS, SEX } from '@share/enums';
+const power: POWER_NUMERIC[] = [POWER_NUMERIC.SUPER_ADMIN, POWER_NUMERIC.ADMIN, POWER_NUMERIC.SALE];
+const status: STATUS[] = [STATUS.UN_BLOCK, STATUS.BLOCK];
+const sex: SEX[] = [SEX.MALE, SEX.FEMALE];
 
 export class CanSignupSerializer extends Validator {
   @IsBoolean()
@@ -50,11 +55,18 @@ export class UserSerializer extends Validator {
 
   @IsOptional()
   @IsInt()
+  @IsIn(sex)
   sex: number;
 
   @IsOptional()
   @IsInt()
+  @IsIn(power)
   power: number;
+
+  @IsOptional()
+  @IsInt()
+  @IsIn(status)
+  active: number;
 
   @Exclude({ toPlainOnly: true })
   @IsOptional()

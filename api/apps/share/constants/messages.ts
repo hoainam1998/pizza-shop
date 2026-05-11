@@ -23,6 +23,7 @@ export default Object.freeze({
   USER: {
     YOUR_POWER_INVALID: 'Your power invalid!',
     YOUR_GENDER_INVALID: 'Your gender invalid!',
+    YOUR_STATUS_INVALID: 'Your status invalid!',
     SIGNUP_FAILED: 'Signup user was failed!',
     SIGNUP_SUCCESS: 'Signup user was success!. Please check your email!',
     EMAIL_REGIS_ALREADY_EXIST: 'Your email was already regis!',
@@ -41,6 +42,7 @@ export default Object.freeze({
     LOGOUT_USER_FAIL: 'Logout user was fail!',
     UPDATE_PERSONAL_INFO_SUCCESS: 'Update your personal info was success!',
     UPDATE_USER_POWER_SUCCESS: 'Update user power was success!',
+    UPDATE_USER_STATUS_SUCCESS: 'Update user status was success!',
     ONLY_ALLOW_YOUR_SELF: 'Only your self can handle this process!',
     API_KEY_INVALID: 'Your API key is invalid!',
     DO_NOT_PERMISSION: 'You do not permission to handle this process!',
@@ -49,6 +51,7 @@ export default Object.freeze({
     NOT_ALLOW_ADMIN_LOGIN: 'Admin can not access this resource!',
     NOT_UPDATE_POWER_WHO_HAVE_FIRST_LOGIN: 'You can not update power who have not reset password!',
     USER_INFO_OUT_OF_DATE: 'Some thing broken!. Your information do not match with record in database!',
+    YOU_WERE_BLOCKED: 'You were blocked. Please contact my admin!',
   },
   INGREDIENT: {
     CREATE_INGREDIENT_SUCCESS: 'Create ingredient was success!',

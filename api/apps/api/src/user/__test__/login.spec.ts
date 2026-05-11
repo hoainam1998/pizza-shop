@@ -45,7 +45,7 @@ const loginPayload: LoginInfo = {
   by: expect.any(String),
 };
 
-const userExpected = omitFields(['password', 'plain_password', 'session_id'], {
+const userExpected = omitFields(['password', 'plain_password', 'session_id', 'active'], {
   ...user,
   reset_password_token: null,
 }) as UserLoggedType;
@@ -93,7 +93,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
 
   it(createTestName('login success for first time', HttpStatus.OK), async () => {
     expect.hasAssertions();
-    const userExpected = omitFields(['password', 'plain_password', 'session_id'], {
+    const userExpected = omitFields(['password', 'plain_password', 'session_id', 'active'], {
       ...user,
       reset_password_token: resetPasswordToken,
     }) as UserLoggedType;
@@ -210,6 +210,25 @@ describe(createDescribeTest(HTTP_METHOD.POST, loginUrl), () => {
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.PASSWORD_NOT_MATCH));
+    expect(loginService).toHaveBeenCalledTimes(1);
+    expect(loginService).toHaveBeenCalledWith(loginPayload);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledWith(loginPattern, loginPayload);
+  });
+
+  it(createTestName('login failed when user were blocked', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const send = jest
+      .spyOn(clientProxy, 'send')
+      .mockReturnValue(throwError(() => new UnauthorizedException(createMessage(messages.USER.YOU_WERE_BLOCKED))));
+    const loginService = jest.spyOn(userService, 'login');
+    await api
+      .post(loginUrl)
+      .set('Cookie', [`app=${APP_NAME.ADMIN}`])
+      .send(loginInfo)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.YOU_WERE_BLOCKED));
     expect(loginService).toHaveBeenCalledTimes(1);
     expect(loginService).toHaveBeenCalledWith(loginPayload);
     expect(send).toHaveBeenCalledTimes(1);

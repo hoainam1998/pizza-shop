@@ -17,6 +17,7 @@ import {
   updatePersonalInfoPattern,
   deleteUserPattern,
   updateUserCompletePattern,
+  updateStatusPattern,
 } from '@share/pattern';
 import type {
   UserCreatedReturnType,
@@ -26,7 +27,7 @@ import type {
   UserSignupType,
   UserWithOnlySessionIDType,
 } from '@share/interfaces';
-import { LoginInfo, ResetPassword, UpdatePower, UserPagination } from '@share/dto/validators/user.dto';
+import { LoginInfo, ResetPassword, UpdatePower, UpdateStatus, UserPagination } from '@share/dto/validators/user.dto';
 import {
   checkArrayHaveValues,
   comparePassword,
@@ -35,7 +36,7 @@ import {
   verifyAdminResetPasswordToken,
 } from '@share/utils';
 import messages from '@share/constants/messages';
-import { APP_NAME, POWER_NUMERIC } from '@share/enums';
+import { APP_NAME, POWER_NUMERIC, STATUS } from '@share/enums';
 import { SOCKET_SERVICE } from '@share/di-token';
 
 type RequesterFromType = {
@@ -83,6 +84,10 @@ export default class UserController {
   async login(loginInfo: LoginInfo): Promise<UserLoggedType> {
     if (!(await this.userService.checkUserLogged(loginInfo.session_id))) {
       return this.userService.login(loginInfo.email).then(async (user) => {
+        if (user.active === STATUS.BLOCK) {
+          throw new UnauthorizedException(createMessage(messages.USER.YOU_WERE_BLOCKED));
+        }
+
         validateUserPermission(loginInfo, user);
         if (user.session_id) {
           throw new UnauthorizedException(createMessage(messages.USER.ALREADY_LOGIN));
@@ -92,7 +97,7 @@ export default class UserController {
             if (!user.reset_password_token) {
               finalUser = await this.userService.updateUserSessionId(user.user_id, loginInfo.session_id);
             }
-            return omitFields(['password', 'session_id'], finalUser) as UserLoggedType;
+            return omitFields(['password', 'session_id', 'active'], finalUser) as UserLoggedType;
           }
           throw new UnauthorizedException(createMessage(messages.USER.PASSWORD_NOT_MATCH));
         }
@@ -111,8 +116,12 @@ export default class UserController {
 
       if (isSame) {
         return this.userService
-          .getUser({ email: resetPasswordBody.email }, { password: true, power: true })
+          .getUser({ email: resetPasswordBody.email }, { password: true, power: true, active: true })
           .then((user: user) => {
+            if (user.active === STATUS.BLOCK) {
+              throw new UnauthorizedException(createMessage(messages.USER.YOU_WERE_BLOCKED));
+            }
+
             validateUserPermission(resetPasswordBody, user);
             if (comparePassword(resetPasswordBody.oldPassword, user.password)) {
               return this.userService.resetPassword(resetPasswordBody);
@@ -172,6 +181,15 @@ export default class UserController {
   @HandleServiceError
   updatePower(payload: UpdatePower): Promise<user> {
     return this.userService.updatePower(payload).then(async (user) => {
+      await this.userService.logout(user.user_id);
+      return user;
+    });
+  }
+
+  @MessagePattern(updateStatusPattern)
+  @HandleServiceError
+  updateStatus(payload: UpdateStatus): Promise<user> {
+    return this.userService.updateStatus(payload).then(async (user) => {
       await this.userService.logout(user.user_id);
       return user;
     });

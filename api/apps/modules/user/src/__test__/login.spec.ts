@@ -11,7 +11,7 @@ import { createMessage, omitFields } from '@share/utils';
 import messages from '@share/constants/messages';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { LoginInfo } from '@share/dto/validators/user.dto';
-import { POWER_NUMERIC, APP_NAME } from '@share/enums';
+import { POWER_NUMERIC, APP_NAME, STATUS } from '@share/enums';
 
 let loggerService: LoggingService;
 let userController: UserController;
@@ -42,7 +42,7 @@ describe('login', () => {
     const updateUserSessionId = jest.spyOn(userService, 'updateUserSessionId').mockImplementation(jest.fn());
     const loginController = jest.spyOn(userController, 'login');
     await expect(userController.login(loginInfo)).resolves.toEqual(
-      omitFields(['password', 'session_id'], userFirstTimeLogin),
+      omitFields(['password', 'session_id', 'active'], userFirstTimeLogin),
     );
     expect(loginController).toHaveBeenCalledTimes(1);
     expect(checkUserLogged).toHaveBeenCalledTimes(1);
@@ -61,7 +61,9 @@ describe('login', () => {
     const login = jest.spyOn(userService, 'login').mockResolvedValue(userAlreadyLogin);
     const updateUserSessionId = jest.spyOn(userService, 'updateUserSessionId').mockResolvedValue(user);
     const loginController = jest.spyOn(userController, 'login');
-    await expect(userController.login(loginInfo)).resolves.toEqual(omitFields(['password', 'session_id'], user));
+    await expect(userController.login(loginInfo)).resolves.toEqual(
+      omitFields(['password', 'session_id', 'active'], user),
+    );
     expect(loginController).toHaveBeenCalledTimes(1);
     expect(checkUserLogged).toHaveBeenCalledTimes(1);
     expect(checkUserLogged).toHaveBeenCalledWith(loginInfo.session_id);
@@ -178,6 +180,29 @@ describe('login', () => {
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
   });
 
+  it('login failed when user were blocked', async () => {
+    expect.hasAssertions();
+    const userBlocked = { ...userAlreadyLogin, active: STATUS.BLOCK };
+    const comparePassword = jest.spyOn(bcrypt, 'compareSync').mockReturnValue(true);
+    const logMethod = jest.spyOn(loggerService, 'error');
+    const checkUserLogged = jest.spyOn(userService, 'checkUserLogged').mockResolvedValue(false);
+    const login = jest.spyOn(userService, 'login').mockResolvedValue(userBlocked);
+    const updateUserSessionId = jest.spyOn(userService, 'updateUserSessionId');
+    const loginController = jest.spyOn(userController, 'login');
+    await expect(userController.login(loginInfo)).rejects.toThrow(
+      new RpcException(new UnauthorizedException(createMessage(messages.USER.YOU_WERE_BLOCKED))),
+    );
+    expect(loginController).toHaveBeenCalledTimes(1);
+    expect(checkUserLogged).toHaveBeenCalledTimes(1);
+    expect(checkUserLogged).toHaveBeenCalledWith(loginInfo.session_id);
+    expect(login).toHaveBeenCalledTimes(1);
+    expect(login).toHaveBeenCalledWith(loginInfo.email);
+    expect(updateUserSessionId).not.toHaveBeenCalled();
+    expect(comparePassword).not.toHaveBeenCalled();
+    expect(logMethod).toHaveBeenCalledTimes(1);
+    expect(logMethod).toHaveBeenCalledWith(messages.USER.YOU_WERE_BLOCKED, expect.any(String));
+  });
+
   it('login failed with updateUserSessionId got unknown error', async () => {
     expect.hasAssertions();
     const comparePassword = jest.spyOn(bcrypt, 'compareSync').mockReturnValue(true);
@@ -202,7 +227,7 @@ describe('login', () => {
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
   });
 
-  it('login failed with login got not found error', async () => {
+  it('login failed with not found error', async () => {
     expect.hasAssertions();
     const checkUserLogged = jest.spyOn(userService, 'checkUserLogged').mockResolvedValue(false);
     const comparePassword = jest.spyOn(bcrypt, 'compareSync');

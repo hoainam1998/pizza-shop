@@ -20,8 +20,9 @@ import constants from '@share/constants';
 import { UserRequestType } from '@share/interfaces';
 import Validator from '@share/dto/serializer/validator';
 import { Pagination } from '@share/dto/validators/common.dto';
-import { APP_NAME, POWER_NUMERIC } from '@share/enums';
+import { APP_NAME, POWER_NUMERIC, STATUS } from '@share/enums';
 const power: POWER_NUMERIC[] = [POWER_NUMERIC.ADMIN, POWER_NUMERIC.SALE];
+const status: STATUS[] = [STATUS.UN_BLOCK, STATUS.BLOCK];
 
 export class UserDTO {
   @Exclude({ toPlainOnly: true })
@@ -212,6 +213,10 @@ export class UserQuery {
 
   @IsOptional()
   @IsBoolean()
+  active: boolean;
+
+  @IsOptional()
+  @IsBoolean()
   apiKey: boolean;
 
   @IsOptional()
@@ -253,6 +258,7 @@ export class UserQuery {
       target.phone = true;
       target.sex = true;
       target.power = true;
+      target.active = true;
       target.isFirstTime = true;
     }
     const query = instanceToPlain(plainToInstance(UserQuery, target));
@@ -350,7 +356,32 @@ export class UpdatePower {
   }
 }
 
+export class UpdateStatus {
+  @IsInt()
+  @IsIn(status)
+  active: number;
+
+  @IsNumberString()
+  @Length(13)
+  userId: string;
+
+  @Expose({ toPlainOnly: true })
+  get user_id() {
+    return this.userId;
+  }
+
+  static plain(target: UpdateStatus): Record<string, any> {
+    const updateStatusPlain = instanceToPlain(plainToInstance(UpdateStatus, target));
+    return instanceToPlain(plainToInstance(UpdateStatusTransform, updateStatusPlain));
+  }
+}
+
 export class UpdatePowerTransform extends OmitType(UpdatePower, ['userId']) {
+  @Exclude()
+  userId: string;
+}
+
+export class UpdateStatusTransform extends OmitType(UpdateStatus, ['userId']) {
   @Exclude()
   userId: string;
 }

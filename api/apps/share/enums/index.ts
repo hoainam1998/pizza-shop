@@ -42,3 +42,8 @@ export enum POWER_NUMERIC {
 export enum REDIS_SUBSCRIBE_NAME {
   LOGOUT = 'logout',
 }
+
+export enum STATUS {
+  UN_BLOCK,
+  BLOCK,
+}

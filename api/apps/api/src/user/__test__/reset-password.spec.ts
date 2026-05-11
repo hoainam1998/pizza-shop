@@ -160,6 +160,25 @@ describe(createDescribeTest(HTTP_METHOD.POST, resetPasswordUrl), () => {
     expect(send).toHaveBeenCalledWith(resetPasswordPattern, resetPasswordPayload);
   });
 
+  it(createTestName('reset password failed with user were blocked', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const send = jest
+      .spyOn(clientProxy, 'send')
+      .mockReturnValue(throwError(() => new UnauthorizedException(createMessage(messages.USER.YOU_WERE_BLOCKED))));
+    const resetPasswordService = jest.spyOn(userService, 'resetPassword');
+    await api
+      .post(resetPasswordUrl)
+      .set('Cookie', [`app=${APP_NAME.ADMIN}`])
+      .send(requestBody)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.YOU_WERE_BLOCKED));
+    expect(resetPasswordService).toHaveBeenCalledTimes(1);
+    expect(resetPasswordService).toHaveBeenCalledWith(resetPasswordPayload);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledWith(resetPasswordPattern, resetPasswordPayload);
+  });
+
   it(createTestName('reset password failed with rpc unknown error', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest

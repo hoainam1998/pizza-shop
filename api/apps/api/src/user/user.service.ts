@@ -12,6 +12,7 @@ import {
   getUserDetailPattern,
   updateUserPattern,
   updatePowerPattern,
+  updateStatusPattern,
   deleteUserPattern,
   logoutPattern,
   updatePersonalInfoPattern,
@@ -62,6 +63,10 @@ export default class UserService {
 
   updatePower(payload: Record<string, any>): Observable<user> {
     return this.user.send<user>(updatePowerPattern, payload);
+  }
+
+  updateStatus(payload: Record<string, any>): Observable<user> {
+    return this.user.send<user>(updateStatusPattern, payload);
   }
 
   deleteUser(userId: string): Observable<UserWithOnlySessionIDType> {
