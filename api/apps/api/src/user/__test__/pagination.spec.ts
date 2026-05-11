@@ -49,6 +49,7 @@ const paginationBody: Record<string, any> = {
     email: true,
     sex: true,
     power: true,
+    active: true,
     apiKey: true,
     isFirstTime: true,
   },

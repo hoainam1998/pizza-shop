@@ -20,6 +20,7 @@ export const resetPasswordPattern = createMicroserviceEvent('reset_password');
 export const getUserDetailPattern = createMicroserviceEvent('get_user');
 export const updateUserPattern = createMicroserviceEvent('update');
 export const updatePowerPattern = createMicroserviceEvent('update-power');
+export const updateStatusPattern = createMicroserviceEvent('update-status');
 export const updatePersonalInfoPattern = createMicroserviceEvent('update-personal-info');
 export const deleteUserPattern = createMicroserviceEvent('delete');
 

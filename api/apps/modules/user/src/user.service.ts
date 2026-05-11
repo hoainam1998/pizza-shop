@@ -10,7 +10,13 @@ import type {
   UserWithOnlySessionIDType,
 } from '@share/interfaces';
 import { calcSkip, createMessage } from '@share/utils';
-import { ResetPassword, UserPagination, LoginSessionPayload, UpdatePower } from '@share/dto/validators/user.dto';
+import {
+  ResetPassword,
+  UserPagination,
+  LoginSessionPayload,
+  UpdatePower,
+  UpdateStatus,
+} from '@share/dto/validators/user.dto';
 import UserCachingService from '@share/libs/caching/user/user.service';
 import ProductCachingService from '@share/libs/caching/product/product.service';
 import ReportCachingService from '@share/libs/caching/report/report.service';
@@ -248,5 +254,17 @@ export default class UserService {
         }
         throw new BadRequestException(createMessage(messages.USER.NOT_UPDATE_POWER_WHO_HAVE_FIRST_LOGIN));
       });
+  }
+
+  @HandlePrismaError(messages.USER)
+  updateStatus(payload: UpdateStatus): Promise<user> {
+    return this.prismaClient.user.update({
+      where: {
+        user_id: payload.user_id,
+      },
+      data: {
+        active: payload.active,
+      },
+    });
   }
 }

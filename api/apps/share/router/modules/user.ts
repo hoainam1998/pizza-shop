@@ -23,6 +23,7 @@ export default class UserRouter extends RouterBase {
     UserRouter.createRouterPath('detail');
     UserRouter.createRouterPath('update');
     UserRouter.createRouterPath('update-power');
+    UserRouter.createRouterPath('update-status');
     UserRouter.createRouterPath('update-personal-info');
     UserRouter.createRouterPath('delete', ':userId');
   }

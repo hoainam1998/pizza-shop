@@ -39,6 +39,7 @@ import {
   UserDelete,
   UpdatePersonalInfo,
   UpdatePower,
+  UpdateStatus,
 } from '@share/dto/validators/user.dto';
 import { ImageTransformPipe } from '@share/pipes';
 import { createMessage } from '@share/utils';
@@ -209,6 +210,7 @@ export default class UserController extends BaseController {
         const response = new PaginationUserSerializer(result);
         const errors = await response.validate();
         if (errors.length) {
+          console.log(errors);
           this.logError(errors, this.pagination.name);
           throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
         }
@@ -278,9 +280,21 @@ export default class UserController extends BaseController {
   @Put(UserRouter.relative.updatePower)
   @HandleHttpError
   updatePower(@Body() payload: UpdatePower): Observable<MessageSerializer> {
-    const updatePowerPayload = UpdatePower.plain(payload);
+    const updateStatusPayload = UpdatePower.plain(payload);
     return this.userService
-      .updatePower(updatePowerPayload)
+      .updatePower(updateStatusPayload)
       .pipe(map(() => MessageSerializer.create(messages.USER.UPDATE_USER_POWER_SUCCESS)));
+  }
+
+  @Roles(POWER_NUMERIC.SUPER_ADMIN)
+  @UseGuards(RolesGuard, DoNotAllowUpdateSelfGuard)
+  @HttpCode(HttpStatus.CREATED)
+  @Put(UserRouter.relative.updateStatus)
+  @HandleHttpError
+  updateStatus(@Body() payload: UpdateStatus): Observable<MessageSerializer> {
+    const updateStatusPayload = UpdateStatus.plain(payload);
+    return this.userService
+      .updateStatus(updateStatusPayload)
+      .pipe(map(() => MessageSerializer.create(messages.USER.UPDATE_USER_STATUS_SUCCESS)));
   }
 }

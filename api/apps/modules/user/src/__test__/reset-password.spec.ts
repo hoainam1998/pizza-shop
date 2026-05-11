@@ -17,7 +17,7 @@ import { createMessage, autoGeneratePassword } from '@share/utils';
 import messages from '@share/constants/messages';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { ResetPassword } from '@share/dto/validators/user.dto';
-import { APP_NAME, POWER_NUMERIC } from '@share/enums';
+import { APP_NAME, POWER_NUMERIC, STATUS } from '@share/enums';
 
 let loggerService: LoggingService;
 let userController: UserController;
@@ -37,7 +37,7 @@ const jwtPayload: jwt.JwtPayload = {
   password: oldPassword,
 };
 
-const getUserParameters = { password: true, power: true };
+const getUserParameters = { password: true, power: true, active: true };
 
 beforeAll(async () => {
   const moduleRef = await startUp();
@@ -244,6 +244,29 @@ describe('reset password', () => {
     expect(compareSync).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenLastCalledWith(messages.USER.NOT_FOUND, expect.any(String));
+  });
+
+  it('reset password failed with user were blocked', async () => {
+    expect.hasAssertions();
+    const userBlocked = { ...user, active: STATUS.BLOCK };
+    const logMethod = jest.spyOn(loggerService, 'error');
+    const verify = jest.spyOn(jwt, 'verify').mockReturnValue(jwtPayload as any);
+    const compareSync = jest.spyOn(bcrypt, 'compareSync');
+    const getUserService = jest.spyOn(userService, 'getUser').mockResolvedValue(userBlocked);
+    const resetPasswordService = jest.spyOn(userService, 'resetPassword');
+    const resetPasswordController = jest.spyOn(userController, 'resetPassword');
+    await expect(userController.resetPassword(resetPasswordBody)).rejects.toThrow(
+      new RpcException(new UnauthorizedException(messages.USER.YOU_WERE_BLOCKED)),
+    );
+    expect(resetPasswordController).toHaveBeenCalledTimes(1);
+    expect(verify).toHaveBeenCalledTimes(1);
+    expect(verify).toHaveBeenCalledWith(resetPasswordBody.token, process.env.ADMIN_RESET_PASSWORD_SECRET_KEY);
+    expect(getUserService).toHaveBeenCalledTimes(1);
+    expect(getUserService).toHaveBeenCalledWith({ email: resetPasswordBody.email }, getUserParameters);
+    expect(resetPasswordService).not.toHaveBeenCalled();
+    expect(compareSync).not.toHaveBeenCalled();
+    expect(logMethod).toHaveBeenCalledTimes(1);
+    expect(logMethod).toHaveBeenLastCalledWith(messages.USER.YOU_WERE_BLOCKED, expect.any(String));
   });
 
   it('reset password failed with getUser got not found error', async () => {

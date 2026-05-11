@@ -1,5 +1,4 @@
 import { PrismaClient, Prisma, PrismaPromise, user } from 'generated/prisma';
-import messages from '@share/constants/messages';
 import { BadRequestException, HttpException, UnauthorizedException } from '@nestjs/common';
 import {
   createMessage,
@@ -10,8 +9,9 @@ import {
   signApiKey,
 } from '@share/utils';
 import constants from '@share/constants';
+import messages from '@share/constants/messages';
 import { type UserCreatedReturnType } from '@share/interfaces';
-import { POWER_NUMERIC, SEX } from '@share/enums';
+import { POWER_NUMERIC, SEX, STATUS } from '@share/enums';
 import RedisClient from '@share/libs/redis-client/redis';
 const REDIS_PREFIX_USER = constants.REDIS_PREFIX.USER;
 
@@ -30,8 +30,9 @@ type PrismaUserUpdateParameter = {
 };
 
 const USER = messages.USER;
-const SEX_VALID = Object.values(SEX);
-const POWER_VALID = Object.values(POWER_NUMERIC);
+const SEX_VALID = [SEX.FEMALE, SEX.MALE];
+const USER_STATUS = [STATUS.UN_BLOCK, STATUS.BLOCK];
+const POWER_VALID = [POWER_NUMERIC.SUPER_ADMIN, POWER_NUMERIC.ADMIN, POWER_NUMERIC.SALE];
 const POWER_UPDATE_VALID = [POWER_NUMERIC.ADMIN, POWER_NUMERIC.SALE];
 
 /**
@@ -70,6 +71,12 @@ export default (prisma: PrismaClient) => ({
     if (Object.hasOwn(args.data, 'power')) {
       if (!POWER_VALID.includes(args.data.power!)) {
         throw new BadRequestException(createMessage(USER.YOUR_POWER_INVALID));
+      }
+    }
+
+    if (Object.hasOwn(args.data, 'active')) {
+      if (!USER_STATUS.includes(args.data.active!)) {
+        throw new BadRequestException(createMessage(USER.YOUR_STATUS_INVALID));
       }
     }
 
@@ -137,6 +144,12 @@ export default (prisma: PrismaClient) => ({
       if (Object.hasOwn(args.data, 'power')) {
         if (!POWER_UPDATE_VALID.includes(args.data.power! as number)) {
           throw new BadRequestException(createMessage(USER.YOUR_POWER_INVALID));
+        }
+      }
+
+      if (Object.hasOwn(args.data, 'active')) {
+        if (!USER_STATUS.includes(args.data.active! as number)) {
+          throw new BadRequestException(createMessage(USER.YOUR_STATUS_INVALID));
         }
       }
 
