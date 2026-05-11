@@ -36,6 +36,11 @@ export enum POWER {
   SALE = 2,
 }
 
+export enum STATUS {
+  UN_BLOCK = 0,
+  BLOCK = 1,
+}
+
 export enum SEX {
   FEMALE = 1,
   MALE = 0,
