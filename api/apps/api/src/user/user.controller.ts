@@ -210,7 +210,6 @@ export default class UserController extends BaseController {
         const response = new PaginationUserSerializer(result);
         const errors = await response.validate();
         if (errors.length) {
-          console.log(errors);
           this.logError(errors, this.pagination.name);
           throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
         }
@@ -280,9 +279,9 @@ export default class UserController extends BaseController {
   @Put(UserRouter.relative.updatePower)
   @HandleHttpError
   updatePower(@Body() payload: UpdatePower): Observable<MessageSerializer> {
-    const updateStatusPayload = UpdatePower.plain(payload);
+    const updatePowerPayload = UpdatePower.plain(payload);
     return this.userService
-      .updatePower(updateStatusPayload)
+      .updatePower(updatePowerPayload)
       .pipe(map(() => MessageSerializer.create(messages.USER.UPDATE_USER_POWER_SUCCESS)));
   }
 
