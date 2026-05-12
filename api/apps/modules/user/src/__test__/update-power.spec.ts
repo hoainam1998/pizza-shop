@@ -1,9 +1,9 @@
-import { RpcException } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaClient } from 'generated/prisma';
 import LoggingService from '@share/libs/logging/logging.service';
 import startUp from './pre-setup';
-import { PRISMA_CLIENT } from '@share/di-token';
+import { PRISMA_CLIENT, SOCKET_SERVICE } from '@share/di-token';
 import UserController from '../user.controller';
 import UserService from '../user.service';
 import { user } from '@share/test/pre-setup/mock/data/user';
@@ -12,11 +12,13 @@ import { createMessage } from '@share/utils';
 import messages from '@share/constants/messages';
 import { PrismaDisconnectError, PrismaNotFoundError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { POWER_NUMERIC } from '@share/enums';
+import { updateUserCompletePattern } from '@share/pattern';
 
 let prismaService: PrismaClient;
 let loggerService: LoggingService;
 let userController: UserController;
 let userService: UserService;
+let socketService: ClientProxy;
 
 const payload: any = {
   user_id: user.user_id,
@@ -34,6 +36,7 @@ beforeAll(async () => {
   userController = moduleRef.get(UserController);
   loggerService = moduleRef.get(LoggingService);
   prismaService = moduleRef.get(PRISMA_CLIENT);
+  socketService = moduleRef.get(SOCKET_SERVICE);
 });
 
 describe('update user power', () => {
@@ -44,6 +47,7 @@ describe('update user power', () => {
       .mockResolvedValue(userAlreadyResetPassword);
     const update = jest.spyOn(prismaService.user, 'update').mockResolvedValue(user);
     const logout = jest.spyOn(userService, 'logout').mockResolvedValue(null);
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
     const updatePowerService = jest.spyOn(userService, 'updatePower');
     const updatePowerController = jest.spyOn(userController, 'updatePower');
     await expect(userController.updatePower(payload)).resolves.toBe(user);
@@ -65,6 +69,8 @@ describe('update user power', () => {
         user_id: payload.user_id,
       },
     });
+    expect(emit).toHaveBeenCalledTimes(1);
+    expect(emit).toHaveBeenCalledWith(updateUserCompletePattern, user.user_id);
     expect(logout).toHaveBeenCalledTimes(1);
     expect(logout).toHaveBeenCalledWith(payload.user_id);
   });
@@ -75,6 +81,7 @@ describe('update user power', () => {
     const findUniqueOrThrow = jest.spyOn(prismaService.user, 'findUniqueOrThrow').mockRejectedValue(UnknownError);
     const update = jest.spyOn(prismaService.user, 'update');
     const logout = jest.spyOn(userService, 'logout');
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
     const updatePowerService = jest.spyOn(userService, 'updatePower');
     const updatePowerController = jest.spyOn(userController, 'updatePower');
     await expect(userController.updatePower(payload)).rejects.toThrow(
@@ -91,6 +98,7 @@ describe('update user power', () => {
     });
     expect(update).not.toHaveBeenCalled();
     expect(logout).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
   });
@@ -103,6 +111,7 @@ describe('update user power', () => {
       .mockResolvedValue(userAlreadyResetPassword);
     const update = jest.spyOn(prismaService.user, 'update').mockRejectedValue(UnknownError);
     const logout = jest.spyOn(userService, 'logout');
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
     const updatePowerService = jest.spyOn(userService, 'updatePower');
     const updatePowerController = jest.spyOn(userController, 'updatePower');
     await expect(userController.updatePower(payload)).rejects.toThrow(
@@ -127,6 +136,7 @@ describe('update user power', () => {
       },
     });
     expect(logout).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
   });
@@ -139,6 +149,7 @@ describe('update user power', () => {
       .mockRejectedValue(PrismaNotFoundError);
     const update = jest.spyOn(prismaService.user, 'update');
     const logout = jest.spyOn(userService, 'logout');
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
     const updatePowerService = jest.spyOn(userService, 'updatePower');
     const updatePowerController = jest.spyOn(userController, 'updatePower');
     await expect(userController.updatePower(payload)).rejects.toThrow(
@@ -155,6 +166,7 @@ describe('update user power', () => {
     });
     expect(update).not.toHaveBeenCalled();
     expect(logout).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).not.toHaveBeenCalled();
   });
 
@@ -166,6 +178,7 @@ describe('update user power', () => {
       .mockResolvedValue(userAlreadyResetPassword);
     const update = jest.spyOn(prismaService.user, 'update').mockRejectedValue(PrismaNotFoundError);
     const logout = jest.spyOn(userService, 'logout');
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
     const updatePowerService = jest.spyOn(userService, 'updatePower');
     const updatePowerController = jest.spyOn(userController, 'updatePower');
     await expect(userController.updatePower(payload)).rejects.toThrow(
@@ -189,6 +202,7 @@ describe('update user power', () => {
         user_id: payload.user_id,
       },
     });
+    expect(emit).not.toHaveBeenCalled();
     expect(logout).not.toHaveBeenCalled();
     expect(logMethod).not.toHaveBeenCalled();
   });
@@ -201,6 +215,7 @@ describe('update user power', () => {
       .mockRejectedValue(PrismaDisconnectError);
     const update = jest.spyOn(prismaService.user, 'update');
     const logout = jest.spyOn(userService, 'logout');
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
     const updatePowerService = jest.spyOn(userService, 'updatePower');
     const updatePowerController = jest.spyOn(userController, 'updatePower');
     await expect(userController.updatePower(payload)).rejects.toThrow(
@@ -217,6 +232,7 @@ describe('update user power', () => {
     });
     expect(update).not.toHaveBeenCalled();
     expect(logout).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(PrismaDisconnectError.message, expect.any(String));
   });
@@ -229,6 +245,7 @@ describe('update user power', () => {
       .mockResolvedValue(userAlreadyResetPassword);
     const update = jest.spyOn(prismaService.user, 'update').mockRejectedValue(PrismaDisconnectError);
     const logout = jest.spyOn(userService, 'logout');
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
     const updatePowerService = jest.spyOn(userService, 'updatePower');
     const updatePowerController = jest.spyOn(userController, 'updatePower');
     await expect(userController.updatePower(payload)).rejects.toThrow(
@@ -253,6 +270,7 @@ describe('update user power', () => {
       },
     });
     expect(logout).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(PrismaDisconnectError.message, expect.any(String));
   });
@@ -263,6 +281,7 @@ describe('update user power', () => {
     const findUniqueOrThrow = jest.spyOn(prismaService.user, 'findUniqueOrThrow').mockResolvedValue(user);
     const update = jest.spyOn(prismaService.user, 'update');
     const logout = jest.spyOn(userService, 'logout');
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
     const updatePowerService = jest.spyOn(userService, 'updatePower');
     const updatePowerController = jest.spyOn(userController, 'updatePower');
     await expect(userController.updatePower(payload)).rejects.toThrow(
@@ -279,8 +298,53 @@ describe('update user power', () => {
     });
     expect(update).not.toHaveBeenCalled();
     expect(logout).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(messages.USER.NOT_UPDATE_POWER_WHO_HAVE_FIRST_LOGIN, expect.any(String));
+  });
+
+  it('update user power failed with invalid power', async () => {
+    expect.hasAssertions();
+    const payloadWithAdminRole = {
+      ...payload,
+      power: POWER_NUMERIC.SUPER_ADMIN,
+    };
+    const logMethod = jest.spyOn(loggerService, 'error');
+    const findUniqueOrThrow = jest
+      .spyOn(prismaService.user, 'findUniqueOrThrow')
+      .mockResolvedValue(userAlreadyResetPassword);
+    const update = jest
+      .spyOn(prismaService.user, 'update')
+      .mockRejectedValue(new BadRequestException(createMessage(messages.USER.YOUR_POWER_INVALID)));
+    const logout = jest.spyOn(userService, 'logout');
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
+    const updatePowerService = jest.spyOn(userService, 'updatePower');
+    const updatePowerController = jest.spyOn(userController, 'updatePower');
+    await expect(userController.updatePower(payloadWithAdminRole)).rejects.toThrow(
+      new RpcException(new BadRequestException(createMessage(messages.USER.YOUR_POWER_INVALID))),
+    );
+    expect(updatePowerController).toHaveBeenCalledTimes(1);
+    expect(updatePowerService).toHaveBeenCalledTimes(1);
+    expect(updatePowerService).toHaveBeenCalledWith(payloadWithAdminRole);
+    expect(findUniqueOrThrow).toHaveBeenCalledTimes(1);
+    expect(findUniqueOrThrow).toHaveBeenCalledWith({
+      where: {
+        user_id: payloadWithAdminRole.user_id,
+      },
+    });
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(update).toHaveBeenCalledWith({
+      data: {
+        power: payloadWithAdminRole.power,
+      },
+      where: {
+        user_id: payloadWithAdminRole.user_id,
+      },
+    });
+    expect(logout).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
+    expect(logMethod).toHaveBeenCalledTimes(1);
+    expect(logMethod).toHaveBeenCalledWith(messages.USER.YOUR_POWER_INVALID, expect.any(String));
   });
 
   it('update user power failed with logout got database disconnect error', async () => {
@@ -293,6 +357,7 @@ describe('update user power', () => {
     const logout = jest.spyOn(userService, 'logout').mockImplementation(() => {
       throw new RpcException(new BadRequestException(PrismaDisconnectError.message));
     });
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
     const updatePowerService = jest.spyOn(userService, 'updatePower');
     const updatePowerController = jest.spyOn(userController, 'updatePower');
     await expect(userController.updatePower(payload)).rejects.toThrow(
@@ -318,6 +383,7 @@ describe('update user power', () => {
     });
     expect(logout).toHaveBeenCalledTimes(1);
     expect(logout).toHaveBeenCalledWith(user.user_id);
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(PrismaDisconnectError.message, expect.any(String));
   });
@@ -330,6 +396,7 @@ describe('update user power', () => {
       .mockResolvedValue(userAlreadyResetPassword);
     const update = jest.spyOn(prismaService.user, 'update').mockResolvedValue(user);
     const logout = jest.spyOn(userService, 'logout').mockRejectedValue(UnknownError);
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
     const updatePowerService = jest.spyOn(userService, 'updatePower');
     const updatePowerController = jest.spyOn(userController, 'updatePower');
     await expect(userController.updatePower(payload)).rejects.toThrow(
@@ -354,6 +421,7 @@ describe('update user power', () => {
     });
     expect(logout).toHaveBeenCalledTimes(1);
     expect(logout).toHaveBeenCalledWith(user.user_id);
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
   });
@@ -368,6 +436,7 @@ describe('update user power', () => {
     const logout = jest.spyOn(userService, 'logout').mockImplementation(() => {
       throw new RpcException(new NotFoundException(messages.USER.NOT_FOUND));
     });
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
     const updatePowerService = jest.spyOn(userService, 'updatePower');
     const updatePowerController = jest.spyOn(userController, 'updatePower');
     await expect(userController.updatePower(payload)).rejects.toThrow(
@@ -393,6 +462,7 @@ describe('update user power', () => {
     });
     expect(logout).toHaveBeenCalledTimes(1);
     expect(logout).toHaveBeenCalledWith(user.user_id);
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).not.toHaveBeenCalled();
   });
 });
