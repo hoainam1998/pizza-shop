@@ -2,7 +2,7 @@ import constants from '@/constants';
 
 export default {
   setAppName(): void {
-    document.cookie = `app=${isSale ? 'sale' : 'admin'}`;
+    document.cookie = `app=${isSale ? 'sale' : 'admin'}; path=/;`;
   },
   setImpactUserApiKey(apiKey: string): void {
     this.clearApiKey();

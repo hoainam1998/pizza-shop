@@ -40,6 +40,14 @@
           @click="updatePower(props.row)">
           {{ props.row.power === POWER.SALE ? 'To admin role' : 'To sale role' }}
         </el-button>
+        <el-button
+          type="warning"
+          size="small"
+          class="ps-fw-bold"
+          plain
+          @click="updateStatus(props.row)">
+          {{ props.row.active === STATUS.UN_BLOCK ? 'Block' : 'Un block' }}
+        </el-button>
       </div>
     </template>
   </Table>
@@ -56,7 +64,7 @@ import UserDefaultImage from '@/assets/images/user.png';
 import type { MessageResponseType, TableFieldType } from '@/interfaces';
 import constants from '@/constants';
 import { UserService } from '@/services';
-import { SEX, POWER, USER_FORM_PURPOSE } from '@/enums';
+import { SEX, POWER, STATUS, USER_FORM_PURPOSE } from '@/enums';
 import { confirmDeleteMessageBox, showErrorNotification, showSuccessNotification } from '@/utils';
 import { cookie as cookieStore } from '@/store';
 const PAGE_SIZE = constants.PAGINATION.PAGE_SIZE;
@@ -74,6 +82,7 @@ type UserType = {
   phone: string;
   sex: number;
   power: number;
+  active: number;
   apiKey: string;
   isFirstTime: boolean;
 };
@@ -118,7 +127,7 @@ const fields: TableFieldType[] = [
   {
     label: 'Sex',
     key: 'sex',
-    width: 150,
+    width: 120,
   },
   {
     key: 'operation',
@@ -178,6 +187,20 @@ const updatePower = (user: UserType): void => {
   });
 };
 
+const updateStatus = (user: UserType): void => {
+  cookieStore.setImpactUserApiKey(user.apiKey);
+  const active = user.active === STATUS.UN_BLOCK ? STATUS.BLOCK : STATUS.UN_BLOCK;
+  UserService.put('update-status', {
+    userId: user.userId,
+    active,
+  }).then((response: AxiosResponse<MessageResponseType>) => {
+    search();
+    showSuccessNotification('Update user status!', response.data.messages);
+  }).catch((error: AxiosError<MessageResponseType>) => {
+    showErrorNotification('Update user status!', error.response?.data.messages);
+  });
+};
+
 const search = (): void => {
   fetchUsers(userTableRef.value?.pageSize || PAGE_SIZE, PAGE_NUMBER);
 };
@@ -195,6 +218,7 @@ const fetchUsers = (pageSize: number, pageNumber: number): void => {
       phone: true,
       sex: true,
       power: true,
+      active: true,
       apiKey: true,
       isFirstTime: true,
     }
