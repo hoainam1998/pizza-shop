@@ -191,6 +191,7 @@ export default class UserController {
   updateStatus(payload: UpdateStatus): Promise<user> {
     return this.userService.updateStatus(payload).then(async (user) => {
       await this.userService.logout(user.user_id);
+      this.socketService.emit(updateUserCompletePattern, user.user_id);
       return user;
     });
   }
