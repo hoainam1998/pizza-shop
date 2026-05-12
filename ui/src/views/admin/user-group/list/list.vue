@@ -127,7 +127,7 @@ const fields: TableFieldType[] = [
   {
     label: 'Sex',
     key: 'sex',
-    width: 150,
+    width: 120,
   },
   {
     key: 'operation',
