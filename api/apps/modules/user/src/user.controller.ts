@@ -182,6 +182,7 @@ export default class UserController {
   updatePower(payload: UpdatePower): Promise<user> {
     return this.userService.updatePower(payload).then(async (user) => {
       await this.userService.logout(user.user_id);
+      this.socketService.emit(updateUserCompletePattern, user.user_id);
       return user;
     });
   }
