@@ -1,22 +1,25 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { PrismaClient } from 'generated/prisma';
 import startUp from './pre-setup';
 import UserController from '../user.controller';
 import UserService from '../user.service';
 import { user } from '@share/test/pre-setup/mock/data/user';
 import { bill } from '@share/test/pre-setup/mock/data/bill';
-import { PRISMA_CLIENT } from '@share/di-token';
+import { PRISMA_CLIENT, SOCKET_SERVICE } from '@share/di-token';
 import LoggingService from '@share/libs/logging/logging.service';
 import { PrismaDisconnectError, PrismaNotFoundError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import messages from '@share/constants/messages';
 import { createMessage } from '@share/utils';
+import { updateUserCompletePattern } from '@share/pattern';
 
 let userController: UserController;
 let userService: UserService;
 let prismaService: PrismaClient;
 let loggerService: LoggingService;
+let socketService: ClientProxy;
+
 const userId = user.user_id;
 const bills = [bill];
 const billIds = bills.map((bill) => bill.bill_id);
@@ -28,6 +31,7 @@ beforeAll(async () => {
   userController = moduleRef.get(UserController);
   loggerService = moduleRef.get(LoggingService);
   prismaService = moduleRef.get(PRISMA_CLIENT);
+  socketService = moduleRef.get(SOCKET_SERVICE);
 });
 
 describe('delete user', () => {
@@ -42,13 +46,12 @@ describe('delete user', () => {
     const deleteManyBillPrismaMethod = jest.spyOn(prismaService.bill, 'deleteMany').mockImplementation(jest.fn());
     const deleteUserPrismaMethod = jest.spyOn(prismaService.user, 'delete').mockImplementation(jest.fn());
     const logout = jest.spyOn(userService, 'logout').mockResolvedValue(null);
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
     const deleteUserServiceMethod = jest.spyOn(userService, 'delete');
     const deleteUserControllerMethod = jest.spyOn(userController, 'delete');
     await expect(userController.delete(userId)).resolves.toBe(user);
     expect(deleteUserControllerMethod).toHaveBeenCalledTimes(1);
     expect(deleteUserControllerMethod).toHaveBeenCalledWith(userId);
-    expect(logout).toHaveBeenCalledTimes(1);
-    expect(logout).toHaveBeenCalledWith(userId);
     expect(deleteUserServiceMethod).toHaveBeenCalledTimes(1);
     expect(deleteUserServiceMethod).toHaveBeenCalledWith(userId);
     expect(findManyBillPrismaMethod).toHaveBeenCalledTimes(1);
@@ -85,6 +88,10 @@ describe('delete user', () => {
         session_id: true,
       },
     });
+    expect(logout).toHaveBeenCalledTimes(1);
+    expect(logout).toHaveBeenCalledWith(userId);
+    expect(emit).toHaveBeenCalledTimes(1);
+    expect(emit).toHaveBeenCalledWith(updateUserCompletePattern, userId);
     expect(logMethod).not.toHaveBeenCalled();
   });
 
@@ -97,6 +104,7 @@ describe('delete user', () => {
     const deleteManyBillPrismaMethod = jest.spyOn(prismaService.bill, 'deleteMany').mockImplementation(jest.fn());
     const deleteUserPrismaMethod = jest.spyOn(prismaService.user, 'delete').mockImplementation(jest.fn());
     const logout = jest.spyOn(userService, 'logout').mockResolvedValue(null);
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
     const deleteUserServiceMethod = jest.spyOn(userService, 'delete');
     const deleteUserControllerMethod = jest.spyOn(userController, 'delete');
     await expect(userController.delete(userId)).rejects.toThrow(
@@ -121,6 +129,7 @@ describe('delete user', () => {
     expect(transaction).not.toHaveBeenCalled();
     expect(deleteManyBillPrismaMethod).not.toHaveBeenCalled();
     expect(deleteUserPrismaMethod).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).not.toHaveBeenCalled();
   });
 
@@ -136,14 +145,13 @@ describe('delete user', () => {
     const deleteUserPrismaMethod = jest.spyOn(prismaService.user, 'delete').mockImplementation(jest.fn());
     const deleteUserServiceMethod = jest.spyOn(userService, 'delete');
     const logout = jest.spyOn(userService, 'logout').mockResolvedValue(null);
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
     const deleteUserControllerMethod = jest.spyOn(userController, 'delete');
     await expect(userController.delete(userId)).rejects.toThrow(
       new RpcException(new BadRequestException(createMessage(messages.USER.NOT_FOUND))),
     );
     expect(deleteUserControllerMethod).toHaveBeenCalledTimes(1);
     expect(deleteUserControllerMethod).toHaveBeenCalledWith(userId);
-    expect(logout).toHaveBeenCalledTimes(1);
-    expect(logout).toHaveBeenCalledWith(userId);
     expect(deleteUserServiceMethod).toHaveBeenCalledTimes(1);
     expect(deleteUserServiceMethod).toHaveBeenCalledWith(userId);
     expect(findManyBillPrismaMethod).toHaveBeenCalledTimes(1);
@@ -166,6 +174,9 @@ describe('delete user', () => {
     expect(transaction).not.toHaveBeenCalled();
     expect(deleteManyBillPrismaMethod).not.toHaveBeenCalled();
     expect(deleteUserPrismaMethod).not.toHaveBeenCalled();
+    expect(logout).toHaveBeenCalledTimes(1);
+    expect(logout).toHaveBeenCalledWith(userId);
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).not.toHaveBeenCalled();
   });
 
@@ -181,14 +192,13 @@ describe('delete user', () => {
     const deleteUserPrismaMethod = jest.spyOn(prismaService.user, 'delete');
     const deleteUserServiceMethod = jest.spyOn(userService, 'delete');
     const logout = jest.spyOn(userService, 'logout').mockResolvedValue(null);
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
     const deleteUserControllerMethod = jest.spyOn(userController, 'delete');
     await expect(userController.delete(userId)).rejects.toThrow(
       new RpcException(new BadRequestException(createMessage(messages.USER.NOT_FOUND))),
     );
     expect(deleteUserControllerMethod).toHaveBeenCalledTimes(1);
     expect(deleteUserControllerMethod).toHaveBeenCalledWith(userId);
-    expect(logout).toHaveBeenCalledTimes(1);
-    expect(logout).toHaveBeenCalledWith(userId);
     expect(deleteUserServiceMethod).toHaveBeenCalledTimes(1);
     expect(deleteUserServiceMethod).toHaveBeenCalledWith(userId);
     expect(findManyBillPrismaMethod).toHaveBeenCalledTimes(1);
@@ -225,6 +235,9 @@ describe('delete user', () => {
         session_id: true,
       },
     });
+    expect(logout).toHaveBeenCalledTimes(1);
+    expect(logout).toHaveBeenCalledWith(userId);
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).not.toHaveBeenCalled();
   });
 
@@ -237,6 +250,7 @@ describe('delete user', () => {
     const deleteManyBillPrismaMethod = jest.spyOn(prismaService.bill, 'deleteMany').mockImplementation(jest.fn());
     const deleteUserPrismaMethod = jest.spyOn(prismaService.user, 'delete').mockImplementation(jest.fn());
     const logout = jest.spyOn(userService, 'logout').mockResolvedValue(null);
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
     const deleteUserServiceMethod = jest.spyOn(userService, 'delete');
     const deleteUserControllerMethod = jest.spyOn(userController, 'delete');
     await expect(userController.delete(userId)).rejects.toThrow(
@@ -261,6 +275,7 @@ describe('delete user', () => {
     expect(transaction).not.toHaveBeenCalled();
     expect(deleteManyBillPrismaMethod).not.toHaveBeenCalled();
     expect(deleteUserPrismaMethod).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
   });
@@ -276,6 +291,7 @@ describe('delete user', () => {
     const deleteManyBillPrismaMethod = jest.spyOn(prismaService.bill, 'deleteMany').mockImplementation(jest.fn());
     const deleteUserPrismaMethod = jest.spyOn(prismaService.user, 'delete').mockImplementation(jest.fn());
     const logout = jest.spyOn(userService, 'logout').mockResolvedValue(null);
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
     const deleteUserServiceMethod = jest.spyOn(userService, 'delete');
     const deleteUserControllerMethod = jest.spyOn(userController, 'delete');
     await expect(userController.delete(userId)).rejects.toThrow(
@@ -307,6 +323,7 @@ describe('delete user', () => {
     expect(transaction).not.toHaveBeenCalled();
     expect(deleteManyBillPrismaMethod).not.toHaveBeenCalled();
     expect(deleteUserPrismaMethod).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
   });
@@ -314,6 +331,7 @@ describe('delete user', () => {
   it('delete user failed with transaction got unknown error', async () => {
     expect.hasAssertions();
     const logout = jest.spyOn(userService, 'logout').mockResolvedValue(null);
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
     const logMethod = jest.spyOn(loggerService, 'error');
     const findManyBillPrismaMethod = jest.spyOn(prismaService.bill, 'findMany').mockResolvedValue(bills);
     const deleteManyBillDetailPrismMethod = jest
@@ -367,6 +385,7 @@ describe('delete user', () => {
         session_id: true,
       },
     });
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
   });
@@ -374,6 +393,7 @@ describe('delete user', () => {
   it('delete user failed with database disconnect error', async () => {
     expect.hasAssertions();
     const logout = jest.spyOn(userService, 'logout').mockResolvedValue(null);
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
     const logMethod = jest.spyOn(loggerService, 'error');
     const findManyBillPrismaMethod = jest
       .spyOn(prismaService.bill, 'findMany')
@@ -406,6 +426,7 @@ describe('delete user', () => {
     expect(transaction).not.toHaveBeenCalled();
     expect(deleteManyBillPrismaMethod).not.toHaveBeenCalled();
     expect(deleteUserPrismaMethod).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(PrismaDisconnectError.message, expect.any(String));
   });
@@ -421,6 +442,7 @@ describe('delete user', () => {
     const logout = jest.spyOn(userService, 'logout').mockImplementation(() => {
       throw new RpcException(new BadRequestException(PrismaDisconnectError.message));
     });
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
     const deleteUserServiceMethod = jest.spyOn(userService, 'delete');
     const deleteUserControllerMethod = jest.spyOn(userController, 'delete');
     await expect(userController.delete(userId)).rejects.toThrow(
@@ -436,6 +458,7 @@ describe('delete user', () => {
     expect(transaction).not.toHaveBeenCalled();
     expect(deleteManyBillPrismaMethod).not.toHaveBeenCalled();
     expect(deleteUserPrismaMethod).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(PrismaDisconnectError.message, expect.any(String));
   });
@@ -449,6 +472,7 @@ describe('delete user', () => {
     const deleteManyBillPrismaMethod = jest.spyOn(prismaService.bill, 'deleteMany');
     const deleteUserPrismaMethod = jest.spyOn(prismaService.user, 'delete');
     const logout = jest.spyOn(userService, 'logout').mockRejectedValue(UnknownError);
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
     const deleteUserServiceMethod = jest.spyOn(userService, 'delete');
     const deleteUserControllerMethod = jest.spyOn(userController, 'delete');
     await expect(userController.delete(userId)).rejects.toThrow(
@@ -464,6 +488,7 @@ describe('delete user', () => {
     expect(transaction).not.toHaveBeenCalled();
     expect(deleteManyBillPrismaMethod).not.toHaveBeenCalled();
     expect(deleteUserPrismaMethod).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
   });
@@ -479,6 +504,7 @@ describe('delete user', () => {
     const logout = jest.spyOn(userService, 'logout').mockImplementation(() => {
       throw new RpcException(new NotFoundException(messages.USER.NOT_FOUND));
     });
+    const emit = jest.spyOn(socketService, 'emit').mockImplementation(jest.fn());
     const deleteUserServiceMethod = jest.spyOn(userService, 'delete');
     const deleteUserControllerMethod = jest.spyOn(userController, 'delete');
     await expect(userController.delete(userId)).rejects.toThrow(
@@ -494,6 +520,7 @@ describe('delete user', () => {
     expect(transaction).not.toHaveBeenCalled();
     expect(deleteManyBillPrismaMethod).not.toHaveBeenCalled();
     expect(deleteUserPrismaMethod).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).not.toHaveBeenCalled();
   });
 });
