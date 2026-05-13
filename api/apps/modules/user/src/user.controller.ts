@@ -174,7 +174,9 @@ export default class UserController {
   @HandleServiceError
   async delete(userId: string): Promise<UserWithOnlySessionIDType> {
     await this.userService.logout(userId);
-    return this.userService.delete(userId);
+    const user = await this.userService.delete(userId);
+    this.socketService.emit(updateUserCompletePattern, userId);
+    return user;
   }
 
   @MessagePattern(updatePowerPattern)
