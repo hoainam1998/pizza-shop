@@ -37,7 +37,7 @@ export default class SchedulerService {
       }
       this.logger.warn(messages.PRODUCT.SCHEDULE_UPDATE_STATE_PRODUCT_FAILED, actionName);
     } catch (error) {
-      this.logger.error(error.message as string, actionName);
+      this.logger.error((error as Error).message, actionName);
     }
   }
 
@@ -46,7 +46,7 @@ export default class SchedulerService {
       this.schedulerRegistry.deleteCronJob(jobName);
       this.logger.log(`${jobName} was cancel!`, actionName);
     } catch (error) {
-      this.logger.error(error.message as string, actionName);
+      this.logger.error((error as Error).message, actionName);
     }
   }
 
@@ -73,7 +73,7 @@ export default class SchedulerService {
         this.logger.warn(messages.COMMON.EXECUTION_FAIL, actionName);
       }
     } catch (error) {
-      this.logger.error(error.message as string, actionName);
+      this.logger.error((error as Error).message, actionName);
     }
   }
 }
