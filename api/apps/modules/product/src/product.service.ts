@@ -648,15 +648,19 @@ export default class ProductService {
   private loadDataPurchaseVolumeChartAtSpecificTime(timeline: number): Promise<void> {
     const start = new Date(timeline);
     const end = new Date(timeline);
+    const upperLimit = new Date();
+    const lowerLimit = new Date();
     start.setMinutes(0, 0, 0);
     end.setMinutes(59, 59, 59);
-    const upperLimit = new Date();
     upperLimit.setHours(23, 59, 59, 59);
-    const lowerLimit = new Date();
     lowerLimit.setHours(7, 0, 0, 0);
+    const lowerLimitTimestamp = lowerLimit.getTime();
+    const upperLimitTimestamp = upperLimit.getTime();
+    const startTimestamp = start.getTime();
+    const endTimestamp = end.getTime();
 
-    if (timeline >= start.getTime() && timeline < end.getTime()) {
-      return this.getBillsAtSpecificTime(start.getTime(), end.getTime())
+    if (timeline >= lowerLimitTimestamp && timeline < upperLimitTimestamp) {
+      return this.getBillsAtSpecificTime(startTimestamp, endTimestamp)
         .then((bills) => {
           return bills.reduce(
             (data, bill) => {
@@ -695,7 +699,7 @@ export default class ProductService {
     const minimumTimestamp = set(new Date(), { hours: 7, minutes: 0, seconds: 0, milliseconds: 0 }).getTime();
     const currentTimestamp = current.getTime();
 
-    if (current.getTime() <= limitTimestamp) {
+    if (currentTimestamp <= limitTimestamp) {
       if (currentTimestamp <= minimumTimestamp) {
         start = sub(new Date(), { days: 1 });
         start.setHours(7, 0, 0, 0);
@@ -710,7 +714,7 @@ export default class ProductService {
       }
     } else {
       const endOfDayTimestamp = endOfDay(current).getTime();
-      if (current.getTime() <= endOfDayTimestamp) {
+      if (currentTimestamp <= endOfDayTimestamp) {
         end = set(new Date(), { hours: 23, minutes: 59, seconds: 59, milliseconds: 59 });
         start = set(new Date(), { hours: 7, minutes: 0, seconds: 0, milliseconds: 0 });
       } else {

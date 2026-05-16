@@ -11,6 +11,7 @@ import {
   Param,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { type Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -48,6 +49,9 @@ import BaseController from '../controller';
 import { ProductRouter } from '@share/router';
 import { ProductPaginationResponse } from '@share/interfaces';
 import { createMessage } from '@share/utils';
+import { Roles } from '@share/decorators/auths';
+import RolesGuard from '@share/guards/roles.service';
+import { POWER_NUMERIC } from '@share/enums';
 
 @Controller(ProductRouter.BaseUrl)
 export default class ProductController extends BaseController {
@@ -272,6 +276,8 @@ export default class ProductController extends BaseController {
   }
 
   @SkipThrottle()
+  @Roles(POWER_NUMERIC.SUPER_ADMIN)
+  @UseGuards(RolesGuard)
   @Post(ProductRouter.relative.loadDataPurchaseVolumeChart)
   @HttpCode(HttpStatus.OK)
   @HandleHttpError

@@ -143,3 +143,7 @@ export const bill = {
   capital,
   created_at: Date.now().toString(),
 };
+
+export const createBills = (length: number): (typeof bill)[] => {
+  return Array.apply(this, Array(length)).map(() => bill);
+};
