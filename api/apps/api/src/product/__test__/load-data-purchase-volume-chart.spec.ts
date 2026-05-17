@@ -9,7 +9,7 @@ import ProductService from '../product.service';
 import ProductController from '../product.controller';
 import messages from '@share/constants/messages';
 import { sessionPayload } from '@share/test/pre-setup/mock/data/user';
-import { HTTP_METHOD } from '@share/enums';
+import { HTTP_METHOD, POWER_NUMERIC } from '@share/enums';
 import { createDescribeTest, createTestName, getMockModule } from '@share/test/helpers';
 import { ProductRouter } from '@share/router';
 import { loadDataPurchaseVolumeChartPattern } from '@share/pattern';
@@ -82,6 +82,25 @@ describe(createDescribeTest(HTTP_METHOD.POST, loadDataPurchaseVolumeChartUrl), (
         .expect(HttpStatus.UNAUTHORIZED)
         .expect('Content-Type', /application\/json/)
         .expect(createMessages(messages.USER.DID_NOT_LOGIN));
+      expect(loadDataPurchaseVolumeChart).not.toHaveBeenCalled();
+      expect(send).not.toHaveBeenCalled();
+      expect(logError).not.toHaveBeenCalled();
+    },
+  );
+
+  it(
+    createTestName('load data purchase volume chart failed with user do not have permission', HttpStatus.UNAUTHORIZED),
+    async () => {
+      expect.hasAssertions();
+      const logError = jest.spyOn(productController as any, 'logError');
+      const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(chartResponse));
+      const loadDataPurchaseVolumeChart = jest.spyOn(productService, 'loadDataPurchaseVolumeChart');
+      await api
+        .post(loadDataPurchaseVolumeChartUrl)
+        .set('mock-session', JSON.stringify({ ...sessionPayload, power: POWER_NUMERIC.SALE }))
+        .expect(HttpStatus.UNAUTHORIZED)
+        .expect('Content-Type', /application\/json/)
+        .expect(createMessages(messages.USER.DO_NOT_PERMISSION));
       expect(loadDataPurchaseVolumeChart).not.toHaveBeenCalled();
       expect(send).not.toHaveBeenCalled();
       expect(logError).not.toHaveBeenCalled();
