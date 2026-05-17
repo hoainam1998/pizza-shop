@@ -16,7 +16,7 @@ import { OmitType } from '@nestjs/mapped-types';
 import { Status } from 'generated/prisma';
 import { Pagination } from './common.dto';
 import { CHART_BY } from '@share/enums';
-const chartBy = Object.values(CHART_BY);
+const chartBy = [CHART_BY.DAY, CHART_BY.MONTH, CHART_BY.QUARTER, CHART_BY.YEAR];
 
 class IngredientSelect {
   @IsOptional()
