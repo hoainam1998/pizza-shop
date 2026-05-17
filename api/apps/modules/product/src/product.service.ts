@@ -46,8 +46,20 @@ import { addDataChartEventPattern, refreshProductInfoPattern } from '@share/patt
 
 const billMessages = messages.BILL;
 
+type TimeRangeType = {
+  start?: string;
+  end?: string;
+  range?: Date[];
+  selectable: boolean;
+  step: StepFnType;
+};
 type ActionFnType = (start: number, end: number, coreDate: DataChartType) => void;
-type StepFnType = (action: ActionFnType, startIndex?: number, coreData?: DataChartType) => DataChartType;
+type StepFnType = (
+  self: Required<TimeRangeType>,
+  action: ActionFnType,
+  startIndex?: number,
+  coreData?: DataChartType,
+) => DataChartType;
 
 @Injectable()
 export default class ProductService {
@@ -537,30 +549,27 @@ export default class ProductService {
     const { time, by } = payload;
 
     function step(
+      self: Required<TimeRangeType>,
       action: ActionFnType,
       startIndex: number = 0,
       coreData: DataChartType = { revenue: [], capital: [], labels: [] },
     ) {
       const nextIndex = startIndex + 1;
-      if (nextIndex < this.range.length) {
-        const start: number = this.range[startIndex].getTime();
-        const next: number = this.range[nextIndex].getTime();
+      if (nextIndex < self.range.length) {
+        const start: number = self.range[startIndex].getTime();
+        const next: number = self.range[nextIndex].getTime();
         action(start, next, coreData);
-        this.step(action, nextIndex, coreData);
-        if (nextIndex === this.range.length - 1) {
-          action(next, +this.end, coreData);
+        self.step(self, action, nextIndex, coreData);
+        if (nextIndex === self.range.length - 1) {
+          action(next, +self.end, coreData);
         }
       }
       return coreData;
     }
 
-    const timeRange: {
-      start?: string;
-      end?: string;
-      range?: Date[];
-      step: StepFnType;
-    } = {
+    const timeRange: TimeRangeType = {
       step,
+      selectable: false,
     };
 
     const assignTimeRange = (start: Date, end: Date, range: Date[]): void => {
@@ -568,6 +577,7 @@ export default class ProductService {
         start: start.getTime().toString(),
         end: end.getTime().toString(),
         range,
+        selectable: true,
       });
     };
 
@@ -609,21 +619,29 @@ export default class ProductService {
         break;
     }
 
-    return this.prismaClient.bill
-      .findMany({
-        where: {
-          created_at: {
-            gte: timeRange.start,
-            lt: timeRange.end,
+    if (timeRange.selectable) {
+      return this.prismaClient.bill
+        .findMany({
+          where: {
+            created_at: {
+              gte: timeRange.start,
+              lt: timeRange.end,
+            },
           },
-        },
-        select: {
-          capital: true,
-          complete_total: true,
-          created_at: true,
-        },
-      })
-      .then((bills) => timeRange.step(action(bills, by)) as RevenueDataChart);
+          select: {
+            capital: true,
+            complete_total: true,
+            created_at: true,
+          },
+        })
+        .then((bills) => timeRange.step(timeRange as Required<TimeRangeType>, action(bills, by)) as RevenueDataChart);
+    } else {
+      return Promise.resolve({
+        revenue: [],
+        capital: [],
+        labels: [],
+      });
+    }
   }
 
   private getBillsAtSpecificTime(
