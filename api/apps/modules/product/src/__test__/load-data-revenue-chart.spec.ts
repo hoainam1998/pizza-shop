@@ -1,17 +1,17 @@
+import { BadRequestException } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import { PrismaClient } from 'generated/prisma';
 import startUp from './pre-setup';
 import ProductController from '../product.controller';
 import ProductService from '../product.service';
+import * as helper from '../chart-helper.helper';
 import { PRISMA_CLIENT } from '@share/di-token';
 import { createBills } from '@share/test/pre-setup/mock/data/bill';
 import { CHART_BY } from '@share/enums';
-import * as helper from '../chart-helper.helper';
 import { DataChartType } from '@share/interfaces';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
-import { RpcException } from '@nestjs/microservices';
-import { BadRequestException } from '@nestjs/common';
-import messages from '@share/constants/messages';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
+import messages from '@share/constants/messages';
 
 let productController: ProductController;
 let productService: ProductService;

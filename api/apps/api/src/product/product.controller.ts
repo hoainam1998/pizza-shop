@@ -238,6 +238,8 @@ export default class ProductController extends BaseController {
   }
 
   @SkipThrottle()
+  @Roles(POWER_NUMERIC.SUPER_ADMIN)
+  @UseGuards(RolesGuard)
   @Post(ProductRouter.relative.loadDataBestSellingProductsChart)
   @HttpCode(HttpStatus.OK)
   @HandleHttpError

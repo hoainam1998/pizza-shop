@@ -9,7 +9,7 @@ import ProductService from '../product.service';
 import ProductController from '../product.controller';
 import messages from '@share/constants/messages';
 import { sessionPayload } from '@share/test/pre-setup/mock/data/user';
-import { HTTP_METHOD, POWER_NUMERIC } from '@share/enums';
+import { HTTP_METHOD, POWER_NUMERIC, CHART_BY } from '@share/enums';
 import { createDescribeTest, createTestName, getMockModule } from '@share/test/helpers';
 import { ProductRouter } from '@share/router';
 import { loadDataRevenueChartPattern } from '@share/pattern';
@@ -17,7 +17,6 @@ import { createMessages } from '@share/utils';
 import { RevenueDataChart } from '@share/dto/serializer/product';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
-import { CHART_BY } from '@share/enums';
 const loadDataRevenueChartUrl = ProductRouter.absolute.loadDataRevenueChart;
 
 const MockProductModule = getMockModule(ProductModule, {
