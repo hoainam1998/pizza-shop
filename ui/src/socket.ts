@@ -52,7 +52,11 @@ export default class SocketService {
    * @param {(payload: any) => void} callback - The callback event.
    */
   static subscribe(eventName: SOCKET_EVENT_NAME, callback: (payload: any) => void): void {
-    this.subscribers.push(createSubscriber(eventName, callback));
+    if (this._io?.connected) {
+      this._io?.on(eventName, callback);
+    } else {
+      this.subscribers.push(createSubscriber(eventName, callback));
+    }
   }
 
   /**
