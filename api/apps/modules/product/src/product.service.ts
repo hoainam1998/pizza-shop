@@ -432,16 +432,16 @@ export default class ProductService {
   @HandlePrismaError(messages.PRODUCT)
   loadDataBestSellingProductsChart(payload: ChartRequestPayload): Promise<BestSellingProductDataChartItem[]> {
     const { time, by } = payload;
-    let timeRange: {
-      start?: string;
-      end?: string;
-    } = {};
+    const timeRange: Omit<TimeRangeType, 'range' | 'step'> = {
+      selectable: false,
+    };
 
     const assignTimeRange = (startDate: Date, endDate: Date): void => {
-      timeRange = {
+      Object.assign(timeRange, {
         start: startDate.getTime().toString(),
         end: endDate.getTime().toString(),
-      };
+        selectable: true,
+      });
     };
 
     switch (by) {
@@ -478,70 +478,74 @@ export default class ProductService {
         break;
     }
 
-    return this.prismaClient.bill
-      .findMany({
-        where: {
-          created_at: {
-            gte: timeRange.start,
-            lt: timeRange.end,
-          },
-        },
-        select: {
-          bill_detail: {
-            select: {
-              product: {
-                select: {
-                  name: true,
-                },
-              },
-              product_id: true,
-              count: true,
+    if (timeRange.selectable) {
+      return this.prismaClient.bill
+        .findMany({
+          where: {
+            created_at: {
+              gte: timeRange.start,
+              lt: timeRange.end,
             },
           },
-          created_at: true,
-        },
-      })
-      .then((bills) => {
-        return bills.reduce<BestSellingProductDataChartItem[]>((products, bill) => {
-          products = products.concat(
-            Array.from(
-              bill.bill_detail
-                .reduce((collect, productInBill) => {
-                  if (collect.has(productInBill.product_id)) {
-                    const item = collect.get(productInBill.product_id);
-                    item.count += productInBill.count;
-                    collect.set(productInBill.product_id, item);
-                  } else {
-                    collect.set(productInBill.product_id, {
-                      id: productInBill.product_id,
-                      name: productInBill.product.name,
-                      count: productInBill.count,
-                    });
-                  }
-                  return collect;
-                }, new Map())
-                .values(),
-            ).flat(),
-          );
-          return products;
-        }, []);
-      })
-      .then((products) => {
-        return Array.from(
-          products
-            .reduce((mergedCollection, product) => {
-              if (mergedCollection.has(product.id)) {
-                const item = mergedCollection.get(product.id);
-                item.count += product.count;
-                mergedCollection.set(product.id, item);
-              } else {
-                mergedCollection.set(product.id, product);
-              }
-              return mergedCollection;
-            }, new Map())
-            .values(),
-        ).flat();
-      });
+          select: {
+            bill_detail: {
+              select: {
+                product: {
+                  select: {
+                    name: true,
+                  },
+                },
+                product_id: true,
+                count: true,
+              },
+            },
+            created_at: true,
+          },
+        })
+        .then((bills) => {
+          return bills.reduce<BestSellingProductDataChartItem[]>((products, bill) => {
+            products = products.concat(
+              Array.from(
+                bill.bill_detail
+                  .reduce((collect, productInBill) => {
+                    if (collect.has(productInBill.product_id)) {
+                      const item = collect.get(productInBill.product_id);
+                      item.count += productInBill.count;
+                      collect.set(productInBill.product_id, item);
+                    } else {
+                      collect.set(productInBill.product_id, {
+                        id: productInBill.product_id,
+                        name: productInBill.product.name,
+                        count: productInBill.count,
+                      });
+                    }
+                    return collect;
+                  }, new Map())
+                  .values(),
+              ).flat(),
+            );
+            return products;
+          }, []);
+        })
+        .then((products) => {
+          return Array.from(
+            products
+              .reduce((mergedCollection, product) => {
+                if (mergedCollection.has(product.id)) {
+                  const item = mergedCollection.get(product.id);
+                  item.count += product.count;
+                  mergedCollection.set(product.id, item);
+                } else {
+                  mergedCollection.set(product.id, product);
+                }
+                return mergedCollection;
+              }, new Map())
+              .values(),
+          ).flat();
+        });
+    } else {
+      return Promise.resolve([]);
+    }
   }
 
   @HandlePrismaError(messages.PRODUCT)
