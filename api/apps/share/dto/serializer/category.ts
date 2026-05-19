@@ -9,6 +9,7 @@ import {
   IsNumberString,
 } from 'class-validator';
 import { Exclude, Expose, Type } from 'class-transformer';
+import { category } from 'generated/prisma';
 import Validator from './validator';
 
 export class CategoryDetail extends Validator {
@@ -28,21 +29,28 @@ export class CategoryDetail extends Validator {
   get categoryId() {
     return this.category_id;
   }
+
+  constructor(target: category) {
+    super();
+    Object.assign(this, target);
+  }
 }
 
 export class CategoryFormatter extends CategoryDetail {
   @IsOptional()
   @Exclude({ toPlainOnly: true })
-  _count: any = {};
+  _count: {
+    product?: number;
+  } = {};
 
   @Expose()
   @IsOptional()
   get disabled() {
-    return Object.hasOwn(this._count, 'product') ? this._count.product > 0 : undefined;
+    return Object.hasOwn(this._count, 'product') ? this._count.product! > 0 : undefined;
   }
 
-  constructor(target: any) {
-    super();
+  constructor(target: CategoryFormatter) {
+    super(target);
     Object.assign(this, target);
   }
 }
@@ -69,7 +77,7 @@ export class CategoryPaginationSerializer extends Validator {
 
 export class CategoryDetailSerializer extends CategoryDetail {
   constructor(target: Omit<CategoryDetailSerializer, 'categoryId' | 'validate'>) {
-    super();
+    super(target);
     Object.assign(this, target);
   }
 }

@@ -38,7 +38,7 @@ export class CategoryQuery {
   @IsOptional()
   disabled: boolean;
 
-  @Expose({ toPlainOnly: true, groups: ['include_id'] })
+  @Expose({ toPlainOnly: true })
   get category_id() {
     return true;
   }
@@ -54,30 +54,19 @@ export class CategoryQuery {
     }
   }
 
-  static plainWithIncludeId(target: CategoryQuery): Record<string, any> {
+  static plain(target: CategoryQuery, selectDisableField: boolean = false): Record<string, any> {
     if (Object.values(target).every((v) => v === undefined)) {
       target.name = true;
       target.avatar = true;
-      target.disabled = true;
-    }
-    const query = instanceToPlain(plainToInstance(CategoryQuery, target), { groups: ['include_id'] });
-    const queryExcludeDisabled = instanceToPlain(plainToInstance(CategoryQueryTransform, query), {
-      exposeUnsetFields: false,
-    });
-    return queryExcludeDisabled;
-  }
-
-  static plainWithExcludeId(target: CategoryQuery): Record<string, any> {
-    if (Object.values(target).every((v) => v === undefined)) {
-      target.name = true;
-      target.avatar = true;
+      if (selectDisableField) {
+        target.disabled = true;
+      }
     }
 
     const query = instanceToPlain(plainToInstance(CategoryQuery, target));
-    const queryExcludeDisabled = instanceToPlain(plainToInstance(CategoryQueryTransform, query), {
+    return instanceToPlain(plainToInstance(CategoryQueryTransform, query), {
       exposeUnsetFields: false,
     });
-    return queryExcludeDisabled;
   }
 }
 

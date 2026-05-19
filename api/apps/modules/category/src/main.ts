@@ -13,10 +13,7 @@ async function bootstrap() {
   await app
     .listen()
     .then(() =>
-      Logger.log(
-        `Ingredient module started at port: ${process.env.CATEGORY_MICROSERVICE_TCP_PORT}`,
-        CategoryModule.name,
-      ),
+      Logger.log(`Category module started at port: ${process.env.CATEGORY_MICROSERVICE_TCP_PORT}`, CategoryModule.name),
     );
 }
 bootstrap();

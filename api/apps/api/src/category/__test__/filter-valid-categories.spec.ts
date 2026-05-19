@@ -6,7 +6,7 @@ import {
   RequestMethod,
 } from '@nestjs/common';
 import { of, throwError } from 'rxjs';
-import { instanceToPlain, plainToInstance } from 'class-transformer';
+import { instanceToPlain } from 'class-transformer';
 import { ValidationError } from 'class-validator';
 import { expect } from '@jest/globals';
 import { ClientProxy } from '@nestjs/microservices';
@@ -23,8 +23,8 @@ import CategoryController from '../category.controller';
 import CategoryModule from '../category.module';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
-import { Categories, CategoryDetailSerializer } from '@share/dto/serializer/category';
-import { createMessage, createMessages } from '@share/utils';
+import { Categories } from '@share/dto/serializer/category';
+import { createMessages } from '@share/utils';
 import { CategoryRouter } from '@share/router';
 const filterValidCategoriesUrl: string = CategoryRouter.absolute.filterValidCategories;
 

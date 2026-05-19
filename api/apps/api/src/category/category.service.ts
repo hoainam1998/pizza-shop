@@ -12,7 +12,7 @@ import {
   getAllCategoriesPattern,
   filterValidCategoriesPattern,
 } from '@share/pattern';
-import { CategoryDto, CategoryQuery, GetCategory, PaginationCategory } from '@share/dto/validators/category.dto';
+import { CategoryQuery, GetCategory, PaginationCategory } from '@share/dto/validators/category.dto';
 import { CategoryPaginationSerializer } from '@share/dto/serializer/category';
 
 @Injectable()
@@ -23,8 +23,8 @@ export default class CategoryService {
     return this.category.send<category>(createCategoryPattern, category);
   }
 
-  getCategory(category: GetCategory): Observable<Omit<CategoryDto, 'categoryId'>> {
-    return this.category.send<Omit<CategoryDto, 'categoryId'>>(getCategoryPattern, category);
+  getCategory(category: GetCategory): Observable<category> {
+    return this.category.send<category>(getCategoryPattern, category);
   }
 
   getAllCategories(select: CategoryQuery): Observable<category[]> {
