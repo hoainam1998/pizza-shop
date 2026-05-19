@@ -21,7 +21,8 @@ import CategoryService from '../category.service';
 import CategoryModule from '../category.module';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
-import { CategoryDetailSerializer } from '@share/dto/serializer/category';
+import { CategoryDetail, CategoryDetailSerializer } from '@share/dto/serializer/category';
+import { CategoryQuery } from '@share/dto/validators/category.dto';
 import { createMessage, createMessages } from '@share/utils';
 import { CategoryRouter } from '@share/router';
 delete category._count;
@@ -32,7 +33,7 @@ const MockCategoryModule = getMockModule(CategoryModule, {
   method: RequestMethod.POST,
 });
 
-const getCategoryRequestBody = {
+const getCategoryRequestBody: any = {
   categoryId: Date.now().toString(),
   query: {
     name: true,
@@ -40,10 +41,13 @@ const getCategoryRequestBody = {
   },
 };
 
+const requestPlain = { ...getCategoryRequestBody, query: CategoryQuery.plain(getCategoryRequestBody.query) };
+
 let api: TestAgent;
 let clientProxy: ClientProxy;
 let close: () => Promise<void>;
 let categoryService: CategoryService;
+const categoryResponse = instanceToPlain(plainToInstance(CategoryDetail, category));
 
 beforeEach(async () => {
   const requestTest = await startUp(MockCategoryModule);
@@ -70,11 +74,11 @@ describe(createDescribeTest(HTTP_METHOD.POST, getCategoryDetailUrl), () => {
       .send(getCategoryRequestBody)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
-      .expect(instanceToPlain(plainToInstance(CategoryDetailSerializer, category)));
+      .expect(categoryResponse);
     expect(getCategoryService).toHaveBeenCalledTimes(1);
-    expect(getCategoryService).toHaveBeenCalledWith(getCategoryRequestBody);
+    expect(getCategoryService).toHaveBeenCalledWith(requestPlain);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(getCategoryPattern, getCategoryRequestBody);
+    expect(send).toHaveBeenCalledWith(getCategoryPattern, requestPlain);
   });
 
   it(createTestName('get category detail failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
@@ -105,9 +109,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, getCategoryDetailUrl), () => {
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.OUTPUT_VALIDATE));
     expect(getCategoryService).toHaveBeenCalledTimes(1);
-    expect(getCategoryService).toHaveBeenCalledWith(getCategoryRequestBody);
+    expect(getCategoryService).toHaveBeenCalledWith(requestPlain);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(getCategoryPattern, getCategoryRequestBody);
+    expect(send).toHaveBeenCalledWith(getCategoryPattern, requestPlain);
   });
 
   it(createTestName('get category detail failed with not found error', HttpStatus.NOT_FOUND), async () => {
@@ -124,9 +128,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, getCategoryDetailUrl), () => {
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.CATEGORY.NOT_FOUND));
     expect(getCategoryService).toHaveBeenCalledTimes(1);
-    expect(getCategoryService).toHaveBeenCalledWith(getCategoryRequestBody);
+    expect(getCategoryService).toHaveBeenCalledWith(requestPlain);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(getCategoryPattern, getCategoryRequestBody);
+    expect(send).toHaveBeenCalledWith(getCategoryPattern, requestPlain);
   });
 
   it(createTestName('get category detail failed with unknown error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
@@ -141,9 +145,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, getCategoryDetailUrl), () => {
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(new InternalServerErrorException().message));
     expect(getCategoryService).toHaveBeenCalledTimes(1);
-    expect(getCategoryService).toHaveBeenCalledWith(getCategoryRequestBody);
+    expect(getCategoryService).toHaveBeenCalledWith(requestPlain);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(getCategoryPattern, getCategoryRequestBody);
+    expect(send).toHaveBeenCalledWith(getCategoryPattern, requestPlain);
   });
 
   it(createTestName('get category detail failed with server error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
@@ -159,9 +163,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, getCategoryDetailUrl), () => {
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(serverError.message));
     expect(getCategoryService).toHaveBeenCalledTimes(1);
-    expect(getCategoryService).toHaveBeenCalledWith(getCategoryRequestBody);
+    expect(getCategoryService).toHaveBeenCalledWith(requestPlain);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(getCategoryPattern, getCategoryRequestBody);
+    expect(send).toHaveBeenCalledWith(getCategoryPattern, requestPlain);
   });
 
   it(createTestName('get category detail failed with missing field', HttpStatus.BAD_REQUEST), async () => {
@@ -216,9 +220,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, getCategoryDetailUrl), () => {
       .expect(HttpStatus.OK)
       .expect(instanceToPlain(plainToInstance(CategoryDetailSerializer, category)));
     expect(getCategoryService).toHaveBeenCalledTimes(1);
-    expect(getCategoryService).toHaveBeenCalledWith(getCategoryRequestBody);
+    expect(getCategoryService).toHaveBeenCalledWith(requestPlain);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(getCategoryPattern, getCategoryRequestBody);
+    expect(send).toHaveBeenCalledWith(getCategoryPattern, requestPlain);
   });
 
   it(createTestName('get category detail failed with database disconnect', HttpStatus.BAD_REQUEST), async () => {
@@ -235,8 +239,8 @@ describe(createDescribeTest(HTTP_METHOD.POST, getCategoryDetailUrl), () => {
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
     expect(getCategoryService).toHaveBeenCalledTimes(1);
-    expect(getCategoryService).toHaveBeenCalledWith(getCategoryRequestBody);
+    expect(getCategoryService).toHaveBeenCalledWith(requestPlain);
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith(getCategoryPattern, getCategoryRequestBody);
+    expect(send).toHaveBeenCalledWith(getCategoryPattern, requestPlain);
   });
 });
