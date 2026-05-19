@@ -28,7 +28,6 @@ import { ProductPagination, ProductQueryTransform } from '@share/dto/validators/
 import { createMessages } from '@share/utils';
 import { ProductRouter } from '@share/router';
 const productPaginationUrl = ProductRouter.absolute.pagination;
-
 const MockProductModule = getMockModule(ProductModule, { path: productPaginationUrl, method: RequestMethod.POST });
 
 delete product.ingredients;
@@ -63,7 +62,7 @@ let close: () => Promise<void>;
 let productService: ProductService;
 let productController: ProductController;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const requestTest = await startUp(MockProductModule);
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;
