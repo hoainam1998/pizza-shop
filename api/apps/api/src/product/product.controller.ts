@@ -79,7 +79,7 @@ export default class ProductController extends BaseController {
 
   private handlePaginationObservable(
     observable: Observable<ProductPaginationResponse>,
-    select: ProductPagination | ProductPaginationForSale,
+    query: ProductQuery,
   ): Observable<Promise<Record<string, any>>> {
     return observable.pipe(
       map((results) => {
@@ -89,8 +89,8 @@ export default class ProductController extends BaseController {
             throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
           }
           const paginationResultSerializer = plainToInstance(PaginationProductSerializer, results);
-          const groups = ['bought', 'disabled'].reduce((groups: string[], key: keyof typeof select.query) => {
-            if (select.query[key]) {
+          const groups = ['bought', 'disabled'].reduce<string[]>((groups: string[], key: string) => {
+            if (query[key as keyof typeof query]) {
               groups.push(key);
             }
             return groups;
@@ -106,7 +106,7 @@ export default class ProductController extends BaseController {
   @HandleHttpError
   pagination(@Body() select: ProductPagination): Observable<Promise<Record<string, any>>> {
     const query = ProductQuery.plain(select.query) as any;
-    return this.handlePaginationObservable(this.productService.pagination({ ...select, query }), select);
+    return this.handlePaginationObservable(this.productService.pagination({ ...select, query }), select.query);
   }
 
   @SkipThrottle()
@@ -123,7 +123,7 @@ export default class ProductController extends BaseController {
         ...instanceToPlain(select, { exposeUnsetFields: true }),
         query,
       }),
-      select,
+      select.query,
     );
   }
 
