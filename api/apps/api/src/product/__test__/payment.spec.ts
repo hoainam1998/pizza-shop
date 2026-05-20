@@ -39,7 +39,7 @@ const payload = {
   userId: sessionPayload?.userId,
 };
 
-beforeEach(async () => {
+beforeAll(async () => {
   const requestTest = await startUp(MockProductModule);
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;

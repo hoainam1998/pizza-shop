@@ -11,7 +11,7 @@ let categoryCachingService: CategoryCachingService;
 let redisClient: RedisClient;
 const categories = createCategoryList(2);
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
   categoryCachingService = moduleRef.get(CategoryCachingService);
   redisClient = moduleRef.get(REDIS_CLIENT);

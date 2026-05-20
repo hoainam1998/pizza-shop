@@ -26,9 +26,8 @@ let loggerService: LoggingService;
 let ingredientCachingService: IngredientCachingService;
 const length = 2;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
-
   ingredientService = moduleRef.get(IngredientService);
   ingredientController = moduleRef.get(IngredientController);
   loggerService = moduleRef.get(LoggingService);

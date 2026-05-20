@@ -19,9 +19,8 @@ let loggerService: LoggingService;
 let schedulerService: SchedulerService;
 let prismaService: PrismaClient;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
-
   schedulerService = moduleRef.get(SchedulerService);
   productService = moduleRef.get(ProductService);
   productController = moduleRef.get(ProductController);

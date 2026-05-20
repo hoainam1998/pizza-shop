@@ -10,9 +10,8 @@ let ingredientService: IngredientService;
 let prismaService: PrismaClient;
 const ingredientId = ingredient.ingredient_id;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
-
   ingredientService = moduleRef.get(IngredientService);
   prismaService = moduleRef.get(PRISMA_CLIENT);
 });

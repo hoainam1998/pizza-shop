@@ -14,7 +14,7 @@ import startUp from './pre-setup';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { getUserDetailPattern } from '@share/pattern';
-import { user as originUser, apiKey } from '@share/test/pre-setup/mock/data/user';
+import { user as originUser, apiKey, resetPasswordToken } from '@share/test/pre-setup/mock/data/user';
 import { sessionPayload } from '@share/test/pre-setup/mock/data/user';
 import { createDescribeTest, createTestName, getMockModule } from '@share/test/helpers';
 import UserService from '../user.service';
@@ -28,8 +28,7 @@ import { UserRouter } from '@share/router';
 import { UserDetail } from '@share/dto/validators/user.dto';
 import { UserSerializer } from '@share/dto/serializer/user';
 import UserCachingService from '@share/libs/caching/user/user.service';
-const user: Partial<typeof originUser> = { ...originUser, api_key: apiKey };
-delete user.reset_password_token;
+const user: Partial<typeof originUser> = { ...originUser, api_key: apiKey, reset_password_token: resetPasswordToken };
 delete user.password;
 delete user.plain_password;
 delete user.session_id;
@@ -47,6 +46,8 @@ const getUserRequestBody = {
     power: true,
     sex: true,
     avatar: true,
+    active: true,
+    isFirstTime: true,
     apiKey: true,
   },
 };

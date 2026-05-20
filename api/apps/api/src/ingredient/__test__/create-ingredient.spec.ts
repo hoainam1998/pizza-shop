@@ -39,7 +39,7 @@ const ingredientRequestBody = {
 
 const ingredientBody = instanceToPlain(plainToInstance(IngredientCreate, ingredientRequestBody));
 
-beforeEach(async () => {
+beforeAll(async () => {
   const requestTest = await startUp(MockIngredientModule);
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;

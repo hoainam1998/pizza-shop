@@ -17,9 +17,8 @@ let userController: UserController;
 let userService: UserService;
 const countResult = 1;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
-
   userService = moduleRef.get(UserService);
   userController = moduleRef.get(UserController);
   loggerService = moduleRef.get(LoggingService);

@@ -27,9 +27,8 @@ let clientProxy: ClientProxy;
 
 const emitMockParameters = userIds.map((userId) => [refreshProductInfoPattern, userId]);
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
-
   productService = moduleRef.get(ProductService);
   productController = moduleRef.get(ProductController);
   loggerService = moduleRef.get(LoggingService);

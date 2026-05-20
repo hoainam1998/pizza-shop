@@ -10,7 +10,7 @@ let categoryService: CategoryService;
 let categoryCachingService: CategoryCachingService;
 let prismaService: PrismaClient;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
   categoryService = moduleRef.get(CategoryService);
   categoryCachingService = moduleRef.get(CategoryCachingService);

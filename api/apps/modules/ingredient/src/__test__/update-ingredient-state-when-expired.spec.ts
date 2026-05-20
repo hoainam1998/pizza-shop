@@ -7,9 +7,8 @@ let ingredientService: IngredientService;
 let schedulerService: SchedulerService;
 const actionName = 'action_name';
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
-
   ingredientService = moduleRef.get(IngredientService);
   schedulerService = moduleRef.get(SchedulerService);
 });

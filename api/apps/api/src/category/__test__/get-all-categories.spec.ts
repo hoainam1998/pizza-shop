@@ -49,7 +49,7 @@ let close: () => Promise<void>;
 let categoryService: CategoryService;
 let categoryController: CategoryController;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const requestTest = await startUp(MockCategoryModule);
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;

@@ -36,7 +36,7 @@ let clientProxy: ClientProxy;
 let close: () => Promise<void>;
 let ingredientService: IngredientService;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const requestTest = await startUp(MockIngredientModule);
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;

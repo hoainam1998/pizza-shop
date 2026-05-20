@@ -8,9 +8,8 @@ import { PrismaDisconnectError, PrismaNotFoundError } from '@share/test/pre-setu
 let productService: ProductService;
 let prismaService: PrismaClient;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
-
   productService = moduleRef.get(ProductService);
   prismaService = moduleRef.get(PRISMA_CLIENT);
 });

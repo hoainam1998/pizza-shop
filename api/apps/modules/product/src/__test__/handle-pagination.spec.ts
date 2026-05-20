@@ -29,9 +29,8 @@ const where = {
   status: Status.IN_STOCK,
 };
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
-
   productService = moduleRef.get(ProductService);
   prismaService = moduleRef.get(PRISMA_CLIENT);
 });

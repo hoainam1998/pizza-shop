@@ -19,9 +19,8 @@ let prismaService: PrismaClient;
 let loggerService: LoggingService;
 let ingredientCachingService: IngredientCachingService;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
-
   ingredientService = moduleRef.get(IngredientService);
   ingredientController = moduleRef.get(IngredientController);
   loggerService = moduleRef.get(LoggingService);

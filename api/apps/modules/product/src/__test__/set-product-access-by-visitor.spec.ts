@@ -12,9 +12,8 @@ const result = 1;
 const products = createProductList(2);
 const productIds = products.map((product) => product.product_id);
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
-
   productService = moduleRef.get(ProductService);
   productCachingService = moduleRef.get(ProductCachingService);
 });

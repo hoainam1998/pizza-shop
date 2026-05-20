@@ -42,9 +42,8 @@ const length = 2;
 const ingredients = createIngredients(length);
 const skip = calcSkip(paginationBody.pageSize, paginationBody.pageNumber);
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
-
   ingredientService = moduleRef.get(IngredientService);
   ingredientController = moduleRef.get(IngredientController);
   loggerService = moduleRef.get(LoggingService);

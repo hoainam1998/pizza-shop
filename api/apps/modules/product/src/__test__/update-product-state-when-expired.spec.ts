@@ -7,7 +7,7 @@ let schedulerService: SchedulerService;
 let productService: ProductService;
 const actionName = 'action_name';
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
   schedulerService = moduleRef.get(SchedulerService);
   productService = moduleRef.get(ProductService);
