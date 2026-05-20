@@ -10,7 +10,7 @@ let schedulerRegistry: SchedulerRegistry;
 const jobName = 'job_name';
 const actionName = 'action_name';
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
   loggerService = moduleRef.get(LoggingService);
   schedulerRegistry = moduleRef.get(SchedulerRegistry);

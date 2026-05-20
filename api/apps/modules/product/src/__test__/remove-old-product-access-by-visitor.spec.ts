@@ -10,9 +10,8 @@ let productCachingService: ProductCachingService;
 const productIds = [Date.now().toString(), (Date.now() + 1).toString()];
 const result = 1;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
-
   productService = moduleRef.get(ProductService);
   productCachingService = moduleRef.get(ProductCachingService);
 });

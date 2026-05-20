@@ -29,9 +29,8 @@ const getCategoryBody: any = {
   query,
 };
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
-
   categoryService = moduleRef.get(CategoryService);
   categoryController = moduleRef.get(CategoryController);
   loggerService = moduleRef.get(LoggingService);

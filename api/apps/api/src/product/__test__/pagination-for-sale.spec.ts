@@ -74,7 +74,7 @@ let close: () => Promise<void>;
 let productService: ProductService;
 let productController: ProductController;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const requestTest = await startUp(MockProductModule);
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;

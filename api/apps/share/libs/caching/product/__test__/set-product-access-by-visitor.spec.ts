@@ -10,7 +10,7 @@ let redisClient: RedisClient;
 const result = 1;
 const productIds = [Date.now().toString(), (Date.now() + 1).toString()];
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
   productCachingService = moduleRef.get(ProductCachingService);
   redisClient = moduleRef.get(REDIS_CLIENT);

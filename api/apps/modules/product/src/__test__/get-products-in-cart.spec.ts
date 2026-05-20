@@ -43,9 +43,8 @@ const payload = {
 const result = 1;
 const setVisitorParameters = productIds.map((id) => [id, payload.userId]);
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
-
   productService = moduleRef.get(ProductService);
   productController = moduleRef.get(ProductController);
   productCachingService = moduleRef.get(ProductCachingService);

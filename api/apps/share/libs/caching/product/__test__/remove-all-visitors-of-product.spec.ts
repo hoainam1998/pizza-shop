@@ -9,7 +9,7 @@ let productCachingService: ProductCachingService;
 let redisClient: RedisClient;
 const result = 1;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
   productCachingService = moduleRef.get(ProductCachingService);
   redisClient = moduleRef.get(REDIS_CLIENT);

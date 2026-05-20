@@ -55,15 +55,15 @@ describe(createDescribeTest(HTTP_METHOD.POST, logoutUrl), () => {
     expect(send).toHaveBeenCalledWith(logoutPattern, userId);
   });
 
-  it(createTestName('logout failed with session unset', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('logout failed with session unset', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(null));
     const loginService = jest.spyOn(userService, 'logout');
     await api
       .get(logoutUrl)
-      .expect(HttpStatus.BAD_REQUEST)
+      .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
-      .expect(createMessages(messages.USER.ALREADY_LOGOUT));
+      .expect(createMessages(messages.USER.DID_NOT_LOGIN));
     expect(loginService).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });

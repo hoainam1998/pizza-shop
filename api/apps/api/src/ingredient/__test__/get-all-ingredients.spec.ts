@@ -62,7 +62,7 @@ let close: () => Promise<void>;
 let ingredientService: IngredientService;
 let ingredientController: IngredientController;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const requestTest = await startUp(MockIngredientModule);
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;

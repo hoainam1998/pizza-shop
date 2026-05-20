@@ -22,7 +22,7 @@ let close: () => Promise<void>;
 let userService: UserService;
 const countResult = 1;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const requestTest = await startUp();
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;

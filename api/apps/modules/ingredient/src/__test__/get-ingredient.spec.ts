@@ -36,7 +36,7 @@ const select: any = {
   ingredientId: ingredient.ingredient_id,
 };
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
   ingredientService = moduleRef.get(IngredientService);
   ingredientController = moduleRef.get(IngredientController);

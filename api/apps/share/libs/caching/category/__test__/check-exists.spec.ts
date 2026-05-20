@@ -9,7 +9,7 @@ const categoryKey = constants.REDIS_PREFIX.CATEGORIES;
 let categoryCachingService: CategoryCachingService;
 let redisClient: RedisClient;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
   categoryCachingService = moduleRef.get(CategoryCachingService);
   redisClient = moduleRef.get(REDIS_CLIENT);

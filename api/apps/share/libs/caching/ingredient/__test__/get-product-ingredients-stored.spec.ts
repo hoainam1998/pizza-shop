@@ -13,7 +13,7 @@ const ingredientIds = createIngredients(2).map((ingredient) => ingredient.ingred
 let ingredientCachingService: IngredientCachingService;
 let redisClient: RedisClient;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
   ingredientCachingService = moduleRef.get(IngredientCachingService);
   redisClient = moduleRef.get(REDIS_CLIENT);

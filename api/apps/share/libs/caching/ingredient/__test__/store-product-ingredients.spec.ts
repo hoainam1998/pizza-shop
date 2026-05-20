@@ -11,7 +11,7 @@ const ingredients = createRedisProductIngredients(length);
 let ingredientCachingService: IngredientCachingService;
 let redisClientService: RedisClient;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
   ingredientCachingService = moduleRef.get(IngredientCachingService);
   redisClientService = moduleRef.get(REDIS_CLIENT);

@@ -22,9 +22,8 @@ const query: any = {
   avatar: true,
 };
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
-
   categoryService = moduleRef.get(CategoryService);
   categoryController = moduleRef.get(CategoryController);
   loggerService = moduleRef.get(LoggingService);

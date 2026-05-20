@@ -35,7 +35,7 @@ let clientProxy: ClientProxy;
 let close: () => Promise<void>;
 let categoryService: CategoryService;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const requestTest = await startUp(MockCategoryModule);
   api = requestTest.api;
   clientProxy = requestTest.clientProxy;

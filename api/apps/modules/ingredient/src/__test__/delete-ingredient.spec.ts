@@ -19,9 +19,8 @@ let ingredientCachingService: IngredientCachingService;
 const ingredientId = ingredient.ingredient_id;
 const count = { count: 2 };
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
-
   ingredientService = moduleRef.get(IngredientService);
   schedulerService = moduleRef.get(SchedulerService);
   prismaService = moduleRef.get(PRISMA_CLIENT);

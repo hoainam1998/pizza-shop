@@ -11,7 +11,7 @@ let productService: ProductService;
 let prismaService: PrismaClient;
 const total = 10000;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
   productService = moduleRef.get(ProductService);
   prismaService = moduleRef.get(PRISMA_CLIENT);

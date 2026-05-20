@@ -28,9 +28,8 @@ const select = {
   },
 };
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
-
   ingredientService = moduleRef.get(IngredientService);
   prismaService = moduleRef.get(PRISMA_CLIENT);
   ingredientCachingService = moduleRef.get(IngredientCachingService);

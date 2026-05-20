@@ -17,9 +17,8 @@ let productService: ProductService;
 let prismaService: PrismaClient;
 let ingredientCachingService: IngredientCachingService;
 
-beforeEach(async () => {
+beforeAll(async () => {
   const moduleRef = await startUp();
-
   productService = moduleRef.get(ProductService);
   productController = moduleRef.get(ProductController);
   prismaService = moduleRef.get(PRISMA_CLIENT);
