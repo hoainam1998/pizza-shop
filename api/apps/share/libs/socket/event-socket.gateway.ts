@@ -57,6 +57,12 @@ export default class EventsGateway {
     SocketInstances.Client.getSocketClient(userId)?.emit(socketEventNames.REFRESH);
   }
 
+  refreshAllProducts(): void {
+    SocketInstances.Client.getAllSocketClient().forEach((socket) => {
+      socket.emit(socketEventNames.REFRESH_ALL_PRODUCT);
+    });
+  }
+
   addChartData(payload: DataChartAddedType): void {
     void this.reportCachingService
       .getAllReportViewer()
