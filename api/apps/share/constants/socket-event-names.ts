@@ -2,6 +2,7 @@ export default Object.freeze({
   CONNECTED: 'connected',
   DISCONNECT: 'disconnect',
   REFRESH: 'refresh',
+  REFRESH_ALL_PRODUCT: 'refresh_all_product',
   ADD_DATA_CHART: 'add_data_chart',
   UPDATE_USER_STATUS: 'update_user_status',
   UPDATE_USER_POWER: 'update_user_power',

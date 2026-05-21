@@ -42,7 +42,7 @@ import ProductCachingService from '@share/libs/caching/product/product.service';
 import ErrorCode from '@share/error-code';
 import { CHART_BY } from '@share/enums';
 import { action } from './chart-helper.helper';
-import { addDataChartEventPattern, refreshProductInfoPattern } from '@share/pattern';
+import { addDataChartEventPattern, refreshProductInfoPattern, refreshAllProductsPattern } from '@share/pattern';
 
 const billMessages = messages.BILL;
 
@@ -102,6 +102,7 @@ export default class ProductService {
       .then(async (product) => {
         this.updateProductStateWhenExpired(product, this.createProduct.name);
         await this.ingredientCachingService.deleteAllProductIngredients(product.product_id);
+        this.socketGateway.emit(refreshAllProductsPattern, {});
         return product;
       });
   }

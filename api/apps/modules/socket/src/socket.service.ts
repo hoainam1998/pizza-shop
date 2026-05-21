@@ -17,4 +17,8 @@ export default class SocketService {
   updateUserComplete(userId: string): void {
     this.socketGateway.updateUserComplete(userId);
   }
+
+  refreshAllProducts(): void {
+    this.socketGateway.refreshAllProducts();
+  }
 }

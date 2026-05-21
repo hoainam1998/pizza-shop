@@ -30,6 +30,14 @@ export default class SocketInstancesStorage {
   }
 
   /**
+   * Return all socket clients.
+   * @returns {Socket[]} - All socket clients.
+   */
+  getAllSocketClient(): Socket[] {
+    return Array.from(this.wsInstances.values());
+  }
+
+  /**
    * Remove socket client out of storage.
    * @param {string} userId - An userId
    */
