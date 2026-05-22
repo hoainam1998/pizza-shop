@@ -40,7 +40,6 @@
   </section>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
 import ProductItem from '../product-item/product-item.vue';
 import List from '@/components/common/list/list.vue';
 import Pagination from '@/components/common/pagination/pagination.vue';
@@ -48,9 +47,9 @@ import ResultSearch from '@/components/sale/product/result-search/result-search.
 import EmptyLogo from '@/assets/images/empty.png';
 import { vGridProductBorder, vPositionTop } from './directives';
 import { type ProductPropsType } from './props-validator';
-const currentPage = ref<number>(1);
 
 const { total = 0, products = [] } = defineProps<ProductPropsType>();
+const currentPage = defineModel<number>({ default: 1 });
 const emit = defineEmits<{
   (e: 'onChange', pageNumber: number): void;
 }>();
@@ -58,10 +57,6 @@ const emit = defineEmits<{
 const onChange = (pageNumber: number): void => {
   emit('onChange', pageNumber);
 };
-
-defineExpose({
-  currentPage
-});
 </script>
 <style lang="scss" scoped>
 .products-wrapper {

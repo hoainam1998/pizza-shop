@@ -45,7 +45,7 @@
               <span class="ps-fw-bold">Total:&nbsp;</span>
               <span class="ps-text-style-italic">{{ $formatVNDCurrency(total) }}</span>
             </span>
-            <el-button :disabled="cartItems.length === 0" type="primary" class="ps-w-mobile-100px" @click="payment">
+            <el-button :disabled="paymentDisabled" type="primary" class="ps-w-mobile-100px" @click="payment">
               Payment
             </el-button>
           </div>
@@ -120,6 +120,13 @@ const cartItems = computed<CartItemInfoType[]>(() => {
       calcTotal: calcTotal(cartItem.productId),
     };
   });
+});
+
+const paymentDisabled = computed<boolean>(() => {
+  if (cartItems.value.length > 0) {
+    return cartItems.value.some((item) => item.noExist);
+  }
+  return true;
 });
 
 const productIds = computed<string[]>(() => {
@@ -212,6 +219,8 @@ const getAllServerCartItems = (): Promise<ServerCartItemType[]> => {
         avatar: true
       },
       productIds: productIds.value,
+    }, {
+      allowNotFound: true,
     }).then((result) => {
       serverCartItemGroups.value = groupingServerCartItems(result.data);
       return result.data;

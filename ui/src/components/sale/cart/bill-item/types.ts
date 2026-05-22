@@ -24,7 +24,7 @@ export default {
           case 'noExist':
             return typeof value === 'boolean';
           default:
-            return false;
+            return true;
         }
       });
     },
