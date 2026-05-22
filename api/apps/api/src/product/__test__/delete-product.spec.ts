@@ -19,6 +19,7 @@ import ProductModule from '../product.module';
 import messages from '@share/constants/messages';
 import { HTTP_METHOD } from '@share/enums';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
+import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { createMessages } from '@share/utils';
 import { ProductRouter } from '@share/router';
 const deleteProductBaseUrl = ProductRouter.absolute.delete;
@@ -92,7 +93,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteProductBaseUrl), () => {
     expect(send).not.toHaveBeenCalled();
   });
 
-  it(createTestName('delete product failed with unknown error', HttpStatus.BAD_REQUEST), async () => {
+  it(createTestName('delete product failed with rpc unknown error', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const send = jest
       .spyOn(clientProxy, 'send')
@@ -104,6 +105,22 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteProductBaseUrl), () => {
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.COMMON_ERROR));
+    expect(deleteProduct).toHaveBeenCalledTimes(1);
+    expect(deleteProduct).toHaveBeenCalledWith(productId);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledWith(deleteProductPattern, productId);
+  });
+
+  it(createTestName('delete product failed with unknown error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
+    expect.hasAssertions();
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
+    const deleteProduct = jest.spyOn(productService, 'deleteProduct');
+    await api
+      .delete(deleteProductUrl)
+      .set('mock-session', JSON.stringify(sessionPayload))
+      .expect(HttpStatus.INTERNAL_SERVER_ERROR)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(new InternalServerErrorException().message));
     expect(deleteProduct).toHaveBeenCalledTimes(1);
     expect(deleteProduct).toHaveBeenCalledWith(productId);
     expect(send).toHaveBeenCalledTimes(1);

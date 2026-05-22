@@ -255,9 +255,12 @@ export default class ProductService {
           },
         }),
       ])
-      .then((results) => {
+      .then(async (results) => {
         const product = results[1];
         this.schedulerService.deleteScheduler(this._jobName, this.deleteProduct.name);
+        const visitorIds = await this.productCachingService.getVisitor(product.product_id);
+        visitorIds.forEach((visitorId) => this.socketGateway.emit(refreshProductInfoPattern, visitorId));
+        void this.removeProductAccessByVisitor(product.product_id);
         return product;
       });
   }
