@@ -10,6 +10,7 @@ export enum OBJECT_STORE_NAME {
 
 export enum SOCKET_EVENT_NAME {
   REFRESH = 'refresh',
+  REFRESH_ALL_PRODUCT = 'refresh_all_product',
   REMOVE_REPORT_VIEWER = 'remove_report_viewer',
   ADD_DATA_CHART = 'add_data_chart',
   UPDATE_USER_STATUS = 'update_user_status',

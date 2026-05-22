@@ -1,14 +1,13 @@
 <template>
   <CategorySelection :items="categories" />
   <Products
+    v-model="currentPage"
     :total="productsForSale.total"
     :products="productsForSale.products"
-    @onChange="paginationOnChange"
-    ref="productsRef" />
+    @onChange="paginationOnChange" />
 </template>
-
 <script setup lang="ts">
-import { ref, onMounted, useTemplateRef, reactive, onBeforeMount, onBeforeUnmount } from 'vue';
+import { ref, onMounted,  reactive, onBeforeMount, onBeforeUnmount } from 'vue';
 import { onBeforeRouteUpdate, useRoute } from 'vue-router';
 import CategorySelection from '@/components/sale/category-selection/category-selection.vue';
 import Products from '@/components/sale/product/products/products.vue';
@@ -27,7 +26,7 @@ type ProductsForSaleType = {
 const route = useRoute();
 const search = ref<string>(route.query.search as string);
 const categoryId = ref<string>(route.query.category as string);
-const productsComponentRef = useTemplateRef('productsRef');
+const currentPage = ref<number>(1);
 const productsForSale = reactive<ProductsForSaleType>({
   products: [],
   total: 0,
@@ -37,7 +36,7 @@ const categories = ref<CategorySelectionPropsType['items']>([]);
 
 const onChange = (pageNumber?: number): void => {
   ProductService.post('pagination-for-sale', {
-    pageNumber: pageNumber || productsComponentRef.value!.currentPage,
+    pageNumber: pageNumber || currentPage.value,
     categoryId: categoryId.value,
     search: search.value,
     query: {
@@ -78,12 +77,14 @@ const paginationOnChange = (pageNumber: number): void => {
 };
 
 onBeforeMount(() => {
-  SocketService.subscribe(SOCKET_EVENT_NAME.REFRESH,
-    () => setTimeout(() => onChange(), 500)
-  );
+  SocketService.subscribe(SOCKET_EVENT_NAME.REFRESH, onChange);
+  SocketService.subscribe(SOCKET_EVENT_NAME.REFRESH_ALL_PRODUCT, onChange);
 });
 
-onBeforeUnmount(() => SocketService.unsubscribe(SOCKET_EVENT_NAME.REFRESH));
+onBeforeUnmount(() => {
+  SocketService.unsubscribe(SOCKET_EVENT_NAME.REFRESH);
+  SocketService.unsubscribe(SOCKET_EVENT_NAME.REFRESH_ALL_PRODUCT);
+});
 
 onBeforeRouteUpdate((to) => {
   search.value = to.query.search as string;

@@ -29,6 +29,7 @@ import PsEmailInput from '@/components/common/inputs/email/email.vue';
 import loginFormInformation from '@/composables/use-login-form';
 import useWrapperRouter from '@/composables/use-router';
 import { UserService } from '@/services';
+import SocketService from '@/socket';
 import paths from '@/router/paths';
 import { auth as authStore, cookie as cookieStore } from '@/store';
 import { generateResetPasswordLink, showErrorNotification } from '@/utils';
@@ -52,10 +53,11 @@ const onSubmit = async (): Promise<void> => {
               authStore.setUserLoggedToken(response.data.userLoggedToken);
               authStore.setApiKey(response.data.apiKey!);
               cookieStore.setImpactUserApiKey(response.data.apiKey!);
+              SocketService.connect();
               push(paths.HOME);
             }
           }).catch((error: AxiosError<MessageResponseType>) => {
-            showErrorNotification('Admin login!', error.response?.data.messages);
+            showErrorNotification('Sale login!', error.response?.data.messages);
           }).finally(resetForm);
       }
     });

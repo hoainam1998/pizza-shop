@@ -36,11 +36,11 @@ const emit = defineEmits<{
 
 const search = (): void => {
   if (keyword.value) {
-    push({ path: paths.BASE.Path, query: { ...route.query, search: keyword.value } });
+    push({ path: paths.HOME.Path, query: { ...route.query, search: keyword.value } });
   } else {
     const query = { ...route.query };
     delete query.search;
-    push({ path: paths.BASE.Path, query });
+    push({ path: paths.HOME.Path, query });
   }
   emit('search', keyword.value);
 };
