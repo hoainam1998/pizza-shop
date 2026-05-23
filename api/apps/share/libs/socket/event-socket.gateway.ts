@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common';
-import { ConnectedSocket, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import type { DataChartAddedType, ConnectedPayloadType, SocketExtended } from '@share/interfaces';
 import ReportCachingService from '@share/libs/caching/report/report.service';
@@ -44,13 +44,6 @@ export default class EventsGateway {
       await removeSocketClient();
       Logger.warn(`Disconnect with ${reason} - sender: ${client.requester.userId}`, 'Socket Event Gateway');
     });
-  }
-
-  @SubscribeMessage(socketEventNames.LOGOUT)
-  logout(@ConnectedSocket() client: SocketExtended): void {
-    const userId = client['requester'].userId as string;
-    this.userCachingService.logoutPublish(userId);
-    client.disconnect();
   }
 
   refreshCurrentInfo(userId: string): void {
