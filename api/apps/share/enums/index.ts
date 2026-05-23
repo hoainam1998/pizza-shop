@@ -40,7 +40,7 @@ export enum POWER_NUMERIC {
 }
 
 export enum REDIS_SUBSCRIBE_NAME {
-  LOGOUT = 'logout',
+  KEY_EVENT_EXPIRED = '__keyevent@0__:expired',
 }
 
 export enum STATUS {

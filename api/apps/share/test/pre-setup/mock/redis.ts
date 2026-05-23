@@ -19,6 +19,7 @@ jest.mock('redis', () => {
       sAdd: jest.fn(),
       sMembers: jest.fn(),
       sRem: jest.fn(),
+      configSet: jest.fn(),
     })),
   };
 });
