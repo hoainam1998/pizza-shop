@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
 import SendEmailService from './mailer.service';
-import { TransportType } from '@nestjs-modules/mailer/dist/interfaces/mailer-options.interface';
+import { TransportType } from 'node_modules/@nestjs-modules/mailer/dist/interfaces/mailer-options.interface';
 
 @Module({
   imports: [
