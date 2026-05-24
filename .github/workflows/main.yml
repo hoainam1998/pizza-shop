@@ -26,8 +26,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache-dependency-path: api/package-lock.json
-          cache: 'npm' # or 'yarn' / 'pnpm'
+          cache-dependency-path: api/package.json
+          cache: 'npm'
 
       - name: Install Dependencies
         run: npm i
