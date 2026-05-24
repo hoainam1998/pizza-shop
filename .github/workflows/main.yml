@@ -4,36 +4,36 @@ on:
   push:
     branches: [ master ]
 
+env:
+  ORIGIN_CORS: "http://localhost:3000"
+  CLIENT_ORIGIN_CORS: "http://localhost:3001"
+  LOCALHOST: "localhost"
+  USER: "root"
+  PORT: 5000
+  SOCKET_PORT: 5001
+  REDIS_HOST: "localhost"
+  REDIS_SERVER_PORT: 6379
+  TEST_PORT: 0
+  SOCKET_TEST_PORT: 1234
+  SESSION_EXPIRES: 3600000
+  SESSION_ID_TOKEN: "session_id_token"
+  SECRET_KEY: "secret_key"
+  CLIENT_LOGIN_SECRET_KEY: "client_login_secret_key"
+  CLIENT_RESET_PASSWORD_SECRET_KEY: "client_reset_password_secret_key"
+  ADMIN_RESET_PASSWORD_SECRET_KEY: "admin_reset_password_secret_key"
+  SECRET_KEY_LOGIN: "secret_key_login"
+  SMPT_HOST: "smtp.gmail.com"
+  SMPT_PORT: 587
+  SMPT_MAIL: "huyenthoaihoainam@gmail.com"
+  SMPT_APP_PASS: "aajy yqod wllw cchg"
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    env:
-      ORIGIN_CORS: "http://localhost:3000"
-      CLIENT_ORIGIN_CORS: "http://localhost:3001"
-      LOCALHOST: "localhost"
-      USER: "root"
-      PORT: 5000
-      SOCKET_PORT: 5001
-      REDIS_HOST: "localhost"
-      REDIS_SERVER_PORT: 6379
-      TEST_PORT: 0
-      SOCKET_TEST_PORT: 1234
-      SESSION_EXPIRES: 3600000
-      SESSION_ID_TOKEN: "session_id_token"
-      SECRET_KEY: "secret_key"
-      CLIENT_LOGIN_SECRET_KEY: "client_login_secret_key"
-      CLIENT_RESET_PASSWORD_SECRET_KEY: "client_reset_password_secret_key"
-      ADMIN_RESET_PASSWORD_SECRET_KEY: "admin_reset_password_secret_key"
-      SECRET_KEY_LOGIN: "secret_key_login"
-      SMPT_HOST: "smtp.gmail.com"
-      SMPT_PORT: 587
-      SMPT_MAIL: "huyenthoaihoainam@gmail.com"
-      SMPT_APP_PASS: "aajy yqod wllw cchg"
     defaults:
       run:
         working-directory: ./api
-    
-    # Use services if your microservice requires a broker like Redis or RabbitMQ for tests
+
     services:
       redis:
         image: redis
