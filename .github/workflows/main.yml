@@ -33,7 +33,7 @@ jobs:
         run: npm i
 
       - name: Linting
-        run: npm run lint
+        run: npm run lint -- --quiet
 
       - name: Run Unit Tests
         run: npm run test
