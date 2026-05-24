@@ -7,6 +7,9 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api
     
     # Use services if your microservice requires a broker like Redis or RabbitMQ for tests
     services:
@@ -23,6 +26,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache-dependency-path: api/package-lock.json
           cache: 'npm' # or 'yarn' / 'pnpm'
 
       - name: Install Dependencies
