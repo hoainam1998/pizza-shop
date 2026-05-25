@@ -10,11 +10,17 @@ const productId = Date.now().toString();
 const ingredients = createRedisProductIngredients(length);
 let ingredientCachingService: IngredientCachingService;
 let redisClientService: RedisClient;
+let close: () => Promise<void>;
 
 beforeAll(async () => {
   const moduleRef = await startUp();
   ingredientCachingService = moduleRef.get(IngredientCachingService);
   redisClientService = moduleRef.get(REDIS_CLIENT);
+  close = () => moduleRef.close();
+});
+
+afterAll(async () => {
+  await close();
 });
 
 describe('store product ingredients', () => {

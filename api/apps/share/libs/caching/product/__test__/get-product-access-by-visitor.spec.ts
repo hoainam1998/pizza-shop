@@ -7,12 +7,18 @@ import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 
 let productCachingService: ProductCachingService;
 let redisClient: RedisClient;
+let close: () => Promise<void>;
 const productIds = [Date.now().toString(), (Date.now() + 1).toString()];
 
 beforeAll(async () => {
   const moduleRef = await startUp();
   productCachingService = moduleRef.get(ProductCachingService);
   redisClient = moduleRef.get(REDIS_CLIENT);
+  close = () => moduleRef.close();
+});
+
+afterAll(async () => {
+  await close();
 });
 
 describe('get product access by visitor', () => {

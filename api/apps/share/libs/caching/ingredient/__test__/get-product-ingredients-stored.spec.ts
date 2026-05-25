@@ -12,11 +12,17 @@ const ingredientIds = createIngredients(2).map((ingredient) => ingredient.ingred
 
 let ingredientCachingService: IngredientCachingService;
 let redisClient: RedisClient;
+let close: () => Promise<void>;
 
 beforeAll(async () => {
   const moduleRef = await startUp();
   ingredientCachingService = moduleRef.get(IngredientCachingService);
   redisClient = moduleRef.get(REDIS_CLIENT);
+  close = () => moduleRef.close();
+});
+
+afterAll(async () => {
+  await close();
 });
 
 describe('get product ingredient stored', () => {

@@ -11,6 +11,7 @@ import './socket-instances-storage-mock';
 let gateway: EventsGateway;
 let loggerService: LoggingService;
 let reportCachingService: ReportCachingService;
+let close: () => Promise<void>;
 const userIds = [Date.now().toString()];
 const payload: DataChartAddedType = {
   revenue: 0,
@@ -27,6 +28,11 @@ beforeAll(async () => {
   gateway = moduleRef.get(EventsGateway);
   loggerService = moduleRef.get(LoggingService);
   reportCachingService = moduleRef.get(ReportCachingService);
+  close = () => moduleRef.close();
+});
+
+afterAll(async () => {
+  await close();
 });
 
 describe('add chart data', () => {

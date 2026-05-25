@@ -6,6 +6,7 @@ import './socket-instances-storage-mock';
 
 const userId = Date.now().toString();
 let gateway: EventsGateway;
+let close: () => Promise<void>;
 
 const socket: any = {
   emit: jest.fn(),
@@ -14,6 +15,11 @@ const socket: any = {
 beforeAll(async () => {
   const moduleRef = await startUp();
   gateway = moduleRef.get(EventsGateway);
+  close = () => moduleRef.close();
+});
+
+afterAll(async () => {
+  await close();
 });
 
 describe('refresh current info', () => {

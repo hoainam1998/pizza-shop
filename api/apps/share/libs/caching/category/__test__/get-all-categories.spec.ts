@@ -9,12 +9,18 @@ const categoryKey = constants.REDIS_PREFIX.CATEGORIES;
 
 let categoryCachingService: CategoryCachingService;
 let redisClient: RedisClient;
+let close: () => Promise<void>;
 const categories = createCategoryList(2);
 
 beforeAll(async () => {
   const moduleRef = await startUp();
   categoryCachingService = moduleRef.get(CategoryCachingService);
   redisClient = moduleRef.get(REDIS_CLIENT);
+  close = () => moduleRef.close();
+});
+
+afterAll(async () => {
+  await close();
 });
 
 describe('get all caching categories', () => {

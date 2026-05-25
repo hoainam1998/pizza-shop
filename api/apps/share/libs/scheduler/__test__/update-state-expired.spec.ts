@@ -10,6 +10,7 @@ import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 let loggerService: LoggingService;
 let schedulerService: SchedulerService;
 let schedulerRegistry: SchedulerRegistry;
+let close: () => Promise<void>;
 const expiredTime = Date.now() + 10 * 1000;
 const jobName = 'job_name';
 const actionName = 'action_name';
@@ -24,6 +25,11 @@ beforeAll(async () => {
   loggerService = moduleRef.get(LoggingService);
   schedulerRegistry = moduleRef.get(SchedulerRegistry);
   schedulerService = moduleRef.get(SchedulerService);
+  close = () => moduleRef.close();
+});
+
+afterAll(async () => {
+  await close();
 });
 
 describe('update state expired', () => {

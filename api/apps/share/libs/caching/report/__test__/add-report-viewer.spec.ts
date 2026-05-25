@@ -10,11 +10,17 @@ let reportCachingService: ReportCachingService;
 let redisClient: RedisClient;
 const result: number = 1;
 const userId: string = Date.now().toString();
+let close: () => Promise<void>;
 
 beforeAll(async () => {
   const moduleRef = await startUp();
   reportCachingService = moduleRef.get(ReportCachingService);
   redisClient = moduleRef.get(REDIS_CLIENT);
+  close = () => moduleRef.close();
+});
+
+afterAll(async () => {
+  await close();
 });
 
 describe('add report viewer', () => {

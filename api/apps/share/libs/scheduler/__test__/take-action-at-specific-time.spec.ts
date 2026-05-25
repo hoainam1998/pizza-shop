@@ -10,6 +10,7 @@ import messages from '@share/constants/messages';
 let loggerService: LoggingService;
 let schedulerService: SchedulerService;
 let schedulerRegistry: SchedulerRegistry;
+let close: () => Promise<void>;
 const timeline = Date.now() + 10000;
 const action = jest.fn();
 const jobName = 'job_name';
@@ -24,6 +25,11 @@ beforeAll(async () => {
   loggerService = moduleRef.get(LoggingService);
   schedulerRegistry = moduleRef.get(SchedulerRegistry);
   schedulerService = moduleRef.get(SchedulerService);
+  close = () => moduleRef.close();
+});
+
+afterAll(async () => {
+  await close();
 });
 
 describe('take action at specific time', () => {

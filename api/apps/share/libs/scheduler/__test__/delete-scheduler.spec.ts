@@ -7,6 +7,7 @@ import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 let loggerService: LoggingService;
 let schedulerService: SchedulerService;
 let schedulerRegistry: SchedulerRegistry;
+let close: () => Promise<void>;
 const jobName = 'job_name';
 const actionName = 'action_name';
 
@@ -15,6 +16,11 @@ beforeAll(async () => {
   loggerService = moduleRef.get(LoggingService);
   schedulerRegistry = moduleRef.get(SchedulerRegistry);
   schedulerService = moduleRef.get(SchedulerService);
+  close = () => moduleRef.close();
+});
+
+afterAll(async () => {
+  await close();
 });
 
 describe('delete scheduler', () => {

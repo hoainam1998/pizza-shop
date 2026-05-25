@@ -18,11 +18,17 @@ const sessionString = JSON.stringify({
 
 let userCachingService: UserCachingService;
 let redisClient: RedisClient;
+let close: () => Promise<void>;
 
 beforeAll(async () => {
   const moduleRef = await startUp();
   userCachingService = moduleRef.get(UserCachingService);
   redisClient = moduleRef.get(REDIS_CLIENT);
+  close = () => moduleRef.close();
+});
+
+afterAll(async () => {
+  await close();
 });
 
 describe('check user already logged', () => {

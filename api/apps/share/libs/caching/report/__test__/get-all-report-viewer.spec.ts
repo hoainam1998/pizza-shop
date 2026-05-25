@@ -8,12 +8,18 @@ const reportViewerKey = constants.REDIS_PREFIX.REPORT_VIEWER;
 
 let reportCachingService: ReportCachingService;
 let redisClient: RedisClient;
+let close: () => Promise<void>;
 const userIds: string[] = [Date.now().toString()];
 
 beforeAll(async () => {
   const moduleRef = await startUp();
   reportCachingService = moduleRef.get(ReportCachingService);
   redisClient = moduleRef.get(REDIS_CLIENT);
+  close = () => moduleRef.close();
+});
+
+afterAll(async () => {
+  await close();
 });
 
 describe('get all report viewer', () => {

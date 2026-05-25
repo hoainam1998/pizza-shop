@@ -6,6 +6,7 @@ import ReportCachingService from '@share/libs/caching/report/report.service';
 
 let gateway: EventsGateway;
 let reportCachingService: ReportCachingService;
+let close: () => Promise<void>;
 const userId = Date.now().toString();
 const payload = {
   userId,
@@ -20,6 +21,11 @@ beforeAll(async () => {
   const moduleRef = await startUp();
   gateway = moduleRef.get(EventsGateway);
   reportCachingService = moduleRef.get(ReportCachingService);
+  close = () => moduleRef.close();
+});
+
+afterAll(async () => {
+  await close();
 });
 
 describe('socket connected', () => {
