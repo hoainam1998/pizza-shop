@@ -156,8 +156,8 @@
     "test:e2e:user.update-status": "jest --watch apps/api/src/user/__test__/update-status.spec.ts",
     "test:e2e:user.update-personal-info": "jest --watch apps/api/src/user/__test__/update-personal-info.spec.ts",
     "test:e2e:user": "jest --watch apps/api/src/user/__test__/",
-    "test:e2e": "jest --watch apps/api/src/",
-    "test:ut": "jest --watch --testPathPatterns=/apps\/modules\/* /apps\/share\/libs\/*",
+    "test:e2e": "jest --watch --forceExit apps/api/src/",
+    "test:ut": "jest --watch --forceExit --testPathPatterns=/apps\/modules\/* /apps\/share\/libs\/*",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
   },
@@ -254,6 +254,6 @@
       "^@share(|/.*)$": "<rootDir>/apps/share/$1",
       "generated/prisma": "<rootDir>/generated/prisma"
     },
-    "testTimeout": 10000
+    "testTimeout": 1000
   }
 }
