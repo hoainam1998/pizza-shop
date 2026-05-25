@@ -157,7 +157,7 @@
     "test:e2e:user.update-personal-info": "jest --watch apps/api/src/user/__test__/update-personal-info.spec.ts",
     "test:e2e:user": "jest --watch apps/api/src/user/__test__/",
     "test:e2e": "jest --watch --forceExit apps/api/src/",
-    "test:ut": "jest --watch --maxWorkers=2 --forceExit --testPathPatterns=/apps\/modules\/* /apps\/share\/libs\/*",
+    "test:ut": "jest --maxWorkers=2 --forceExit --testPathPatterns=/apps\/modules\/* /apps\/share\/libs\/*",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
   },
