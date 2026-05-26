@@ -4,7 +4,7 @@ on:
   label:
     types: [backend]
   push:
-    branches: 
+    branches:
       - master
       - fs-*
       - be-*
@@ -19,7 +19,7 @@ env:
   SOCKET_PORT: 8000
   ADMIN_ORIGIN_CORS: "http://localhost:3000"
   SALE_ORIGIN_CORS: "http://localhost:3001"
-  SESSION_ID_TOKEN: "session_id_token"
+  SESSION_ID_TOKEN: ${{ secrets.SESSION_ID_TOKEN }}
   SESSION_EXPIRES: 3600000
   REDIS_HOST: "localhost"
   REDIS_SERVER_PORT: 6379
@@ -32,7 +32,7 @@ env:
   API_KEY: ${{ secrets.API_KEY }}
   SMPT_HOST: "smtp.gmail.com"
   SMPT_PORT: 587
-  SMPT_MAIL: "huyenthoaihoainam@gmail.com"
+  SMPT_MAIL: ${{ secrets.SMPT_MAIL }}
   SMPT_APP_PASS: "aajy yqod wllw cchg"
   THROTTLE_TTL: 1000
   THROTTLE_LIMIT: 1
