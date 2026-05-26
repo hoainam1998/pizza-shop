@@ -4,8 +4,11 @@ on:
   label:
     types: [backend]
   push:
-    branches: [*]
-
+    branches: 
+      - master
+      - fs-*
+      - be-*
+      - fe-*
 env:
   API_PORT: 5000
   USER_MICROSERVICE_TCP_PORT: 5001
