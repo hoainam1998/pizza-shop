@@ -206,9 +206,9 @@ describe(createDescribeTest(HTTP_METHOD.POST, resetPasswordUrl), () => {
       .post(resetPasswordUrl)
       .set('Cookie', [`app=${APP_NAME.ADMIN}`])
       .send(requestBody);
-      // .expect(HttpStatus.INTERNAL_SERVER_ERROR)
-      // .expect('Content-Type', /application\/json/)
-      // .expect(createMessages(new InternalServerErrorException().message));
+    // .expect(HttpStatus.INTERNAL_SERVER_ERROR)
+    // .expect('Content-Type', /application\/json/)
+    // .expect(createMessages(new InternalServerErrorException().message));
     console.log(response.body);
     expect(resetPasswordService).toHaveBeenCalledTimes(1);
     expect(resetPasswordService).toHaveBeenCalledWith(resetPasswordPayload);
