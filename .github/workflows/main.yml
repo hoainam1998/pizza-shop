@@ -1,8 +1,8 @@
 name: NestJS Microservice CI
 
 on:
-  push:
-    branches: [ master ]
+  label:
+    types: [backend]
 
 env:
   API_PORT: 5000
@@ -21,10 +21,10 @@ env:
   SOCKET_PING_INTERVAL: 60000
   SOCKET_PING_TIMEOUT: 60000
   REFRESH_TTL_SEC: 86400
-  ADMIN_RESET_PASSWORD_SECRET_KEY: "admin_reset_password_secret_key"
-  ADMIN_REFRESH_TOKEN_SECRET_KEY: "admin_refresh_token_secret_key"
-  USER_LOGGED_SECRET_KEY: "user_logged_secret_key"
-  API_KEY: "api_key"
+  ADMIN_RESET_PASSWORD_SECRET_KEY: ${{ secrets.ADMIN_RESET_PASSWORD_SECRET_KEY }}
+  ADMIN_REFRESH_TOKEN_SECRET_KEY: ${{ secrets.ADMIN_REFRESH_TOKEN_SECRET_KEY }}
+  USER_LOGGED_SECRET_KEY: ${{ secrets.USER_LOGGED_SECRET_KEY }}
+  API_KEY: ${{ secrets.API_KEY }}
   SMPT_HOST: "smtp.gmail.com"
   SMPT_PORT: 587
   SMPT_MAIL: "huyenthoaihoainam@gmail.com"
