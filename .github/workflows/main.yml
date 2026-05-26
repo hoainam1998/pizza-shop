@@ -4,7 +4,7 @@ on:
   label:
     types: [backend]
   push:
-    branches: *
+    branches: [*]
 
 env:
   API_PORT: 5000
