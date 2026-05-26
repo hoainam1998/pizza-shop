@@ -1,8 +1,6 @@
 name: NestJS Microservice CI
 
 on:
-  label:
-    types: [backend]
   push:
     branches:
       - master
@@ -39,6 +37,7 @@ env:
 
 jobs:
   build-and-test:
+    if: contains(github.event.pull_request.labels.*.name, 'back-end')
     runs-on: ubuntu-latest
     defaults:
       run:
