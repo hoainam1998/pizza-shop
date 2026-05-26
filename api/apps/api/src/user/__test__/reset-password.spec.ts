@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { BadRequestException, HttpStatus, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { of, throwError } from 'rxjs';
 import { UserRouter } from '@share/router';
@@ -203,14 +202,13 @@ describe(createDescribeTest(HTTP_METHOD.POST, resetPasswordUrl), () => {
     expect.hasAssertions();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
     const resetPasswordService = jest.spyOn(userService, 'resetPassword');
-    const response = await api
+    await api
       .post(resetPasswordUrl)
       .set('Cookie', [`app=${APP_NAME.ADMIN}`])
-      .send(requestBody);
-    // .expect(HttpStatus.INTERNAL_SERVER_ERROR)
-    // .expect('Content-Type', /application\/json/)
-    // .expect(createMessages(new InternalServerErrorException().message));
-    console.log(response.body);
+      .send(requestBody)
+      .expect(HttpStatus.INTERNAL_SERVER_ERROR)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(new InternalServerErrorException().message));
     expect(resetPasswordService).toHaveBeenCalledTimes(1);
     expect(resetPasswordService).toHaveBeenCalledWith(resetPasswordPayload);
     expect(send).toHaveBeenCalledTimes(1);
