@@ -158,8 +158,8 @@
     "test:e2e:user": "jest --watch apps/api/src/user/__test__/",
     "test:e2e": "jest --watch --forceExit apps/api/src/",
     "test:ut": "jest --testPathPatterns=/apps\/modules\/* /apps\/share\/libs\/*",
-    "test:ut.ci": "jest --maxWorkers=2 --forceExit --testPathPatterns=/apps\/modules\/* /apps\/share\/libs\/*",
-    "test:e2e.ci": "jest --maxWorkers=2 --forceExit apps/api/src/",
+    "test:ut:ci": "jest --maxWorkers=2 --forceExit --testPathPatterns=/apps\/modules\/* /apps\/share\/libs\/*",
+    "test:e2e:ci": "jest --maxWorkers=2 --forceExit apps/api/src/",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
   },
