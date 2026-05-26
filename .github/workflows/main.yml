@@ -3,6 +3,8 @@ name: NestJS Microservice CI
 on:
   label:
     types: [backend]
+  push:
+    branches: *
 
 env:
   API_PORT: 5000
