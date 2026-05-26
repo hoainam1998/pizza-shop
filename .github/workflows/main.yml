@@ -8,6 +8,8 @@ on:
       - be-*
       - fe-*
       - ci-*
+    paths:
+      - api
 env:
   API_PORT: 5000
   USER_MICROSERVICE_TCP_PORT: 5001
@@ -38,7 +40,6 @@ env:
 
 jobs:
   build-and-test:
-    # if: contains(github.event.pull_request.labels.*.name, 'back-end')
     runs-on: ubuntu-latest
     defaults:
       run:
