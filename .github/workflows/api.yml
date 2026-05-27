@@ -1,4 +1,4 @@
-name: NestJS Microservice CI
+name: Pizza Shop Api CI
 
 on:
   pull_request:
@@ -6,7 +6,6 @@ on:
       - master
       - fs-*
       - be-*
-      - fe-*
       - ci-*
 env:
   API_PORT: 5000
@@ -32,7 +31,7 @@ env:
   SMPT_HOST: "smtp.gmail.com"
   SMPT_PORT: 587
   SMPT_MAIL: ${{ secrets.SMPT_MAIL }}
-  SMPT_APP_PASS: "aajy yqod wllw cchg"
+  SMPT_APP_PASS: "${{ secrets.SMPT_APP_PASS }}"
   THROTTLE_TTL: 1000
   THROTTLE_LIMIT: 1
 

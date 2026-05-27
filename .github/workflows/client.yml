@@ -1,0 +1,43 @@
+name: Pizza Shop Client CI
+
+on:
+  pull_request:
+    branches:
+      - master
+      - fs-*
+      - fe-*
+      - ci-*
+env:
+  ADMIN_PORT: 3000,
+  SALE_PORT: 3001,
+  BASE_URL: "http://localhost:5000",
+  SOCKET_URL: "http://localhost:8000",
+  ROUTER_BASE_URL: '/',
+
+jobs:
+  build-and-test:
+    if: contains(github.event.pull_request.labels.*.name, 'front-end')
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./ui
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache-dependency-path: ui/package.json
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm i
+
+      - name: Linting
+        run: npm run lint -- --quiet
+
+      - name: Build Application
+        run: npm run build

@@ -9,8 +9,6 @@
     "admin": "webpack serve --mode development --config build/webpack.dev.js",
     "sale": "webpack serve --mode development --env APP_NAME=sale --config build/webpack.dev.js",
     "build": "webpack --config build/webpack.prod.js",
-    "preview": "vite preview",
-    "build-only": "vite build",
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix",
     "format": "prettier --write src/"
