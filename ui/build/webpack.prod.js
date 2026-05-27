@@ -12,4 +12,7 @@ module.exports = merge(common({}), {
       'process.env': JSON.stringify(prod),
     }),
   ],
+  performance: {
+    hints: false,
+  },
 });
