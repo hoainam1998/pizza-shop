@@ -113,6 +113,7 @@
     "test:ut:socket-lib.connected": "jest --watch --testPathPatterns=apps/share/libs/socket/__test__/connected.spec.ts",
     "test:ut:socket-lib.update-user-complete": "jest --watch --testPathPatterns=apps/share/libs/socket/__test__/update-user-complete.spec.ts",
     "test:ut:socket-lib.refresh-all-products": "jest --watch --testPathPatterns=apps/share/libs/socket/__test__/refresh-all-products.spec.ts",
+    "test:ut:mailer.send-password": "jest --watch --testPathPatterns=apps/share/libs/mailer/__test__/send-password.spec.ts",
     "test:e2e:product.create": "jest --watch apps/api/src/product/__test__/create-product.spec.ts",
     "test:e2e:product.pagination": "jest --watch apps/api/src/product/__test__/pagination.spec.ts",
     "test:e2e:product.pagination-for-sale": "jest --watch apps/api/src/product/__test__/pagination-for-sale.spec.ts",
