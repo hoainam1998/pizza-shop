@@ -1,25 +1,27 @@
 import SocketController from '../socket.controller';
 import SocketService from '../socket.service';
-import EventsGateway from '@share/libs/socket/event-socket.gateway';
+import ProductNotificationEventsGateway from '@share/libs/socket/event-socket/product-notification';
 import startUp from './pre-setup';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 
 let socketController: SocketController;
 let socketService: SocketService;
-let socketGateway: EventsGateway;
+let productNotificationEventsGateway: ProductNotificationEventsGateway;
 const userId: string = Date.now().toString();
 
 beforeAll(async () => {
   const moduleRef = await startUp();
   socketController = moduleRef.get(SocketController);
   socketService = moduleRef.get(SocketService);
-  socketGateway = moduleRef.get(EventsGateway);
+  productNotificationEventsGateway = moduleRef.get(ProductNotificationEventsGateway);
 });
 
 describe('refresh product info', () => {
   it('refresh product info success', () => {
     expect.hasAssertions();
-    const refreshCurrentInfoSocketGateway = jest.spyOn(socketGateway, 'refreshCurrentInfo').mockImplementation(jest.fn);
+    const refreshCurrentInfoSocketGateway = jest
+      .spyOn(productNotificationEventsGateway, 'refreshProductInfo')
+      .mockImplementation(jest.fn);
     const refreshProductInfoService = jest.spyOn(socketService, 'refreshProductInfo');
     const refreshProductInfoController = jest.spyOn(socketController, 'refreshProductInfo');
     socketController.refreshProductInfo(userId);
@@ -32,9 +34,11 @@ describe('refresh product info', () => {
 
   it('refresh product info failed with unknown error', () => {
     expect.hasAssertions();
-    const refreshCurrentInfoSocketGateway = jest.spyOn(socketGateway, 'refreshCurrentInfo').mockImplementation(() => {
-      throw UnknownError;
-    });
+    const refreshCurrentInfoSocketGateway = jest
+      .spyOn(productNotificationEventsGateway, 'refreshProductInfo')
+      .mockImplementation(() => {
+        throw UnknownError;
+      });
     const refreshProductInfoService = jest.spyOn(socketService, 'refreshProductInfo');
     const refreshProductInfoController = jest.spyOn(socketController, 'refreshProductInfo');
     expect(() => socketController.refreshProductInfo(userId)).toThrow(UnknownError);

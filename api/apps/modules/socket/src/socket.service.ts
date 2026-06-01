@@ -1,24 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import { DataChartAddedType } from '@share/interfaces';
-import EventsGateway from '@share/libs/socket/event-socket.gateway';
+import UserNotificationEventsGateway from '@share/libs/socket/event-socket/user-notification';
+import ProductNotificationEventsGateway from '@share/libs/socket/event-socket/product-notification';
 
 @Injectable()
 export default class SocketService {
-  constructor(private readonly socketGateway: EventsGateway) {}
+  constructor(
+    private readonly productNotificationEventsGateway: ProductNotificationEventsGateway,
+    private readonly userNotificationEventsGateway: UserNotificationEventsGateway,
+  ) {}
 
   addDataChart(payload: DataChartAddedType): void {
-    this.socketGateway.addChartData(payload);
+    this.productNotificationEventsGateway.addChartData(payload);
   }
 
   refreshProductInfo(userId: string): void {
-    this.socketGateway.refreshCurrentInfo(userId);
-  }
-
-  updateUserComplete(userId: string): void {
-    this.socketGateway.updateUserComplete(userId);
+    this.productNotificationEventsGateway.refreshProductInfo(userId);
   }
 
   refreshAllProducts(): void {
-    this.socketGateway.refreshAllProducts();
+    this.productNotificationEventsGateway.refreshAllProducts();
+  }
+
+  refreshUserPagination(): void {
+    this.userNotificationEventsGateway.refreshUserPagination();
+  }
+
+  updateUserComplete(userId: string): void {
+    this.userNotificationEventsGateway.updateUserComplete(userId);
   }
 }

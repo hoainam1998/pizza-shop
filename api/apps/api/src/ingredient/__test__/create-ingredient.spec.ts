@@ -62,6 +62,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
 
     await api
       .post(createIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('name', ingredient.name)
       .field('unit', ingredient.unit)
@@ -87,6 +88,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
     await api
       .post(createIngredientUrl)
       .set('Connection', 'keep-alive')
+      .set('Connection', 'keep-alive')
       .field('name', ingredient.name)
       .field('unit', ingredient.unit)
       .field('count', ingredient.count)
@@ -106,6 +108,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
     const createIngredient = jest.spyOn(ingredientService, 'createIngredient');
     const response = await api
       .post(createIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('ingredientId', Date.now().toString())
       .field('name', ingredient.name)
@@ -128,6 +131,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
     const createIngredient = jest.spyOn(ingredientService, 'createIngredient');
     await api
       .post(createIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('name', ingredient.name)
       .field('unit', ingredient.unit)
@@ -148,6 +152,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
     const createIngredient = jest.spyOn(ingredientService, 'createIngredient');
     await api
       .post(createIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('name', ingredient.name)
       .field('unit', ingredient.unit)
@@ -168,6 +173,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
     const createIngredient = jest.spyOn(ingredientService, 'createIngredient');
     const response = await api
       .post(createIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('name', ingredient.name)
       .field('unit', ingredient.unit)
@@ -187,6 +193,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
     const createIngredient = jest.spyOn(ingredientService, 'createIngredient');
     const response = await api
       .post(createIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('unit', ingredient.unit)
       .field('count', ingredient.count)
@@ -205,6 +212,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
     const createIngredient = jest.spyOn(ingredientService, 'createIngredient');
     const response = await api
       .post(createIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('name', ingredient.name)
       .field('unit', ingredient.unit)
@@ -224,6 +232,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
     const createIngredient = jest.spyOn(ingredientService, 'createIngredient');
     const response = await api
       .post(createIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('name', ingredient.name)
       .field('unit', ingredient.unit)
@@ -243,6 +252,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
     const createIngredient = jest.spyOn(ingredientService, 'createIngredient');
     await api
       .post(createIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('name', ingredient.name)
       .field('unit', ingredient.unit)
@@ -267,6 +277,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
     const createIngredient = jest.spyOn(ingredientService, 'createIngredient');
     await api
       .post(createIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('name', ingredient.name)
       .field('unit', ingredient.unit)
@@ -291,6 +302,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
     const createIngredient = jest.spyOn(ingredientService, 'createIngredient');
     await api
       .post(createIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('name', ingredient.name)
       .field('unit', ingredient.unit)
@@ -314,6 +326,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createIngredientUrl), () => {
     const createIngredient = jest.spyOn(ingredientService, 'createIngredient');
     await api
       .post(createIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('name', ingredient.name)
       .field('unit', ingredient.unit)

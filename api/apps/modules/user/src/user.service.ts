@@ -30,7 +30,7 @@ export default class UserService {
     private readonly productCachingService: ProductCachingService,
     private readonly reportCachingService: ReportCachingService,
   ) {
-    userCachingService.logoutSubscribe((redisSessionId: string) => {
+    userCachingService.logoutSubscribeWithSessionExpired((redisSessionId: string) => {
       if (/ps:\w+/.test(redisSessionId)) {
         const sessionId = redisSessionId.split(':')[1];
         void this.prismaClient.user
@@ -49,6 +49,12 @@ export default class UserService {
             }
           });
       }
+    });
+
+    userCachingService.logoutSubscribe((payload: string) => {
+      const json = Event.fromJson(payload);
+      const { senderId } = json;
+      void this.logout(senderId);
     });
   }
 

@@ -24,6 +24,8 @@ import { HTTP_METHOD, POWER_NUMERIC } from '@share/enums';
 import { createMessage, createMessages, signApiKey } from '@share/utils';
 import { UserRouter } from '@share/router';
 import UserCachingService from '@share/libs/caching/user/user.service';
+import { ALLOW_VALID_API_KEY_GUARD } from '@share/di-token';
+import AllowValidApiKeyGuard from '@share/guards/allow-valid-api-key.service';
 const deleteUserBaseUrl: string = UserRouter.absolute.delete;
 const userId = user.user_id;
 const deleteUserUrl: string = `${deleteUserBaseUrl}/${userId}`;
@@ -34,6 +36,7 @@ let clientProxy: ClientProxy;
 let close: () => Promise<void>;
 let userService: UserService;
 let userCachingService: UserCachingService;
+let allowValidApiKeyGuard: AllowValidApiKeyGuard;
 
 const invalidPowerSessionPayload = { ...sessionPayload, power: POWER_NUMERIC.SALE };
 const missMatchUserIdApiKey = signApiKey({ userId: Date.now().toString(), email: user.email, power: user.power });
@@ -45,6 +48,7 @@ beforeAll(async () => {
   close = () => requestTest.app.close();
   userService = requestTest.app.get(UserService);
   userCachingService = requestTest.app.get(UserCachingService);
+  allowValidApiKeyGuard = requestTest.app.get(ALLOW_VALID_API_KEY_GUARD);
 });
 
 afterEach(async () => {
@@ -57,6 +61,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
   it(createTestName('delete user success', HttpStatus.OK), async () => {
     expect.hasAssertions();
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     await api
@@ -66,6 +71,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.DELETE_USER_SUCCESS));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(deleteUserService).toHaveBeenCalledTimes(1);
     expect(deleteUserService).toHaveBeenCalledWith(userId);
     expect(send).toHaveBeenCalledTimes(1);
@@ -74,6 +80,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
 
   it(createTestName('delete user failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     await api
@@ -81,12 +88,14 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.DID_NOT_LOGIN));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(deleteUserService).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
 
   it(createTestName('delete user failed with API key not set', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     await api
@@ -95,6 +104,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.API_KEY_INVALID));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(deleteUserService).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -102,6 +112,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
   it(createTestName('delete user failed when API key do not match', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(null);
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
     await api
@@ -111,12 +122,15 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.USER_INFO_OUT_OF_DATE));
+    expect(logoutPublish).toHaveBeenCalledTimes(1);
+    expect(logoutPublish).toHaveBeenCalledWith(sessionPayload?.userId);
     expect(deleteUserService).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
 
   it(createTestName('delete user failed when update self information', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(apiKey);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
@@ -127,12 +141,14 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.DO_NOT_CHANGE_YOURSELF));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(deleteUserService).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
 
   it(createTestName('delete user failed when user have not permission', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(apiKey);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
@@ -143,12 +159,14 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.DO_NOT_PERMISSION));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(deleteUserService).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
 
   it(createTestName('delete user failed with not found error', HttpStatus.NOT_FOUND), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest
       .spyOn(clientProxy, 'send')
@@ -161,6 +179,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.NOT_FOUND));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(deleteUserService).toHaveBeenCalledTimes(1);
     expect(deleteUserService).toHaveBeenCalledWith(userId);
     expect(send).toHaveBeenCalledTimes(1);
@@ -169,6 +188,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
 
   it(createTestName('delete user failed with unknown error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
@@ -179,6 +199,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(new InternalServerErrorException().message));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(deleteUserService).toHaveBeenCalledTimes(1);
     expect(deleteUserService).toHaveBeenCalledWith(userId);
     expect(send).toHaveBeenCalledTimes(1);
@@ -187,6 +208,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
 
   it(createTestName('delete user failed with RPC unknown error', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest
       .spyOn(clientProxy, 'send')
@@ -199,6 +221,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.COMMON_ERROR));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(deleteUserService).toHaveBeenCalledTimes(1);
     expect(deleteUserService).toHaveBeenCalledWith(userId);
     expect(send).toHaveBeenCalledTimes(1);
@@ -207,6 +230,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
 
   it(createTestName('delete user failed with server error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const serverError = new InternalServerErrorException();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => serverError));
@@ -218,6 +242,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(serverError.message));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(deleteUserService).toHaveBeenCalledTimes(1);
     expect(deleteUserService).toHaveBeenCalledWith(userId);
     expect(send).toHaveBeenCalledTimes(1);
@@ -226,6 +251,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
 
   it(createTestName('delete user failed with invalid userId field', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest.spyOn(clientProxy, 'send');
     const deleteUserService = jest.spyOn(userService, 'deleteUser');
@@ -235,6 +261,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
       .set('mock-session', JSON.stringify(sessionPayload))
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(response.body).toEqual({ messages: expect.any(Array) });
     expect(deleteUserService).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
@@ -242,6 +269,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
 
   it(createTestName('delete user failed with database disconnect', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest
       .spyOn(clientProxy, 'send')
@@ -254,6 +282,7 @@ describe(createDescribeTest(HTTP_METHOD.DELETE, deleteUserBaseUrl), () => {
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(deleteUserService).toHaveBeenCalledTimes(1);
     expect(deleteUserService).toHaveBeenCalledWith(userId);
     expect(send).toHaveBeenCalledTimes(1);

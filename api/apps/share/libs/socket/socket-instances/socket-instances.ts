@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io';
 import type { ConnectedPayloadType } from '@share/interfaces';
-import { VIEW } from '@share/enums';
+import { VIEW, SOCKET_NAME } from '@share/enums';
 import SocketInstancesStorage from './socket-instances-storage';
 
 /**
@@ -8,8 +8,8 @@ import SocketInstancesStorage from './socket-instances-storage';
  * @class
  */
 export default class SocketInstances {
-  private static readonly _adminSocketInstances = new SocketInstancesStorage();
-  private static readonly _clientSocketInstances = new SocketInstancesStorage();
+  private static readonly _adminSocketInstances = new SocketInstancesStorage(SOCKET_NAME.ADMIN);
+  private static readonly _clientSocketInstances = new SocketInstancesStorage(SOCKET_NAME.CLIENT);
 
   /**
    * Admin socket instances list.

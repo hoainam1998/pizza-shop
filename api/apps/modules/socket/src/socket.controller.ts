@@ -6,6 +6,7 @@ import {
   refreshProductInfoPattern,
   updateUserCompletePattern,
   refreshAllProductsPattern,
+  refreshUserPaginationPattern,
 } from '@share/pattern';
 import type { DataChartAddedType } from '@share/interfaces';
 
@@ -31,5 +32,10 @@ export default class SocketController {
   @EventPattern(refreshAllProductsPattern)
   refreshAllProducts(): void {
     this.socketService.refreshAllProducts();
+  }
+
+  @EventPattern(refreshUserPaginationPattern)
+  refreshUserPagination(): void {
+    this.socketService.refreshUserPagination();
   }
 }

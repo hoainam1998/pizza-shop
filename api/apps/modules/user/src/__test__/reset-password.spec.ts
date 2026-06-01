@@ -1,4 +1,4 @@
-import { RpcException } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
@@ -18,10 +18,13 @@ import messages from '@share/constants/messages';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import { ResetPassword } from '@share/dto/validators/user.dto';
 import { APP_NAME, POWER_NUMERIC, STATUS } from '@share/enums';
+import { SOCKET_SERVICE } from '@share/di-token';
+import { refreshUserPaginationPattern } from '@share/pattern';
 
 let loggerService: LoggingService;
 let userController: UserController;
 let userService: UserService;
+let socketService: ClientProxy;
 
 const oldPassword = autoGeneratePassword();
 const resetPasswordBody: ResetPassword = {
@@ -44,11 +47,13 @@ beforeAll(async () => {
   userService = moduleRef.get(UserService);
   userController = moduleRef.get(UserController);
   loggerService = moduleRef.get(LoggingService);
+  socketService = moduleRef.get(SOCKET_SERVICE);
 });
 
 describe('reset password', () => {
   it('reset password success', async () => {
     expect.hasAssertions();
+    const emit = jest.spyOn(socketService, 'emit');
     const verify = jest.spyOn(jwt, 'verify').mockReturnValue(jwtPayload as any);
     const compareSync = jest.spyOn(bcrypt, 'compareSync').mockReturnValue(true);
     const getUserService = jest.spyOn(userService, 'getUser').mockResolvedValue(user);
@@ -64,10 +69,13 @@ describe('reset password', () => {
     expect(compareSync).toHaveBeenCalledWith(resetPasswordBody.oldPassword, user.password);
     expect(resetPasswordService).toHaveBeenCalledTimes(1);
     expect(resetPasswordService).toHaveBeenCalledWith(resetPasswordBody);
+    expect(emit).toHaveBeenCalledTimes(1);
+    expect(emit).toHaveBeenCalledWith(refreshUserPaginationPattern, {});
   });
 
   it('reset password failed with sale view and admin role', async () => {
     expect.hasAssertions();
+    const emit = jest.spyOn(socketService, 'emit');
     const resetPasswordBodyWithSale = { ...resetPasswordBody, by: APP_NAME.SALE };
     const userWithAdminRole = { ...user, power: POWER_NUMERIC.ADMIN };
     const verify = jest.spyOn(jwt, 'verify').mockReturnValue(jwtPayload as any);
@@ -85,10 +93,12 @@ describe('reset password', () => {
     expect(getUserService).toHaveBeenCalledWith({ email: resetPasswordBodyWithSale.email }, getUserParameters);
     expect(compareSync).not.toHaveBeenCalled();
     expect(resetPasswordService).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
   });
 
   it('reset password failed with admin view and sale role', async () => {
     expect.hasAssertions();
+    const emit = jest.spyOn(socketService, 'emit');
     const resetPasswordBodyWithAdmin = { ...resetPasswordBody, by: APP_NAME.ADMIN };
     const userWithSaleRole = { ...user, power: POWER_NUMERIC.SALE };
     const verify = jest.spyOn(jwt, 'verify').mockReturnValue(jwtPayload as any);
@@ -106,10 +116,12 @@ describe('reset password', () => {
     expect(getUserService).toHaveBeenCalledWith({ email: resetPasswordBodyWithAdmin.email }, getUserParameters);
     expect(compareSync).not.toHaveBeenCalled();
     expect(resetPasswordService).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
   });
 
   it('reset password failed when unknown resource', async () => {
     expect.hasAssertions();
+    const emit = jest.spyOn(socketService, 'emit');
     const resetPasswordBodyWithUnknownResource = { ...resetPasswordBody, by: undefined };
     const userWithSaleRole = { ...user, power: POWER_NUMERIC.SALE };
     const verify = jest.spyOn(jwt, 'verify').mockReturnValue(jwtPayload as any);
@@ -133,10 +145,12 @@ describe('reset password', () => {
     );
     expect(compareSync).not.toHaveBeenCalled();
     expect(resetPasswordService).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
   });
 
   it('reset password failed with jwt verify got unknown error', async () => {
     expect.hasAssertions();
+    const emit = jest.spyOn(socketService, 'emit');
     const logMethod = jest.spyOn(loggerService, 'error');
     const verify = jest.spyOn(jwt, 'verify').mockImplementation(() => {
       throw JsonWebTokenUnknownError;
@@ -156,10 +170,12 @@ describe('reset password', () => {
     expect(resetPasswordService).not.toHaveBeenCalled();
     expect(compareSync).not.toHaveBeenCalled();
     expect(getUserService).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
   });
 
   it('reset password failed with jwt verify got token expired error', async () => {
     expect.hasAssertions();
+    const emit = jest.spyOn(socketService, 'emit');
     const logMethod = jest.spyOn(loggerService, 'error');
     const verify = jest.spyOn(jwt, 'verify').mockImplementation(() => {
       throw JsonWebTokenExpiredError;
@@ -179,10 +195,12 @@ describe('reset password', () => {
     expect(resetPasswordService).not.toHaveBeenCalled();
     expect(getUserService).not.toHaveBeenCalled();
     expect(compareSync).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
   });
 
   it('reset password failed with jwt verify got malformed error', async () => {
     expect.hasAssertions();
+    const emit = jest.spyOn(socketService, 'emit');
     const logMethod = jest.spyOn(loggerService, 'error');
     const verify = jest.spyOn(jwt, 'verify').mockImplementation(() => {
       throw JsonWebTokenMalformedError;
@@ -202,10 +220,12 @@ describe('reset password', () => {
     expect(resetPasswordService).not.toHaveBeenCalled();
     expect(getUserService).not.toHaveBeenCalled();
     expect(compareSync).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
   });
 
   it('reset password failed with jwt verify result is null', async () => {
     expect.hasAssertions();
+    const emit = jest.spyOn(socketService, 'emit');
     const logMethod = jest.spyOn(loggerService, 'error');
     const verify = jest.spyOn(jwt, 'verify').mockReturnValue(null as any);
     const compareSync = jest.spyOn(bcrypt, 'compareSync');
@@ -221,12 +241,14 @@ describe('reset password', () => {
     expect(resetPasswordService).not.toHaveBeenCalled();
     expect(getUserService).not.toHaveBeenCalled();
     expect(compareSync).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenLastCalledWith(messages.USER.NOT_FOUND, expect.any(String));
   });
 
   it('reset password failed with jwt verify result is not same with user info', async () => {
     expect.hasAssertions();
+    const emit = jest.spyOn(socketService, 'emit');
     const logMethod = jest.spyOn(loggerService, 'error');
     const verify = jest.spyOn(jwt, 'verify').mockReturnValue({ ...jwtPayload, email: 'anotherEmail@gmail.com' } as any);
     const compareSync = jest.spyOn(bcrypt, 'compareSync');
@@ -242,6 +264,7 @@ describe('reset password', () => {
     expect(resetPasswordService).not.toHaveBeenCalled();
     expect(getUserService).not.toHaveBeenCalled();
     expect(compareSync).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenLastCalledWith(messages.USER.NOT_FOUND, expect.any(String));
   });
@@ -249,6 +272,7 @@ describe('reset password', () => {
   it('reset password failed with user were blocked', async () => {
     expect.hasAssertions();
     const userBlocked = { ...user, active: STATUS.BLOCK };
+    const emit = jest.spyOn(socketService, 'emit');
     const logMethod = jest.spyOn(loggerService, 'error');
     const verify = jest.spyOn(jwt, 'verify').mockReturnValue(jwtPayload as any);
     const compareSync = jest.spyOn(bcrypt, 'compareSync');
@@ -265,12 +289,14 @@ describe('reset password', () => {
     expect(getUserService).toHaveBeenCalledWith({ email: resetPasswordBody.email }, getUserParameters);
     expect(resetPasswordService).not.toHaveBeenCalled();
     expect(compareSync).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenLastCalledWith(messages.USER.YOU_WERE_BLOCKED, expect.any(String));
   });
 
   it('reset password failed with getUser got not found error', async () => {
     expect.hasAssertions();
+    const emit = jest.spyOn(socketService, 'emit');
     const logMethod = jest.spyOn(loggerService, 'error');
     const verify = jest.spyOn(jwt, 'verify').mockReturnValue(jwtPayload as any);
     const compareSync = jest.spyOn(bcrypt, 'compareSync');
@@ -289,12 +315,14 @@ describe('reset password', () => {
     expect(getUserService).toHaveBeenCalledWith({ email: resetPasswordBody.email }, getUserParameters);
     expect(resetPasswordService).not.toHaveBeenCalled();
     expect(compareSync).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).not.toHaveBeenCalled();
   });
 
   it('reset password failed with getUser got unknown error', async () => {
     expect.hasAssertions();
     const logMethod = jest.spyOn(loggerService, 'error');
+    const emit = jest.spyOn(socketService, 'emit');
     const verify = jest.spyOn(jwt, 'verify').mockReturnValue(jwtPayload as any);
     const compareSync = jest.spyOn(bcrypt, 'compareSync');
     const getUserService = jest.spyOn(userService, 'getUser').mockRejectedValue(UnknownError);
@@ -312,11 +340,13 @@ describe('reset password', () => {
     expect(logMethod).toHaveBeenLastCalledWith(UnknownError.message, expect.any(String));
     expect(resetPasswordService).not.toHaveBeenCalled();
     expect(compareSync).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
   });
 
   it('reset password failed with getUser got database disconnect error', async () => {
     expect.hasAssertions();
     const logMethod = jest.spyOn(loggerService, 'error');
+    const emit = jest.spyOn(socketService, 'emit');
     const verify = jest.spyOn(jwt, 'verify').mockReturnValue(jwtPayload as any);
     const compareSync = jest.spyOn(bcrypt, 'compareSync');
     const getUserService = jest
@@ -336,11 +366,13 @@ describe('reset password', () => {
     expect(logMethod).toHaveBeenLastCalledWith(PrismaDisconnectError.message, expect.any(String));
     expect(resetPasswordService).not.toHaveBeenCalled();
     expect(compareSync).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
   });
 
   it('reset password failed with comparePassword got unknown error', async () => {
     expect.hasAssertions();
     const logMethod = jest.spyOn(loggerService, 'error');
+    const emit = jest.spyOn(socketService, 'emit');
     const verify = jest.spyOn(jwt, 'verify').mockReturnValue(jwtPayload as any);
     const compareSync = jest.spyOn(bcrypt, 'compareSync').mockImplementation(() => {
       throw UnknownError;
@@ -361,11 +393,13 @@ describe('reset password', () => {
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenLastCalledWith(UnknownError.message, expect.any(String));
     expect(resetPasswordService).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
   });
 
   it('reset password failed with comparePassword return false', async () => {
     expect.hasAssertions();
     const logMethod = jest.spyOn(loggerService, 'error');
+    const emit = jest.spyOn(socketService, 'emit');
     const verify = jest.spyOn(jwt, 'verify').mockReturnValue(jwtPayload as any);
     const compareSync = jest.spyOn(bcrypt, 'compareSync').mockReturnValue(false);
     const getUserService = jest.spyOn(userService, 'getUser').mockResolvedValue(user);
@@ -384,11 +418,13 @@ describe('reset password', () => {
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenLastCalledWith(messages.USER.PASSWORD_NOT_MATCH, expect.any(String));
     expect(resetPasswordService).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
   });
 
   it('reset password failed when resetPassword method got unknown error', async () => {
     expect.hasAssertions();
     const logMethod = jest.spyOn(loggerService, 'error');
+    const emit = jest.spyOn(socketService, 'emit');
     const verify = jest.spyOn(jwt, 'verify').mockReturnValue(jwtPayload as any);
     const compareSync = jest.spyOn(bcrypt, 'compareSync').mockReturnValue(true);
     const getUserService = jest.spyOn(userService, 'getUser').mockResolvedValue(user);
@@ -406,12 +442,14 @@ describe('reset password', () => {
     expect(compareSync).toHaveBeenCalledWith(resetPasswordBody.oldPassword, user.password);
     expect(resetPasswordService).toHaveBeenCalledTimes(1);
     expect(resetPasswordService).toHaveBeenCalledWith(resetPasswordBody);
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenLastCalledWith(UnknownError.message, expect.any(String));
   });
 
   it('reset password failed when resetPassword method got not found error', async () => {
     expect.hasAssertions();
+    const emit = jest.spyOn(socketService, 'emit');
     const logMethod = jest.spyOn(loggerService, 'error');
     const verify = jest.spyOn(jwt, 'verify').mockReturnValue(jwtPayload as any);
     const compareSync = jest.spyOn(bcrypt, 'compareSync').mockReturnValue(true);
@@ -432,12 +470,14 @@ describe('reset password', () => {
     expect(compareSync).toHaveBeenCalledWith(resetPasswordBody.oldPassword, user.password);
     expect(resetPasswordService).toHaveBeenCalledTimes(1);
     expect(resetPasswordService).toHaveBeenCalledWith(resetPasswordBody);
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(messages.USER.NOT_FOUND, expect.any(String));
   });
 
   it('reset password failed when resetPassword method got database disconnect error', async () => {
     expect.hasAssertions();
+    const emit = jest.spyOn(socketService, 'emit');
     const logMethod = jest.spyOn(loggerService, 'error');
     const verify = jest.spyOn(jwt, 'verify').mockReturnValue(jwtPayload as any);
     const compareSync = jest.spyOn(bcrypt, 'compareSync').mockReturnValue(true);
@@ -458,6 +498,7 @@ describe('reset password', () => {
     expect(compareSync).toHaveBeenCalledWith(resetPasswordBody.oldPassword, user.password);
     expect(resetPasswordService).toHaveBeenCalledTimes(1);
     expect(resetPasswordService).toHaveBeenCalledWith(resetPasswordBody);
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenLastCalledWith(PrismaDisconnectError.message, expect.any(String));
   });

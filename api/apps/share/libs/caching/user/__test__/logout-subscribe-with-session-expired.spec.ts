@@ -30,13 +30,16 @@ describe('logout subscribe with session expired', () => {
       connect: jest.fn().mockResolvedValue({}),
       subscribe: jest.fn().mockResolvedValue({}),
     };
+    const configSet = jest.spyOn(redisClient.Client, 'configSet').mockImplementation(jest.fn());
     jest.spyOn(redisClient.Client, 'duplicate').mockReturnValue(subscriber as any);
     const subscribe = jest.spyOn(redisClient, 'subscribe');
-    const logoutSubscribe = jest.spyOn(userCachingService, 'logoutSubscribe');
-    userCachingService.logoutSubscribe(func);
-    expect(logoutSubscribe).toHaveBeenCalledTimes(1);
+    const logoutSubscribeWithSessionExpired = jest.spyOn(userCachingService, 'logoutSubscribeWithSessionExpired');
+    userCachingService.logoutSubscribeWithSessionExpired(func);
+    expect(logoutSubscribeWithSessionExpired).toHaveBeenCalledTimes(1);
+    expect(configSet).toHaveBeenCalledTimes(1);
+    expect(configSet).toHaveBeenCalledWith('notify-keyspace-events', 'Ex');
     expect(subscribe).toHaveBeenCalledTimes(1);
-    expect(subscribe).toHaveBeenCalledWith(REDIS_SUBSCRIBE_NAME.LOGOUT, func);
+    expect(subscribe).toHaveBeenCalledWith(REDIS_SUBSCRIBE_NAME.KEY_EVENT_EXPIRED, func);
     expect(subscriber.connect).toHaveBeenCalledTimes(1);
     await subscriber.connect.mock.results[0].value[0];
     expect(subscriber.subscribe).toHaveBeenCalledTimes(1);
@@ -48,14 +51,17 @@ describe('logout subscribe with session expired', () => {
       connect: jest.fn().mockResolvedValue({}),
       subscribe: jest.fn().mockRejectedValue(UnknownError),
     };
+    const configSet = jest.spyOn(redisClient.Client, 'configSet').mockImplementation(jest.fn());
     jest.spyOn(redisClient.Client, 'duplicate').mockReturnValue(subscriber as any);
     const error = jest.spyOn(Logger, 'error').mockImplementation(jest.fn());
     const subscribe = jest.spyOn(redisClient, 'subscribe');
-    const logoutSubscribe = jest.spyOn(userCachingService, 'logoutSubscribe');
-    userCachingService.logoutSubscribe(func);
-    expect(logoutSubscribe).toHaveBeenCalledTimes(1);
+    const logoutSubscribeWithSessionExpired = jest.spyOn(userCachingService, 'logoutSubscribeWithSessionExpired');
+    userCachingService.logoutSubscribeWithSessionExpired(func);
+    expect(logoutSubscribeWithSessionExpired).toHaveBeenCalledTimes(1);
+    expect(configSet).toHaveBeenCalledTimes(1);
+    expect(configSet).toHaveBeenCalledWith('notify-keyspace-events', 'Ex');
     expect(subscribe).toHaveBeenCalledTimes(1);
-    expect(subscribe).toHaveBeenCalledWith(REDIS_SUBSCRIBE_NAME.LOGOUT, func);
+    expect(subscribe).toHaveBeenCalledWith(REDIS_SUBSCRIBE_NAME.KEY_EVENT_EXPIRED, func);
     expect(subscriber.connect).toHaveBeenCalledTimes(1);
     await subscriber.connect.mock.results[0].value[0];
     expect(subscriber.subscribe).toHaveBeenCalledTimes(1);

@@ -1,9 +1,9 @@
-import { RpcException } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PrismaClient } from 'generated/prisma';
 import LoggingService from '@share/libs/logging/logging.service';
 import startUp from './pre-setup';
-import { PRISMA_CLIENT } from '@share/di-token';
+import { PRISMA_CLIENT, SOCKET_SERVICE } from '@share/di-token';
 import UserController from '../user.controller';
 import UserService from '../user.service';
 import { user } from '@share/test/pre-setup/mock/data/user';
@@ -11,11 +11,13 @@ import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import { createMessage } from '@share/utils';
 import messages from '@share/constants/messages';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
+import { refreshUserPaginationPattern } from '@share/pattern';
 
 let prismaService: PrismaClient;
 let loggerService: LoggingService;
 let userController: UserController;
 let userService: UserService;
+let socketService: ClientProxy;
 
 const userInput: any = {
   user_id: user.user_id,
@@ -33,12 +35,14 @@ beforeAll(async () => {
   userController = moduleRef.get(UserController);
   loggerService = moduleRef.get(LoggingService);
   prismaService = moduleRef.get(PRISMA_CLIENT);
+  socketService = moduleRef.get(SOCKET_SERVICE);
 });
 
 describe('update personal info', () => {
   it('update personal info success', async () => {
     expect.hasAssertions();
     const logMethod = jest.spyOn(loggerService, 'error');
+    const emit = jest.spyOn(socketService, 'emit');
     const update = jest.spyOn(prismaService.user, 'update').mockResolvedValue(user);
     const logout = jest.spyOn(userService, 'logout').mockResolvedValue(null);
     const updatePersonalInfoService = jest.spyOn(userService, 'updatePersonalInfo');
@@ -56,12 +60,15 @@ describe('update personal info', () => {
     });
     expect(logout).toHaveBeenCalledTimes(1);
     expect(logout).toHaveBeenCalledWith(userInput.user_id);
+    expect(emit).toHaveBeenCalledTimes(1);
+    expect(emit).toHaveBeenCalledWith(refreshUserPaginationPattern, {});
     expect(logMethod).not.toHaveBeenCalled();
   });
 
   it('update personal info failed with unknown error', async () => {
     expect.hasAssertions();
     const logMethod = jest.spyOn(loggerService, 'error');
+    const emit = jest.spyOn(socketService, 'emit');
     const update = jest.spyOn(prismaService.user, 'update').mockRejectedValue(UnknownError);
     const logout = jest.spyOn(userService, 'logout');
     const updatePersonalInfoService = jest.spyOn(userService, 'updatePersonalInfo');
@@ -80,6 +87,7 @@ describe('update personal info', () => {
       },
     });
     expect(logout).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
   });
@@ -87,6 +95,7 @@ describe('update personal info', () => {
   it('update personal info failed with database disconnect error', async () => {
     expect.hasAssertions();
     const logMethod = jest.spyOn(loggerService, 'error');
+    const emit = jest.spyOn(socketService, 'emit');
     const update = jest.spyOn(prismaService.user, 'update').mockRejectedValue(PrismaDisconnectError);
     const logout = jest.spyOn(userService, 'logout');
     const updatePersonalInfoService = jest.spyOn(userService, 'updatePersonalInfo');
@@ -105,6 +114,7 @@ describe('update personal info', () => {
       },
     });
     expect(logout).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(PrismaDisconnectError.message, expect.any(String));
   });
@@ -112,6 +122,7 @@ describe('update personal info', () => {
   it('update personal info failed with logout got database disconnect error', async () => {
     expect.hasAssertions();
     const logMethod = jest.spyOn(loggerService, 'error');
+    const emit = jest.spyOn(socketService, 'emit');
     const update = jest.spyOn(prismaService.user, 'update').mockResolvedValue(user);
     const logout = jest.spyOn(userService, 'logout').mockImplementation(() => {
       throw new RpcException(new BadRequestException(PrismaDisconnectError.message));
@@ -133,6 +144,7 @@ describe('update personal info', () => {
     });
     expect(logout).toHaveBeenCalledTimes(1);
     expect(logout).toHaveBeenCalledWith(user.user_id);
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(PrismaDisconnectError.message, expect.any(String));
   });
@@ -140,6 +152,7 @@ describe('update personal info', () => {
   it('update personal info failed with logout got unknown error', async () => {
     expect.hasAssertions();
     const logMethod = jest.spyOn(loggerService, 'error');
+    const emit = jest.spyOn(socketService, 'emit');
     const update = jest.spyOn(prismaService.user, 'update').mockResolvedValue(user);
     const logout = jest.spyOn(userService, 'logout').mockRejectedValue(UnknownError);
     const updatePersonalInfoService = jest.spyOn(userService, 'updatePersonalInfo');
@@ -159,6 +172,7 @@ describe('update personal info', () => {
     });
     expect(logout).toHaveBeenCalledTimes(1);
     expect(logout).toHaveBeenCalledWith(user.user_id);
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(UnknownError.message, expect.any(String));
   });
@@ -166,6 +180,7 @@ describe('update personal info', () => {
   it('update personal info failed with logout got data not found error', async () => {
     expect.hasAssertions();
     const logMethod = jest.spyOn(loggerService, 'error');
+    const emit = jest.spyOn(socketService, 'emit');
     const update = jest.spyOn(prismaService.user, 'update').mockResolvedValue(user);
     const logout = jest.spyOn(userService, 'logout').mockImplementation(() => {
       throw new RpcException(new NotFoundException(messages.USER.NOT_FOUND));
@@ -187,12 +202,14 @@ describe('update personal info', () => {
     });
     expect(logout).toHaveBeenCalledTimes(1);
     expect(logout).toHaveBeenCalledWith(user.user_id);
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).not.toHaveBeenCalled();
   });
 
   it('update personal info failed with sex invalid', async () => {
     expect.hasAssertions();
     const logout = jest.spyOn(userService, 'logout');
+    const emit = jest.spyOn(socketService, 'emit');
     const sexInvalidException = new BadRequestException(createMessage(messages.USER.YOUR_GENDER_INVALID));
     const logMethod = jest.spyOn(loggerService, 'error');
     const update = jest.spyOn(prismaService.user, 'update').mockRejectedValue(sexInvalidException);
@@ -211,12 +228,14 @@ describe('update personal info', () => {
     });
     expect(logout).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledWith(messages.USER.YOUR_GENDER_INVALID, expect.any(String));
   });
 
   it('update personal info failed with power invalid', async () => {
     expect.hasAssertions();
     const logout = jest.spyOn(userService, 'logout');
+    const emit = jest.spyOn(socketService, 'emit');
     const powerInvalidException = new BadRequestException(createMessage(messages.USER.YOUR_POWER_INVALID));
     const logMethod = jest.spyOn(loggerService, 'error');
     const update = jest.spyOn(prismaService.user, 'update').mockRejectedValue(powerInvalidException);
@@ -234,6 +253,7 @@ describe('update personal info', () => {
       },
     });
     expect(logout).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(messages.USER.YOUR_POWER_INVALID, expect.any(String));
   });
@@ -241,6 +261,7 @@ describe('update personal info', () => {
   it('update personal info failed with email was already exist', async () => {
     expect.hasAssertions();
     const logout = jest.spyOn(userService, 'logout');
+    const emit = jest.spyOn(socketService, 'emit');
     const emailExistException = new UnauthorizedException(createMessage(messages.USER.EMAIL_REGIS_ALREADY_EXIST));
     const logMethod = jest.spyOn(loggerService, 'error');
     const update = jest.spyOn(prismaService.user, 'update').mockRejectedValue(emailExistException);
@@ -258,6 +279,7 @@ describe('update personal info', () => {
       },
     });
     expect(logout).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(messages.USER.EMAIL_REGIS_ALREADY_EXIST, expect.any(String));
   });
@@ -265,6 +287,7 @@ describe('update personal info', () => {
   it('update personal info failed with phone was already exist', async () => {
     expect.hasAssertions();
     const logout = jest.spyOn(userService, 'logout');
+    const emit = jest.spyOn(socketService, 'emit');
     const phoneExistException = new UnauthorizedException(createMessage(messages.USER.PHONE_ALREADY_EXIST));
     const logMethod = jest.spyOn(loggerService, 'error');
     const update = jest.spyOn(prismaService.user, 'update').mockRejectedValue(phoneExistException);
@@ -282,6 +305,7 @@ describe('update personal info', () => {
       },
     });
     expect(logout).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
     expect(logMethod).toHaveBeenCalledTimes(1);
     expect(logMethod).toHaveBeenCalledWith(messages.USER.PHONE_ALREADY_EXIST, expect.any(String));
   });

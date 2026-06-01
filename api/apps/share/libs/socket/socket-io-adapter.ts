@@ -6,16 +6,16 @@ import { verifyApiKey } from '@share/utils';
 import { ConfigService } from '@nestjs/config';
 import UserCachingService from '@share/libs/caching/user/user.service';
 import messages from '@share/constants/messages';
-import EventsGateway from './event-socket.gateway';
 import { POWER_NUMERIC, VIEW } from '@share/enums';
 import { SocketExtended } from '@share/interfaces';
+import SocketConnected from './event-socket/socket-connected';
 
 export class SocketIoAdapter extends IoAdapter {
   constructor(
     appOrHttpServer: INestApplicationContext,
     private readonly config: ConfigService,
     private readonly userCachingService: UserCachingService,
-    private readonly eventsGateway: EventsGateway,
+    private readonly socketConnected: SocketConnected,
   ) {
     super(appOrHttpServer);
   }
@@ -58,7 +58,7 @@ export class SocketIoAdapter extends IoAdapter {
         userId: requester.userId,
         view: requester.power === POWER_NUMERIC.SALE ? VIEW.CLIENT : VIEW.ADMIN,
       };
-      this.eventsGateway.connected(userConnected, socket);
+      this.socketConnected.connected(userConnected, socket);
     });
 
     return server;

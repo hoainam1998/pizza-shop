@@ -18,6 +18,7 @@ import {
   deleteUserPattern,
   updateUserCompletePattern,
   updateStatusPattern,
+  refreshUserPaginationPattern,
 } from '@share/pattern';
 import type {
   UserCreatedReturnType,
@@ -59,7 +60,7 @@ const validateUserPermission = (requestPayload: RequesterFromType, user: Pick<us
   }
 };
 
-@Controller('user')
+@Controller()
 export default class UserController {
   constructor(
     @Inject(SOCKET_SERVICE) private readonly socketService: ClientProxy,
@@ -97,6 +98,7 @@ export default class UserController {
             if (!user.reset_password_token) {
               finalUser = await this.userService.updateUserSessionId(user.user_id, loginInfo.session_id);
             }
+            this.socketService.emit(refreshUserPaginationPattern, {});
             return omitFields(['password', 'session_id', 'active'], finalUser) as UserLoggedType;
           }
           throw new UnauthorizedException(createMessage(messages.USER.PASSWORD_NOT_MATCH));
@@ -124,7 +126,10 @@ export default class UserController {
 
             validateUserPermission(resetPasswordBody, user);
             if (comparePassword(resetPasswordBody.oldPassword, user.password)) {
-              return this.userService.resetPassword(resetPasswordBody);
+              return this.userService.resetPassword(resetPasswordBody).then((result) => {
+                this.socketService.emit(refreshUserPaginationPattern, {});
+                return result;
+              });
             } else {
               throw new UnauthorizedException(createMessage(messages.USER.PASSWORD_NOT_MATCH));
             }
@@ -210,6 +215,7 @@ export default class UserController {
   updatePersonalInfo(user: user): Promise<user> {
     return this.userService.updatePersonalInfo(user).then(async (userResult) => {
       await this.userService.logout(user.user_id);
+      this.socketService.emit(refreshUserPaginationPattern, {});
       return userResult;
     });
   }
