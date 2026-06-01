@@ -10,9 +10,9 @@ export default class OnlyAllowSelfGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const previousValidateResult = await this.allowValidApiKeyGuard.canActivate(context);
+    const request = context.switchToHttp().getRequest();
 
     if (previousValidateResult) {
-      const request = context.switchToHttp().getRequest();
       const requester = request['requester'];
 
       if (requester.userId === request.session.user.userId) {
@@ -20,7 +20,10 @@ export default class OnlyAllowSelfGuard implements CanActivate {
       } else {
         throw new UnauthorizedException(createMessage(messages.USER.ONLY_ALLOW_YOUR_SELF));
       }
+    } else {
+      this.allowValidApiKeyGuard.logoutPublish(request.session.user.userId as string);
+      request.session.destroy();
+      throw new UnauthorizedException(createMessage(messages.USER.USER_INFO_OUT_OF_DATE));
     }
-    throw new UnauthorizedException(createMessage(messages.USER.USER_INFO_OUT_OF_DATE));
   }
 }

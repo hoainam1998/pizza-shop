@@ -68,9 +68,9 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateIngredientUrl), () => {
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(ingredient));
     const updateIngredient = jest.spyOn(ingredientService, 'updateIngredient');
     ingredientBody.avatar = expect.toBeImageBase64();
-
     await api
       .put(updateIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('ingredientId', ingredient.ingredient_id)
       .field('name', ingredient.name)
@@ -93,7 +93,6 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateIngredientUrl), () => {
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(ingredient));
     const updateIngredient = jest.spyOn(ingredientService, 'updateIngredient');
     ingredientBody.avatar = expect.toBeImageBase64();
-
     await api
       .put(updateIngredientUrl)
       .set('Connection', 'keep-alive')
@@ -117,6 +116,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateIngredientUrl), () => {
     const updateIngredient = jest.spyOn(ingredientService, 'updateIngredient');
     const response = await api
       .put(updateIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('ingredientIds', [ingredient.ingredient_id])
       .field('ingredientId', ingredient.ingredient_id)
@@ -140,6 +140,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateIngredientUrl), () => {
     const updateIngredient = jest.spyOn(ingredientService, 'updateIngredient');
     await api
       .put(updateIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('ingredientId', ingredient.ingredient_id)
       .field('name', ingredient.name)
@@ -161,6 +162,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateIngredientUrl), () => {
     const updateIngredient = jest.spyOn(ingredientService, 'updateIngredient');
     await api
       .put(updateIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('ingredientId', ingredient.ingredient_id)
       .field('name', ingredient.name)
@@ -182,6 +184,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateIngredientUrl), () => {
     const updateIngredient = jest.spyOn(ingredientService, 'updateIngredient');
     const response = await api
       .put(updateIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('ingredientId', ingredient.ingredient_id)
       .field('name', ingredient.name)
@@ -202,6 +205,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateIngredientUrl), () => {
     const updateIngredient = jest.spyOn(ingredientService, 'updateIngredient');
     const response = await api
       .put(updateIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('ingredientId', ingredient.ingredient_id)
       .field('unit', ingredient.unit)
@@ -221,6 +225,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateIngredientUrl), () => {
     const updateIngredient = jest.spyOn(ingredientService, 'updateIngredient');
     const response = await api
       .put(updateIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('ingredientId', ingredient.ingredient_id)
       .field('name', ingredient.name)
@@ -241,6 +246,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateIngredientUrl), () => {
     const updateIngredient = jest.spyOn(ingredientService, 'updateIngredient');
     const response = await api
       .put(updateIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('ingredientId', ingredient.ingredient_id)
       .field('name', ingredient.name)
@@ -263,6 +269,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateIngredientUrl), () => {
     const updateIngredient = jest.spyOn(ingredientService, 'updateIngredient');
     await api
       .put(updateIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('ingredientId', ingredient.ingredient_id)
       .field('name', ingredient.name)
@@ -286,6 +293,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateIngredientUrl), () => {
     const updateIngredient = jest.spyOn(ingredientService, 'updateIngredient');
     await api
       .put(updateIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('ingredientId', ingredient.ingredient_id)
       .field('name', ingredient.name)
@@ -311,6 +319,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateIngredientUrl), () => {
     const updateIngredient = jest.spyOn(ingredientService, 'updateIngredient');
     await api
       .put(updateIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('ingredientId', ingredient.ingredient_id)
       .field('name', ingredient.name)
@@ -336,6 +345,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateIngredientUrl), () => {
     const updateIngredient = jest.spyOn(ingredientService, 'updateIngredient');
     await api
       .put(updateIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('ingredientId', ingredient.ingredient_id)
       .field('name', ingredient.name)
@@ -360,6 +370,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateIngredientUrl), () => {
     const updateIngredient = jest.spyOn(ingredientService, 'updateIngredient');
     await api
       .put(updateIngredientUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('ingredientId', ingredient.ingredient_id)
       .field('name', ingredient.name)

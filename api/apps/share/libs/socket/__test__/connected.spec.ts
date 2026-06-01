@@ -1,10 +1,10 @@
 import startUp from './pre-setup';
-import EventsGateway from '../event-socket.gateway';
+import SocketConnected from '../event-socket/socket-connected';
 import SocketInstances from '../socket-instances/socket-instances';
 import { VIEW } from '@share/enums';
 import ReportCachingService from '@share/libs/caching/report/report.service';
 
-let gateway: EventsGateway;
+let socketConnected: SocketConnected;
 let reportCachingService: ReportCachingService;
 let close: () => Promise<void>;
 const userId = Date.now().toString();
@@ -19,7 +19,7 @@ const socket: any = {
 
 beforeAll(async () => {
   const moduleRef = await startUp();
-  gateway = moduleRef.get(EventsGateway);
+  socketConnected = moduleRef.get(SocketConnected);
   reportCachingService = moduleRef.get(ReportCachingService);
   close = () => moduleRef.close();
 });
@@ -33,8 +33,8 @@ describe('socket connected', () => {
     expect.hasAssertions();
     const addReportViewer = jest.spyOn(reportCachingService, 'addReportViewer');
     const addSocketClient = jest.spyOn(SocketInstances, 'addSocketClient').mockImplementation(jest.fn);
-    const connected = jest.spyOn(gateway, 'connected');
-    gateway.connected(payload, socket);
+    const connected = jest.spyOn(socketConnected, 'connected');
+    socketConnected.connected(payload, socket);
     expect(connected).toHaveBeenCalledTimes(1);
     expect(addSocketClient).toHaveBeenCalledTimes(1);
     expect(addSocketClient).toHaveBeenCalledWith(payload, socket);
@@ -50,8 +50,8 @@ describe('socket connected', () => {
     expect.hasAssertions();
     const addReportViewer = jest.spyOn(reportCachingService, 'addReportViewer');
     const addSocketClient = jest.spyOn(SocketInstances, 'addSocketClient').mockImplementation(jest.fn);
-    const connected = jest.spyOn(gateway, 'connected');
-    gateway.connected(clientViewPayload, socket);
+    const connected = jest.spyOn(socketConnected, 'connected');
+    socketConnected.connected(clientViewPayload, socket);
     expect(connected).toHaveBeenCalledTimes(1);
     expect(addSocketClient).toHaveBeenCalledTimes(1);
     expect(addSocketClient).toHaveBeenCalledWith(clientViewPayload, socket);

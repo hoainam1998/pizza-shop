@@ -20,8 +20,17 @@ export default class UserCachingService extends CachingService {
     return this.RedisClientInstance.hGet(REDIS_PREFIX_USER, userId);
   }
 
-  logoutSubscribe(logout: (args: any) => void): void {
+  logoutSubscribeWithSessionExpired(logout: (args: any) => void): void {
     void this.RedisClientInstance.configSet('notify-keyspace-events', 'Ex');
     void this.RedisInstance.subscribe(REDIS_SUBSCRIBE_NAME.KEY_EVENT_EXPIRED, logout);
+  }
+
+  logoutSubscribe(logout: (args: any) => void): void {
+    void this.RedisInstance.subscribe(REDIS_SUBSCRIBE_NAME.LOGOUT, logout);
+  }
+
+  publishLogout(senderId: string): void {
+    const event = Event.createEvent(REDIS_SUBSCRIBE_NAME.LOGOUT, { userId: senderId }, senderId);
+    this.RedisInstance.publish(event);
   }
 }

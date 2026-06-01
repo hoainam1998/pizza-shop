@@ -24,6 +24,8 @@ import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-
 import { UpdateUser } from '@share/dto/validators/user.dto';
 import { updateUserPattern } from '@share/pattern';
 import UserCachingService from '@share/libs/caching/user/user.service';
+import AllowValidApiKeyGuard from '@share/guards/allow-valid-api-key.service';
+import { ALLOW_VALID_API_KEY_GUARD } from '@share/di-token';
 const updateUserUrl = UserRouter.absolute.update;
 const MockUserModule = getMockModule(UserModule, { path: updateUserUrl, method: RequestMethod.PUT });
 
@@ -32,6 +34,7 @@ let clientProxy: ClientProxy;
 let close: () => Promise<void>;
 let userService: UserService;
 let userCachingService: UserCachingService;
+let allowValidApiKeyGuard: AllowValidApiKeyGuard;
 
 const requestBody = {
   userId: user.user_id,
@@ -52,6 +55,7 @@ beforeAll(async () => {
   close = () => requestTest.app.close();
   userService = requestTest.app.get(UserService);
   userCachingService = requestTest.app.get(UserCachingService);
+  allowValidApiKeyGuard = requestTest.app.get(ALLOW_VALID_API_KEY_GUARD);
 });
 
 afterEach(async () => {
@@ -64,6 +68,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
   it(createTestName('update user success', HttpStatus.CREATED), async () => {
     expect.hasAssertions();
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const updateUserService = jest.spyOn(userService, 'updateUser');
     await api
@@ -74,6 +79,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .expect(HttpStatus.CREATED)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.UPDATE_USER_SUCCESS));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(updateUserService).toHaveBeenCalledTimes(1);
     expect(updateUserService).toHaveBeenCalledWith(userUpdate);
     expect(send).toHaveBeenCalledTimes(1);
@@ -82,6 +88,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
 
   it(createTestName('update user failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const updateUserService = jest.spyOn(userService, 'updateUser');
     await api
@@ -92,11 +99,13 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.DID_NOT_LOGIN));
     expect(updateUserService).not.toHaveBeenCalled();
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
 
   it(createTestName('update user failed with API key not set', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const updateUserService = jest.spyOn(userService, 'updateUser');
     await api
@@ -107,12 +116,14 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.API_KEY_INVALID));
     expect(updateUserService).not.toHaveBeenCalled();
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
 
   it(createTestName('update user failed when update self information', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(apiKey);
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const updateUserService = jest.spyOn(userService, 'updateUser');
     await api
@@ -124,12 +135,14 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.DO_NOT_CHANGE_YOURSELF));
     expect(updateUserService).not.toHaveBeenCalled();
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
 
   it(createTestName('update user failed when user have not permission', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const updateUserService = jest.spyOn(userService, 'updateUser');
     await api
@@ -141,12 +154,14 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.DO_NOT_PERMISSION));
     expect(updateUserService).not.toHaveBeenCalled();
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
 
   it(createTestName('update user failed with API key do not match', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(null);
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const send = jest.spyOn(clientProxy, 'send');
     const updateUserService = jest.spyOn(userService, 'updateUser');
     await api
@@ -157,6 +172,8 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.USER_INFO_OUT_OF_DATE));
+    expect(logoutPublish).toHaveBeenCalledTimes(1);
+    expect(logoutPublish).toHaveBeenCalledWith(sessionPayload?.userId);
     expect(updateUserService).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -164,6 +181,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
   it(createTestName('update user failed with rpc unknown error', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const send = jest
       .spyOn(clientProxy, 'send')
       .mockReturnValue(throwError(() => new BadRequestException(createMessage(messages.COMMON.COMMON_ERROR))));
@@ -176,6 +194,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.COMMON_ERROR));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(updateUserService).toHaveBeenCalledTimes(1);
     expect(updateUserService).toHaveBeenCalledWith(userUpdate);
     expect(send).toHaveBeenCalledTimes(1);
@@ -185,6 +204,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
   it(createTestName('update user failed with super admin power', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     const requestBodyWithAdmin = { ...requestBody, power: POWER_NUMERIC.SUPER_ADMIN };
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest
       .spyOn(clientProxy, 'send')
@@ -198,6 +218,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
     expect(response.body).toEqual({ messages: [expect.any(String)] });
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(updateUserService).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -205,6 +226,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
   it(createTestName('update user failed with unknown error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
     const updateUserService = jest.spyOn(userService, 'updateUser');
     await api
@@ -215,6 +237,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(new InternalServerErrorException().message));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(updateUserService).toHaveBeenCalledTimes(1);
     expect(updateUserService).toHaveBeenCalledWith(userUpdate);
     expect(send).toHaveBeenCalledTimes(1);
@@ -224,6 +247,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
   it(createTestName('update user failed with not found error', HttpStatus.NOT_FOUND), async () => {
     expect.hasAssertions();
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const send = jest
       .spyOn(clientProxy, 'send')
       .mockReturnValue(throwError(() => new NotFoundException(messages.USER.NOT_FOUND)));
@@ -236,6 +260,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.NOT_FOUND));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(updateUserService).toHaveBeenCalledTimes(1);
     expect(updateUserService).toHaveBeenCalledWith(userUpdate);
     expect(send).toHaveBeenCalledTimes(1);
@@ -249,6 +274,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
     };
     delete requestBodyWithoutUserId.userId;
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const updateUserService = jest.spyOn(userService, 'updateUser');
     const response = await api
@@ -258,6 +284,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .send(requestBodyWithoutUserId)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(response.body).toEqual({ messages: expect.any(Array) });
     expect(updateUserService).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
@@ -270,6 +297,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       power: POWER_NUMERIC.ADMIN,
     };
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const updateUserService = jest.spyOn(userService, 'updateUser');
     const response = await api
@@ -280,6 +308,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
     expect(response.body).toEqual({ messages: expect.any(Array) });
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(updateUserService).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -287,6 +316,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
   it(createTestName('update user failed with database disconnect error', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const send = jest
       .spyOn(clientProxy, 'send')
       .mockReturnValue(throwError(() => new BadRequestException(PrismaDisconnectError.message)));
@@ -299,6 +329,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(updateUserService).toHaveBeenCalledTimes(1);
     expect(updateUserService).toHaveBeenCalledWith(userUpdate);
     expect(send).toHaveBeenCalledTimes(1);
@@ -308,6 +339,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
   it(createTestName('update user failed with server error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const serverError = new InternalServerErrorException();
     const updateUserService = jest.spyOn(userService, 'updateUser');
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => serverError));
@@ -319,6 +351,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(serverError.message));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(updateUserService).toHaveBeenCalledTimes(1);
     expect(updateUserService).toHaveBeenCalledWith(userUpdate);
     expect(send).toHaveBeenCalledTimes(1);
@@ -328,6 +361,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
   it(createTestName('update user failed with sex invalid', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const updateUserService = jest.spyOn(userService, 'updateUser');
     const send = jest
       .spyOn(clientProxy, 'send')
@@ -340,6 +374,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.YOUR_GENDER_INVALID));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(updateUserService).toHaveBeenCalledTimes(1);
     expect(updateUserService).toHaveBeenCalledWith(userUpdate);
     expect(send).toHaveBeenCalledTimes(1);
@@ -349,6 +384,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
   it(createTestName('update user failed with email was already exist', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const updateUserService = jest.spyOn(userService, 'updateUser');
     const send = jest
       .spyOn(clientProxy, 'send')
@@ -363,6 +399,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.EMAIL_REGIS_ALREADY_EXIST));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(updateUserService).toHaveBeenCalledTimes(1);
     expect(updateUserService).toHaveBeenCalledWith(userUpdate);
     expect(send).toHaveBeenCalledTimes(1);
@@ -372,6 +409,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
   it(createTestName('update user failed with phone was already exist', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const updateUserService = jest.spyOn(userService, 'updateUser');
     const send = jest
       .spyOn(clientProxy, 'send')
@@ -384,6 +422,7 @@ describe(createDescribeTest(HTTP_METHOD.PUT, updateUserUrl), () => {
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.PHONE_ALREADY_EXIST));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(updateUserService).toHaveBeenCalledTimes(1);
     expect(updateUserService).toHaveBeenCalledWith(userUpdate);
     expect(send).toHaveBeenCalledTimes(1);

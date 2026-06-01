@@ -1,4 +1,4 @@
-import EventsGateway from '../event-socket.gateway';
+import ProductNotificationEventsGateway from '@share/libs/socket/event-socket/product-notification';
 import startUp from './pre-setup';
 import SocketInstances from '../socket-instances/socket-instances';
 import socketEventNames from '@share/constants/socket-event-names';
@@ -8,7 +8,7 @@ import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 import LoggingService from '@share/libs/logging/logging.service';
 import './socket-instances-storage-mock';
 
-let gateway: EventsGateway;
+let productNotificationEventsGateway: ProductNotificationEventsGateway;
 let loggerService: LoggingService;
 let reportCachingService: ReportCachingService;
 let close: () => Promise<void>;
@@ -25,7 +25,7 @@ const socket: any = {
 
 beforeAll(async () => {
   const moduleRef = await startUp();
-  gateway = moduleRef.get(EventsGateway);
+  productNotificationEventsGateway = moduleRef.get(ProductNotificationEventsGateway);
   loggerService = moduleRef.get(LoggingService);
   reportCachingService = moduleRef.get(ReportCachingService);
   close = () => moduleRef.close();
@@ -40,8 +40,8 @@ describe('add chart data', () => {
     expect.hasAssertions();
     const getSocketClient = jest.spyOn(SocketInstances.Admin, 'getSocketClient').mockReturnValue(socket);
     const getAllReportViewer = jest.spyOn(reportCachingService, 'getAllReportViewer').mockResolvedValue(userIds);
-    const addChartData = jest.spyOn(gateway, 'addChartData');
-    gateway.addChartData(payload);
+    const addChartData = jest.spyOn(productNotificationEventsGateway, 'addChartData');
+    productNotificationEventsGateway.addChartData(payload);
     expect(addChartData).toHaveBeenCalledTimes(1);
     expect(addChartData).toHaveBeenCalledWith(payload);
     expect(getAllReportViewer).toHaveBeenCalledTimes(1);
@@ -58,8 +58,8 @@ describe('add chart data', () => {
     const log = jest.spyOn(loggerService, 'error');
     const getSocketClient = jest.spyOn(SocketInstances.Admin, 'getSocketClient');
     const getAllReportViewer = jest.spyOn(reportCachingService, 'getAllReportViewer').mockRejectedValue(UnknownError);
-    const addChartData = jest.spyOn(gateway, 'addChartData');
-    gateway.addChartData(payload);
+    const addChartData = jest.spyOn(productNotificationEventsGateway, 'addChartData');
+    productNotificationEventsGateway.addChartData(payload);
     expect(addChartData).toHaveBeenCalledTimes(1);
     expect(addChartData).toHaveBeenCalledWith(payload);
     expect(getAllReportViewer).toHaveBeenCalledTimes(1);
@@ -74,8 +74,8 @@ describe('add chart data', () => {
     expect.hasAssertions();
     const getSocketClient = jest.spyOn(SocketInstances.Admin, 'getSocketClient').mockReturnValue(undefined);
     const getAllReportViewer = jest.spyOn(reportCachingService, 'getAllReportViewer').mockResolvedValue(userIds);
-    const addChartData = jest.spyOn(gateway, 'addChartData');
-    gateway.addChartData(payload);
+    const addChartData = jest.spyOn(productNotificationEventsGateway, 'addChartData');
+    productNotificationEventsGateway.addChartData(payload);
     expect(addChartData).toHaveBeenCalledTimes(1);
     expect(addChartData).toHaveBeenCalledWith(payload);
     expect(getAllReportViewer).toHaveBeenCalledTimes(1);

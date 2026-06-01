@@ -5,7 +5,7 @@ import SocketModule from './socket.module';
 import { ConfigService } from '@nestjs/config';
 import { SocketIoAdapter } from '@share/libs/socket/socket-io-adapter';
 import UserCachingService from '@share/libs/caching/user/user.service';
-import EventsGateway from '@share/libs/socket/event-socket.gateway';
+import SocketConnected from '@share/libs/socket/event-socket/socket-connected';
 
 async function bootstrap() {
   const service = await NestFactory.createMicroservice<MicroserviceOptions>(SocketModule, {
@@ -16,8 +16,8 @@ async function bootstrap() {
   });
   const configService = service.get(ConfigService);
   const userCachingService = service.get(UserCachingService);
-  const eventsGateway = service.get(EventsGateway);
-  service.useWebSocketAdapter(new SocketIoAdapter(service, configService, userCachingService, eventsGateway));
+  const socketConnected = service.get(SocketConnected);
+  service.useWebSocketAdapter(new SocketIoAdapter(service, configService, userCachingService, socketConnected));
   await service
     .listen()
     .then(() => Logger.log(`Socket module started at port: ${process.env.SOCKET_MICROSERVICE_TCP_PORT!}`));

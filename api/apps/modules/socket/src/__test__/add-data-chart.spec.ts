@@ -1,13 +1,13 @@
 import SocketController from '../socket.controller';
 import SocketService from '../socket.service';
-import EventsGateway from '@share/libs/socket/event-socket.gateway';
+import ProductNotificationEventsGateway from '@share/libs/socket/event-socket/product-notification';
 import startUp from './pre-setup';
 import type { DataChartAddedType } from '@share/interfaces';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
 
 let socketController: SocketController;
 let socketService: SocketService;
-let socketGateway: EventsGateway;
+let productNotificationEventsGateway: ProductNotificationEventsGateway;
 const payload: DataChartAddedType = {
   revenue: 0,
   capital: 0,
@@ -17,13 +17,15 @@ beforeAll(async () => {
   const moduleRef = await startUp();
   socketController = moduleRef.get(SocketController);
   socketService = moduleRef.get(SocketService);
-  socketGateway = moduleRef.get(EventsGateway);
+  productNotificationEventsGateway = moduleRef.get(ProductNotificationEventsGateway);
 });
 
 describe('add data chart', () => {
   it('add data chart success', (done) => {
     expect.hasAssertions();
-    const addChartDataSocketGateway = jest.spyOn(socketGateway, 'addChartData').mockImplementation(jest.fn);
+    const addChartDataSocketGateway = jest
+      .spyOn(productNotificationEventsGateway, 'addChartData')
+      .mockImplementation(jest.fn);
     const addDataChartService = jest.spyOn(socketService, 'addDataChart');
     const addDataChartController = jest.spyOn(socketController, 'addDataChart');
     socketController.addDataChart(payload);
@@ -37,9 +39,11 @@ describe('add data chart', () => {
 
   it('add data chart failed with unknown error', (done) => {
     expect.hasAssertions();
-    const addChartDataSocketGateway = jest.spyOn(socketGateway, 'addChartData').mockImplementation(() => {
-      throw UnknownError;
-    });
+    const addChartDataSocketGateway = jest
+      .spyOn(productNotificationEventsGateway, 'addChartData')
+      .mockImplementation(() => {
+        throw UnknownError;
+      });
     const addDataChartService = jest.spyOn(socketService, 'addDataChart');
     const addDataChartController = jest.spyOn(socketController, 'addDataChart');
     expect(() => socketController.addDataChart(payload)).toThrow(UnknownError);

@@ -1,10 +1,10 @@
-import EventsGateway from '../event-socket.gateway';
+import ProductNotificationEventsGateway from '@share/libs/socket/event-socket/product-notification';
 import startUp from './pre-setup';
 import SocketInstances from '../socket-instances/socket-instances';
 import socketEventNames from '@share/constants/socket-event-names';
 import './socket-instances-storage-mock';
 
-let socketGateway: EventsGateway;
+let productNotificationEventsGateway: ProductNotificationEventsGateway;
 let close: () => Promise<void>;
 
 const socket: any = {
@@ -13,7 +13,7 @@ const socket: any = {
 
 beforeAll(async () => {
   const moduleRef = await startUp();
-  socketGateway = moduleRef.get(EventsGateway);
+  productNotificationEventsGateway = moduleRef.get(ProductNotificationEventsGateway);
   close = () => moduleRef.close();
 });
 
@@ -25,8 +25,8 @@ describe('refresh all products', () => {
   it('refresh all products success', () => {
     expect.hasAssertions();
     const getAllSocketClient = jest.spyOn(SocketInstances.Client, 'getAllSocketClient').mockReturnValue([socket]);
-    const refreshAllProducts = jest.spyOn(socketGateway, 'refreshAllProducts');
-    socketGateway.refreshAllProducts();
+    const refreshAllProducts = jest.spyOn(productNotificationEventsGateway, 'refreshAllProducts');
+    productNotificationEventsGateway.refreshAllProducts();
     expect(refreshAllProducts).toHaveBeenCalledTimes(1);
     expect(getAllSocketClient).toHaveBeenCalledTimes(1);
     expect(socket.emit).toHaveBeenCalledTimes(1);
@@ -36,8 +36,8 @@ describe('refresh all products', () => {
   it('refresh all products failed', () => {
     expect.hasAssertions();
     const getAllSocketClient = jest.spyOn(SocketInstances.Client, 'getAllSocketClient').mockReturnValue([]);
-    const refreshAllProducts = jest.spyOn(socketGateway, 'refreshAllProducts');
-    socketGateway.refreshAllProducts();
+    const refreshAllProducts = jest.spyOn(productNotificationEventsGateway, 'refreshAllProducts');
+    productNotificationEventsGateway.refreshAllProducts();
     expect(refreshAllProducts).toHaveBeenCalledTimes(1);
     expect(getAllSocketClient).toHaveBeenCalledTimes(1);
     expect(socket.emit).not.toHaveBeenCalled();

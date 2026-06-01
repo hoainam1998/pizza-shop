@@ -31,4 +31,8 @@ export default class AllowValidApiKeyGuard implements CanActivate {
     }
     throw new UnauthorizedException(createMessage(messages.USER.API_KEY_INVALID));
   }
+
+  logoutPublish(userId: string): void {
+    this.userCachingService.publishLogout(userId);
+  }
 }

@@ -52,6 +52,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
     const createCategory = jest.spyOn(categoryService, 'createCategory');
     await api
       .post(createCategoryUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('name', category.name)
       .attach('avatar', getStaticFile('test-image.png'))
@@ -86,6 +87,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
     const createCategory = jest.spyOn(categoryService, 'createCategory');
     const response = await api
       .post(createCategoryUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('categoryIds', Date.now().toString())
       .field('name', category.name)
@@ -105,6 +107,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
     const createCategory = jest.spyOn(categoryService, 'createCategory');
     await api
       .post(createCategoryUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('name', category.name)
       .attach('avatar', getStaticFile('test-image.png'))
@@ -124,6 +127,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
     const createCategory = jest.spyOn(categoryService, 'createCategory');
     await api
       .post(createCategoryUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('name', category.name)
       .attach('avatar', getStaticFile('empty.png'))
@@ -140,6 +144,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
     const createCategory = jest.spyOn(categoryService, 'createCategory');
     await api
       .post(createCategoryUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('name', category.name)
       .attach('avatar', getStaticFile('favicon.ico'))
@@ -156,6 +161,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
     const createCategory = jest.spyOn(categoryService, 'createCategory');
     const response = await api
       .post(createCategoryUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('name', category.name)
       .expect(HttpStatus.BAD_REQUEST)
@@ -171,6 +177,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
     const createCategory = jest.spyOn(categoryService, 'createCategory');
     const response = await api
       .post(createCategoryUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .attach('avatar', getStaticFile('test-image.png'))
       .expect(HttpStatus.BAD_REQUEST)
@@ -188,6 +195,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
     const createCategory = jest.spyOn(categoryService, 'createCategory');
     await api
       .post(createCategoryUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .attach('avatar', getStaticFile('test-image.png'))
       .field('name', category.name)
@@ -207,6 +215,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, createCategoryUrl), () => {
     const createCategory = jest.spyOn(categoryService, 'createCategory');
     await api
       .post(createCategoryUrl)
+      .set('Connection', 'keep-alive')
       .set('mock-session', JSON.stringify(sessionPayload))
       .field('name', category.name)
       .attach('avatar', getStaticFile('test-image.png'))

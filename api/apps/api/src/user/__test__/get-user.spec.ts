@@ -28,6 +28,8 @@ import { UserRouter } from '@share/router';
 import { UserDetail } from '@share/dto/validators/user.dto';
 import { UserSerializer } from '@share/dto/serializer/user';
 import UserCachingService from '@share/libs/caching/user/user.service';
+import { ALLOW_VALID_API_KEY_GUARD } from '@share/di-token';
+import AllowValidApiKeyGuard from '@share/guards/allow-valid-api-key.service';
 const user: Partial<typeof originUser> = { ...originUser, api_key: apiKey, reset_password_token: resetPasswordToken };
 delete user.password;
 delete user.plain_password;
@@ -62,6 +64,7 @@ let close: () => Promise<void>;
 let userService: UserService;
 let userController: UserController;
 let userCachingService: UserCachingService;
+let allowValidApiKeyGuard: AllowValidApiKeyGuard;
 
 beforeAll(async () => {
   const requestTest = await startUp(MockUserModule);
@@ -71,6 +74,7 @@ beforeAll(async () => {
   userService = requestTest.app.get(UserService);
   userController = requestTest.app.get(UserController);
   userCachingService = requestTest.app.get(UserCachingService);
+  allowValidApiKeyGuard = requestTest.app.get(ALLOW_VALID_API_KEY_GUARD);
 });
 
 afterEach(async () => {
@@ -82,6 +86,7 @@ afterEach(async () => {
 describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
   it(createTestName('get user detail success', HttpStatus.OK), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const getUserService = jest.spyOn(userService, 'getUserDetail');
@@ -93,6 +98,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/)
       .expect(userPlain);
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(getUserService).toHaveBeenCalledTimes(1);
     expect(getUserService).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
@@ -101,6 +107,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
 
   it(createTestName('get user detail failed with authentication error', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const getUserService = jest.spyOn(userService, 'getUserDetail');
     await api
@@ -109,12 +116,14 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.DID_NOT_LOGIN));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(getUserService).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
 
   it(createTestName('get user detail failed with API key not set', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const getUserService = jest.spyOn(userService, 'getUserDetail');
     await api
@@ -124,12 +133,33 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.API_KEY_INVALID));
+    expect(logoutPublish).not.toHaveBeenCalled();
+    expect(getUserService).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it(createTestName('get user detail failed when API key do not match', HttpStatus.UNAUTHORIZED), async () => {
+    expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
+    const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
+    const getUserService = jest.spyOn(userService, 'getUserDetail');
+    await api
+      .post(getUserUrl)
+      .set('Cookie', [`${constants.IMPACT_USER_API_KEY}=${apiKey}`])
+      .set('mock-session', JSON.stringify(sessionPayload))
+      .send(getUserRequestBody)
+      .expect(HttpStatus.UNAUTHORIZED)
+      .expect('Content-Type', /application\/json/)
+      .expect(createMessages(messages.USER.USER_INFO_OUT_OF_DATE));
+    expect(logoutPublish).toHaveBeenCalledTimes(1);
+    expect(logoutPublish).toHaveBeenCalledWith(sessionPayload?.userId);
     expect(getUserService).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
 
   it(createTestName('get user detail failed when update self information', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(apiKey);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const getUserService = jest.spyOn(userService, 'getUserDetail');
@@ -141,12 +171,14 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.DO_NOT_CHANGE_YOURSELF));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(getUserService).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
 
   it(createTestName('get user detail failed when user have not permission', HttpStatus.UNAUTHORIZED), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
     const getUserService = jest.spyOn(userService, 'getUserDetail');
@@ -158,6 +190,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
       .expect(HttpStatus.UNAUTHORIZED)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.DO_NOT_PERMISSION));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(getUserService).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
   });
@@ -166,6 +199,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
     expect.hasAssertions();
     const validatorErrors = [new ValidationError()];
     const logError = jest.spyOn(userController as any, 'logError').mockImplementation(() => jest.fn());
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     jest.spyOn(UserSerializer.prototype, 'validate').mockResolvedValue(validatorErrors);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(of(user));
@@ -178,6 +212,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.OUTPUT_VALIDATE));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(getUserService).toHaveBeenCalledTimes(1);
     expect(getUserService).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
@@ -189,6 +224,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
   it(createTestName('get user detail failed with not found error', HttpStatus.NOT_FOUND), async () => {
     expect.hasAssertions();
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     const send = jest
       .spyOn(clientProxy, 'send')
       .mockReturnValue(throwError(() => new NotFoundException(createMessage(messages.USER.NOT_FOUND))));
@@ -201,6 +237,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
       .expect(HttpStatus.NOT_FOUND)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.USER.NOT_FOUND));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(getUserService).toHaveBeenCalledTimes(1);
     expect(getUserService).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
@@ -209,6 +246,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
 
   it(createTestName('get user detail failed with unknown error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => UnknownError));
     const getUserService = jest.spyOn(userService, 'getUserDetail');
@@ -220,6 +258,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(new InternalServerErrorException().message));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(getUserService).toHaveBeenCalledTimes(1);
     expect(getUserService).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
@@ -228,6 +267,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
 
   it(createTestName('get user detail failed with RPC unknown error', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest
       .spyOn(clientProxy, 'send')
@@ -241,6 +281,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.COMMON_ERROR));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(getUserService).toHaveBeenCalledTimes(1);
     expect(getUserService).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
@@ -249,6 +290,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
 
   it(createTestName('get user detail failed with server error', HttpStatus.INTERNAL_SERVER_ERROR), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const serverError = new InternalServerErrorException();
     const send = jest.spyOn(clientProxy, 'send').mockReturnValue(throwError(() => serverError));
@@ -261,6 +303,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
       .expect(HttpStatus.INTERNAL_SERVER_ERROR)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(serverError.message));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(getUserService).toHaveBeenCalledTimes(1);
     expect(getUserService).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
@@ -269,6 +312,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
 
   it(createTestName('get user detail failed with missing field', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const missingQueryFieldBody = {
       userId: getUserRequestBody.userId,
@@ -282,6 +326,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
       .send(missingQueryFieldBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(response.body).toEqual({ messages: expect.any(Array) });
     expect(getUserService).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
@@ -289,6 +334,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
 
   it(createTestName('get user detail failed with undefined field', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const undefinedFieldBody = {
       ...getUserRequestBody,
@@ -303,6 +349,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
       .send(undefinedFieldBody)
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/);
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(response.body).toEqual({ messages: expect.any(Array) });
     expect(getUserService).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
@@ -310,6 +357,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
 
   it(createTestName('get user detail success with empty query field', HttpStatus.OK), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const queryFieldEmptyBody = {
       userId: getUserRequestBody.userId,
@@ -324,6 +372,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
       .send(queryFieldEmptyBody)
       .expect(HttpStatus.OK)
       .expect('Content-Type', /application\/json/);
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(getUserService).toHaveBeenCalledTimes(1);
     expect(getUserService).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);
@@ -332,6 +381,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
 
   it(createTestName('get user failed with database disconnect', HttpStatus.BAD_REQUEST), async () => {
     expect.hasAssertions();
+    const logoutPublish = jest.spyOn(allowValidApiKeyGuard, 'logoutPublish').mockImplementation(jest.fn);
     jest.spyOn(userCachingService, 'getUserApiKey').mockResolvedValue(missMatchUserIdApiKey);
     const send = jest
       .spyOn(clientProxy, 'send')
@@ -345,6 +395,7 @@ describe(createDescribeTest(HTTP_METHOD.POST, getUserUrl), () => {
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
+    expect(logoutPublish).not.toHaveBeenCalled();
     expect(getUserService).toHaveBeenCalledTimes(1);
     expect(getUserService).toHaveBeenCalledWith(select);
     expect(send).toHaveBeenCalledTimes(1);

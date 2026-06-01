@@ -1,4 +1,5 @@
 import { Socket } from 'socket.io';
+import { SOCKET_NAME } from '@share/enums';
 
 /**
  * Storage all socket client.
@@ -6,9 +7,19 @@ import { Socket } from 'socket.io';
  */
 export default class SocketInstancesStorage {
   private wsInstances: Map<string, Socket>;
+  private name: string;
+  private static Groups: Record<string, Map<string, Socket> | null> = {};
 
-  constructor() {
-    this.wsInstances = new Map<string, Socket>();
+  constructor(name: SOCKET_NAME) {
+    this.name = name;
+    if (!Object.hasOwn(SocketInstancesStorage.Groups, name)) {
+      this.wsInstances = new Map<string, Socket>();
+      SocketInstancesStorage.Groups[name] = this.wsInstances;
+    }
+  }
+
+  get WSInstances() {
+    return SocketInstancesStorage.Groups[this.name];
   }
 
   /**
@@ -17,7 +28,7 @@ export default class SocketInstancesStorage {
    * @param {Socket} client - The socket client.
    */
   addSocketClient(userId: string, client: Socket): void {
-    this.wsInstances.set(userId, client);
+    this.WSInstances?.set(userId, client);
   }
 
   /**
@@ -26,7 +37,7 @@ export default class SocketInstancesStorage {
    * @returns {Socket | undefined} - The socket client.
    */
   getSocketClient(userId: string): Socket | undefined {
-    return this.wsInstances.get(userId);
+    return this.WSInstances?.get(userId);
   }
 
   /**
@@ -34,7 +45,10 @@ export default class SocketInstancesStorage {
    * @returns {Socket[]} - All socket clients.
    */
   getAllSocketClient(): Socket[] {
-    return Array.from(this.wsInstances.values());
+    if (this.WSInstances) {
+      return Array.from(this.WSInstances.values());
+    }
+    return [];
   }
 
   /**
@@ -42,6 +56,6 @@ export default class SocketInstancesStorage {
    * @param {string} userId - An userId
    */
   removeSocketClient(userId: string): void {
-    this.wsInstances.delete(userId);
+    this.WSInstances?.delete(userId);
   }
 }

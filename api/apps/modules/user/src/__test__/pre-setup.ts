@@ -40,6 +40,7 @@ export default (): Promise<TestingModule> => {
     .useValue({
       logoutSubscribe: jest.fn(),
       checkUserAlreadyLogged: jest.fn(),
+      logoutSubscribeWithSessionExpired: jest.fn(),
     })
     .overrideModule(ShareModule)
     .useModule(ShareTestingModule)

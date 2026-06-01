@@ -41,9 +41,15 @@ export enum POWER_NUMERIC {
 
 export enum REDIS_SUBSCRIBE_NAME {
   KEY_EVENT_EXPIRED = '__keyevent@0__:expired',
+  LOGOUT = 'logout',
 }
 
 export enum STATUS {
   UN_BLOCK,
   BLOCK,
+}
+
+export enum SOCKET_NAME {
+  CLIENT = 'client',
+  ADMIN = 'admin',
 }
