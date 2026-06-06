@@ -18,8 +18,11 @@
               <el-form-item label="Category" prop="category">
                 <el-select v-model="form.category" :value-key="form.category" name="category"
                   placeholder="Please select a category!">
-                  <el-option v-for="(category, index) in categories" :key="index" :value="category.categoryId"
-                    :label="category.name" />
+                  <List :items="categories">
+                    <template #default="{ item }">
+                      <el-option :value="item.categoryId" :label="item.name" />
+                    </template>
+                  </List>
                 </el-select>
               </el-form-item>
             </el-col>
@@ -62,7 +65,6 @@
     </el-form>
   </section>
 </template>
-
 <script setup lang="ts">
 import { onBeforeMount, reactive, ref, type Ref, inject, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -70,6 +72,7 @@ import type { AxiosResponse } from 'axios';
 import type { FormInstance, FormRules, UploadRawFile } from 'element-plus';
 import UploadBox from '@/components/common/upload-box/upload-box.vue';
 import ExpiredDaySelect from '@/components/admin/expired-time-select/expired-time-select.vue';
+import List from '@/components/common/list/list.vue';
 import IngredientSelect from './ingredient-select.vue';
 import { CategoryService, ProductService } from '@/services';
 import { type CategoryType, type IngredientType, } from '@/interfaces';

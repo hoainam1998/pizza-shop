@@ -7,19 +7,17 @@
           <slot name="expand" v-bind="props"></slot>
         </template>
       </el-table-column>
-      <el-table-column
-        v-for="(field, index) in fields"
-        :key="index"
-        :label="field.label"
-        :prop="field.key"
-        :width="field.width"
-        align="center">
-        <template #default="props">
-          <slot :name="field.key" v-bind="props">
-            {{ props.row[field.key] !== undefined ? props.row[field.key].toString() : '' }}
-          </slot>
+      <List :items="fields">
+        <template #default="{ item }">
+          <el-table-column :key="item.id" :label="item.label" :prop="item.key" :width="item.width" align="center">
+            <template #default="props">
+              <slot :name="item.key" v-bind="props">
+                {{ props.row[item.key] !== undefined ? props.row[item.key].toString() : '' }}
+              </slot>
+            </template>
+          </el-table-column>
         </template>
-      </el-table-column>
+      </List>
     </el-table>
     <div class="ps-display-flex ps-justify-content-space-between ps-mt-7">
       <el-select v-model="pageSize" class="ps-w-100px" @change="pageSizeChange">
@@ -37,6 +35,7 @@
 </template>
 <script lang="ts" setup generic="T">
 import { useSlots, ref } from 'vue';
+import List from '@/components/common/list/list.vue';
 import type { TableFieldType } from '@/interfaces';
 import constants from '@/constants';
 

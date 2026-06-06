@@ -28,6 +28,7 @@ import PsPasswordInput from '@/components/common/inputs/password/password.vue';
 import PsEmailInput from '@/components/common/inputs/email/email.vue';
 import loginFormInformation from '@/composables/use-login-form';
 import useWrapperRouter from '@/composables/use-router';
+import socketRegister from '@/composables/use-register-socket-event';
 import { UserService } from '@/services';
 import SocketService from '@/socket';
 import paths from '@/router/paths';
@@ -53,6 +54,7 @@ const onSubmit = async (): Promise<void> => {
               authStore.setUserLoggedToken(response.data.userLoggedToken);
               authStore.setApiKey(response.data.apiKey!);
               cookieStore.setImpactUserApiKey(response.data.apiKey!);
+              socketRegister();
               SocketService.connect();
               push(paths.HOME);
             }

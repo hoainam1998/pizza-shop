@@ -1,22 +1,12 @@
 import { UserService } from '@/services';
-import { showErrorNotification } from '@/utils';
-import useWrapperRouter from '@/composables/use-router';
-import paths from '@/router/paths';
-import Storage from '@/storage/storage';
-import { cookie as cookieStore } from '@/store';
+import { showErrorNotification, forceLogout } from '@/utils';
 
-export default (): () => void => {
-  const { push } = useWrapperRouter();
-
+export default (): (() => void) => {
   return () => {
     UserService.get('logout')
       .catch((error) => {
-        showErrorNotification('Logout', error.response.data.messages);
+        showErrorNotification('Logout!', error.response.data.messages);
       })
-      .finally(() => {
-        push(paths.LOGIN);
-        Storage.clear();
-        cookieStore.clearApiKey();
-      });
+      .finally(forceLogout);
   };
 };

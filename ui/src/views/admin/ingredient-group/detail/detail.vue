@@ -31,7 +31,11 @@
                     :value-key="form.unit"
                     name="unit"
                     placeholder="Please select an unit!">
-                      <el-option v-for="(unit, index) in units" :key="index" :value="unit.value" :label="unit.label" />
+                      <List :items="units">
+                        <template #default="{ item }">
+                          <el-option :value="item.value" :label="item.label" />
+                        </template>
+                      </List>
                   </el-select>
                 </el-form-item>
               </el-col>
@@ -62,12 +66,12 @@
     </section>
   </el-dialog>
 </template>
-
 <script setup lang="ts">
 import { reactive, ref, useTemplateRef, nextTick } from 'vue';
 import type { FormInstance, FormRules, UploadRawFile } from 'element-plus';
 import ExpiredDaySelect from '@/components/admin/expired-time-select/expired-time-select.vue';
 import UploadBox from '@/components/common/upload-box/upload-box.vue';
+import List from '@/components/common/list/list.vue';
 import { IngredientService } from '@/services';
 import type { IngredientType, OptionType } from '@/interfaces';
 import constants from '@/constants';

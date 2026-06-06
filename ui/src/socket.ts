@@ -21,6 +21,17 @@ export default class SocketService {
   private static subscribers: Subscriber[] = [];
 
   /**
+   * Check if the event have not been added yet, then add it.
+   * @param {SOCKET_EVENT_NAME} eventName - The socket event name.
+   * @param {(payload: any) => void} callback - The callback event.
+   */
+  private static listenEvent(eventName: string, callback: (payload: any) => void): void {
+    if (!this._io!.hasListeners(eventName)) {
+      this._io!.on(eventName, callback);
+    }
+  }
+
+  /**
    * Socket connect.
    */
   static connect(): void {
@@ -34,7 +45,7 @@ export default class SocketService {
         while (this.subscribers.length) {
           const subscriber = this.subscribers.shift();
           if (subscriber) {
-            this._io?.on(subscriber?.name, subscriber?.callback);
+            this.listenEvent(subscriber.name, subscriber.callback);
           }
         }
       });
@@ -53,7 +64,7 @@ export default class SocketService {
    */
   static subscribe(eventName: SOCKET_EVENT_NAME, callback: (payload: any) => void): void {
     if (this._io?.connected) {
-      this._io?.on(eventName, callback);
+      this.listenEvent(eventName, callback);
     } else {
       this.subscribers.push(createSubscriber(eventName, callback));
     }
