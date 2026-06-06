@@ -54,7 +54,7 @@
   <UserDetail ref="userDetail" @search="search" />
 </template>
 <script setup lang="ts">
-import { ref, type Ref, onBeforeMount, useTemplateRef } from 'vue';
+import { ref, type Ref, onBeforeMount, useTemplateRef, onBeforeUnmount } from 'vue';
 import type { AxiosError, AxiosResponse } from 'axios';
 import Table from '@/components/common/table/table.vue';
 import NewButton from '@/components/common/buttons/new-button/new-button.vue';
@@ -64,9 +64,10 @@ import UserDefaultImage from '@/assets/images/user.png';
 import type { MessageResponseType, TableFieldType } from '@/interfaces';
 import constants from '@/constants';
 import { UserService } from '@/services';
-import { SEX, POWER, STATUS, USER_FORM_PURPOSE } from '@/enums';
+import { SEX, POWER, STATUS, USER_FORM_PURPOSE, SOCKET_EVENT_NAME } from '@/enums';
 import { confirmDeleteMessageBox, showErrorNotification, showSuccessNotification } from '@/utils';
 import { cookie as cookieStore } from '@/store';
+import SocketService from '@/socket';
 const PAGE_SIZE = constants.PAGINATION.PAGE_SIZE;
 const PAGE_NUMBER = constants.PAGINATION.PAGE_NUMBER;
 
@@ -231,5 +232,12 @@ const fetchUsers = (pageSize: number, pageNumber: number): void => {
   });
 };
 
-onBeforeMount(() => fetchUsers(PAGE_SIZE, PAGE_NUMBER));
+onBeforeMount(() => {
+  fetchUsers(PAGE_SIZE, PAGE_NUMBER);
+  SocketService.subscribe(SOCKET_EVENT_NAME.REFRESH_USER_PAGINATION, search);
+});
+
+onBeforeUnmount(() => {
+  SocketService.unsubscribe(SOCKET_EVENT_NAME.REFRESH_USER_PAGINATION);
+});
 </script>

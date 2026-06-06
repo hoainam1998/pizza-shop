@@ -1,5 +1,6 @@
 import type {  RouteLocationAsPathGeneric } from 'vue-router';
 import Storage from '@/storage/storage';
+import SocketService from '@/socket';
 import paths from '@/router/paths';
 import { cookie as cookieStore } from '@/store';
 
@@ -23,5 +24,6 @@ export const generateResetPasswordLink = (resetPasswordToken: string): RouteLoca
 export const forceLogout = (): void => {
   globalThis.router.push(`${paths.LOGIN}`);
   Storage.clear();
+  SocketService.disconnect();
   cookieStore.clearApiKey();
 };
