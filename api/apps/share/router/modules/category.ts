@@ -1,7 +1,7 @@
 import RouterBase from '../base';
 
 /**
- * Regis route path.
+ * Regis category route path.
  *
  * @extends RouterBase
  * @class

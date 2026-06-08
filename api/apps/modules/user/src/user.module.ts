@@ -17,6 +17,7 @@ import { SOCKET_SERVICE } from '@share/di-token';
           return {
             transport: Transport.TCP,
             options: {
+              host: process.env.NODE_ENV === 'docker' ? 'host.docker.internal' : process.env.LOCALHOST,
               port: parseInt(configService.get<string>('ports.SOCKET_MICROSERVICE_TCP_PORT')!),
             },
           };

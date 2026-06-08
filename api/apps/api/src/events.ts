@@ -21,7 +21,9 @@ const startUp = (redisClient: RedisClient, prismaClient: PrismaClient): void => 
         return groups;
       }, {});
       void redisClient.Client.del(constants.REDIS_PREFIX.USER);
-      void redisClient.Client.hSet(constants.REDIS_PREFIX.USER, userApiKeys);
+      if (Object.keys(userApiKeys).length) {
+        void redisClient.Client.hSet(constants.REDIS_PREFIX.USER, userApiKeys);
+      }
     });
 };
 

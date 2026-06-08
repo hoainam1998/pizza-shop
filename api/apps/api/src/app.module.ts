@@ -4,11 +4,12 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { PrismaClient } from 'generated/prisma';
 import { xss } from 'express-xss-sanitizer';
+import ShareModule from '@share/module';
 import ProductModule from './product/product.module';
 import IngredientModule from './ingredient/ingredient.module';
-import ShareModule from '@share/module';
 import CategoryModule from './category/category.module';
 import UserModule from './user/user.module';
+import HealthyModule from './healthy/healthy.module';
 import AuthGuard from '@share/guards/auth.service';
 import { PRISMA_CLIENT, REDIS_CLIENT } from '@share/di-token';
 import RedisClient from '@share/libs/redis-client/redis';
@@ -21,6 +22,7 @@ import { startUp, shutDown } from './events';
     UserModule,
     IngredientModule,
     ProductModule,
+    HealthyModule,
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => [

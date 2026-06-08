@@ -23,11 +23,21 @@
     "noImplicitAny": true,
     "strictBindCallApply": true,
     "noFallthroughCasesInSwitch": true,
-    "types": ["jest", "node", "multer", "express"],
+    "types": [
+      "jest",
+      "node",
+      "multer",
+      "express"
+    ],
     "strictPropertyInitialization": false,
-    "typeRoots": ["./node_modules/@types", "types.d.ts"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "types.d.ts"
+    ],
     "paths": {
-      "@share/*": ["apps/share/*"]
+      "@share/*": [
+        "apps/share/*"
+      ]
     }
   }
 }
