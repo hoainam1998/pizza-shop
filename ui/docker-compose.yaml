@@ -1,0 +1,21 @@
+x-share-service: &share-service
+  build: .
+  volumes:
+    - source:/client
+
+services:
+  admin:
+    <<: *share-service
+    ports:
+      - 3000:3000
+    command: npm run admin
+
+  sale:
+    <<: *share-service
+    ports:
+      - 3001:3001
+    command: npm run sale
+
+volumes:
+  source:
+  
