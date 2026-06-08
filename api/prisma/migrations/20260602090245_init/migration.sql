@@ -60,11 +60,15 @@ CREATE TABLE `user` (
     `power` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `phone` VARCHAR(11) NOT NULL,
     `email` VARCHAR(100) NOT NULL,
+    `active` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `session_id` VARCHAR(100) NULL,
     `reset_password_token` TEXT NULL,
+    `api_key` TEXT NULL,
 
     UNIQUE INDEX `user_password_key`(`password`),
     UNIQUE INDEX `user_phone_key`(`phone`),
     UNIQUE INDEX `user_email_key`(`email`),
+    UNIQUE INDEX `user_session_id_key`(`session_id`),
     INDEX `user_user_id_last_name_email_idx`(`user_id`, `last_name`, `email`),
     PRIMARY KEY (`user_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

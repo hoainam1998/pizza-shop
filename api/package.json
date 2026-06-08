@@ -8,11 +8,13 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
+    "db:deploy": "npx prisma migrate deploy && npx prisma generate",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/apps/api/main",
-    "docker-dev": "docker compose -f docker-compose.dev.yaml --env-file ./.env up -d",
+    "docker-dev": "docker compose --project-name redis run -d -p 6379:6379 -p 8001:8001 --name redis_c redis-stack",
+    "docker-run": "docker compose --project-name server up -d",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -162,8 +164,8 @@
     "test:e2e:user.update-personal-info": "jest --watch apps/api/src/user/__test__/update-personal-info.spec.ts",
     "test:e2e:user": "jest --watch apps/api/src/user/__test__/",
     "test:e2e": "jest --watch --forceExit apps/api/src/",
-    "test:ut": "jest --testPathPatterns=/apps\/modules\/* /apps\/share\/libs\/*",
-    "test:ut:ci": "jest --maxWorkers=2 --forceExit --detectOpenHandles --testPathPatterns=/apps\/modules\/* /apps\/share\/libs\/*",
+    "test:ut": "jest --testPathPatterns=/apps/modules/* /apps/share/libs/*",
+    "test:ut:ci": "jest --maxWorkers=2 --forceExit --detectOpenHandles --testPathPatterns=/apps/modules/* /apps/share/libs/*",
     "test:e2e:ci": "jest --maxWorkers=2 --forceExit --detectOpenHandles apps/api/src/",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
@@ -178,6 +180,7 @@
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/platform-socket.io": "^11.1.10",
     "@nestjs/schedule": "^6.0.1",
+    "@nestjs/terminus": "^11.1.1",
     "@nestjs/throttler": "^6.4.0",
     "@nestjs/websockets": "^11.1.10",
     "@prisma/client": "^6.14.0",
@@ -255,7 +258,8 @@
       "<rootDir>/apps/share/test/pre-setup/test-run-setup.ts"
     ],
     "roots": [
-      "<rootDir>/apps"
+      "<rootDir>/apps",
+      "<rootDir>/apps/"
     ],
     "moduleNameMapper": {
       "^@share(|/.*)$": "<rootDir>/apps/share/$1",

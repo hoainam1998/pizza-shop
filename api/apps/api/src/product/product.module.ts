@@ -14,6 +14,7 @@ import LoggingModule from '@share/libs/logging/logging.module';
           return {
             transport: Transport.TCP,
             options: {
+              host: process.env.NODE_ENV === 'docker' ? 'host.docker.internal' : process.env.LOCALHOST,
               port: parseInt(configService.get<string>('ports.PRODUCT_MICROSERVICE_TCP_PORT')!),
             },
           };

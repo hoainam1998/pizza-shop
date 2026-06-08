@@ -1,5 +1,10 @@
 import Route from './route';
 
+/**
+ * Convert hyphen to camelcase path.
+ * @param {string} path - The path input.
+ * @returns {string} - The converted path.
+ */
 const convertHyphenToCamelCasePath = (path: string): string => {
   const pathSeparate = path.split('-');
   if (pathSeparate.length > 1) {

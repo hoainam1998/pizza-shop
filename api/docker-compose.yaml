@@ -1,0 +1,179 @@
+x-shared-env: &shared-env
+  DATABASE_URL: mysql://root:root@db:3306/pizza-shop?schema=public
+
+x-service-healthcheck: &service-healthcheck
+  test: ["CMD", "curl", "-f", "http://localhost:5000/healthy"]
+  timeout: 5s
+  retries: 5
+
+x-base-microservice: &base-microservice
+  environment:
+    <<: *shared-env
+    REDIS_SERVER_HOST: redis-stack
+  links:
+    - redis-stack
+  depends_on:
+    db:
+      condition: service_healthy
+    redis-stack:
+      condition: service_healthy
+
+x-build-context: &build-context
+  context: .
+  dockerfile: ./dockerfile/Dockerfile.main
+
+services:
+  db:
+    image: mysql:latest
+    container_name: db_c
+    environment:
+      MYSQL_DATABASE: pizza-shop
+      MYSQL_HOST: ${LOCALHOST}
+      MYSQL_ROOT_PASSWORD: ${USER}
+      MYSQL_ALLOW_EMPTY_PASSWORD: true
+    volumes:
+      - ./db:/var/lib/mysql
+    ports:
+      - 3306:3306
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 5
+
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: pma_c
+    links:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: unless-stopped
+    ports:
+      - 8081:80
+
+  redis-stack:
+    image: redis/redis-stack:latest
+    container_name: redis-stack
+    ports:
+      - ${REDIS_SERVER_PORT}:${REDIS_SERVER_PORT}
+      - 8001:8001
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      timeout: 5s
+      retries: 3
+
+  prisma:
+    build:
+      context: .
+      dockerfile: ./dockerfile/Dockerfile.prisma
+    container_name: prisma_c
+    environment:
+      <<: *shared-env
+    tty: true
+    ports:
+      - 8888:8888
+    depends_on:
+      db:
+        condition: service_healthy
+
+  socket:
+    <<: *base-microservice
+    build:
+      <<: *build-context
+      args:
+        COMMAND: npm run start:dev socket
+    volumes:
+      - source:/api
+    container_name: socket_c
+    ports:
+      - ${SOCKET_MICROSERVICE_TCP_PORT}:${SOCKET_MICROSERVICE_TCP_PORT}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  user:
+    <<: *base-microservice
+    build:
+      <<: *build-context
+      args:
+        COMMAND: npm run start:dev user
+    volumes:
+      - source:/api
+    container_name: user_c
+    ports:
+      - ${USER_MICROSERVICE_TCP_PORT}:${USER_MICROSERVICE_TCP_PORT}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - socket
+  
+  category:
+    <<: *base-microservice
+    build:
+      <<: *build-context
+      args:
+        COMMAND: npm run start:dev category
+    volumes:
+      - source:/api
+    container_name: category_c
+    ports:
+      - ${CATEGORY_MICROSERVICE_TCP_PORT}:${CATEGORY_MICROSERVICE_TCP_PORT}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - socket
+
+  ingredient:
+    <<: *base-microservice
+    build:
+      <<: *build-context
+      args:
+        COMMAND: npm run start:dev ingredient
+    volumes:
+      - source:/api
+    container_name: ingredient_c
+    ports:
+      - ${INGREDIENT_MICROSERVICE_TCP_PORT}:${INGREDIENT_MICROSERVICE_TCP_PORT}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - socket
+
+  product:
+    <<: *base-microservice
+    build:
+      <<: *build-context
+      args:
+        COMMAND: npm run start:dev product
+    volumes:
+      - source:/api
+    container_name: product_c
+    ports:
+      - ${PRODUCT_MICROSERVICE_TCP_PORT}:${PRODUCT_MICROSERVICE_TCP_PORT}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - socket
+
+  api:
+    <<: *base-microservice
+    build:
+      <<: *build-context
+    volumes:
+      - source:/api
+    container_name: api_c
+    ports:
+      - ${API_PORT}:${API_PORT}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - user
+      - ingredient
+      - product
+      - category
+    healthcheck:
+      <<: *service-healthcheck
+
+volumes:
+  source:
