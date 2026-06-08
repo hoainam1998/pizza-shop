@@ -8,6 +8,8 @@
   "scripts": {
     "admin": "webpack serve --mode development --config build/webpack.dev.js",
     "sale": "webpack serve --mode development --env APP_NAME=sale --config build/webpack.dev.js",
+    "docker-admin": "docker compose --project-name client run -d -p 3000:3000 --name client_admin_c admin",
+    "docker-sale": "docker compose --project-name client run -d -p 3001:3001 --name client_sale_c sale",
     "build": "webpack --config build/webpack.prod.js",
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix",
