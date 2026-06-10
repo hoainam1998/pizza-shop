@@ -1,9 +1,11 @@
 import sanitize from 'sanitize-html';
 import type { AxiosRequestConfig } from 'axios';
 
+const allowedKeys = ['oldPassword', 'password'];
+
 const options: sanitize.IOptions = {
-  allowedTags: [], // Disallow all HTML tags
-  allowedAttributes: {}, // Disallow all attributes
+  allowedTags: [],
+  allowedAttributes: {},
 };
 
 /**
@@ -15,6 +17,23 @@ const options: sanitize.IOptions = {
 const sanitizeData = (data: string): string => sanitize(data, options);
 
 /**
+ * Sanitizing value but exclude the keys.
+ *
+ * @param {string} key - The key name.
+ * @param {string} value - The key value.
+ * @returns {string} - Sanitized value. 
+ */
+const sanitizing = (key: string, value: string): string => {
+  if (typeof value === 'string') {
+    if (allowedKeys.includes(key)) {
+      return value;
+    }
+    return sanitizeData(value);
+  }
+  return value;
+};
+
+/**
  * Sanitize data object.
  *
  * @param {object} obj - The input object.
@@ -22,7 +41,7 @@ const sanitizeData = (data: string): string => sanitize(data, options);
  */
 const sanitizeDataObject = (obj: object): object => {
   return Object.entries(obj).reduce((data, [key, value]) => {
-    Object.assign(data, { [key]: typeof value === 'string' ? sanitizeData(value) : value });
+    Object.assign(data, { [key]: sanitizing(key, value) });
     return data;
   }, {});
 };
