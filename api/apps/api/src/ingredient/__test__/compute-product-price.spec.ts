@@ -11,6 +11,7 @@ import IngredientModule from '../ingredient.module';
 import { computeProductPricePattern } from '@share/pattern';
 import startUp from './pre-setup';
 import UnknownError from '@share/test/pre-setup/mock/errors/unknown-error';
+import { product } from '@share/test/pre-setup/mock/data/product';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
 import messages from '@share/constants/messages';
 import { createMessages } from '@share/utils';
@@ -25,15 +26,15 @@ const MockIngredientModule = getMockModule(IngredientModule, {
 
 const price = 20000;
 const requestBody = {
-  temporaryProductId: '1234567890',
+  temporaryProductId: product.product_id,
   productIngredients: [
     {
-      ingredientId: '1757410124885',
+      ingredientId: Date.now().toString(),
       amount: 20,
       unit: Unit.GRAM,
     },
     {
-      ingredientId: '1757582086529',
+      ingredientId: Date.now().toString(),
       amount: 2,
       unit: Unit.GRAM,
     },

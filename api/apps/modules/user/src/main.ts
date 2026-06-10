@@ -15,4 +15,4 @@ async function bootstrap() {
     .listen()
     .then(() => Logger.log(`User module started at port: ${process.env.USER_MICROSERVICE_TCP_PORT}`, UserModule.name));
 }
-bootstrap();
+void bootstrap();

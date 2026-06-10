@@ -4,22 +4,19 @@ import { product, Prisma, PrismaClient, PrismaPromise, Status } from 'generated/
 import messages from '@share/constants/messages';
 import { createMessage } from '@share/utils';
 
-type PrismaProductCreateParameter = {
-  args: Omit<Prisma.productCreateArgs, 'data'> & {
-    data: Omit<Prisma.productCreateArgs['data'], 'product_id'> | Prisma.productCreateArgs['data'];
-    where: Prisma.productWhereInput;
-  };
-  query: (args: PrismaProductCreateParameter['args']) => PrismaPromise<product>;
+type PrismaProductUpdateParameter = {
+  args: Prisma.productUpdateArgs;
+  query: (args: Prisma.productUpdateArgs) => PrismaPromise<product>;
 };
 
 export default (prisma: PrismaClient) => ({
-  update: async ({ args }: PrismaProductCreateParameter): Promise<any> => {
+  update: async ({ args }: PrismaProductUpdateParameter): Promise<product> => {
     return prisma.$transaction(async (pm) => {
       if (args.where.product_id) {
         await pm.$executeRaw`SELECT * FROM PRODUCT WHERE product_id = ${args.where.product_id} FOR UPDATE`;
         const productSelected = await pm.product.findUnique({
           where: {
-            product_id: args.where.product_id as string,
+            product_id: args.where.product_id,
           },
         });
 
@@ -29,17 +26,17 @@ export default (prisma: PrismaClient) => ({
       }
 
       if (Object.hasOwn(args.data, 'expired_time')) {
-        if (+args.data.expired_time <= Date.now()) {
+        if (+args.data.expired_time! <= Date.now()) {
           args.data.status = Status.EXPIRED;
         } else {
           args.data.status = Status.IN_STOCK;
         }
       }
 
-      if (!Object.hasOwn(args.data, 'status') && args.data.count <= 10) {
+      if (!Object.hasOwn(args.data, 'status') && (args.data.count as number) <= 10) {
         args.data.status = Status.LESS;
       }
-      return await pm.product.update(args as any);
+      return await pm.product.update(args);
     });
   },
 });
