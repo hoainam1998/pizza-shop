@@ -89,6 +89,7 @@ services:
     container_name: socket_c
     ports:
       - ${SOCKET_MICROSERVICE_TCP_PORT}:${SOCKET_MICROSERVICE_TCP_PORT}
+      - ${SOCKET_PORT}:${SOCKET_PORT}
     extra_hosts:
       - "host.docker.internal:host-gateway"
 

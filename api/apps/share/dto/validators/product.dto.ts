@@ -11,11 +11,13 @@ import {
   ValidateNested,
   IsNumber,
   IsIn,
+  Matches,
 } from 'class-validator';
 import { OmitType } from '@nestjs/mapped-types';
 import { Status } from 'generated/prisma';
 import { Pagination } from './common.dto';
 import { CHART_BY } from '@share/enums';
+import constants from '@share/constants';
 const chartBy = [CHART_BY.DAY, CHART_BY.MONTH, CHART_BY.QUARTER, CHART_BY.YEAR];
 
 class IngredientSelect {
@@ -38,7 +40,7 @@ class IngredientSelect {
 
 export class ProductCreate {
   @IsDefined()
-  @IsNumberString()
+  @Matches(constants.ID_PATTERN)
   productId: string;
 
   @IsString()
@@ -326,7 +328,7 @@ export class ProductPagination extends Pagination {
   search: string;
 
   @IsOptional()
-  @IsNumberString()
+  @Matches(constants.ID_PATTERN)
   categoryId: string;
 
   @IsDefined()
@@ -350,7 +352,7 @@ export class ProductPaginationForSale {
   search: string;
 
   @IsOptional()
-  @IsNumberString()
+  @Matches(constants.ID_PATTERN)
   categoryId: string;
 
   @IsDefined()
@@ -366,7 +368,7 @@ export class GetProduct {
   query: ProductQuery;
 
   @IsDefined()
-  @IsNumberString()
+  @Matches(constants.ID_PATTERN)
   productId: string;
 }
 
@@ -382,7 +384,7 @@ export class GetProductsInCart {
 }
 
 export class Cart {
-  @IsNumberString()
+  @Matches(constants.ID_PATTERN)
   productId: string;
 
   @IsInt()

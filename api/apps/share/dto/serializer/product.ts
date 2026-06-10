@@ -9,10 +9,12 @@ import {
   IsObject,
   IsOptional,
   IsString,
+  Matches,
   ValidateNested,
 } from 'class-validator';
 import { product } from 'generated/prisma';
 import Validator from './validator';
+import constants from '@share/constants';
 
 export class ProductSerializer extends Validator {
   @IsOptional()
@@ -21,7 +23,7 @@ export class ProductSerializer extends Validator {
   product_ingredient: any[];
 
   @IsOptional()
-  @IsString()
+  @Matches(constants.ID_PATTERN)
   @Exclude({ toPlainOnly: true })
   product_id: string;
 
@@ -43,7 +45,7 @@ export class ProductSerializer extends Validator {
   original_price: number;
 
   @IsOptional()
-  @IsString()
+  @Matches(constants.ID_PATTERN)
   @Exclude({ toPlainOnly: true })
   category_id: number;
 
@@ -167,7 +169,7 @@ export class Products extends Validator {
 }
 
 export class PaymentErrors {
-  @IsNumberString()
+  @Matches(constants.ID_PATTERN)
   productId: string;
 
   @IsArray()

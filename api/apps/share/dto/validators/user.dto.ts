@@ -5,14 +5,11 @@ import {
   IsInt,
   IsPhoneNumber,
   IsString,
-  IsStrongPassword,
   Matches,
   IsIn,
   IsOptional,
   IsDefined,
   ValidateNested,
-  IsNumberString,
-  Length,
   Allow,
 } from 'class-validator';
 import { OmitType } from '@nestjs/mapped-types';
@@ -81,8 +78,7 @@ export class CreateUser extends UserDTO {
 }
 
 export class UpdateUser extends UserDTO {
-  @IsNumberString()
-  @Length(13)
+  @Matches(constants.ID_PATTERN)
   userId: string;
 
   @Expose({ toPlainOnly: true })
@@ -110,7 +106,6 @@ export class LoginInfo {
   @IsEmail()
   email: string;
 
-  @IsStrongPassword({ minLength: 8, minUppercase: 0, minNumbers: 0, minSymbols: 1 })
   @Matches(new RegExp(constants.PASSWORD_PATTERN))
   password: string;
 
@@ -148,11 +143,9 @@ export class ResetPassword {
   @IsEmail()
   email: string;
 
-  @IsStrongPassword({ minLength: 8, minUppercase: 0, minNumbers: 0, minSymbols: 0 })
   @Matches(new RegExp(constants.PASSWORD_PATTERN))
   password: string;
 
-  @IsStrongPassword({ minLength: 8, minUppercase: 0, minNumbers: 0, minSymbols: 0 })
   @Matches(new RegExp(constants.PASSWORD_PATTERN))
   oldPassword: string;
 
@@ -170,7 +163,7 @@ export class LoginSessionPayload extends Validator {
   @IsBoolean()
   canSignup: boolean;
 
-  @IsString()
+  @Matches(constants.ID_PATTERN)
   userId: string;
 
   @IsInt()
@@ -303,8 +296,7 @@ export class UserDetail {
   query: UserQuery;
 
   @IsDefined()
-  @IsNumberString()
-  @Length(13)
+  @Matches(constants.ID_PATTERN)
   userId: string;
 
   @Expose({ toPlainOnly: true })
@@ -331,8 +323,7 @@ export class UserDetailTransform extends OmitType(UserDetail, ['userId']) {
 
 export class UserDelete {
   @IsDefined()
-  @IsNumberString()
-  @Length(13)
+  @Matches(constants.ID_PATTERN)
   userId: string;
 }
 
@@ -341,8 +332,7 @@ export class UpdatePower {
   @IsIn(power)
   power: number;
 
-  @IsNumberString()
-  @Length(13)
+  @Matches(constants.ID_PATTERN)
   userId: string;
 
   @Expose({ toPlainOnly: true })
@@ -361,8 +351,7 @@ export class UpdateStatus {
   @IsIn(status)
   active: number;
 
-  @IsNumberString()
-  @Length(13)
+  @Matches(constants.ID_PATTERN)
   userId: string;
 
   @Expose({ toPlainOnly: true })
