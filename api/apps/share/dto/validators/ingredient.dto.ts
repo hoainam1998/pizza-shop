@@ -9,9 +9,11 @@ import {
   IsPositive,
   IsDefined,
   ValidateNested,
+  Matches,
 } from 'class-validator';
 import { type ProductIngredientType, type IngredientSelectType } from '@share/interfaces';
 import { Pagination } from './common.dto';
+import constants from '@share/constants';
 
 export class IngredientBody {
   @IsString()
@@ -45,7 +47,7 @@ export class IngredientCreate extends IngredientBody {}
 
 export class IngredientUpdate extends IngredientBody {
   @IsOptional()
-  @IsNumberString()
+  @Matches(constants.ID_PATTERN)
   ingredientId: string;
 
   @Expose({ toPlainOnly: true, groups: ['update'] })
@@ -55,7 +57,7 @@ export class IngredientUpdate extends IngredientBody {
 }
 
 export class ProductIngredients implements ProductIngredientType {
-  @IsNumberString()
+  @Matches(constants.ID_PATTERN)
   ingredientId: string;
 
   @IsInt()
@@ -66,7 +68,7 @@ export class ProductIngredients implements ProductIngredientType {
 }
 
 export class ComputeProductPrice {
-  @IsNumberString()
+  @Matches(constants.ID_PATTERN)
   temporaryProductId: string;
 
   @IsArray()
@@ -177,6 +179,6 @@ export class GetIngredient {
   @Type(() => IngredientSelect)
   query: IngredientSelect;
 
-  @IsNumberString()
+  @Matches(constants.ID_PATTERN)
   ingredientId: string;
 }

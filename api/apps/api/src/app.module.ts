@@ -60,6 +60,6 @@ export default class AppModule implements OnApplicationBootstrap, OnApplicationS
   }
 
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(xss({ allowedKeys: ['oldPassword'] })).forRoutes('*');
+    consumer.apply(xss({ allowedKeys: ['oldPassword', 'password'] })).forRoutes('*');
   }
 }

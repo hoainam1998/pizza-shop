@@ -6,15 +6,16 @@ import {
   ArrayNotEmpty,
   IsOptional,
   ValidateNested,
-  IsNumberString,
+  Matches,
 } from 'class-validator';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { category } from 'generated/prisma';
 import Validator from './validator';
+import constants from '@share/constants';
 
 export class CategoryDetail extends Validator {
   @Exclude({ toPlainOnly: true })
-  @IsNumberString()
+  @Matches(constants.ID_PATTERN)
   category_id: string;
 
   @IsOptional()

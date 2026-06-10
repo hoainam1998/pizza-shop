@@ -8,14 +8,16 @@ import {
   IsOptional,
   IsDefined,
   IsObject,
+  Matches,
 } from 'class-validator';
 import { ingredient, Status, Unit } from 'generated/prisma';
 import Validator from './validator';
 import type { IngredientPaginationResponse, IngredientPrismaOmitType } from '@share/interfaces';
+import constants from '@share/constants';
 
 export class Ingredient extends Validator implements ingredient {
   @Exclude({ toPlainOnly: true })
-  @IsNumberString()
+  @Matches(constants.ID_PATTERN)
   ingredient_id: string;
 
   @IsOptional()
@@ -65,11 +67,13 @@ export class Ingredient extends Validator implements ingredient {
   @IsOptional()
   @IsObject()
   @Exclude({ toPlainOnly: true })
-  _count: any;
+  _count: {
+    product_ingredient?: number;
+  };
 
   @Expose({ toPlainOnly: true })
   get disabled() {
-    return Object.hasOwn(this._count || {}, 'product_ingredient') ? this._count.product_ingredient > 0 : undefined;
+    return Object.hasOwn(this._count || {}, 'product_ingredient') ? this._count.product_ingredient! > 0 : undefined;
   }
 
   @Expose({ toPlainOnly: true })

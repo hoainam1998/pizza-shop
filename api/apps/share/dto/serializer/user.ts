@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsPhoneNumber,
   IsString,
+  Matches,
   ValidateNested,
 } from 'class-validator';
 import { Exclude, Expose, instanceToPlain, plainToInstance, Type } from 'class-transformer';
@@ -15,6 +16,7 @@ import Validator from './validator';
 import { UserLoggedType, UserPaginationResponse, UserLoggedSerializerType } from '@share/interfaces';
 import { signUserLoggedToken } from '@share/utils';
 import { POWER_NUMERIC, STATUS, SEX } from '@share/enums';
+import constants from '@share/constants';
 const power: POWER_NUMERIC[] = [POWER_NUMERIC.SUPER_ADMIN, POWER_NUMERIC.ADMIN, POWER_NUMERIC.SALE];
 const status: STATUS[] = [STATUS.UN_BLOCK, STATUS.BLOCK];
 const sex: SEX[] = [SEX.MALE, SEX.FEMALE];
@@ -31,7 +33,7 @@ export class CanSignupSerializer extends Validator {
 
 export class UserSerializer extends Validator {
   @Exclude({ toPlainOnly: true })
-  @IsString()
+  @Matches(constants.ID_PATTERN)
   user_id: string;
 
   @Exclude({ toPlainOnly: true })

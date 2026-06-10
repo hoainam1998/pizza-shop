@@ -1,6 +1,7 @@
 import { OmitType } from '@nestjs/mapped-types';
 import { Exclude, Expose, instanceToPlain, plainToInstance, Transform, Type } from 'class-transformer';
-import { IsDefined, IsString, IsNumber, IsOptional, IsBoolean, Length, IsNumberString } from 'class-validator';
+import { IsDefined, IsString, IsNumber, IsOptional, IsBoolean, Matches } from 'class-validator';
+import constants from '@share/constants';
 
 export class CreateCategory {
   @IsDefined()
@@ -12,8 +13,7 @@ export class CreateCategory {
   avatar: string;
 
   @Exclude({ toPlainOnly: true })
-  @IsNumberString()
-  @Length(13)
+  @Matches(new RegExp(constants.ID_PATTERN))
   @IsOptional()
   @Transform(({ value }) => (value ? value : Date.now().toString()))
   categoryId: string;
@@ -94,7 +94,7 @@ export class PaginationCategory {
 
 export class CategoryDto {
   @IsString()
-  @Length(13)
+  @Matches(constants.ID_PATTERN)
   categoryId: string;
 
   @IsString()
@@ -108,7 +108,7 @@ export class CategoryDto {
 
 export class GetCategory {
   @IsString()
-  @Length(13)
+  @Matches(constants.ID_PATTERN)
   categoryId: string;
 
   @IsDefined()
