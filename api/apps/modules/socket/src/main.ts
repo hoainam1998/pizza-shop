@@ -23,4 +23,4 @@ async function bootstrap() {
     .listen()
     .then(() => Logger.log(`Socket module started at port: ${process.env.SOCKET_MICROSERVICE_TCP_PORT!}`));
 }
-bootstrap();
+void bootstrap();

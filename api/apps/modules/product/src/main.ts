@@ -17,4 +17,4 @@ async function bootstrap() {
       Logger.log(`Product module started at port: ${process.env.PRODUCT_MICROSERVICE_TCP_PORT}`, ProductModule.name),
     );
 }
-bootstrap();
+void bootstrap();

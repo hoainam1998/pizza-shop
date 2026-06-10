@@ -25,4 +25,4 @@ async function bootstrap() {
   app.use(cookieParser());
   await app.listen(port, () => Logger.log(`App started at ${port}`, 'App Bootstrap'));
 }
-bootstrap();
+void bootstrap();

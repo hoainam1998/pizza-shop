@@ -19,7 +19,7 @@ export default class AuthGuard implements CanActivate {
     if (isPublic) {
       return true;
     } else {
-      const errors = await new LoginSessionPayload(request.session.user).validate();
+      const errors = await new LoginSessionPayload(request.session.user as LoginSessionPayload).validate();
       if (errors.length) {
         throw new UnauthorizedException(createMessage(messages.USER.DID_NOT_LOGIN));
       }

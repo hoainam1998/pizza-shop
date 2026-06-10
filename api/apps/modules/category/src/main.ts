@@ -17,4 +17,4 @@ async function bootstrap() {
       Logger.log(`Category module started at port: ${process.env.CATEGORY_MICROSERVICE_TCP_PORT}`, CategoryModule.name),
     );
 }
-bootstrap();
+void bootstrap();
