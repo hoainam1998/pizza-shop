@@ -1,18 +1,21 @@
-# ui
+# Description
 
-This template should help get you started developing with Vue 3 in Vite.
+The pizza shop ui.
 
 ## Recommended IDE Setup
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+[VSCode](https://code.visualstudio.com/)
 
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
+## Technical
+[Typescript](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html) +
+[Webpack](https://webpack.js.org/concepts/) +
+[Vue3](https://vuejs.org/guide/introduction.html) +
+[VueRouter](https://router.vuejs.org/guide/) +
+[Axios](https://axios.rest/pages/getting-started/first-steps) +
+[Socket](https://socket.io/docs/v4/tutorial/introduction) +
+[Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) +
+SCSS +
+HTML
 
 ## Project Setup
 
@@ -21,13 +24,15 @@ npm install
 ```
 
 ### Compile and Hot-Reload for Development
+```bash
+# for admin role
+npm run admin
 
-```sh
-npm run dev
+# for client role
+npm run sale
 ```
 
-### Type-Check, Compile and Minify for Production
-
+### Build
 ```sh
 npm run build
 ```
@@ -37,3 +42,13 @@ npm run build
 ```sh
 npm run lint
 ```
+### Docker
+```bash
+# build sale container
+npm run docker-sale
+
+# build admin container
+npm run docker-admin
+```
+## CI 
+[../.github/workflows/client.yml](../.github/workflows/client.yml)
