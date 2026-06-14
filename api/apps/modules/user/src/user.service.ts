@@ -119,7 +119,6 @@ export default class UserService {
   }
 
   validateUserPermission(requestPayload: RequesterFromType, user: Pick<user, 'power'>): void {
-    console.log(requestPayload.by, user.power);
     if (requestPayload.by) {
       if (requestPayload.by === APP_NAME.ADMIN) {
         if (user.power === POWER_NUMERIC.SALE) {
