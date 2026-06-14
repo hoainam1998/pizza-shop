@@ -30,6 +30,7 @@ export default {
   },
   user: {
     findUniqueOrThrow: jest.fn(),
+    findFirstOrThrow: jest.fn(),
     create: jest.fn(),
     count: jest.fn(),
     update: jest.fn(),

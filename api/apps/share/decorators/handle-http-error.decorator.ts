@@ -18,13 +18,14 @@ export default function (target: any, propertyName: string, descriptor: TypedPro
       if (isObservable(output)) {
         return output.pipe(
           catchError((error: MicroservicesErrorResponse) => {
+            const errorCode: string | undefined = error.response?.errorCode;
             switch (error.status) {
               case HttpStatus.NOT_FOUND:
-                throw new NotFoundException(error);
+                throw new NotFoundException(error, errorCode);
               case HttpStatus.UNAUTHORIZED:
-                throw new UnauthorizedException(createMessage(error.message));
+                throw new UnauthorizedException(createMessage(error.message, errorCode));
               case HttpStatus.BAD_REQUEST:
-                throw new BadRequestException(createMessage(error.message));
+                throw new BadRequestException(createMessage(error.message, errorCode));
               default:
                 if (error.code === 'ECONNREFUSED') {
                   throw new BadRequestException(createMessage(messages.COMMON.MODULE_DISCONNECT));

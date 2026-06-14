@@ -16,14 +16,16 @@ import {
   deleteUserPattern,
   logoutPattern,
   updatePersonalInfoPattern,
+  refreshResetPasswordTokenPattern,
 } from '@share/pattern';
 import type {
+  RefreshResetPasswordTokenResponse,
   UserCreatedReturnType,
   UserLoggedType,
   UserPaginationResponse,
   UserWithOnlySessionIDType,
 } from '@share/interfaces';
-import { LoginInfo, ResetPassword } from '@share/dto/validators/user.dto';
+import { LoginInfo, RefreshResetResetPasswordToken, ResetPassword } from '@share/dto/validators/user.dto';
 
 @Injectable()
 export default class UserService {
@@ -43,6 +45,15 @@ export default class UserService {
 
   resetPassword(resetPasswordBody: ResetPassword): Observable<Omit<user, 'password' | 'phone'>> {
     return this.user.send<user>(resetPasswordPattern, resetPasswordBody);
+  }
+
+  refreshResetPasswordToken(
+    refreshResetPasswordTokenBody: RefreshResetResetPasswordToken,
+  ): Observable<RefreshResetPasswordTokenResponse> {
+    return this.user.send<RefreshResetPasswordTokenResponse>(
+      refreshResetPasswordTokenPattern,
+      refreshResetPasswordTokenBody,
+    );
   }
 
   pagination(select: Record<string, any>): Observable<UserPaginationResponse> {

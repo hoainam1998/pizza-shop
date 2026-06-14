@@ -19,8 +19,10 @@ import {
   updateUserCompletePattern,
   updateStatusPattern,
   refreshUserPaginationPattern,
+  refreshResetPasswordTokenPattern,
 } from '@share/pattern';
 import type {
+  RefreshResetPasswordTokenResponse,
   UserCreatedReturnType,
   UserDetailType,
   UserLoggedType,
@@ -28,7 +30,14 @@ import type {
   UserSignupType,
   UserWithOnlySessionIDType,
 } from '@share/interfaces';
-import { LoginInfo, ResetPassword, UpdatePower, UpdateStatus, UserPagination } from '@share/dto/validators/user.dto';
+import {
+  LoginInfo,
+  RefreshResetResetPasswordToken,
+  ResetPassword,
+  UpdatePower,
+  UpdateStatus,
+  UserPagination,
+} from '@share/dto/validators/user.dto';
 import {
   checkArrayHaveValues,
   comparePassword,
@@ -37,28 +46,8 @@ import {
   verifyAdminResetPasswordToken,
 } from '@share/utils';
 import messages from '@share/constants/messages';
-import { APP_NAME, POWER_NUMERIC, STATUS } from '@share/enums';
+import { STATUS } from '@share/enums';
 import { SOCKET_SERVICE } from '@share/di-token';
-
-type RequesterFromType = {
-  by?: APP_NAME;
-};
-
-const validateUserPermission = (requestPayload: RequesterFromType, user: Pick<user, 'power'>): void => {
-  if (requestPayload.by) {
-    if (requestPayload.by === APP_NAME.ADMIN) {
-      if (user.power === POWER_NUMERIC.SALE) {
-        throw new UnauthorizedException(createMessage(messages.USER.NOT_ALLOW_SALE_LOGIN));
-      }
-    } else {
-      if (user.power === POWER_NUMERIC.ADMIN) {
-        throw new UnauthorizedException(createMessage(messages.USER.NOT_ALLOW_ADMIN_LOGIN));
-      }
-    }
-  } else {
-    throw new UnauthorizedException(createMessage(messages.COMMON.UNKNOWN_RESOURCE));
-  }
-};
 
 @Controller()
 export default class UserController {
@@ -89,7 +78,7 @@ export default class UserController {
           throw new UnauthorizedException(createMessage(messages.USER.YOU_WERE_BLOCKED));
         }
 
-        validateUserPermission(loginInfo, user);
+        this.userService.validateUserPermission(loginInfo, user);
         if (user.session_id) {
           throw new UnauthorizedException(createMessage(messages.USER.ALREADY_LOGIN));
         } else {
@@ -124,7 +113,7 @@ export default class UserController {
               throw new UnauthorizedException(createMessage(messages.USER.YOU_WERE_BLOCKED));
             }
 
-            validateUserPermission(resetPasswordBody, user);
+            this.userService.validateUserPermission(resetPasswordBody, user);
             if (comparePassword(resetPasswordBody.oldPassword, user.password)) {
               return this.userService.resetPassword(resetPasswordBody).then((result) => {
                 this.socketService.emit(refreshUserPaginationPattern, {});
@@ -139,6 +128,14 @@ export default class UserController {
     } else {
       throw new UnauthorizedException(createMessage(messages.USER.NOT_FOUND));
     }
+  }
+
+  @MessagePattern(refreshResetPasswordTokenPattern)
+  @HandleServiceError
+  refreshResetPasswordToken(
+    refreshResetPasswordTokenBody: RefreshResetResetPasswordToken,
+  ): Promise<RefreshResetPasswordTokenResponse> {
+    return this.userService.refreshResetPasswordToken(refreshResetPasswordTokenBody);
   }
 
   @MessagePattern(paginationPattern)

@@ -160,3 +160,9 @@ export type LoggerIncludeType = {
 export type SocketExtended = Socket & {
   requester: Record<string, any>;
 };
+
+export type RefreshResetPasswordTokenResponse = {
+  email: string;
+  password: string;
+  reset_password_link: string;
+};

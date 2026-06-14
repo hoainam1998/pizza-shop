@@ -18,6 +18,11 @@ class ErrorCode {
    * Product miss update.
    */
   static REFRESH_PRODUCT = 'REFRESH_PRODUCT';
+
+  /**
+   * Token expired
+   */
+  static TOKEN_EXPIRED = 'TOKEN_EXPIRED';
 }
 
 export default ErrorCode;

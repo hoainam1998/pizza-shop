@@ -17,11 +17,12 @@ export const signupPattern = createMicroserviceEvent('signup');
 export const loginPattern = createMicroserviceEvent('login');
 export const logoutPattern = createMicroserviceEvent('logout');
 export const resetPasswordPattern = createMicroserviceEvent('reset_password');
+export const refreshResetPasswordTokenPattern = createMicroserviceEvent('refresh_reset_password_token');
 export const getUserDetailPattern = createMicroserviceEvent('get_user');
 export const updateUserPattern = createMicroserviceEvent('update');
-export const updatePowerPattern = createMicroserviceEvent('update-power');
-export const updateStatusPattern = createMicroserviceEvent('update-status');
-export const updatePersonalInfoPattern = createMicroserviceEvent('update-personal-info');
+export const updatePowerPattern = createMicroserviceEvent('update_power');
+export const updateStatusPattern = createMicroserviceEvent('update_status');
+export const updatePersonalInfoPattern = createMicroserviceEvent('update_personal_info');
 export const deleteUserPattern = createMicroserviceEvent('delete');
 
 // ingredient
