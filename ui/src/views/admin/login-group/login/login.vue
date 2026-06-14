@@ -5,7 +5,13 @@
         class="ps-display-block ps-margin-auto"
         width="100px"
         height="100px" />
-      <el-form :id="FORM_ID" ref="loginFormRef" :model="loginFormModel" :rules="loginFormRules" label-position="top">
+      <el-form 
+        :id="FORM_ID" 
+        ref="loginFormRef" 
+        :model="loginFormModel" 
+        :rules="loginFormRules" 
+        label-position="top" 
+        class="ps-w-400px">
         <el-form-item label="Email" prop="email">
           <ps-email-input v-model="loginFormModel.email" name="email" />
         </el-form-item>

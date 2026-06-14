@@ -23,6 +23,10 @@ export enum ERROR_PRODUCT_STATE {
   REFRESH_PRODUCT = 'REFRESH_PRODUCT',
 }
 
+export enum ERROR_CODE {
+  TOKEN_EXPIRED = 'TOKEN_EXPIRED',
+}
+
 export enum CHART_MODE {
   DAY = 'day',
   MONTH = 'month',

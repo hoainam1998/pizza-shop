@@ -1,5 +1,5 @@
 import type { RouterOptions } from 'vue-router';
-import NotFound from '@/views/not-found/not-found.vue';
+import NotFound from '@/views/common/not-found/not-found.vue';
 import AdminLogin from '@/views/admin/login-group/login/login.vue';
 import SaleLogin from '@/views/sale/login-group/login/login.vue';
 import AdminResetPassword from '@/views/admin/login-group/reset-password/reset-password.vue';
