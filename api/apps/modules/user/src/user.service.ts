@@ -1,26 +1,39 @@
-import { BadRequestException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpStatus, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaClient, type user, type Prisma } from 'generated/prisma';
 import { PRISMA_CLIENT } from '@share/di-token';
 import messages from '@share/constants/messages';
 import { HandlePrismaError } from '@share/decorators';
 import type {
+  RefreshResetPasswordTokenResponse,
   UserCreatedReturnType,
   UserPaginationPrismaResponse,
   UserSignupType,
   UserWithOnlySessionIDType,
 } from '@share/interfaces';
-import { calcSkip, createMessage } from '@share/utils';
+import {
+  calcSkip,
+  createMessage,
+  autoGeneratePassword,
+  signingAdminResetPasswordToken,
+  getResetPasswordLink,
+} from '@share/utils';
 import {
   ResetPassword,
   UserPagination,
   LoginSessionPayload,
   UpdatePower,
   UpdateStatus,
+  RefreshResetResetPasswordToken,
 } from '@share/dto/validators/user.dto';
 import UserCachingService from '@share/libs/caching/user/user.service';
 import ProductCachingService from '@share/libs/caching/product/product.service';
 import ReportCachingService from '@share/libs/caching/report/report.service';
 import Event from '@share/libs/redis-client/events/event';
+import { APP_NAME, POWER_NUMERIC, STATUS } from '@share/enums';
+
+type RequesterFromType = {
+  by?: APP_NAME;
+};
 
 @Injectable()
 export default class UserService {
@@ -105,6 +118,22 @@ export default class UserService {
     });
   }
 
+  validateUserPermission(requestPayload: RequesterFromType, user: Pick<user, 'power'>): void {
+    if (requestPayload.by) {
+      if (requestPayload.by === APP_NAME.ADMIN) {
+        if (user.power === POWER_NUMERIC.SALE) {
+          throw new UnauthorizedException(createMessage(messages.USER.NOT_ALLOW_SALE_LOGIN));
+        }
+      } else {
+        if ([POWER_NUMERIC.SUPER_ADMIN, POWER_NUMERIC.ADMIN].includes(user.power)) {
+          throw new UnauthorizedException(createMessage(messages.USER.NOT_ALLOW_ADMIN_LOGIN));
+        }
+      }
+    } else {
+      throw new UnauthorizedException(createMessage(messages.COMMON.UNKNOWN_RESOURCE));
+    }
+  }
+
   @HandlePrismaError(messages.USER)
   updateUserSessionId(userId: string, sessionId: string | null): Promise<user> {
     return this.prismaClient.user.update({
@@ -132,6 +161,49 @@ export default class UserService {
         password: true,
       },
     });
+  }
+
+  @HandlePrismaError(messages.USER, { NotFound: HttpStatus.UNAUTHORIZED })
+  async refreshResetPasswordToken(
+    refreshResetPasswordTokenBody: RefreshResetResetPasswordToken,
+  ): Promise<RefreshResetPasswordTokenResponse> {
+    const originPassword = autoGeneratePassword();
+    return this.prismaClient.user
+      .findFirstOrThrow({
+        where: {
+          reset_password_token: refreshResetPasswordTokenBody.token,
+        },
+        select: {
+          user_id: true,
+          email: true,
+          power: true,
+          active: true,
+        },
+      })
+      .then((user) => {
+        if (user.active === STATUS.BLOCK) {
+          throw new UnauthorizedException(createMessage(messages.USER.YOU_WERE_BLOCKED));
+        }
+
+        this.validateUserPermission(refreshResetPasswordTokenBody, user);
+        const resetPasswordToken = signingAdminResetPasswordToken({ email: user.email, password: originPassword });
+        const resetPasswordLink = getResetPasswordLink(resetPasswordToken, user.power);
+        return this.prismaClient.user
+          .update({
+            where: {
+              user_id: user.user_id,
+            },
+            data: {
+              password: originPassword,
+              reset_password_token: resetPasswordToken,
+            },
+          })
+          .then(() => ({
+            password: originPassword,
+            email: user.email,
+            reset_password_link: resetPasswordLink,
+          }));
+      });
   }
 
   @HandlePrismaError(messages.USER)

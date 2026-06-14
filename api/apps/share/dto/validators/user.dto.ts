@@ -156,6 +156,14 @@ export class ResetPassword {
   by?: APP_NAME;
 }
 
+export class RefreshResetResetPasswordToken {
+  @IsString()
+  token: string;
+
+  @Allow()
+  by?: APP_NAME;
+}
+
 export class LoginSessionPayload extends Validator {
   @IsEmail()
   email: string;

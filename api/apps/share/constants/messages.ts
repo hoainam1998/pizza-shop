@@ -32,6 +32,8 @@ export default Object.freeze({
     NOT_FOUND: 'The user requirement is not found!',
     PASSWORD_NOT_MATCH: 'Your password are not match!',
     RESET_PASSWORD_SUCCESS: 'Reset password was success!',
+    REFRESH_RESET_PASSWORD_TOKEN_SUCCESS: 'Reset password token was success. Please check your mailbox!',
+    REFRESH_RESET_PASSWORD_TOKEN_FAILED: 'Reset password token was failed!',
     DID_NOT_LOGIN: 'Your did not login yet!',
     ALREADY_LOGIN: 'User already login!',
     ALREADY_LOGOUT: 'User already logout!',

@@ -18,6 +18,7 @@ export default class UserRouter extends RouterBase {
     UserRouter.createRouterPath('login');
     UserRouter.createRouterPath('logout');
     UserRouter.createRouterPath('reset-password');
+    UserRouter.createRouterPath('refresh-reset-password-token');
     UserRouter.createRouterPath('create');
     UserRouter.createRouterPath('pagination');
     UserRouter.createRouterPath('detail');

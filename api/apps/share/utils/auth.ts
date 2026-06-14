@@ -183,15 +183,6 @@ const getResetPasswordLink = (resetPasswordToken: string, role: POWER_NUMERIC): 
   return RESET_PASSWORD_URL.replace(/{origin}/, origin).replace(/{token}/, resetPasswordToken);
 };
 
-// /**
-//  * Return client reset password link.
-//  *
-//  * @param {string} resetPasswordToken - The reset password token.
-//  * @return {string} - The reset password link.
-//  */
-// const getClientResetPasswordLink = (resetPasswordToken: string): string =>
-//   RESET_PASSWORD_URL.format(process.env.CLIENT_ORIGIN_CORS, resetPasswordToken);
-
 export {
   signingAdminResetPasswordToken,
   signClientResetPasswordToken,
@@ -209,5 +200,4 @@ export {
   verifyClientLoginToken,
   getResetPasswordLink,
   comparePassword,
-  // getClientResetPasswordLink,
 };

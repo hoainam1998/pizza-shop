@@ -13,6 +13,7 @@ import { resetPasswordPattern } from '@share/pattern';
 import { createMessage, createMessages, autoGeneratePassword } from '@share/utils';
 import messages from '@share/constants/messages';
 import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-errors';
+import ErrorCode from '@share/error-code';
 const resetPasswordUrl = UserRouter.absolute.resetPassword;
 
 let api: TestAgent;
@@ -228,6 +229,30 @@ describe(createDescribeTest(HTTP_METHOD.POST, resetPasswordUrl), () => {
       .expect(HttpStatus.BAD_REQUEST)
       .expect('Content-Type', /application\/json/)
       .expect(createMessages(messages.COMMON.DATABASE_DISCONNECT));
+    expect(resetPasswordService).toHaveBeenCalledTimes(1);
+    expect(resetPasswordService).toHaveBeenCalledWith(resetPasswordPayload);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledWith(resetPasswordPattern, resetPasswordPayload);
+  });
+
+  it(createTestName('reset password failed with token expired', HttpStatus.BAD_REQUEST), async () => {
+    expect.hasAssertions();
+    const send = jest
+      .spyOn(clientProxy, 'send')
+      .mockReturnValue(
+        throwError(() => new BadRequestException(createMessage(messages.JWT.EXPIRED, ErrorCode.TOKEN_EXPIRED))),
+      );
+    const resetPasswordService = jest.spyOn(userService, 'resetPassword');
+    await api
+      .post(resetPasswordUrl)
+      .set('Cookie', [`app=${APP_NAME.ADMIN}`])
+      .send(requestBody)
+      .expect(HttpStatus.BAD_REQUEST)
+      .expect('Content-Type', /application\/json/)
+      .expect({
+        messages: [messages.JWT.EXPIRED],
+        errorCode: ErrorCode.TOKEN_EXPIRED,
+      });
     expect(resetPasswordService).toHaveBeenCalledTimes(1);
     expect(resetPasswordService).toHaveBeenCalledWith(resetPasswordPayload);
     expect(send).toHaveBeenCalledTimes(1);

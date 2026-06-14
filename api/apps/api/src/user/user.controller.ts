@@ -40,12 +40,17 @@ import {
   UpdatePersonalInfo,
   UpdatePower,
   UpdateStatus,
+  RefreshResetResetPasswordToken,
 } from '@share/dto/validators/user.dto';
 import { ImageTransformPipe } from '@share/pipes';
 import { createMessage } from '@share/utils';
 import messages from '@share/constants/messages';
 import SendEmailService from '@share/libs/mailer/mailer.service';
-import type { UserLoggedSerializerType, UserCreatedReturnType } from '@share/interfaces';
+import type {
+  UserLoggedSerializerType,
+  UserCreatedReturnType,
+  RefreshResetPasswordTokenResponse,
+} from '@share/interfaces';
 import { MessageSerializer } from '@share/dto/serializer/common';
 import LoggingService from '@share/libs/logging/logging.service';
 import { UserRouter } from '@share/router';
@@ -146,6 +151,28 @@ export default class UserController extends BaseController {
     return this.userService
       .resetPassword(resetPasswordBody)
       .pipe(map(() => MessageSerializer.create(messages.USER.RESET_PASSWORD_SUCCESS)));
+  }
+
+  @Public()
+  @HttpCode(HttpStatus.CREATED)
+  @Post(UserRouter.relative.refreshResetPasswordToken)
+  @HandleHttpError
+  refreshResetPasswordToken(
+    @Req() req: Express.Request,
+    @Body() refreshResetPasswordBody: RefreshResetResetPasswordToken,
+  ): Observable<Promise<MessageSerializer>> {
+    Object.assign(refreshResetPasswordBody, { by: req.cookies.app });
+    return this.userService.refreshResetPasswordToken(refreshResetPasswordBody).pipe(
+      map(async (user: RefreshResetPasswordTokenResponse) => {
+        try {
+          await this.sendEmailService.sendPassword(user.email, user.reset_password_link, user.password);
+          return MessageSerializer.create(messages.USER.REFRESH_RESET_PASSWORD_TOKEN_SUCCESS);
+        } catch (error) {
+          Logger.error(this.refreshResetPasswordToken.name, error);
+          throw new BadRequestException(MessageSerializer.create(messages.USER.REFRESH_RESET_PASSWORD_TOKEN_FAILED));
+        }
+      }),
+    );
   }
 
   @Roles(POWER_NUMERIC.SUPER_ADMIN)

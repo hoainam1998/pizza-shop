@@ -40,6 +40,7 @@ beforeAll(async () => {
 describe('login', () => {
   it('login first time success', async () => {
     expect.hasAssertions();
+    const validateUserPermission = jest.spyOn(userService, 'validateUserPermission');
     const emit = jest.spyOn(socketService, 'emit');
     const comparePassword = jest.spyOn(bcrypt, 'compareSync').mockReturnValue(true);
     const checkUserLogged = jest.spyOn(userService, 'checkUserLogged').mockResolvedValue(false);
@@ -54,6 +55,8 @@ describe('login', () => {
     expect(checkUserLogged).toHaveBeenCalledWith(loginInfo.session_id);
     expect(login).toHaveBeenCalledTimes(1);
     expect(login).toHaveBeenCalledWith(loginInfo.email);
+    expect(validateUserPermission).toHaveBeenCalledTimes(1);
+    expect(validateUserPermission).toHaveBeenCalledWith(loginInfo, userFirstTimeLogin);
     expect(updateUserSessionId).not.toHaveBeenCalled();
     expect(comparePassword).toHaveBeenCalledTimes(1);
     expect(comparePassword).toHaveBeenCalledWith(loginInfo.password, userFirstTimeLogin.password);
@@ -63,6 +66,7 @@ describe('login', () => {
 
   it('login success with user already login before', async () => {
     expect.hasAssertions();
+    const validateUserPermission = jest.spyOn(userService, 'validateUserPermission');
     const emit = jest.spyOn(socketService, 'emit');
     const comparePassword = jest.spyOn(bcrypt, 'compareSync').mockReturnValue(true);
     const checkUserLogged = jest.spyOn(userService, 'checkUserLogged').mockResolvedValue(false);
@@ -77,6 +81,8 @@ describe('login', () => {
     expect(checkUserLogged).toHaveBeenCalledWith(loginInfo.session_id);
     expect(login).toHaveBeenCalledTimes(1);
     expect(login).toHaveBeenCalledWith(loginInfo.email);
+    expect(validateUserPermission).toHaveBeenCalledTimes(1);
+    expect(validateUserPermission).toHaveBeenCalledWith(loginInfo, userAlreadyLogin);
     expect(updateUserSessionId).toHaveBeenCalledTimes(1);
     expect(updateUserSessionId).toHaveBeenCalledWith(userFirstTimeLogin.user_id, loginInfo.session_id);
     expect(comparePassword).toHaveBeenCalledTimes(1);
@@ -87,6 +93,7 @@ describe('login', () => {
 
   it('login failed with sale view and admin role', async () => {
     expect.hasAssertions();
+    const validateUserPermission = jest.spyOn(userService, 'validateUserPermission');
     const emit = jest.spyOn(socketService, 'emit');
     const loginInfoWithSaleView = { ...loginInfo, by: APP_NAME.SALE };
     const userWithAdminRole = { ...userAlreadyLogin, power: POWER_NUMERIC.ADMIN };
@@ -103,6 +110,8 @@ describe('login', () => {
     expect(checkUserLogged).toHaveBeenCalledWith(loginInfoWithSaleView.session_id);
     expect(login).toHaveBeenCalledTimes(1);
     expect(login).toHaveBeenCalledWith(loginInfoWithSaleView.email);
+    expect(validateUserPermission).toHaveBeenCalledTimes(1);
+    expect(validateUserPermission).toHaveBeenCalledWith(loginInfoWithSaleView, userWithAdminRole);
     expect(updateUserSessionId).not.toHaveBeenCalled();
     expect(comparePassword).not.toHaveBeenCalled();
     expect(emit).not.toHaveBeenCalled();
@@ -110,12 +119,13 @@ describe('login', () => {
 
   it('login failed with admin view and sale role', async () => {
     expect.hasAssertions();
+    const validateUserPermission = jest.spyOn(userService, 'validateUserPermission');
     const emit = jest.spyOn(socketService, 'emit');
     const loginInfoWithAdminView = { ...loginInfo, by: APP_NAME.ADMIN };
-    const userWithAdminRole = { ...userAlreadyLogin, power: POWER_NUMERIC.SALE };
+    const userWithSaleRole = { ...userAlreadyLogin, power: POWER_NUMERIC.SALE };
     const comparePassword = jest.spyOn(bcrypt, 'compareSync').mockReturnValue(true);
     const checkUserLogged = jest.spyOn(userService, 'checkUserLogged').mockResolvedValue(false);
-    const login = jest.spyOn(userService, 'login').mockResolvedValue(userWithAdminRole);
+    const login = jest.spyOn(userService, 'login').mockResolvedValue(userWithSaleRole);
     const updateUserSessionId = jest.spyOn(userService, 'updateUserSessionId').mockResolvedValue(user);
     const loginController = jest.spyOn(userController, 'login');
     await expect(userController.login(loginInfoWithAdminView)).rejects.toThrow(
@@ -126,6 +136,8 @@ describe('login', () => {
     expect(checkUserLogged).toHaveBeenCalledWith(loginInfoWithAdminView.session_id);
     expect(login).toHaveBeenCalledTimes(1);
     expect(login).toHaveBeenCalledWith(loginInfoWithAdminView.email);
+    expect(validateUserPermission).toHaveBeenCalledTimes(1);
+    expect(validateUserPermission).toHaveBeenCalledWith(loginInfoWithAdminView, userWithSaleRole);
     expect(updateUserSessionId).not.toHaveBeenCalled();
     expect(comparePassword).not.toHaveBeenCalled();
     expect(emit).not.toHaveBeenCalled();
@@ -133,6 +145,7 @@ describe('login', () => {
 
   it('login failed when unknown resource', async () => {
     expect.hasAssertions();
+    const validateUserPermission = jest.spyOn(userService, 'validateUserPermission');
     const emit = jest.spyOn(socketService, 'emit');
     const loginInfoWithUnknownResource = { ...loginInfo, by: undefined };
     const comparePassword = jest.spyOn(bcrypt, 'compareSync').mockReturnValue(true);
@@ -148,6 +161,8 @@ describe('login', () => {
     expect(checkUserLogged).toHaveBeenCalledWith(loginInfoWithUnknownResource.session_id);
     expect(login).toHaveBeenCalledTimes(1);
     expect(login).toHaveBeenCalledWith(loginInfoWithUnknownResource.email);
+    expect(validateUserPermission).toHaveBeenCalledTimes(1);
+    expect(validateUserPermission).toHaveBeenCalledWith(loginInfoWithUnknownResource, userAlreadyLogin);
     expect(updateUserSessionId).not.toHaveBeenCalled();
     expect(comparePassword).not.toHaveBeenCalled();
     expect(emit).not.toHaveBeenCalled();
@@ -155,6 +170,7 @@ describe('login', () => {
 
   it('login failed with checkUserLogged got unknown error', async () => {
     expect.hasAssertions();
+    const validateUserPermission = jest.spyOn(userService, 'validateUserPermission');
     const emit = jest.spyOn(socketService, 'emit');
     const comparePassword = jest.spyOn(bcrypt, 'compareSync').mockReturnValue(true);
     const logMethod = jest.spyOn(loggerService, 'error');
@@ -169,6 +185,7 @@ describe('login', () => {
     expect(checkUserLogged).toHaveBeenCalledTimes(1);
     expect(checkUserLogged).toHaveBeenCalledWith(loginInfo.session_id);
     expect(login).not.toHaveBeenCalled();
+    expect(validateUserPermission).not.toHaveBeenCalled();
     expect(updateUserSessionId).not.toHaveBeenCalled();
     expect(comparePassword).not.toHaveBeenCalled();
     expect(emit).not.toHaveBeenCalled();
@@ -178,6 +195,7 @@ describe('login', () => {
 
   it('login failed with login got unknown error', async () => {
     expect.hasAssertions();
+    const validateUserPermission = jest.spyOn(userService, 'validateUserPermission');
     const emit = jest.spyOn(socketService, 'emit');
     const comparePassword = jest.spyOn(bcrypt, 'compareSync').mockReturnValue(true);
     const logMethod = jest.spyOn(loggerService, 'error');
@@ -193,6 +211,7 @@ describe('login', () => {
     expect(checkUserLogged).toHaveBeenCalledWith(loginInfo.session_id);
     expect(login).toHaveBeenCalledTimes(1);
     expect(login).toHaveBeenCalledWith(loginInfo.email);
+    expect(validateUserPermission).not.toHaveBeenCalled();
     expect(updateUserSessionId).not.toHaveBeenCalled();
     expect(comparePassword).not.toHaveBeenCalled();
     expect(emit).not.toHaveBeenCalled();
@@ -202,6 +221,7 @@ describe('login', () => {
 
   it('login failed when user were blocked', async () => {
     expect.hasAssertions();
+    const validateUserPermission = jest.spyOn(userService, 'validateUserPermission');
     const emit = jest.spyOn(socketService, 'emit');
     const userBlocked = { ...userAlreadyLogin, active: STATUS.BLOCK };
     const comparePassword = jest.spyOn(bcrypt, 'compareSync').mockReturnValue(true);
@@ -218,6 +238,7 @@ describe('login', () => {
     expect(checkUserLogged).toHaveBeenCalledWith(loginInfo.session_id);
     expect(login).toHaveBeenCalledTimes(1);
     expect(login).toHaveBeenCalledWith(loginInfo.email);
+    expect(validateUserPermission).not.toHaveBeenCalled();
     expect(updateUserSessionId).not.toHaveBeenCalled();
     expect(comparePassword).not.toHaveBeenCalled();
     expect(emit).not.toHaveBeenCalled();
@@ -227,6 +248,7 @@ describe('login', () => {
 
   it('login failed with updateUserSessionId got unknown error', async () => {
     expect.hasAssertions();
+    const validateUserPermission = jest.spyOn(userService, 'validateUserPermission');
     const emit = jest.spyOn(socketService, 'emit');
     const comparePassword = jest.spyOn(bcrypt, 'compareSync').mockReturnValue(true);
     const logMethod = jest.spyOn(loggerService, 'error');
@@ -242,6 +264,8 @@ describe('login', () => {
     expect(checkUserLogged).toHaveBeenCalledWith(loginInfo.session_id);
     expect(login).toHaveBeenCalledTimes(1);
     expect(login).toHaveBeenCalledWith(loginInfo.email);
+    expect(validateUserPermission).toHaveBeenCalledTimes(1);
+    expect(validateUserPermission).toHaveBeenCalledWith(loginInfo, userAlreadyLogin);
     expect(updateUserSessionId).toHaveBeenCalledTimes(1);
     expect(updateUserSessionId).toHaveBeenCalledWith(userAlreadyLogin.user_id, loginInfo.session_id);
     expect(comparePassword).toHaveBeenCalledTimes(1);
@@ -253,6 +277,7 @@ describe('login', () => {
 
   it('login failed with not found error', async () => {
     expect.hasAssertions();
+    const validateUserPermission = jest.spyOn(userService, 'validateUserPermission');
     const emit = jest.spyOn(socketService, 'emit');
     const checkUserLogged = jest.spyOn(userService, 'checkUserLogged').mockResolvedValue(false);
     const comparePassword = jest.spyOn(bcrypt, 'compareSync');
@@ -268,6 +293,7 @@ describe('login', () => {
     expect(checkUserLogged).toHaveBeenCalledWith(loginInfo.session_id);
     expect(login).toHaveBeenCalledTimes(1);
     expect(login).toHaveBeenCalledWith(loginInfo.email);
+    expect(validateUserPermission).not.toHaveBeenCalled();
     expect(updateUserSessionId).not.toHaveBeenCalled();
     expect(comparePassword).not.toHaveBeenCalled();
     expect(emit).not.toHaveBeenCalled();
@@ -276,6 +302,7 @@ describe('login', () => {
 
   it('login failed with updateUserSessionId got not found error', async () => {
     expect.hasAssertions();
+    const validateUserPermission = jest.spyOn(userService, 'validateUserPermission');
     const emit = jest.spyOn(socketService, 'emit');
     const checkUserLogged = jest.spyOn(userService, 'checkUserLogged').mockResolvedValue(false);
     const comparePassword = jest.spyOn(bcrypt, 'compareSync').mockReturnValue(true);
@@ -291,6 +318,8 @@ describe('login', () => {
     expect(checkUserLogged).toHaveBeenCalledWith(loginInfo.session_id);
     expect(login).toHaveBeenCalledTimes(1);
     expect(login).toHaveBeenCalledWith(loginInfo.email);
+    expect(validateUserPermission).toHaveBeenCalledTimes(1);
+    expect(validateUserPermission).toHaveBeenCalledWith(loginInfo, userAlreadyLogin);
     expect(updateUserSessionId).toHaveBeenCalledTimes(1);
     expect(updateUserSessionId).toHaveBeenCalledWith(userAlreadyLogin.user_id, loginInfo.session_id);
     expect(comparePassword).toHaveBeenCalledTimes(1);
@@ -301,6 +330,7 @@ describe('login', () => {
 
   it('login failed with password not match', async () => {
     expect.hasAssertions();
+    const validateUserPermission = jest.spyOn(userService, 'validateUserPermission');
     const emit = jest.spyOn(socketService, 'emit');
     const checkUserLogged = jest.spyOn(userService, 'checkUserLogged').mockResolvedValue(false);
     const comparePassword = jest.spyOn(bcrypt, 'compareSync').mockReturnValue(false);
@@ -316,6 +346,8 @@ describe('login', () => {
     expect(checkUserLogged).toHaveBeenCalledWith(loginInfo.session_id);
     expect(login).toHaveBeenCalledTimes(1);
     expect(login).toHaveBeenCalledWith(loginInfo.email);
+    expect(validateUserPermission).toHaveBeenCalledTimes(1);
+    expect(validateUserPermission).toHaveBeenCalledWith(loginInfo, userAlreadyLogin);
     expect(comparePassword).toHaveBeenCalledTimes(1);
     expect(comparePassword).toHaveBeenCalledWith(loginInfo.password, userAlreadyLogin.password);
     expect(updateUserSessionId).not.toHaveBeenCalled();
@@ -326,6 +358,7 @@ describe('login', () => {
 
   it('login failed with login got database disconnect error', async () => {
     expect.hasAssertions();
+    const validateUserPermission = jest.spyOn(userService, 'validateUserPermission');
     const emit = jest.spyOn(socketService, 'emit');
     const checkUserLogged = jest.spyOn(userService, 'checkUserLogged').mockResolvedValue(false);
     const comparePassword = jest.spyOn(bcrypt, 'compareSync').mockReturnValue(false);
@@ -343,6 +376,7 @@ describe('login', () => {
     expect(checkUserLogged).toHaveBeenCalledWith(loginInfo.session_id);
     expect(login).toHaveBeenCalledTimes(1);
     expect(login).toHaveBeenCalledWith(loginInfo.email);
+    expect(validateUserPermission).not.toHaveBeenCalled();
     expect(comparePassword).not.toHaveBeenCalled();
     expect(updateUserSessionId).not.toHaveBeenCalled();
     expect(emit).not.toHaveBeenCalled();
@@ -352,6 +386,7 @@ describe('login', () => {
 
   it('login failed with updateUserSessionId got database disconnect error', async () => {
     expect.hasAssertions();
+    const validateUserPermission = jest.spyOn(userService, 'validateUserPermission');
     const emit = jest.spyOn(socketService, 'emit');
     const checkUserLogged = jest.spyOn(userService, 'checkUserLogged').mockResolvedValue(false);
     const comparePassword = jest.spyOn(bcrypt, 'compareSync').mockReturnValue(true);
@@ -369,6 +404,8 @@ describe('login', () => {
     expect(checkUserLogged).toHaveBeenCalledWith(loginInfo.session_id);
     expect(login).toHaveBeenCalledTimes(1);
     expect(login).toHaveBeenCalledWith(loginInfo.email);
+    expect(validateUserPermission).toHaveBeenCalledTimes(1);
+    expect(validateUserPermission).toHaveBeenCalledWith(loginInfo, userAlreadyLogin);
     expect(updateUserSessionId).toHaveBeenCalledTimes(1);
     expect(updateUserSessionId).toHaveBeenCalledWith(userAlreadyLogin.user_id, loginInfo.session_id);
     expect(comparePassword).toHaveBeenCalledTimes(1);
