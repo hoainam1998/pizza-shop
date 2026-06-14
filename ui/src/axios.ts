@@ -41,7 +41,7 @@ const handleRequestError = (error: AxiosError<any, any>): void => {
 
 const axiosInstance = axios.create({
   baseURL: process.env.BASE_URL,
-  timeout: 5000,
+  timeout: parseInt(process.env.REQUEST_TIMEOUT!),
   withCredentials: true,
 });
 

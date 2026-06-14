@@ -4,7 +4,7 @@
       :model="signupFormModel"
       label-width="auto"
       :rules="rules"
-      class="ps-bg-white ps-border-radius-5">
+      class="ps-bg-white ps-border-radius-5 ps-w-500px">
         <el-form-item label="First name" prop="firstName">
           <el-input v-model="signupFormModel.firstName" name="firstName" />
         </el-form-item>

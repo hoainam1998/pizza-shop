@@ -11,6 +11,7 @@ export type TableFieldType = {
 
 export type MessageResponseType = {
   messages: string;
+  errorCode?: string;
 };
 
 export type IngredientType = {
