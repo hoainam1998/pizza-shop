@@ -16,8 +16,7 @@ import { PrismaDisconnectError } from '@share/test/pre-setup/mock/errors/prisma-
 import messages from '@share/constants/messages';
 import { createMessages } from '@share/utils';
 import { IngredientRouter } from '@share/router';
-
-const computeProductPriceUrl = IngredientRouter.absolute.computedProductPrice;
+const computeProductPriceUrl = IngredientRouter.absolute.computeProductPrice;
 
 const MockIngredientModule = getMockModule(IngredientModule, {
   path: computeProductPriceUrl,
