@@ -46,6 +46,9 @@ const adminRoutes: RouterOptions['routes'] = [
           {
             path: `${paths.ID}`,
             name: names.ProductUpdate,
+            props: {
+              notShowBreadcrumb: true,
+            },
             component: ProductDetail,
           },
         ],

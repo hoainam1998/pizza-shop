@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onBeforeMount, onMounted, useTemplateRef, type Component, ref, type Ref, shallowRef } from 'vue';
+import { onBeforeMount, onMounted, useTemplateRef, type Component, ref, type Ref, shallowRef, computed } from 'vue';
 import { RouterLink, onBeforeRouteUpdate, useRoute } from 'vue-router';
 import { primaryColor, whiteColor } from '@/assets/scss/variables.module.scss';
 import { Document, Menu as IconMenu, Burger, Tickets, User } from '@element-plus/icons-vue';
@@ -88,7 +88,7 @@ const menuItems: Ref<MenuItem[]> = ref([
   }
 ]);
 
-const menuPaths: string[] = menuItems.value.map((item) => item.index);
+const menuPaths = computed(() => menuItems.value.map((item) => item.index));
 
 const menuItemClick = (menuItemProps: MenuItem): void => {
   push(menuItemProps.index);
@@ -105,7 +105,7 @@ onBeforeMount(() => {
 });
 
 onMounted(() => {
-  const routeItem = route.matched.find((match) => menuPaths.includes(match.path));
+  const routeItem = route.matched.find((match) => menuPaths.value.includes(match.path));
   if (routeItem) {
     menuRef.value.updateActiveIndex(routeItem.path);
   }

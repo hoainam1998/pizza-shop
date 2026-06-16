@@ -97,7 +97,7 @@ const form = reactive<IngredientFormRule>({
   unit: '',
 });
 
-const dialogVisible = defineModel<boolean>('dialogVisible');
+const dialogVisible = defineModel<boolean>();
 const uploadImageRef = useTemplateRef('uploadImage');
 const dialogRef = useTemplateRef('dialogRef');
 const ingredientFormRef = ref<FormInstance>();

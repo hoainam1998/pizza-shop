@@ -9,7 +9,7 @@
       </el-table-column>
       <List :items="fields">
         <template #default="{ item }">
-          <el-table-column :key="item.id" :label="item.label" :prop="item.key" :width="item.width" align="center">
+          <el-table-column v-bind="item" :key="item.id" :prop="item.key" align="center">
             <template #default="props">
               <slot :name="item.key" v-bind="props">
                 {{ props.row[item.key] !== undefined ? props.row[item.key].toString() : '' }}

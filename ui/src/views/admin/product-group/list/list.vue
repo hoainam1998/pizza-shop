@@ -77,11 +77,13 @@ const fields: TableFieldType[] = [
     label: 'Avatar',
     key: 'avatar',
     width: 100,
+    fixed: true,
   },
   {
     label: 'Name',
     key: 'name',
     width: 300,
+    fixed: true,
   },
   {
     label: 'Category',
@@ -110,6 +112,8 @@ const fields: TableFieldType[] = [
   },
   {
     key: 'operation',
+    minWidth: 200,
+    fixed: 'right',
   }
 ];
 

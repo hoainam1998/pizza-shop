@@ -71,7 +71,7 @@ const computedProductPrice = (): void => {
 
   if (shouldSendRequest) {
     IngredientService.post('compute-product-price', {
-      temporaryProductId,
+      temporaryProductId: temporaryProductId.value,
       productIngredients: ingredientSelected.value
     }, {
       showSpinner: false,
@@ -168,7 +168,7 @@ const IngredientItem = defineComponent((props:
           default: () => h(ElRow,
             { gutter: 10, justify: 'space-between', align: 'middle', class: 'ps-w-100 ps-h-60px' }, {
             default: () => [
-              h(ElCol, { xl: 3 }, {
+              h(ElCol, { lg: 3, xl: 3 }, {
                 default: () => h('img',
                   {
                     src: props.avatar || spicePng,
@@ -177,7 +177,7 @@ const IngredientItem = defineComponent((props:
                     height: 50,
                   }),
               }),
-              h(ElCol, { xl: 10 }, { default: () => h(ElFormItem, {
+              h(ElCol, { lg: 10, xl: 10 }, { default: () => h(ElFormItem, {
                 rules: { required: true, trigger: 'change' },
                 prop: `ingredients.${props.index}.ingredientId`,
                 showMessage: false,
@@ -196,7 +196,7 @@ const IngredientItem = defineComponent((props:
                 })
               })
             }),
-              h(ElCol, { xl: 4 }, {
+              h(ElCol, { lg: 4, xl: 4 }, {
                 default: () => h(ElFormItem, {
                   rules: [
                     { required: true, trigger: 'change' },
@@ -217,7 +217,7 @@ const IngredientItem = defineComponent((props:
                   })
                 })
               }),
-              h(ElCol, { xl: 6 }, {
+              h(ElCol, { lg: 6, xl: 6 }, {
                 default: () => h(ElFormItem, {
                   rules: { required: true, trigger: 'change' },
                   prop: `ingredients.${props.index}.unit`,
@@ -240,7 +240,7 @@ const IngredientItem = defineComponent((props:
                     }),
                 })
               }),
-              h(ElCol, { xl: 1, class: 'ps-pt-10' }, {
+              h(ElCol, { lg: 1, xl: 1, class: 'ps-pt-10' }, {
                 default: () => h(ElIcon,
                   { color: dangerColor, size: 20, class: 'ps-cursor-pointer', onClick: deleteFn },
                   { default: () => h(CloseBold) })

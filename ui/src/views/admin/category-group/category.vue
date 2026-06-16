@@ -1,43 +1,45 @@
 <template>
-  <main class="category ps-display-flex ps-flex-gap-10 ps-px-10">
-    <Table
-      ref="categoryTable"
-      :fields="fields"
-      :data="data"
-      :total="total"
-      emptyText="Categories are empty!"
-      @pagination="fetchCategories">
-      <template #avatar="props">
-        <img :src="props.row.avatar" :alt="props.row.name" width="40px" height="40px" />
-      </template>
-      <template #name="props">
-        {{ props.row.name }}
-      </template>
-      <template #operation="props">
-        <div class="ps-text-align-center">
-          <el-button size="small" class="ps-fw-bold" type="success" @click="getCategoryDetail(props.row.categoryId)">
-            Update
-          </el-button>
-          <el-button size="small" class="ps-fw-bold" type="danger" @click="deleteCategory(props.row.categoryId)">
-            Delete
-          </el-button>
-        </div>
-      </template>
-    </Table>
-    <el-form ref="categoryFormRef" :id="FORM_ID" :model="ruleForm" :rules="categoryFormRules" label-width="auto"
-      label-position="left" class="ps-mt-10 ps-flex-basic-40">
-      <el-form-item label="Category name" prop="name">
-        <el-input v-model="ruleForm.name" name="name" />
-      </el-form-item>
-      <el-form-item label="Avatar" prop="avatar">
-        <UploadBox ref="uploadImage" name="avatar" v-model:file="ruleForm.avatar" />
-      </el-form-item>
-      <div class="ps-display-flex ps-justify-content-center">
-        <el-button class="ps-fw-bold" type="primary" @click="submitForm">
-          {{ isUpdate ? 'Update' : 'Create' }}
-        </el-button>
-      </div>
-    </el-form>
+  <main class="category ps-px-10">
+    <el-row :gutter="10">
+      <el-col :lg="16" :xl="18">
+        <Table ref="categoryTable" :fields="fields" :data="data" :total="total" emptyText="Categories are empty!"
+          @pagination="fetchCategories">
+          <template #avatar="props">
+            <img :src="props.row.avatar" :alt="props.row.name" width="40px" height="40px" />
+          </template>
+          <template #name="props">
+            {{ props.row.name }}
+          </template>
+          <template #operation="props">
+            <div class="ps-text-align-center">
+              <el-button size="small" class="ps-fw-bold" type="success"
+                @click="getCategoryDetail(props.row.categoryId)">
+                Update
+              </el-button>
+              <el-button size="small" class="ps-fw-bold" type="danger" @click="deleteCategory(props.row.categoryId)">
+                Delete
+              </el-button>
+            </div>
+          </template>
+        </Table>
+      </el-col>
+      <el-col :lg="8" :xl="6">
+        <el-form ref="categoryFormRef" :id="FORM_ID" :model="ruleForm" :rules="categoryFormRules" label-width="auto"
+          label-position="left" class="ps-mt-10">
+          <el-form-item label="Category name" prop="name">
+            <el-input v-model="ruleForm.name" name="name" />
+          </el-form-item>
+          <el-form-item label="Avatar" prop="avatar">
+            <UploadBox ref="uploadImage" name="avatar" v-model:file="ruleForm.avatar" />
+          </el-form-item>
+          <div class="ps-display-flex ps-justify-content-center">
+            <el-button class="ps-fw-bold" type="primary" @click="submitForm">
+              {{ isUpdate ? 'Update' : 'Create' }}
+            </el-button>
+          </div>
+        </el-form>
+      </el-col>
+    </el-row>
   </main>
 </template>
 
@@ -82,6 +84,7 @@ const fields: TableFieldType[] = [
   {
     label: 'Avatar',
     key: 'avatar',
+    width: 100,
   },
   {
     label: 'Name',

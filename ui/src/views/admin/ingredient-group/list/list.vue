@@ -1,6 +1,6 @@
 <template>
   <div class="ps-display-flex ps-flex-gap-5 ps-mt-35 ps-mb-5">
-    <el-button class="ps-bg-2ecc71 ps-text-color-white" @click="showDialog">New</el-button>
+    <el-button class="ps-bg-2ecc71 ps-text-color-white" @click="() => showDialog()">New</el-button>
     <SearchBox ref="searchBox" v-model="keyword" @search="search" />
   </div>
   <Table ref="ingredientTable" :fields="fields" :data="data" :total="total" emptyText="Ingredients are empty!"
@@ -30,7 +30,6 @@
     ref="ingredientDetailRef"
     @onComplete="onComplete"/>
 </template>
-
 <script setup lang="ts">
 import { onBeforeMount, ref, useTemplateRef, type Ref } from 'vue';
 import type { AxiosError, AxiosResponse } from 'axios';
@@ -62,12 +61,14 @@ const fields: TableFieldType[] = [
   {
     label: 'Avatar',
     key: 'avatar',
-    width: 150,
+    width: 100,
+    fixed: true,
   },
   {
     label: 'Name',
     key: 'name',
-    width: 350,
+    width: 300,
+    fixed: true,
   },
   {
     label: 'Count',
@@ -92,10 +93,12 @@ const fields: TableFieldType[] = [
   {
     label: 'Status',
     key: 'status',
-    width: 200,
+    width: 150,
   },
   {
     key: 'operation',
+    minWidth: 200,
+    fixed: 'right',
   }
 ];
 
