@@ -103,12 +103,14 @@ const fields: TableFieldType[] = [
   {
     label: 'Avatar',
     key: 'avatar',
-    width: 200,
+    width: 100,
+    fixed: true,
   },
   {
     label: 'Name',
     key: 'name',
     width: 350,
+    fixed: true,
   },
   {
     label: 'Email',
@@ -118,12 +120,12 @@ const fields: TableFieldType[] = [
     {
     label: 'Power',
     key: 'power',
-    width: 150,
+    width: 120,
   },
   {
     label: 'Phone',
     key: 'phone',
-    width: 200,
+    width: 150,
   },
   {
     label: 'Sex',
@@ -132,6 +134,8 @@ const fields: TableFieldType[] = [
   },
   {
     key: 'operation',
+    minWidth: 200,
+    fixed: 'right',
   }
 ];
 

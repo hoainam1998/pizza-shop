@@ -52,11 +52,16 @@ const sanitizeDataObject = (obj: object): object => {
 export default (config: AxiosRequestConfig): void => {
   if (config.data) {
     if (config.data instanceof FormData) {
+      const formData = new FormData();
       for (const [key, value] of config.data.entries()) {
-        if (typeof value === 'string') {
-          config.data.set(key, sanitizeData(value));
+        if (formData.has(key)) {
+          formData.append(key, typeof value === 'string' ? sanitizeData(value) : value);
+        } else {
+          formData.set(key, typeof value === 'string' ? sanitizeData(value) : value);
         }
       }
+
+      config.data = formData;
     } else {
       const body = JSON.parse(JSON.stringify(config.data));
       config.data = sanitizeDataObject(body);

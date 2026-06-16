@@ -7,6 +7,8 @@ export type TableFieldType = {
   key: string;
   label?: string;
   width?: number;
+  minWidth?: number;
+  fixed?: boolean | string;
 };
 
 export type MessageResponseType = {

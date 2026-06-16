@@ -2,19 +2,19 @@
   <section class="product-detail ps-px-10 ps-py-10">
     <el-form :id="FORM_ID" ref="productRef" :model="form" :rules="rules" label-position="top">
       <el-row>
-        <el-col :xl="20">
+        <el-col :lg="18" :xl="20">
           <el-row :gutter="15" justify="space-between">
-            <el-col :xl="4">
+            <el-col :lg="6" :xl="4">
               <el-form-item label="Name" prop="name">
                 <el-input v-model="form.name" name="name" autocomplete="off" />
               </el-form-item>
             </el-col>
-            <el-col :xl="2">
+            <el-col :lg="6" :xl="2">
               <el-form-item label="Amount" prop="count">
                 <el-input v-model.number="form.count" name="count" min="1" type="number" />
               </el-form-item>
             </el-col>
-            <el-col :xl="4">
+            <el-col :lg="6" :xl="4">
               <el-form-item label="Category" prop="category">
                 <el-select v-model="form.category" :value-key="form.category" name="category"
                   placeholder="Please select a category!">
@@ -26,12 +26,12 @@
                 </el-select>
               </el-form-item>
             </el-col>
-            <el-col :xl="4">
+            <el-col :lg="6" :xl="4">
               <el-form-item prop="expiredTime" label="Expired time">
                 <ExpiredDaySelect v-model="form.expiredTime" name="expiredTime" />
               </el-form-item>
             </el-col>
-            <el-col :xl="8">
+            <el-col :lg="18" :xl="8">
               <el-form-item prop="ingredientLength">
                 <el-input type="hidden" v-model.number="form.ingredientLength" name="ingredientLength" />
                 <IngredientSelect
@@ -40,14 +40,14 @@
                   v-model:temporary-product-id="form.productId" />
               </el-form-item>
             </el-col>
-            <el-col :xl="2">
+            <el-col :lg="6" :xl="2">
               <el-form-item label="Price" prop="price">
                 <el-input v-model.number="form.price" name="price" min="1" type="number" />
               </el-form-item>
             </el-col>
           </el-row>
         </el-col>
-        <el-col :xl="4">
+        <el-col :lg="6" :xl="4">
           <el-row class="ps-ml-17 ps-mr-17" justify="center">
             <el-col :xl="24">
               <el-form-item label="Avatar" prop="avatar">
@@ -205,7 +205,7 @@ const onSubmit = async (): Promise<void> => {
               resetForm();
               backToProducts();
             })
-            .catch((error) => showErrorNotification(error.response.data.messages));
+            .catch((error) => showErrorNotification('Create product!', error.response.data.messages));
         }
       }
     });
@@ -245,15 +245,16 @@ onBeforeMount(() => {
       form.count = product.count;
       form.category = product.categoryId;
       form.expiredTime = +product.expiredTime;
+      form.price = product.price;
       const file = await convertBase64ToSingleFile(product.avatar, product.name);
       form.avatar = [file];
-      form.ingredients = product.ingredients;
+      form.ingredients = product.ingredients
+        .map((ingredient: IngredientType) => ({ ...ingredient, amount: ingredient.count }));
       routeName.setName(product.name);
     });
   }
 });
 </script>
-
 <style lang="scss">
   .expired-time-select {
     .el-input {
