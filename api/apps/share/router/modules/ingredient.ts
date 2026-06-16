@@ -16,7 +16,7 @@ export default class IngredientRouter extends RouterBase {
     IngredientRouter.createRouterPath('update');
     IngredientRouter.createRouterPath('detail');
     IngredientRouter.createRouterPath('create');
-    IngredientRouter.createRouterPath('computed-product-price');
+    IngredientRouter.createRouterPath('compute-product-price');
     IngredientRouter.createRouterPath('delete', ':id');
     IngredientRouter.createRouterPath('all');
     IngredientRouter.createRouterPath('pagination');

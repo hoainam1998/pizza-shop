@@ -54,7 +54,11 @@ export class Ingredient extends Validator implements ingredient {
   @Expose({ toPlainOnly: true, groups: ['units'] })
   get units() {
     if (this.unit !== undefined) {
-      return this.unit === Unit.KG ? [Unit.KG, Unit.GRAM] : [Unit.CAN];
+      if (this.unit === Unit.KG) {
+        return [Unit.KG, Unit.GRAM];
+      } else {
+        return [this.unit];
+      }
     }
   }
 

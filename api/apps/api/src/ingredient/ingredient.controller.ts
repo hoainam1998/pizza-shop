@@ -61,7 +61,7 @@ export default class IngredientController extends BaseController {
   }
 
   @SkipThrottle()
-  @Post(IngredientRouter.relative.computedProductPrice)
+  @Post(IngredientRouter.relative.computeProductPrice)
   @HttpCode(HttpStatus.OK)
   @HandleHttpError
   computeProductPrice(@Body() productIngredient: ComputeProductPrice): Observable<number> {
@@ -96,8 +96,8 @@ export default class IngredientController extends BaseController {
         const ingredientList = new IngredientList(ingredients);
         return ingredientList.validate().then((errors) => {
           if (!errors.length) {
-            const groups = ['units', 'unit'].reduce<string[]>((groups, key: keyof typeof select) => {
-              if (select[key]) {
+            const groups = ['units', 'unit'].reduce<string[]>((groups, key: string) => {
+              if (select[key as keyof typeof select]) {
                 groups.push(key);
               }
               return groups;
@@ -125,8 +125,8 @@ export default class IngredientController extends BaseController {
             this.logError(errors, this.getIngredient.name);
             throw new BadRequestException(createMessage(messages.COMMON.OUTPUT_VALIDATE));
           }
-          const groups = ['units', 'unit'].reduce<string[]>((groups, key: keyof typeof select.query) => {
-            if (select.query[key]) {
+          const groups = ['units', 'unit'].reduce<string[]>((groups, key: string) => {
+            if (select.query[key as keyof typeof select.query]) {
               groups.push(key);
             }
             return groups;
@@ -150,8 +150,8 @@ export default class IngredientController extends BaseController {
             this.logError(errors, this.pagination.name);
             throw new BadRequestException(messages.COMMON.OUTPUT_VALIDATE);
           }
-          const groups = ['units', 'unit'].reduce<string[]>((groups, key: keyof typeof select.query) => {
-            if (select.query[key]) {
+          const groups = ['units', 'unit'].reduce<string[]>((groups, key: string) => {
+            if (select.query[key as keyof typeof select.query]) {
               groups.push(key);
             }
             return groups;
