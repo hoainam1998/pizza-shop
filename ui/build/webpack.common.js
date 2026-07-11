@@ -106,8 +106,7 @@ module.exports = (envArgs) => ({
         type: 'asset/inline',
         generator: {
           dataUrl: (content) => {
-            content = content.toString();
-            return svgToMiniDataURI(content);
+            return svgToMiniDataURI(content.toString());
           },
         },
       },
